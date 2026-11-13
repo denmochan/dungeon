@@ -4437,7 +4437,7 @@ Object.assign(DIFF15[1], { text: "勇者がかなり強い。ダンジョンが�
 // 2) 構え：勇者は部屋に入ったその手番は殴られない（並んでから戦う）。待ち伏せだけは例外
 // 3) 勇者の動き：戦士・聖騎士は前列を斬る／盗賊は後列をねらう（👁見張りがいると見破られて止まる）／魔法使いは部屋ごと焼く
 // 4) 陣形：同じ部屋の組み合わせでボーナス（狙い撃ち・群れ・鉄壁・号令・毒炎）
-const front19W = (S, i) => { const r = S.path[i], z = szOf18(r); return i === 0 ? (z >= 3 ? 3 : 2) : (z >= 3 ? 4 : 3); };
+let front19W = (S, i) => { const r = S.path[i], z = szOf18(r); return i === 0 ? (z >= 3 ? 3 : 2) : (z >= 3 ? 4 : 3); };
 const ranged19 = m => m.role === "bow" || m.job === "snipe" || ((m.s11 || {}).shot > 0) || m.aoe > 0;
 // 毎手番：部屋ごとに前列・控えを決める
 function front19(S, N) {
@@ -4787,6 +4787,18 @@ let autoAll19 = function (S) {
   pool.slice().sort(strong).forEach(m => { const i = dens.find(i => cap[i] > 0); if (i != null) put(m, i, null); });
   return S.mons.filter(m => before.get(m.id) !== m.home).length;
 }
+// ================= 入口一強をくずす（11/14） =================
+// ・奥で倒すほど得：倒したDPは 入口×0.6 → 2部屋目×1.0 → 3部屋目×1.4 …
+// ・入口は通路がせまく、前に立って戦えるのは2体まで
+// ・「入口で全員止めろ」の指令はなくし、奥を使わせる指令に
+const depthOf21 = (S, i) => { let n = 0; for (let k = 0; k < i; k++) if (S.path[k] && S.path[k].kind === "den") n++; return n; };
+const depthMul21 = (S, i) => Math.min(2.2, 0.6 + 0.4 * depthOf21(S, i));
+{ const _hh = hurtHero5; hurtHero5 = function (S, N, h, d, killer) { const was = h.st, k0 = N.kills.length; _hh(S, N, h, d, killer);
+  if (was !== "dead" && h.st === "dead" && N.kills.length > k0) { const kl = N.kills[N.kills.length - 1], m = depthMul21(S, h.pos), add = Math.round(kl.gain * (m - 1));
+    N.dp += add; kl.gain += add; kl.depth21 = m; h.depth21 = depthOf21(S, h.pos); N.depthBonus21 = (N.depthBonus21 || 0) + add; } }; }
+front19W = (prev => (S, i) => i === 0 ? 2 : prev(S, i))(front19W);
+delete ORD16.gate;
+ORD16.deep = { name: "奥の部屋で2人以上倒せ", ok: (r, N) => r.win && N.heroes.filter(h => h.st === "dead" && (h.depth21 || 0) >= 1).length >= Math.min(2, N.heroes.length) };
 
 // ================= 洞窟ビュー：勇者から見たダンジョン（上から見たマップ） =================
 let caveOn = (() => { try { return localStorage.getItem("dm8cave") !== "0"; } catch (e) { return true; } })();
@@ -6899,7 +6911,7 @@ document.addEventListener("click", ev => {
     stage.out.sp = ms[0] ? ms[0].sp : null; (rep.evos || []).forEach(e => queue.push({ k: "evo", ...e })); sfx16("coin"); save(); render(); }
 }, true);
 
-const VER20 = "11/14 07:00";
+const VER20 = "11/14 07:40";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7100,7 +7112,7 @@ board20 = function (i) {
   const roleM = m => pl[m.id] === "bed" ? "bed" : pl[m.id] || "fight";
   const awake = res.filter(m => roleM(m) !== "bed"), sleep = res.filter(m => roleM(m) === "bed");
   const p = purpose19(S, i), order = [...(LANES21[p] || ["fight"])]; ROLE18.forEach(k => { if (!order.includes(k) && (k === "fight" || L[k])) order.push(k); });
-  let h = `<div class="cnt20"><span>${POL13[p].icon} <b>${POL13[p].name}部屋</b>　住む子 <b>${awake.length}/${base}</b>${beds ? `　🛏 ${sleep.length}/${beds}床` : ""}</span><span class="hint">子をタップ → 下で変える／もう1体タップで入れかえ</span></div>`;
+  let h = `<div class="cnt20"><span>${POL13[p].icon} <b>${POL13[p].name}部屋</b>　住む子 <b>${awake.length}/${base}</b>${beds ? `　🛏 ${sleep.length}/${beds}床` : ""}</span><span class="hint">⚔ ここで勇者を倒すと 💎×${depthMul21(S, i).toFixed(1)}${i === 0 ? "（入口は少なめ・前で戦えるのは2体まで）" : "（奥ほど多い）"}</span><span class="hint">子をタップ → 下で変える／もう1体タップで入れかえ</span></div>`;
   order.forEach(k => { if (k !== "fight" && !L[k]) return;
     const ms = awake.filter(m => roleM(m) === k), I = ROLEI18[k], lim = k === "fight" ? null : L[k];
     const free = k === "fight" ? Math.max(0, base - awake.length) : Math.max(0, Math.min(lim - ms.length, base - awake.length));
@@ -7203,6 +7215,8 @@ document.addEventListener("click", ev => { const b = ev.target.closest('[data-a=
 }; }
 // 夜は大きな見出しを画面の上に出して、部屋の文字とかぶらないように
 { const _r = render; render = function () { _r.apply(this, arguments); try { document.body.classList.toggle("night21", !!N && view === "night"); } catch (e) {} }; }
+// 結果画面：奥で倒したボーナス
+resultStage15 = (prev => function (r) { let h = prev(r); try { const b = N && N.depthBonus21; if (b) h = h.replace('<div class="rs-grid">', `<div class="streak19">🕳 奥で倒したボーナス <b class="gold">💎+${b}</b></div><div class="rs-grid">`); } catch (e) {} return h; })(resultStage15);
 
 // ================= BGM（その場で合成する小さなループ）：昼はのんびり、夜は速くて不穏、ボスはもっと =================
 let BGMON19 = true; try { BGMON19 = localStorage.getItem("chika-bgm") !== "0"; } catch (e) {}
