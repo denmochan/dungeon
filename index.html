@@ -6997,6 +6997,19 @@ document.addEventListener("click", ev => {
       applySave(d); if (d.S.meta) S.meta = d.S.meta; SAVED_AT = Date.now(); save(); modal = null; title = true; toast("⬇ 読みこんだ"); render();
     } catch (e) { toast("コードが読めなかった"); } }
 }, true);
+// リンクで引き継ぐ：…/#load=DM1xxxx を開くと、確認してから読みこむ
+function hashLoad20() {
+  try { const h = location.hash || ""; if (!h.startsWith("#load=DM1")) return;
+    const v = decodeURIComponent(h.slice(6)), d = JSON.parse(b64d20(v.slice(3))); if (!d.S || !d.S.day) return;
+    window.__hashSave20 = d; history.replaceState(null, "", location.pathname);
+    modal = () => `<h2>🔑 データを引き継ぐ</h2><div class="box">${d.S.day}日目・転生${(d.S.meta && d.S.meta.runs) || 0}回・魔物${(d.S.mons || []).length}体・DP${d.S.dp}</div><div class="hint">このデータで続きから遊ぶ？（いまのデータはバックアップに残る）</div><button class="main" data-a="hl20go">⬇ このデータで遊ぶ</button><button data-a="close">やめる</button>`;
+    render();
+  } catch (e) { console.error(e); }
+}
+document.addEventListener("click", ev => { const b = ev.target.closest("[data-a]"); if (!b || b.dataset.a !== "hl20go") return; ev.stopImmediatePropagation();
+  const d = window.__hashSave20; if (!d) return; try { backup18("リンクで引き継ぐ前"); } catch (e) {}
+  applySave(d); if (d.S.meta) S.meta = d.S.meta; SAVED_AT = Date.now(); save(); modal = null; title = true; toast("⬇ 引き継いだ"); render(); }, true);
+setTimeout(hashLoad20, 300);
 
 // ================= BGM（その場で合成する小さなループ）：昼はのんびり、夜は速くて不穏、ボスはもっと =================
 let BGMON19 = true; try { BGMON19 = localStorage.getItem("chika-bgm") !== "0"; } catch (e) {}
