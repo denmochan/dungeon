@@ -5074,13 +5074,27 @@ function cavePops(){
     if (p.kill || p.big) { CV.el.classList.remove("shake"); void CV.el.offsetWidth; CV.el.classList.add("shake"); }
     sfx16(p.kill ? "kill" : p.down ? "down" : p.big ? "big" : "hit"); if (p.shot) sfx16("shot");
     if (p.shot) { const fe = CV.ents["n" + p.shot.from]; if (fe) { const sh = document.createElement("div"); sh.className = "cshot " + p.shot.kind; sh.style.left = fe.style.left; sh.style.top = `calc(${fe.style.top} - 3%)`; L.appendChild(sh); requestAnimationFrame(() => requestAnimationFrame(() => { sh.style.left = e.style.left; sh.style.top = `calc(${e.style.top} - 3%)`; })); setTimeout(() => sh.remove(), 420); } }
+    // 同じ相手への小さいダメージは、出ている数字に足して1つにまとめる（数字が縦に積み上がらない）
+    const key = (p.k === "h" ? "h" : "n") + p.id; CV.dmg = CV.dmg || {};
+    const old = CV.dmg[key];
+    if (!p.kill && !p.down && !p.big && !p.crit && old && old.el.isConnected && Date.now() - old.at < 700) {
+      old.sum += p.d; old.at = Date.now(); old.el.textContent = String(old.sum); old.el.style.animation = "none"; void old.el.offsetWidth; old.el.style.animation = ""; old.el.style.fontSize = Math.min(26, 13 + Math.sqrt(old.sum) * 1.2) + "px";
+      clearTimeout(old.t); old.t = setTimeout(() => { old.el.remove(); delete CV.dmg[key]; }, 900);
+      e.classList.remove("lgR", "lgL"); void e.offsetWidth; e.classList.add("knock"); setTimeout(() => e.classList.remove("knock"), 220); return; }
     d.className = "cpop dmg " + (p.k === "h" ? "toh" : "tom") + (p.big ? " big" : "") + (p.kill || p.down ? " ko" : "") + (p.crit ? " crit" : "");
     d.textContent = p.kill ? "撃破！" : p.down ? "やられた…" : p.big ? `効果抜群 ${p.d}` : p.crit ? `会心 ${p.d}!!` : String(p.d);
     if (p.k === "h" && !p.kill && p.frac != null) d.style.fontSize = Math.round(12 + 16 * Math.sqrt(p.frac) + (p.crit ? 6 : 0)) + "px";
     if (typeof juice19 === "function") juice19(p, e, L);
-    CV.dk = (CV.dk || 0) + 1; const lane = CV.dk % 3; clearTimeout(CV.dkT); CV.dkT = setTimeout(() => { CV.dk = 0; }, 400);
-    d.style.left = `calc(${e.style.left} + ${(lane - 1) * 22}px)`; d.style.top = `calc(${e.style.top} - 7% - ${lane * 14}px)`;
-    L.appendChild(d); setTimeout(() => d.remove(), 900);
+    // 数字は「その相手の頭の上」に固定。撃破などの大きな文字だけ少し上へ
+    // 別の相手と同じ場所なら、横にずらす
+    CV.dlist = (CV.dlist || []).filter(q => q.el.isConnected); const pk = e.style.left + e.style.top, same = CV.dlist.filter(q => q.pos === pk).length;
+    d.style.left = `calc(${e.style.left} + ${same % 2 ? 1 : -1} * ${Math.ceil(same / 2) * 26}px)`; d.style.top = `calc(${e.style.top} - ${p.kill || p.down || p.big || p.crit ? 14 : 7}% - ${Math.floor(same / 3) * 16}px)`;
+    L.appendChild(d);
+    // 出ている数字と重なったら、重ならなくなるまで上へずらす（画面上の実際の位置で判定）
+    { const live = CV.dlist.filter(q => q.el !== d).map(q => q.el.getBoundingClientRect()); let dy = 0;
+      for (let k = 0; k < 6; k++) { const r = d.getBoundingClientRect(); const hit = live.find(o => r.left < o.right && r.right > o.left && r.top < o.bottom && r.bottom > o.top); if (!hit) break; dy += (r.bottom - hit.top) + 2; d.style.marginTop = (-dy) + "px"; } }
+    const rec = { el: d, sum: p.d, at: Date.now(), pos: e.style.left + e.style.top }; CV.dlist.push(rec); rec.t = setTimeout(() => { d.remove(); if (CV.dmg[key] === rec) delete CV.dmg[key]; }, 900);
+    if (!p.kill && !p.down && !p.big && !p.crit) CV.dmg[key] = rec;
     e.classList.remove("lgR", "lgL"); void e.offsetWidth;   // 打たれた側がのけぞる
     e.classList.add("knock"); setTimeout(() => e.classList.remove("knock"), 220);
   });
@@ -6885,7 +6899,7 @@ document.addEventListener("click", ev => {
     stage.out.sp = ms[0] ? ms[0].sp : null; (rep.evos || []).forEach(e => queue.push({ k: "evo", ...e })); sfx16("coin"); save(); render(); }
 }, true);
 
-const VER20 = "11/14 06:40";
+const VER20 = "11/14 07:00";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
