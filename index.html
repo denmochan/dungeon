@@ -755,6 +755,9 @@ button.on{background:linear-gradient(#5a4220,#3a2a14);border-color:var(--gold);c
 .note20{font-size:12px;color:#ffe9a0;background:#3a2e10;border:1px solid #c09030;border-radius:8px;padding:7px 9px}
 .dw{overflow-x:hidden!important;overscroll-behavior:contain;touch-action:pan-y}.dw.cv .cave{overflow-x:clip}
 .title{overflow-y:auto!important;overflow-x:hidden!important;justify-content:safe center!important;-webkit-overflow-scrolling:touch}
+/* タイトル：入りきらないときは上から並べてスクロール（safe center が効かない端末向けに、上下のすき間で中央寄せ） */
+.title{justify-content:flex-start!important}.title::before,.title::after{content:"";flex:1 0 0;min-height:0}
+.ver20{position:fixed;right:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 4px);font-size:10px;color:#ffffff55;z-index:5;pointer-events:none}
 </style>
 </head>
 <body>
@@ -6840,6 +6843,7 @@ document.addEventListener("click", ev => {
     stage.out.sp = ms[0] ? ms[0].sp : null; (rep.evos || []).forEach(e => queue.push({ k: "evo", ...e })); sfx16("coin"); save(); render(); }
 }, true);
 
+const VER20 = "11/13 23:52";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7010,6 +7014,9 @@ document.addEventListener("click", ev => { const b = ev.target.closest("[data-a]
   const d = window.__hashSave20; if (!d) return; try { backup18("リンクで引き継ぐ前"); } catch (e) {}
   applySave(d); if (d.S.meta) S.meta = d.S.meta; SAVED_AT = Date.now(); save(); modal = null; title = true; toast("⬇ 引き継いだ"); render(); }, true);
 setTimeout(hashLoad20, 300);
+
+// 版の目印（ちゃんと新しい版が開けているか確かめる用）
+{ const _r = render; render = function () { _r.apply(this, arguments); try { if (title && !document.querySelector(".ver20")) document.body.insertAdjacentHTML("beforeend", `<div class="ver20">ver ${VER20}</div>`); if (!title) { const v = document.querySelector(".ver20"); if (v) v.remove(); } } catch (e) {} }; }
 
 // ================= BGM（その場で合成する小さなループ）：昼はのんびり、夜は速くて不穏、ボスはもっと =================
 let BGMON19 = true; try { BGMON19 = localStorage.getItem("chika-bgm") !== "0"; } catch (e) {}
