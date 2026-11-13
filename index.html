@@ -771,6 +771,12 @@ button.on{background:linear-gradient(#5a4220,#3a2a14);border-color:var(--gold);c
 .main-area.ntfull19>.dw{display:flex;flex-direction:column}.main-area.ntfull19>.dw>.cave,.main-area.ntfull19>.dw .cave:not(.town){margin-top:auto;margin-bottom:auto}
 .main-area.ntfull19>.dw>div:first-child{min-height:100%;display:flex;flex-direction:column}.main-area.ntfull19>.dw>div:first-child>.cave{margin-top:auto;margin-bottom:auto}
 .nt19{right:8px!important;left:auto!important;max-width:calc(100% - 16px)}
+.bar20 .nd21{background:linear-gradient(#b8452a,#8a2e1a);border-color:#e06040;color:#fff}.bar20 .nd21.raid{background:linear-gradient(#d03a2a,#901a10)}
+.misf21>summary{flex-wrap:wrap;gap:6px}.mm21{font-size:12px;font-weight:400;background:#0005;border-radius:8px;padding:1px 6px}.mm21.ok{color:#8f8}
+.misf21 .mis19{margin:0 0 4px}.misf21 .mis19 .mh{display:none}
+body.night21 .ban19:not(.fix){top:7%!important;transform-origin:top center;scale:.85}
+.cpop.rt21{white-space:nowrap;font-size:13px}
+.nlog21.t{color:#ffd34a;font-weight:700}
 </style>
 </head>
 <body>
@@ -5056,7 +5062,12 @@ function cavePops(){
   list.slice(-14).forEach(p => {
     if (p.k === "drop") { const e = CV.ents["h" + p.id], L = CV.el.querySelector(".cents"); if (e && L) { const d = document.createElement("div"); d.className = "cpop drop19"; d.style.setProperty("--ic", IRAR19[p.it.ri][1]); d.textContent = ITEM19[p.it.k].icon + " " + p.it.name + "！"; d.style.left = e.style.left; d.style.top = `calc(${e.style.top} - 14%)`; L.appendChild(d); setTimeout(() => d.remove(), 1800); sfx16(p.it.ri >= 2 ? "hatch" : "coin"); } return; }
     if (p.k === "fever") { if (typeof fever19 === "function") fever19(); return; }
-    if (p.k === "t") { const o = hallOf(p.room); if (o && o.M.f === caveFloor) cPop(caveFloor, (o.h.x0 + o.h.x1) / 2, o.h.y0 + 0.6, p.text, "big " + (p.cls || ""), 1600); return; }
+    if (p.k === "t") { const o = hallOf(p.room); if (!o || o.M.f !== caveFloor) return;
+      // 部屋の大きな文字は、ひとつずつ順番に（同じ場所に重ねない）
+      // 夜の部屋の知らせ（陣形・待ち伏せ…）は、画面下の1行に出す。洞窟の中は戦いの数字だけ
+      if (N && view === "night") { N.tline21 = { text: (typeof roomTitle === "function" ? roomTitle(S, p.room) + "：" : "") + p.text, at: Date.now(), cls: p.cls || "" }; const el = document.querySelector(".nlog21"); if (el) { el.textContent = N.tline21.text; el.className = "nlog21 t"; } return; }
+      CV.tq = CV.tq || {}; const now = Date.now(), at = Math.max(now, CV.tq[p.room] || 0); CV.tq[p.room] = at + 750;
+      setTimeout(() => cPop(caveFloor, (o.h.x0 + o.h.x1) / 2, o.h.y0 + 0.6, p.text, "big rt21 " + (p.cls || ""), 1000), at - now); return; }
     const e = CV.ents[(p.k === "h" ? "h" : "n") + p.id]; if (!e) return;
     const L = CV.el.querySelector(".cents"); if (!L) return;
     const d = document.createElement("div");
@@ -5067,7 +5078,8 @@ function cavePops(){
     d.textContent = p.kill ? "撃破！" : p.down ? "やられた…" : p.big ? `効果抜群 ${p.d}` : p.crit ? `会心 ${p.d}!!` : String(p.d);
     if (p.k === "h" && !p.kill && p.frac != null) d.style.fontSize = Math.round(12 + 16 * Math.sqrt(p.frac) + (p.crit ? 6 : 0)) + "px";
     if (typeof juice19 === "function") juice19(p, e, L);
-    d.style.left = `calc(${e.style.left} + ${Math.round((Math.random() - 0.5) * 18)}px)`; d.style.top = `calc(${e.style.top} - 7% + ${Math.round((Math.random() - 0.5) * 10)}px)`;
+    CV.dk = (CV.dk || 0) + 1; const lane = CV.dk % 3; clearTimeout(CV.dkT); CV.dkT = setTimeout(() => { CV.dk = 0; }, 400);
+    d.style.left = `calc(${e.style.left} + ${(lane - 1) * 22}px)`; d.style.top = `calc(${e.style.top} - 7% - ${lane * 14}px)`;
     L.appendChild(d); setTimeout(() => d.remove(), 900);
     e.classList.remove("lgR", "lgL"); void e.offsetWidth;   // 打たれた側がのけぞる
     e.classList.add("knock"); setTimeout(() => e.classList.remove("knock"), 220);
@@ -5087,7 +5099,18 @@ function cGo(w, tx, ty, now, speed = 520){
 function cPop(f, x, y, text, cls = "", ms = 1100){
   if (!CV.el || f !== caveFloor) return; const M = CV.maps[caveFloor]; if (!M) return;
   const d = document.createElement("div"); d.className = "cpop " + cls; d.textContent = text;
-  const jx = /talk|zz/.test(cls) ? 0 : (Math.random() - 0.5) * 0.7, jy = /talk|zz/.test(cls) ? 0 : (Math.random() - 0.5) * 0.4; d.style.left = ((x + 0.5 + jx) / CW * 100) + "%"; d.style.top = ((y + 0.2 + jy) / M.H * 100) + "%";
+  // 文字が重ならないように：近くに出ている文字があれば、上へずらす。多すぎるときは小さい文字を出さない
+  const now = Date.now(); CV.pops = (CV.pops || []).filter(q => q.until > now);
+  const minor = /hitp|frac|tink|eye|zz/.test(cls) || text.length <= 3;
+  if (CV.pops.some(q => q.t === text && Math.abs(q.x - x) < 2)) return;   // 同じ文字が近くに出ていたら出さない
+  if (minor && CV.pops.length >= 6) return;
+  let jx = /talk|zz/.test(cls) ? 0 : (Math.random() - 0.5) * 0.5, yy = y + 0.2;
+  const wide = Math.max(1, text.length * 0.18);
+  const gap = /big/.test(cls) ? 1.0 : 0.6; if (/rt21/.test(cls)) CV.pops = CV.pops.filter(q => !q.rt);
+  for (let k = 0; k < 4 && CV.pops.some(q => Math.abs(q.x - (x + jx)) < (q.w + wide) / 2 && Math.abs(q.y - yy) < gap); k++) yy -= gap;
+  if (CV.pops.some(q => Math.abs(q.x - (x + jx)) < (q.w + wide) / 2 && Math.abs(q.y - yy) < gap)) { if (minor) return; }
+  CV.pops.push({ x: x + jx, y: yy, w: wide, t: text, rt: /rt21/.test(cls), until: now + Math.min(ms, 1200) });
+  d.style.left = ((x + 0.5 + jx) / CW * 100) + "%"; d.style.top = (yy / M.H * 100) + "%";
   const L = CV.el.querySelector(".cents"); if (!L) return; L.appendChild(d); setTimeout(() => d.remove(), ms);
 }
 // 魔物のひとりごと：いまの状況（襲撃まで何日か・仕事・因縁の勇者）をぽつりと言う
@@ -6477,7 +6500,7 @@ function juice19(p, e, L) {
   if (p.k === "h" && p.crit && !p.kill) { const f = document.createElement("div"); f.className = "flash19"; f.style.left = e.style.left; f.style.top = e.style.top; L.appendChild(f); setTimeout(() => f.remove(), 400); sfx16("big"); }
   if (p.k !== "h" || !p.kill) return;
   KC19.n = now - KC19.t < 1600 ? KC19.n + 1 : 1; KC19.t = now;
-  if (p.gain) { const g = document.createElement("div"); g.className = "cpop gain19"; g.textContent = `+${p.gain}💎`; g.style.left = e.style.left; g.style.top = `calc(${e.style.top} - 12%)`; L.appendChild(g); setTimeout(() => g.remove(), 1300); coinFly19(e, p.gain); }
+  if (p.gain && false) { const g = document.createElement("div"); g.className = "cpop gain19"; g.textContent = `+${p.gain}💎`; g.style.left = e.style.left; g.style.top = `calc(${e.style.top} - 12%)`; L.appendChild(g); setTimeout(() => g.remove(), 1300); coinFly19(e, p.gain); }
   if (p.boss) { banner19(`<b>大将 撃破！！</b>`, "boss", 1800); sfx16("win"); return; }
   if (KC19.n >= 2) {
     const n = KC19.n, word = n >= 6 ? "鬼神" : n >= 5 ? "無双" : n >= 4 ? "猛攻" : n >= 3 ? "連撃" : "連続";
@@ -6862,7 +6885,7 @@ document.addEventListener("click", ev => {
     stage.out.sp = ms[0] ? ms[0].sp : null; (rep.evos || []).forEach(e => queue.push({ k: "evo", ...e })); sfx16("coin"); save(); render(); }
 }, true);
 
-const VER20 = "11/14 朝";
+const VER20 = "11/14 06:40";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7114,9 +7137,11 @@ function tidyPanel21() {
 // ---------- 4) 夜：最新のできごとを1行 ----------
 function nightLine21() {
   const c = document.querySelector(".nctl19"); if (!c || !N) return;
-  const e = N.events && N.events[N.events.length - 1]; if (!e) return;
-  const t = e.who ? `${esc(e.who)}「${esc(e.text)}」` : esc(e.text);
-  c.insertAdjacentHTML("beforebegin", `<div class="nlog21 ${e.kind === "kill" ? "k" : e.kind === "esc" || e.kind === "bad" ? "e" : ""}">${t}</div>`);
+  const e = N.events && N.events[N.events.length - 1], tl = N.tline21;
+  if (!e && !tl) return;
+  const useT = tl && (!e || Date.now() - tl.at < 1500);
+  const t = useT ? esc(tl.text) : e.who ? `${esc(e.who)}「${esc(e.text)}」` : esc(e.text);
+  c.insertAdjacentHTML("beforebegin", `<div class="nlog21 ${useT ? "t" : e.kind === "kill" ? "k" : e.kind === "esc" || e.kind === "bad" ? "e" : ""}">${t}</div>`);
 }
 { const _r = render; render = function () { _r.apply(this, arguments); try { tidyPanel21(); nightLine21(); } catch (e) { console.error(e); } }; }
 
@@ -7146,6 +7171,24 @@ if (S && typeof S.tut === "number" && S.tut > TUT.length) S.tut = TUT.length;
   const mb = document.querySelector(".modal .mbox"); if (!mb || mb.querySelector(".mclose21")) return;
   if (!mb.querySelector('[data-a="close"]') && !mb.querySelector('[data-a="lord"]')) mb.insertAdjacentHTML("beforeend", `<div class="mclose21"><button data-a="close">閉じる</button></div>`);
 } catch (e) {} }; }
+
+// ---------- 8) 部屋・育成の画面からも「次の日へ」 ----------
+const ndBtn21 = () => `<button class="nd21 ${isRaid9(S) ? "raid" : ""}" data-a="nextday">${isRaid9(S) ? "⚔ 迎え撃つ" : "☀ 次の日へ"}</button>`;
+{ const _r = render; render = function () { _r.apply(this, arguments); try {
+  const bar = document.querySelector(".bar20"); if (bar && !bar.querySelector(".nd21")) { const g = bar.querySelector('[data-a="g20"]'); if (g) g.remove(); bar.insertAdjacentHTML("beforeend", ndBtn21()); }
+} catch (e) {} }; }
+document.addEventListener("click", ev => { const b = ev.target.closest('[data-a="nextday"]'); if (b && !N) { page20 = null; roomSel = roomOpen = null; SW19 = null; slotPick18 = null; } }, true);
+
+// ---------- 9) 今日のミッションを1行にたたむ ----------
+{ const _t = tidyPanel21; tidyPanel21 = function () { _t(); const pn = $("pn"); if (!pn || roomSel != null || N || view !== "day" || title) return;
+  const mb = pn.querySelector(":scope > .mis19"); const M = S.mis19; if (!mb || !M || !M.list) return;
+  const done = M.list.filter(m => m.done).length;
+  const mini = M.list.map(m => `<span class="mm21 ${m.done ? "ok" : ""}">${MIS19[m.k].icon}${m.done ? "✔" : `${m.got}/${m.need}`}</span>`).join("");
+  const d = document.createElement("details"); d.className = "fold21 misf21"; d.open = !!fold21.mis; d.innerHTML = `<summary>🎯 ${done}/3 ${mini}<small>${M.all ? "コンプ！" : "くわしく"}</small></summary>`;
+  mb.before(d); d.appendChild(mb); d.addEventListener("toggle", () => { fold21.mis = d.open; });
+}; }
+// 夜は大きな見出しを画面の上に出して、部屋の文字とかぶらないように
+{ const _r = render; render = function () { _r.apply(this, arguments); try { document.body.classList.toggle("night21", !!N && view === "night"); } catch (e) {} }; }
 
 // ================= BGM（その場で合成する小さなループ）：昼はのんびり、夜は速くて不穏、ボスはもっと =================
 let BGMON19 = true; try { BGMON19 = localStorage.getItem("chika-bgm") !== "0"; } catch (e) {}
