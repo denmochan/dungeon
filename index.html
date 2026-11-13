@@ -6751,11 +6751,17 @@ function nFight19(S, i) { const r = S.path[i], cap = capOfSlot7(S, i); if (r.fpc
 autoAll19 = function (S) {
   const C = afc19(S), dens = S.path.map((r, i) => r && r.kind === "den" ? i : -1).filter(i => i >= 0); if (!dens.length) return 0;
   dens.forEach(i => { S.path[i].pol = purpose19(S, i); });
-  const fixed = m => !!m.job || restLeft9(S, m), cap = {}, fight = {}, work = {};
-  dens.forEach(i => { const fx = S.mons.filter(m => m.home === i && fixed(m)); cap[i] = capOfSlot7(S, i) - fx.length;
-    fight[i] = Math.max(0, nFight19(S, i) - fx.filter(m => m.job === "guard").length); work[i] = Math.max(0, cap[i] - fight[i]); });
+  // 📌固定の子は動かさない。休んでいる子（💤）は、寝床のある部屋へ先に運ぶ（ひと晩で治る）
+  const fixed = m => !!m.job, cap = {}, fight = {}, work = {};
+  dens.forEach(i => { cap[i] = capOfSlot7(S, i) - S.mons.filter(m => m.home === i && fixed(m)).length; });
   const before = new Map(S.mons.map(m => [m.id, m.home]));
-  let pool = S.mons.filter(m => !fixed(m) && (m.home == null || dens.includes(m.home)));
+  const resting = S.mons.filter(m => !fixed(m) && restLeft9(S, m) && (m.home == null || dens.includes(m.home)));
+  const beds = dens.filter(i => hasFac12(S.path[i], "bed"));
+  resting.sort((a, b) => b.lv - a.lv).forEach(m => { const i = beds.find(i => cap[i] > 0) ?? (m.home != null && cap[m.home] > 0 ? m.home : dens.find(i => cap[i] > 0));
+    if (i != null) { m.home = i; m.job19 = null; m.job19h = i; cap[i]--; } else m.home = null; });
+  dens.forEach(i => { const fx = S.mons.filter(m => m.home === i && fixed(m));
+    fight[i] = Math.max(0, Math.min(cap[i], nFight19(S, i) - fx.filter(m => m.job === "guard").length)); work[i] = Math.max(0, cap[i] - fight[i]); });
+  let pool = S.mons.filter(m => !fixed(m) && !resting.includes(m) && (m.home == null || dens.includes(m.home)));
   pool.forEach(m => { m.home = null; m.job19 = null; });
   const put = (m, i, k) => { m.home = i; m.job19 = k || null; m.job19h = i; cap[i]--; if (k === "guard") fight[i]--; else work[i]--; pool = pool.filter(x => x !== m); };
   const of = p => dens.filter(i => S.path[i].pol === p), strong = (a, b) => power13(b) - power13(a);
@@ -6786,7 +6792,7 @@ autoAll19 = function (S) {
   [...of("guard"), ...of("earn"), ...of("grow")].forEach(i => { while (cap[i] > 0) { const m = pool.slice().sort(strong)[0]; if (!m) break; put(m, i, S.path[i].pol === "grow" ? "guard" : null); } });
   // 7) 控えに強い子を残さない
   pool.slice().sort(strong).forEach(L => {
-    const W = S.mons.filter(m => m.home != null && !fixed(m) && ["earn", "guard"].includes(S.path[m.home].pol) && m.job19 !== "teach" && !isApt18(m, "mine")).sort((a, b) => power13(a) - power13(b))[0];
+    const W = S.mons.filter(m => m.home != null && !fixed(m) && !restLeft9(S, m) && ["earn", "guard"].includes(S.path[m.home].pol) && m.job19 !== "teach" && !isApt18(m, "mine")).sort((a, b) => power13(a) - power13(b))[0];
     if (W && power13(W) < power13(L)) { const i = W.home, k = W.job19; W.home = null; W.job19 = null; L.home = i; L.job19 = k; L.job19h = i; pool = pool.filter(x => x !== L).concat([W]); } });
   return S.mons.filter(m => before.get(m.id) !== m.home).length;
 };
@@ -6843,7 +6849,7 @@ document.addEventListener("click", ev => {
     stage.out.sp = ms[0] ? ms[0].sp : null; (rep.evos || []).forEach(e => queue.push({ k: "evo", ...e })); sfx16("coin"); save(); render(); }
 }, true);
 
-const VER20 = "11/13 23:52";
+const VER20 = "11/14 01:05";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -6909,6 +6915,8 @@ function growPage20() {
   h += `<div class="flow20">${col("grow")}${D.some(i => purpose19(S, i) === "grow") ? `<div class="ar20">▶</div>` : ""}${col("earn")}</div>${col("guard")}`;
   if (bench.length) h += `<div class="col20 c-bench"><h4>🪑 控え ${bench.length}</h4><div class="mrow20">${bench.map(mini).join("")}</div></div>`;
   h += `<div class="lane20"><div class="lh"><b>🎓 卒業のきまり</b><span class="hint">このLvになるまでは、得意に関係なくまず訓練</span></div><div class="chips20">${[5, 7, 10, 15].map(v => `<button class="chip20 ${C.gradLv === v ? "on" : ""}" data-a="gl20" data-v="${v}">Lv${v}で卒業</button>`).join("")}<button class="chip20 ${!C.gradLv ? "on" : ""}" data-a="gl20" data-v="0">最高Lvの${C.thr}%</button></div><div class="hint">いま：Lv${thr}までは訓練、Lv${thr + 1}から得意の部屋へ</div></div>`;
+  const zz = S.mons.filter(m => restLeft9(S, m)), bedR = D.filter(i => hasFac12(S.path[i], "bed"));
+  if (zz.length) h += `<div class="note20">💤 休んでいる子 ${zz.length}体：${bedR.length ? `「並べる」で寝床のある部屋（${bedR.map(i => esc(roomTitle(S, i))).join("・")}）へ運ぶと、ひと晩で治る` : "寝床のある部屋がないので、休みが明けるまで待つ（部屋の設備に🛏寝床を置くと、ひと晩で治る）"}</div>`;
   h += grad.length ? `<div class="note20">🎓 卒業できる子：${grad.map(m => esc(m.nick) + " Lv" + m.lv).join("・")}　→「並べる」で得意の部屋へ</div>` : "";
   h += `<div class="chips20"><button class="chip20" data-a="af19open">⚙️ こまかい設定（部屋の目的・戦う割合・順番）</button><button class="chip20" data-a="mons">👾 魔物の一覧</button></div>`;
   return h + `</div><div class="bar20"><button data-a="pgback">◀ ダンジョン</button><button class="main" data-a="af19go">🪄 この流れで並べる</button></div>`;
