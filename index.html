@@ -806,6 +806,8 @@ html,body{width:100%;max-width:100vw;overflow-x:hidden;position:fixed;inset:0}
 .tick21{position:absolute;transform:translate(-50%,-50%);z-index:6;pointer-events:none;font:900 15px/1 var(--px,sans-serif);padding:3px 7px;border-radius:8px;background:#000a;white-space:nowrap;display:flex;flex-direction:column;align-items:center;transition:opacity .4s}
 .tick21 small{font-size:8px;font-weight:700;opacity:.8;margin-bottom:1px}.tick21.toh{color:#ffd46a}.tick21.tom{color:#ff8a7a}.tick21.out{opacity:0}
 .tick21.bump{animation:tick21 .18s}@keyframes tick21{50%{transform:translate(-50%,-50%) scale(1.18)}}
+.cs18{min-width:0;overflow:hidden}.cs18 .skc{max-width:100%;overflow:hidden;text-overflow:clip;white-space:nowrap}@media (max-width:360px){.cs18 .skc{font-size:10px}}
+.cs18 .skc{white-space:normal!important;overflow:visible!important;text-align:center;line-height:1.15}
 </style>
 </head>
 <body>
@@ -6982,7 +6984,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.105（11/15 02:20）";
+const VER20 = "No.106（11/15 02:40）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
