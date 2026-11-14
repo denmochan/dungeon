@@ -808,6 +808,7 @@ html,body{width:100%;max-width:100vw;overflow-x:hidden;position:fixed;inset:0}
 .tick21.bump{animation:tick21 .18s}@keyframes tick21{50%{transform:translate(-50%,-50%) scale(1.18)}}
 .cs18{min-width:0;overflow:hidden}.cs18 .skc{max-width:100%;overflow:hidden;text-overflow:clip;white-space:nowrap}@media (max-width:360px){.cs18 .skc{font-size:10px}}
 .cs18 .skc{white-space:normal!important;overflow:visible!important;text-align:center;line-height:1.15}
+.achpop{max-width:calc(100vw - 32px);box-sizing:border-box;white-space:normal;text-align:center}
 </style>
 </head>
 <body>
@@ -6548,8 +6549,8 @@ function mixSkillPick18(A, B, pool) {
     + (c && c.k && SK11[c.k] ? slot(`${skChip10(c.k, 1)}<small>生まれつき</small>`, "inn") : "")
     + [0, 1].map(n => use[n] ? slot(`${skChip10(use[n], 1)}<small>${sel.length ? "選んだ" : "おまかせ"}</small>`, sel.length ? "on" : "auto") : slot(`<span>—</span><small>なし</small>`, "emp")).join("")
     + slot(`<span>？</span><small>新しく1つ</small>`, "new") + `</div>`;
-  h += `<div class="lab2">受け継ぐスキルを選ぶ<span class="hint">　タップで入れる／外す（2つまで）</span></div>`
-    + pool.map(k => { const n = sel.indexOf(k); return `<div class="row pick18 ${n >= 0 ? "on" : ""}" data-a="nestpick" data-v="${k}"><span class="pn18">${n >= 0 ? "①②"[n] : ""}</span>${skChip10(k, 1)}<div class="tx"><small>${skText11(k, 1)}</small><small class="hint">${from(k)}が持っている</small></div></div>`; }).join("");
+  h += pool.length ? `<div class="lab2">受け継ぐスキルを選ぶ<span class="hint">　タップで入れる／外す（2つまで）</span></div>` : `<div class="hint">親は受け継げるスキルを持っていない（生まれつきのスキルと、新しい1つだけ）</div>`;
+  h += pool.map(k => { const n = sel.indexOf(k); return `<div class="row pick18 ${n >= 0 ? "on" : ""}" data-a="nestpick" data-v="${k}"><span class="pn18">${n >= 0 ? "①②"[n] : ""}</span>${skChip10(k, 1)}<div class="tx"><small>${skText11(k, 1)}</small><small class="hint">${from(k)}が持っている</small></div></div>`; }).join("");
   h += `<div class="mixbtn18">${sel.length ? `<button data-a="mixclear">選び直す</button><button class="main" data-a="mixgo" data-v="pick">🥚 この${sel.length}つで配合</button>` : `<button class="main" data-a="mixgo" data-v="auto">🪄 おまかせで配合</button>`}</div>`;
   return h;
 }
@@ -6984,7 +6985,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.106（11/15 02:40）";
+const VER20 = "No.107（11/15 03:10）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7454,6 +7455,11 @@ monsModal = (prev => function () {
 document.addEventListener("click", ev => { const b = ev.target.closest('[data-a="mf21"]'); if (!b) return; ev.stopImmediatePropagation(); mf21[b.dataset.k] = b.dataset.v; try { localStorage.setItem("chika-mf21", JSON.stringify(mf21)); } catch (e) {} render(); }, true);
 // 一覧の上のボタンは短く（はみ出さない）
 monsModal = (prev => function () { return prev().replace(">🪄 全体おまかせ<", ">🪄 おまかせ<").replace(">🪑 全員控えへ<", ">🪑 全員控え<").replace(">👋 まとめて手放す<", ">👋 手放す<"); })(monsModal);
+
+// ---------- 17) 名前がかぶらないように（同じ名前が何体もいると見分けられない） ----------
+newMon5 = (prev => function () { const m = prev.apply(this, arguments); try { if (typeof S !== "undefined" && S && S.mons) { const used = new Set(S.mons.map(o => o.nick));
+  if (used.has(m.nick)) { const free = NICK5.filter(n => !used.has(n)); if (free.length) m.nick = free[Math.floor(Math.random() * free.length)];
+    else { let k = 2; while (used.has(m.nick + k)) k++; m.nick = m.nick + k; } } } } catch (e) {} return m; })(newMon5);
 
 // ================= BGM（その場で合成する小さなループ）：昼はのんびり、夜は速くて不穏、ボスはもっと =================
 let BGMON19 = true; try { BGMON19 = localStorage.getItem("chika-bgm") !== "0"; } catch (e) {}
