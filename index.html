@@ -817,6 +817,7 @@ html,body{width:100%;max-width:100vw;overflow-x:hidden;position:fixed;inset:0}
 .mbox>button[data-a="close"]:last-child{bottom:-12px;margin-bottom:-12px;box-shadow:0 0 0 12px #140e0b,0 -10px 14px 6px #140e0b}
 body:has(.ban19:not(.mis)) .nt19{opacity:.12;transition:opacity .2s}
 .nt19{top:6px!important;right:52px!important;max-width:calc(100% - 150px)!important;font-size:11px;padding:3px 8px}.nt19 b{font-size:14px}
+.dsel{display:grid!important;grid-template-columns:repeat(3,1fr);gap:5px!important}.drow{flex-direction:column;gap:1px!important;padding:6px 4px!important;text-align:center!important}.drow .di{font-size:18px!important;width:auto!important}.drow .dn{font-size:12.5px!important;flex:0 0 auto!important;white-space:nowrap}.drow .dr{font-size:11px!important}.title.diff .ddesc{margin-top:2px}.ver20{pointer-events:none;opacity:.55}
 </style>
 </head>
 <body>
@@ -6993,7 +6994,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.112（11/15 02:05）";
+const VER20 = "No.113（11/15 02:15）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7420,7 +7421,7 @@ function relModal21() {
     h += `<div class="lab2">経験をあげる仲間</div>` + L.map(m => { const on = rel21.to === m.id; let lv = m.lv, e = (m.exp || 0) + xp; while (e >= 6 * lv && lv < 99) { e -= 6 * lv; lv++; }
       return `<div class="row pick18 ${on ? "on" : ""}" data-a="rel21to" data-id="${m.id}">${img(m.sp, m.evos, "sp", "width:30px;height:30px;flex:0 0 auto")}<div class="tx"><b>${esc(m.nick)}</b>${rarTag19(m)} Lv${m.lv}${lv > m.lv ? ` <span class="good">→ Lv${lv}</span>` : ""}</div></div>`; }).join(""); }
   const ok = rel21.mode === "dp" || (rel21.mode === "xp" && rel21.to != null);
-  h += rel21.step === "confirm" ? `<div class="box bad21b">本当に${sel.length}体を手放す？ もう戻らない</div><button class="bad21" data-a="rel21go">👋 手放す</button><button data-a="rel21back">やめる</button>`
+  h += rel21.step === "confirm" ? `<div class="box bad21b">本当に${sel.length}体を手放す？ もう戻らない${sel.length >= S.mons.length ? "<br><b>⚠ 魔物が1体もいなくなる（勇者を止められない）</b>" : ""}</div><button class="bad21" data-a="rel21go">👋 手放す</button><button data-a="rel21back">やめる</button>`
     : `<div class="mixbtn18"><button data-a="rel21back">◀ 選びなおす</button><button class="main" data-a="rel21ask" ${ok ? "" : "disabled"}>決める</button></div>`;
   return h;
 }
