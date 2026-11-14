@@ -6923,7 +6923,7 @@ document.addEventListener("click", ev => {
     stage.out.sp = ms[0] ? ms[0].sp : null; (rep.evos || []).forEach(e => queue.push({ k: "evo", ...e })); sfx16("coin"); save(); render(); }
 }, true);
 
-const VER20 = "11/14 11:45";
+const VER20 = "11/14 12:00";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7245,6 +7245,13 @@ mixConfirm = (prev => function () { let h = prev(); try {
 mixSkillModal = function () { return mixConfirm(); };
 // 拡大されたまま戻らないのを防ぐ（ダブルタップ・ピンチ）
 document.addEventListener("gesturestart", e => e.preventDefault(), { passive: false });
+// iPhoneで拡大されたままになったら、元の大きさに戻す（拡大中は画面全体が横に動いてしまう）
+function unzoom21() { try { const vv = window.visualViewport; if (vv && vv.scale <= 1.01 && Math.abs(vv.offsetLeft) < 1) return;
+  const m = document.querySelector('meta[name="viewport"]'); if (!m) return; const c = "width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover";
+  m.setAttribute("content", c + ",minimum-scale=1"); setTimeout(() => { m.setAttribute("content", c); window.scrollTo(0, 0); }, 60); } catch (e) {} }
+if (window.visualViewport) { visualViewport.addEventListener("resize", () => setTimeout(unzoom21, 300)); visualViewport.addEventListener("scroll", () => setTimeout(unzoom21, 300)); }
+document.addEventListener("focusout", () => setTimeout(unzoom21, 200)); window.addEventListener("load", unzoom21); setTimeout(unzoom21, 500);
+document.addEventListener("touchend", e => { if (e.touches.length === 0) setTimeout(unzoom21, 250); }, { passive: true });
 
 // ================= BGM（その場で合成する小さなループ）：昼はのんびり、夜は速くて不穏、ボスはもっと =================
 let BGMON19 = true; try { BGMON19 = localStorage.getItem("chika-bgm") !== "0"; } catch (e) {}
