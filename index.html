@@ -823,6 +823,7 @@ body:has(.ban19:not(.mis)) .nt19{opacity:.12;transition:opacity .2s}
 .pick18.new19{font-size:inherit;font-weight:inherit;color:inherit;text-shadow:none;animation:none}.pick18.new19 .hint{color:#ffd34a}
 .modal .pk{grid-template-columns:repeat(auto-fit,minmax(96px,1fr))}
 body{-webkit-touch-callout:none}img{-webkit-touch-callout:none;-webkit-user-drag:none;user-select:none}textarea,input{user-select:text;-webkit-user-select:text;-webkit-touch-callout:default}
+.tabs20 .tab20{min-width:52px}
 </style>
 </head>
 <body>
@@ -7006,7 +7007,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.126（11/15 03:27）";
+const VER20 = "No.127（11/15 03:28）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7014,6 +7015,8 @@ const VER20 = "No.126（11/15 03:27）";
 let page20 = null, rtab20 = "mons";
 const dens20 = () => S.path.map((r, i) => r && r.kind === "den" ? i : -1).filter(i => i >= 0);
 const roomLab20 = i => esc(roomTitle(S, i));
+// 部屋が多いときのタブは短く（「第4の間📚」→「4📚」・入口は「入口」）
+const roomShort20 = i => { const t = roomTitle(S, i); const m = t.match(/^第(\d+)の間(.*)$/); return esc(m ? m[1] + m[2] : t.replace(/^入口/, "入口")); };
 const roleOfIn20 = m => { if (m.home == null) return null; const pl = roomPlan14(S, m.home); return pl[m.id] === "bed" ? "bed" : pl[m.id] || "fight"; };
 function tok20(m) {
   const r = m.rar19 || "N";
@@ -7051,7 +7054,7 @@ function sheet20() {
     + `<div class="chips20">${m.home != null ? (m.job ? `<button class="chip20" data-a="swfree">🪄 固定を外す</button>` : `<button class="chip20" data-a="swpin">📌 固定</button>`) : ""}<button class="chip20" data-a="swcard">📋 くわしく</button></div></div>`;
 }
 function roomPage20(i) {
-  const tabs = `<div class="tabs20">${dens20().map(j => `<button class="tab20 ${j === i ? "on" : ""}" data-a="rt20" data-v="${j}">${roomLab20(j)}</button>`).join("")}</div>`;
+  const tabs = `<div class="tabs20">${dens20().map(j => `<button class="tab20 ${j === i ? "on" : ""}" data-a="rt20" data-v="${j}">${dens20().length > 5 && j !== i ? roomShort20(j) : roomLab20(j)}</button>`).join("")}</div>`;
   const sub = `<div class="sub20"><button class="${rtab20 === "mons" ? "on" : ""}" data-a="st20" data-v="mons">👥 住む子</button><button class="${rtab20 === "fac" ? "on" : ""}" data-a="st20" data-v="fac">🏗 部屋の設備</button></div>`;
   let body;
   if (slotPick18 && slotPick18.i === i) body = slotPickView18();
