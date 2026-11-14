@@ -790,6 +790,7 @@ html,body{width:100%;max-width:100vw;overflow-x:hidden;position:fixed;inset:0}
 .cbar,.flrbar,.ftabs{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;max-width:100%}
 .nav{max-width:100%;overflow:hidden}.nav button{min-width:0;flex:1 1 0}
 .vrow21{align-items:center}.vrow21 .tx{flex:1;min-width:0}.vact21{display:flex;flex-direction:column;gap:4px;flex:0 0 auto}.vact21 button{padding:6px 8px;font-size:12px}.vact21 .bad21{background:#8a2e1a;border-color:#e06040;color:#fff}
+.vd21{display:flex;align-items:center;gap:10px;margin:8px 0}.vd21 .tx{min-width:0}.bad21b{border-color:#e06040!important;color:#ffb0a0}button.bad21{background:#8a2e1a;border-color:#e06040;color:#fff}
 </style>
 </head>
 <body>
@@ -6951,7 +6952,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "11/14 21:30";
+const VER20 = "11/14 22:20";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7315,6 +7316,36 @@ document.addEventListener("click", ev => { const b = ev.target.closest("[data-a]
 function refund21() { try { if (!S || S.refund21) return; const t = S.lastTribute16; if (!t || !t.dp) return;
   S.refund21 = 1; S.dp += t.dp; save(); setTimeout(() => toast(`💎 上納で渡したDP ${t.dp} を返したよ`), 600); } catch (e) {} }
 { const _r = render; render = function () { refund21(); _r.apply(this, arguments); }; }
+
+// ---------- 13) 保管庫に残す子を、じっくり見てから決める ----------
+let vsee21 = null, vok21 = false;
+vaultSaveModal18 = (prev => function () {
+  if (vsee21 != null) { const m = S.mons.find(o => o.id === vsee21); if (m) return vaultDetail21(m); vsee21 = null; }
+  return prev().replace(/data-a="vsave"/g, 'data-a="vsee21"').replace(/<span class="gold">残す<\/span>/g, '<span class="gold">見る ▶</span>')
+    .replace('<button data-a="vskip">だれも残さない</button>', vok21 === "skip" ? `<div class="box bad21b">本当にだれも残さない？</div><button class="bad21" data-a="vskip">だれも残さずに転生する</button><button data-a="vno21">やめる</button>` : `<button data-a="vskipask21">だれも残さない</button>`);
+})(vaultSaveModal18);
+function vaultDetail21(m) {
+  const r = m.rar19 || "N", ap = aptOf18(m.sp), sks = Object.keys(m.sk || {}), Q = QUIRK[m.quirk];
+  const base = MON[m.sp].forms[0][0], now = monName5(m);
+  let h = `<button class="mini" data-a="vback21">◀ 一覧にもどる</button>
+    <div class="vd21">${img(m.sp, m.evos, "sp", "width:72px;height:72px;flex:0 0 auto")}<div class="tx"><h2 style="margin:0">${esc(m.nick)} <span class="rt19 r-${r} big21">${r}</span>${m.shiny19 ? " ✨色違い" : ""}</h2>
+    <div>${now} Lv${m.lv}${now !== base ? `　<span class="hint">（残すと ${base} にもどる）</span>` : ""}</div></div></div>`;
+  h += `<div class="lab2">残るもの</div><div class="box">
+    <div>🧬 種族：<b>${base}</b>　得意 ${ROLEI18[ap][0]}${ROLEI18[ap][1]}${m.apt2 && ROLEI18[m.apt2] ? `・${ROLEI18[m.apt2][0]}${ROLEI18[m.apt2][1]}` : ""}</div>
+    <div>💎 レア度：<b>${r}</b>（夜の攻撃・体力 +${Math.round((RARB19[rarI19(m)] || 0) * 100)}%）${m.shiny19 ? "　✨色違い（+15%）" : ""}</div>
+    ${Q ? `<div>🙂 性格：<b>${Q.name}</b>（${Q.text}）</div>` : ""}</div>`;
+  h += `<div class="lab2">スキル ${sks.length}つ（ぜんぶ残る）</div>` + (sks.length ? sks.map(k => `<div class="row">${skChip10(k, 1)}<div class="tx"><small>${skText11(k, 1)}</small></div></div>`).join("") : `<div class="hint">スキルなし</div>`);
+  h += `<div class="lab2">なくなるもの</div><div class="box hint">Lv${m.lv} → Lv1・進化（${now !== base ? now + " → " + base : "なし"}）・熟練度・称号</div>`;
+  h += vok21 === m.id
+    ? `<div class="box bad21b">本当に <b>${esc(m.nick)}</b> を残す？　ほかの子はみんないなくなる</div><button class="main" data-a="vsave" data-id="${m.id}">🏺 ${esc(m.nick)}を残して転生する</button><button data-a="vno21">やめる</button>`
+    : `<button class="main" data-a="vokask21" data-v="${m.id}">🏺 この子を残す</button>`;
+  return h;
+}
+document.addEventListener("click", ev => { const b = ev.target.closest("[data-a]"); if (!b || !S) return; const a = b.dataset.a, f = {
+  vsee21: () => { vsee21 = +b.dataset.id; vok21 = false; }, vback21: () => { vsee21 = null; vok21 = false; },
+  vokask21: () => { vok21 = +b.dataset.v; }, vno21: () => { vok21 = false; }, vskipask21: () => { vok21 = "skip"; },
+  vsave: () => { vsee21 = null; vok21 = false; return true; }, vskip: () => { vsee21 = null; vok21 = false; return true; } }[a];
+  if (!f) return; const pass = f(); if (pass) return; ev.stopImmediatePropagation(); render(); }, true);
 
 // ================= BGM（その場で合成する小さなループ）：昼はのんびり、夜は速くて不穏、ボスはもっと =================
 let BGMON19 = true; try { BGMON19 = localStorage.getItem("chika-bgm") !== "0"; } catch (e) {}
