@@ -5030,7 +5030,7 @@ function caveStatic(M){
 }
 function caveShell(){
   const tabs = CV.maps.map(M => `<button class="${M.f === caveFloor ? "on" : ""}" data-a="cfl" data-v="${M.f}">B${M.f + 1}${M.f === caveFloor || CV.maps.length < 2 ? " " + THEME7[M.theme].name : ""}</button>`).join("");
-  return `<div class="cbar"><div class="ctabs">${N ? "" : `<button class="${caveFloor === -1 ? "on" : ""}" data-a="cfl" data-v="-1">⛰ 地上</button>`}${tabs}</div>${N ? `<button class="${caveFollow ? "on" : ""}" data-a="cfollow">🎥</button>` : (S.path.length >= MAX_PATH ? `<button class="digb" data-a="dig">⛏ 満室 <b>${MAX_PATH}/${MAX_PATH}</b></button>` : `<button class="digb" data-a="dig">⛏ 掘る <b>DP ${digCost7(S)}</b></button>`)}</div>`;
+  return `<div class="cbar"><div class="ctabs">${N ? "" : `<button class="${caveFloor === -1 ? "on" : ""}" data-a="cfl" data-v="-1">${CV.maps.length >= 3 && caveFloor !== -1 ? "⛰" : "⛰ 地上"}</button>`}${tabs}</div>${N ? `<button class="${caveFollow ? "on" : ""}" data-a="cfollow">🎥</button>` : (S.path.length >= MAX_PATH ? `<button class="digb" data-a="dig">⛏ 満室${CV.maps.length >= 3 ? "" : ` <b>${MAX_PATH}/${MAX_PATH}</b>`}</button>` : `<button class="digb" data-a="dig">⛏ ${CV.maps.length >= 3 ? "" : "掘る "}<b>${CV.maps.length >= 3 ? "" : "DP "}${digCost7(S)}</b></button>`)}</div>`;
 }
 function caveMount(){
   const host = $("cavehost"); if (!host) return;
@@ -7007,7 +7007,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.127（11/15 03:28）";
+const VER20 = "No.128（11/15 03:29）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
