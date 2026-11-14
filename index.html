@@ -6923,7 +6923,7 @@ document.addEventListener("click", ev => {
     stage.out.sp = ms[0] ? ms[0].sp : null; (rep.evos || []).forEach(e => queue.push({ k: "evo", ...e })); sfx16("coin"); save(); render(); }
 }, true);
 
-const VER20 = "11/14 12:00";
+const VER20 = "11/14 12:10";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7069,7 +7069,7 @@ function xferModal20() {
     <button class="main" data-a="xcopy20">📋 コピーする</button>
     <div class="lab2">コードを貼りつけて読みこむ</div><textarea id="xi20" placeholder="ここに貼りつけ" style="width:100%;height:70px;font-size:10px"></textarea>
     <div class="hint bad">読みこむと、いまのデータは上書きされる（その前にバックアップに残す）</div>
-    <button data-a="xload20">⬇ 読みこむ</button><button data-a="close">閉じる</button>`;
+    <button class="main" data-a="xpaste20">📋 コピーしたコードを貼りつけて読みこむ</button><button data-a="xload20">⬇ 上の欄から読みこむ</button><button data-a="close">閉じる</button>`;
 }
 document.addEventListener("click", ev => {
   const b = ev.target.closest("[data-a]"); if (!b) return; const a = b.dataset.a;
@@ -7099,6 +7099,12 @@ setTimeout(hashLoad20, 300);
 
 // 版の目印（ちゃんと新しい版が開けているか確かめる用）
 { const _r = render; render = function () { _r.apply(this, arguments); try { if (title && !document.querySelector(".ver20")) document.body.insertAdjacentHTML("beforeend", `<div class="ver20">ver ${VER20}</div>`); if (!title) { const v = document.querySelector(".ver20"); if (v) v.remove(); } } catch (e) {} }; }
+
+// 貼りつけボタン：クリップボードから読んで、そのまま読みこむ
+document.addEventListener("click", ev => { const b = ev.target.closest('[data-a="xpaste20"]'); if (!b) return; ev.stopImmediatePropagation();
+  const go = v => { const t = $("xi20"); if (t) t.value = v; const x = document.querySelector('[data-a="xload20"]'); if (x) x.click(); };
+  try { navigator.clipboard.readText().then(v => { if (!v || !v.trim().startsWith("DM1")) { toast("コードがコピーされていない。先に向こうで「コピーする」を押して"); return; } go(v.trim()); }, () => toast("貼りつけできなかった。下の欄を長押しして「ペースト」して")); }
+  catch (e) { toast("下の欄を長押しして「ペースト」して"); } }, true);
 
 // ================= ux21：使いやすさ・分かりやすさの大修正（11/14 夜） =================
 // 1) 寝床はベッドの数まで（Lv1=2床・Lv2=3床・Lv3=4床）。ベッドで寝る子は部屋の定員に数えない
