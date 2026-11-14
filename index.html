@@ -6915,7 +6915,10 @@ autoAll19 = function (S) {
   of("earn").forEach(i => { while (work[i] > 0) { const m = pool.filter(miner).sort((a, b) => mineApt11(b) - mineApt11(a) || b.lv - a.lv)[0]; if (!m) break; put(m, i, null); } });
     },
     strong: () => {
-  C.order.forEach(p => of(p).forEach(i => { while (fight[i] > 0) { const m = pool.slice().sort(strong)[0]; if (!m) break; put(m, i, "guard"); } }));
+  // まだ鍛える枠が空いているなら、卒業Lv以下の子は「強い子」にしない（先に訓練へ）
+  const thr = thrLv19(S), trainLeft = () => of("grow").reduce((a, i) => a + Math.max(0, Math.min(work[i], (slotsOf18(S, i).train || 0) - S.mons.filter(m => m.home === i && (m.job === "train" || m.job19 === "train")).length)), 0);
+  const cand = () => { const tl = trainLeft(), lows = pool.filter(m => m.lv <= thr).length; return pool.filter(m => !(m.lv <= thr && tl > 0 && lows <= tl + 0 && afSteps19(S).includes("train"))); };
+  C.order.forEach(p => of(p).forEach(i => { while (fight[i] > 0) { const m = cand().sort(strong)[0]; if (!m) break; put(m, i, "guard"); } }));
     },
     earn: () => {
   of("earn").forEach(i => { while (work[i] > 0) { const m = pool.slice().sort((a, b) => b.lv - a.lv)[0]; if (!m) break; put(m, i, null); } });
@@ -6997,7 +7000,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.120（11/15 03:20）";
+const VER20 = "No.121（11/15 04:13）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7480,6 +7483,21 @@ newMon5 = (prev => function () { const m = prev.apply(this, arguments); try { if
     if (t && pg) { const r = t.getBoundingClientRect(), pr = pg.getBoundingClientRect(); if (r.bottom > pr.bottom - 6) pg.scrollTop += r.bottom - pr.bottom + 12; else if (r.top < pr.top + 6) pg.scrollTop -= pr.top - r.top + 12; } }
   lastSel21 = cur;
 } catch (e) {} }; }
+
+// ---------- ベッドで治った子が、部屋の定員をこえて残らないように ----------
+// （ベッドの子は定員に数えないので、治ると定員オーバーになることがある → 毎朝おまかせなら並べ直し、そうでなければ控えへ）
+function fixOver21(S) {
+  let moved = [];
+  S.path.forEach((r, i) => { if (!r || r.kind !== "den") return;
+    let res = residents5(S, i), cap = capOfSlot7(S, i); if (res.length <= cap) return;
+    const ex = res.filter(m => !m.job && !restLeft9(S, m)).sort((a, b) => (a.job19 ? 1 : 0) - (b.job19 ? 1 : 0) || power13(a) - power13(b));
+    while (res.length > cap && ex.length) { const m = ex.shift(); m.home = null; m.job19 = null; moved.push(m); res = residents5(S, i); cap = capOfSlot7(S, i); } });
+  if (moved.length && afc19(S).daily) { try { autoAll19(S); } catch (e) {} }
+  return moved;
+}
+{ const _r = render; render = function () { try { if (S && !title && !N && !stage && view === "day" && S.mons && S.path) { const mv = fixOver21(S); if (mv.length) { save(); if (!afc19(S).daily) setTimeout(() => toast(`🛏 治った ${mv.map(m => m.nick).join("・")} は部屋がいっぱいなので控えへ`), 300); } } } catch (e) {} _r.apply(this, arguments); }; }
+{ const _sr = startRaid9; startRaid9 = function (S) { try { fixOver21(S); } catch (e) {} return _sr.apply(this, arguments); }; }
+{ const _dj = dayJobs9; dayJobs9 = function (S, rep) { const r = _dj.apply(this, arguments); try { fixOver21(S); } catch (e) {} return r; }; }
 
 // ================= BGM（その場で合成する小さなループ）：昼はのんびり、夜は速くて不穏、ボスはもっと =================
 let BGMON19 = true; try { BGMON19 = localStorage.getItem("chika-bgm") !== "0"; } catch (e) {}
