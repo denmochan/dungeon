@@ -826,6 +826,7 @@ body{-webkit-touch-callout:none}img{-webkit-touch-callout:none;-webkit-user-drag
 .tabs20 .tab20{min-width:52px}
 .nt19.lo21{top:46px!important;left:10px!important;right:auto!important}
 .pg20,#pn,.mbox,.stage,.sheet20{overflow-x:hidden}
+.mf21 .chips20{gap:4px;row-gap:4px}.mf21 .chip20{padding:3px 8px;font-size:12px;min-height:26px}.mf21 .chips20 b{font-size:11.5px;min-width:26px}.mf21{padding:6px 8px!important}
 </style>
 </head>
 <body>
@@ -7009,7 +7010,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.130（11/15 03:31）";
+const VER20 = "No.131（11/15 03:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7464,7 +7465,7 @@ try { Object.assign(mf21, JSON.parse(localStorage.getItem("chika-mf21") || "{}")
 const APTS21 = ["fight", "mine", "teach", "snipe", "watch", "cook", "trapw"];
 function mfBar21() {
   const c = (k, v, l) => `<button class="chip20 ${mf21[k] === v ? "on" : ""}" data-a="mf21" data-k="${k}" data-v="${v}">${l}</button>`;
-  return `<div class="mf21"><div class="chips20"><b>並び</b>${c("sort", "room", "部屋ごと")}${c("sort", "lvd", "Lv高い順")}${c("sort", "lva", "Lv低い順")}${c("sort", "rar", "レア度順")}</div>
+  return `<div class="mf21"><div class="chips20"><b>並び</b>${c("sort", "room", "部屋ごと")}${c("sort", "lvd", "Lv↓高い")}${c("sort", "lva", "Lv↑低い")}${c("sort", "rar", "レア順")}</div>
     <div class="chips20"><b>レア</b>${c("rar", "all", "全部")}${["SSR", "SR", "R", "N"].map(r => c("rar", r, r)).join("")}${c("rar", "shiny", "✨")}</div>
     <div class="chips20"><b>得意</b>${c("apt", "all", "全部")}${APTS21.filter(k => ROLEI18[k]).map(k => c("apt", k, ROLEI18[k][0])).join("")}</div></div>`;
 }
