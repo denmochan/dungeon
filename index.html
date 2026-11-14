@@ -5463,7 +5463,7 @@ function monCard(id){
     <div class="forms">${D.forms.map((F, k) => `<div class="f ${k === m.evos ? "now" : ""}">${img(m.sp, k)}<div>${F[0]}</div><div>${k === 0 ? "" : "Lv" + EVO_LV5[k - 1]}</div></div>`).join("")}</div>
     <div class="box">${prefText(m.sp)}${m.home != null ? `　この部屋では ${MOOD_FACE(moodOf(S, m))}` : ""}</div><div class="hint">${esc(D.bio)}</div>
     ${(() => { const ks = Object.entries(S.known).filter(([k]) => k.split("|").includes(m.sp)); return ks.length ? `<div class="hint gold">分かっている相性</div><div class="chips">${ks.map(([k, v]) => { const o = k.split("|").find(x => x !== m.sp) || m.sp; return `<span class="chip">${REL7[v].icon}${MON[o].forms[0][0]}</span>`; }).join("")}</div>` : ""; })()}
-    <div class="pk"><button class="main" data-a="move" data-id="${m.id}">🏠 引っ越し</button>${m.home != null ? `<button data-a="out" data-id="${m.id}">控えへ</button>` : ""}<button data-a="release" data-id="${m.id}">逃がす</button></div>
+    <div class="pk"><button class="main" data-a="move" data-id="${m.id}">🏠 引っ越し</button>${m.home != null ? `<button data-a="out" data-id="${m.id}">控えへ</button>` : ""}<button data-a="rel21open" data-id="${m.id}">👋 手放す</button></div>
     <button data-a="close">閉じる</button>`;
 }
 function speciesCard(sp){
@@ -6069,7 +6069,7 @@ function monCard(id){
     <div class="box"><b>${ROLES[D.role].icon}${ROLES[D.role].name}</b>：${ROLES[D.role].text}<br><span class="gold">${fxLine(fx)}</span></div>
     <div class="forms">${D.forms.map((F, k) => `<div class="f ${k === m.evos ? "now" : ""}">${img(m.sp, k)}<div>${F[0]}</div><div>${k === 0 ? "" : "Lv" + EVO_LV5[k - 1]}</div></div>`).join("")}</div>
     <div class="hint">${esc(D.bio)}</div><div class="hint">${prefText(m.sp)}${m.home != null ? `　いまの部屋 ${MOOD_FACE(moodOf(S, m))}` : ""}</div>
-    <div class="pk"><button class="main" data-a="move" data-id="${m.id}">🏠 引っ越し</button>${m.home != null ? `<button data-a="out" data-id="${m.id}">控えへ</button>` : ""}<button data-a="release" data-id="${m.id}">逃がす</button></div>
+    <div class="pk"><button class="main" data-a="move" data-id="${m.id}">🏠 引っ越し</button>${m.home != null ? `<button data-a="out" data-id="${m.id}">控えへ</button>` : ""}<button data-a="rel21open" data-id="${m.id}">👋 手放す</button></div>
     <button data-a="close">閉じる</button>`;
   return h;
 }
@@ -6167,7 +6167,7 @@ function monCard(id){
     <div class="box"><b>${ROLES[D.role].icon}${ROLES[D.role].name}</b>：${ROLES[D.role].text}<br><span class="gold">${fxLine(fx)}</span></div>
     <div class="forms">${D.forms.map((F, k) => `<div class="f ${k === m.evos ? "now" : ""}">${img(m.sp, k)}<div>${F[0]}</div><div>${k === 0 ? "" : "Lv" + EVO_LV5[k - 1]}</div></div>`).join("")}</div>
     <div class="hint">${esc(D.bio)}</div>
-    <div class="pk"><button class="main" data-a="move" data-id="${m.id}">🏠 引っ越し</button>${m.home != null ? `<button data-a="out" data-id="${m.id}">控えへ</button>` : ""}<button data-a="release" data-id="${m.id}">逃がす</button></div>
+    <div class="pk"><button class="main" data-a="move" data-id="${m.id}">🏠 引っ越し</button>${m.home != null ? `<button data-a="out" data-id="${m.id}">控えへ</button>` : ""}<button data-a="rel21open" data-id="${m.id}">👋 手放す</button></div>
     <button data-a="close">閉じる</button>`;
 }
 function monRow(m){
@@ -6996,7 +6996,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.117（11/15 02:55）";
+const VER20 = "No.118（11/15 03:02）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
