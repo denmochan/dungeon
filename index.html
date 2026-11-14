@@ -4109,7 +4109,7 @@ trapPow10 = (prev => function (S, N, i) { return Math.round(prev(S, N, i) * (1 +
 income15 = (prev => S => prev(S) - food16(S))(income15);
 // 契約達成：あまったDPを上納（300は手元に残す）
 const TRIBUTE_KEEP16 = 300, TRIBUTE_RATE16 = 400;
-const tribute16 = S => { const extra = Math.max(0, S.dp - TRIBUTE_KEEP16); return { dp: extra, souls: soulsRate15(S, Math.floor(extra / TRIBUTE_RATE16)) }; };
+let tribute16 = S => { const extra = Math.max(0, S.dp - TRIBUTE_KEEP16); return { dp: extra, souls: soulsRate15(S, Math.floor(extra / TRIBUTE_RATE16)) }; };
 { const _nc = nextContract9; nextContract9 = function (S) {
   const t = tribute16(S); S.dp -= t.dp; metaOf8(S).souls += t.souls; S.lastTribute16 = t;
   return _nc(S) + t.souls;
@@ -4823,6 +4823,8 @@ DIFF15.push(
   { name: "深淵2", icon: "🕳", add: 10, party: 2, rate: 30, fame: 5.8, text: "罠・陣形・配合、ぜんぶそろえて五分" },
   { name: "魔神",  icon: "😈", add: 10, party: 3, rate: 40, fame: 6.8, text: "ここまで来た主さまへ。勝てたら本物" });
 DIFF15.forEach((d, i) => { if (i >= 2) d.text += `（4回目の襲撃から強くなり、最後は×${(d.fame * HARD21).toFixed(1)}）`; });
+// ================= 上納をなくす（11/14）：契約をまたいでもDPはそのまま。魂は契約の報酬だけ =================
+tribute16 = S => ({ dp: 0, souls: 0 });
 
 // ================= 洞窟ビュー：勇者から見たダンジョン（上から見たマップ） =================
 let caveOn = (() => { try { return localStorage.getItem("dm8cave") !== "0"; } catch (e) { return true; } })();
@@ -5682,7 +5684,7 @@ function lordModal(){
     <button data-a="close">閉じる</button>`;
 }
 function contractModal(){
-  return `<h2>📜 契約達成！</h2><div class="box gold" style="text-align:center;font-size:16px">${CONTRACT_LEN9}日 守りきった！</div>${S.newDiff18 != null ? `<div class="box good" style="text-align:center">🔓 難易度「${DIFF15[S.newDiff18].icon}${DIFF15[S.newDiff18].name}」が開いた！（次の周回から選べる）</div>` : ""}<div class="hint">次の契約へ進んでも、ここで転生しても、開いた難易度と契約の報酬はもらえる</div><div class="hint">このダンジョンのまま次の契約へ進める。次の勇者はもっと強い。</div><div class="box">👻 契約の報酬 +${soulsRate15(S, 10 + 10 * S.contract.lv)}<br>💎 上納：手元の${TRIBUTE_KEEP16}DPを残して <b>${tribute16(S).dp}DP</b> を魔王さまへ → 👻+${tribute16(S).souls}</div>
+  return `<h2>📜 契約達成！</h2><div class="box gold" style="text-align:center;font-size:16px">${CONTRACT_LEN9}日 守りきった！</div>${S.newDiff18 != null ? `<div class="box good" style="text-align:center">🔓 難易度「${DIFF15[S.newDiff18].icon}${DIFF15[S.newDiff18].name}」が開いた！（次の周回から選べる）</div>` : ""}<div class="hint">次の契約へ進んでも、ここで転生しても、開いた難易度と契約の報酬はもらえる</div><div class="hint">このダンジョンのまま次の契約へ進める。次の勇者はもっと強い。</div><div class="box">👻 契約の報酬 +${soulsRate15(S, 10 + 10 * S.contract.lv)}<br>💎 手元のDP <b>${S.dp}</b> はそのまま次の契約へ持っていける</div>
     <button class="main" data-a="contnext" style="width:100%">次の契約へ（${S.contract.lv + 1}回目）</button><button data-a="giveup">ここで転生する</button>`;
 }
 function awayModal(r){
@@ -6949,7 +6951,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "11/14 19:00";
+const VER20 = "11/14 20:45";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
