@@ -6484,7 +6484,7 @@ function vaultSaveModal18() {
 function vaultBringModal18() {
   const V = vaultOf18(S), cap = vaultCap18(S);
   return `<h2>🏺 保管庫から連れていく</h2><div class="hint">連れていけるのは <b class="gold">${cap}体</b>（🏺主の器と難易度で増える）。みんなLv1・進化前から</div>`
-    + V.map((v, n) => { const on = VSEL18.includes(n); return `<div class="row pick ${on ? "on" : ""}" data-a="vpick" data-v="${n}">${img(v.sp, 0, "sp", "width:40px;height:40px")}<div class="tx"><b>${esc(v.nick)}</b> ${MON[v.sp].forms[0][0]} <span class="apt18 a-${aptOf18(v.sp)}">得意 ${ROLEI18[aptOf18(v.sp)][0]}</span><div class="sks mini">${Object.keys(v.sk || {}).map(k => skChip10(k, 1)).join("")}</div><small class="hint">${v.run}周目に残した子</small></div>${on ? "✅" : ""}</div>`; }).reverse().join("")
+    + V.map((v, n) => { const on = VSEL18.includes(n); return `<div class="row pick ${on ? "on" : ""}" data-a="vpick" data-v="${n}">${img(v.sp, 0, "sp", "width:40px;height:40px")}<div class="tx"><b>${esc(v.nick)}</b> <span class="rt19 r-${v.rar19 || "N"} big21">${v.rar19 || "N"}</span>${v.shiny19 ? "✨" : ""} ${MON[v.sp].forms[0][0]} <span class="apt18 a-${aptOf18(v.sp)}">得意 ${ROLEI18[aptOf18(v.sp)][0]}</span><div class="sks mini">${Object.keys(v.sk || {}).map(k => skChip10(k, 1)).join("")}</div><small class="hint">${v.run}周目に残した子</small></div>${on ? "✅" : ""}</div>`; }).reverse().join("")
     + `<div class="pk"><button class="main" data-a="vgo">${VSEL18.length ? VSEL18.length + "体を連れて始める" : "連れていかずに始める"}</button></div>`;
 }
 { const _eg = enterGame; enterGame = function () { _eg();
@@ -6985,7 +6985,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.108（11/15 03:30）";
+const VER20 = "No.109（11/15 03:50）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7275,7 +7275,7 @@ if (S && typeof S.tut === "number" && S.tut > TUT.length) S.tut = TUT.length;
 // ---------- 7) ウィンドウ：閉じるボタンがないものに、下に固定の「閉じる」をつける ----------
 { const _r = render; render = function () { _r.apply(this, arguments); try {
   const mb = document.querySelector(".modal .mbox"); if (!mb || mb.querySelector(".mclose21")) return;
-  if (!mb.querySelector('[data-a="close"]') && !mb.querySelector('[data-a="lord"]')) mb.insertAdjacentHTML("beforeend", `<div class="mclose21"><button data-a="close">閉じる</button></div>`);
+  if (!mb.querySelector('[data-a="close"]') && !mb.querySelector('[data-a="lord"]') && !mb.querySelector('[data-a="vgo"]')) mb.insertAdjacentHTML("beforeend", `<div class="mclose21"><button data-a="close">閉じる</button></div>`);
 } catch (e) {} }; }
 
 // ---------- 8) 部屋・育成の画面からも「次の日へ」 ----------
