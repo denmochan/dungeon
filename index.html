@@ -777,6 +777,8 @@ button.on{background:linear-gradient(#5a4220,#3a2a14);border-color:var(--gold);c
 body.night21 .ban19:not(.fix){top:7%!important;transform-origin:top center;scale:.85}
 .cpop.rt21{white-space:nowrap;font-size:13px}
 .nlog21.t{color:#ffd34a;font-weight:700}
+.skr21{font:900 italic 9px/1 sans-serif;margin-left:3px;padding:1px 3px;border-radius:3px;vertical-align:1px;font-style:italic}.skr21.r1{color:#aaa;border:1px solid #666}.skr21.r2{color:#7ac0ff;border:1px solid #3a7ac0}.skr21.r3{color:#ffd34a;border:1px solid #c09030}
+.mp21{display:inline-flex;flex-direction:column;align-items:center;gap:2px}.rt19.big21{font-size:13px;margin:0;padding:1px 6px}.rt19.r-N{color:#aaa;border:1px solid #666}
 </style>
 </head>
 <body>
@@ -6911,7 +6913,7 @@ document.addEventListener("click", ev => {
     stage.out.sp = ms[0] ? ms[0].sp : null; (rep.evos || []).forEach(e => queue.push({ k: "evo", ...e })); sfx16("coin"); save(); render(); }
 }, true);
 
-const VER20 = "11/14 07:40";
+const VER20 = "11/14 10:40";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7217,6 +7219,20 @@ document.addEventListener("click", ev => { const b = ev.target.closest('[data-a=
 { const _r = render; render = function () { _r.apply(this, arguments); try { document.body.classList.toggle("night21", !!N && view === "night"); } catch (e) {} }; }
 // 結果画面：奥で倒したボーナス
 resultStage15 = (prev => function (r) { let h = prev(r); try { const b = N && N.depthBonus21; if (b) h = h.replace('<div class="rs-grid">', `<div class="streak19">🕳 奥で倒したボーナス <b class="gold">💎+${b}</b></div><div class="rs-grid">`); } catch (e) {} return h; })(resultStage15);
+
+// ---------- 10) レア度をはっきり文字で ----------
+// スキル：枠の色だけだった珍しさを、N／R／SR の文字でも出す
+const SKRN21 = ["", "N", "R", "SR"];
+skChip10 = (prev => (k, L, H) => { const h = prev(k, L, H); if (H) return h; const D = SK11[k]; if (!D || !D.r) return h;
+  return h.replace(/<\/span>$/, `<i class="skr21 r${D.r}">${SKRN21[D.r] || ""}</i></span>`); })(skChip10);
+// 配合：親それぞれの下にレア度
+mixConfirm = (prev => function () { let h = prev(); try {
+  const A = S.mons.find(m => m.id === MX[0]), B = S.mons.find(m => m.id === MX[1]); if (!A || !B) return h;
+  const tag = m => { const r = m.rar19 || "N"; return `<span class="rt19 r-${r} big21">${r}</span>${m.shiny19 ? "✨" : ""}`; };
+  h = h.replace(/(<div class="box mixp">)([\s\S]*?)(<b>＋<\/b>)([\s\S]*?)(<b>→<\/b>)/, (all, a, ia, plus, ib, arr) => `${a}<span class="mp21">${ia}${tag(A)}</span>${plus}<span class="mp21">${ib}${tag(B)}</span>${arr}`);
+  h = h.replace(`${esc(A.nick)} Lv${A.lv}（`, `${esc(A.nick)}【${A.rar19 || "N"}】 Lv${A.lv}（`).replace(`と ${esc(B.nick)} Lv${B.lv}。`, `と ${esc(B.nick)}【${B.rar19 || "N"}】 Lv${B.lv}。`);
+} catch (e) {} return h; })(mixConfirm);
+mixSkillModal = function () { return mixConfirm(); };
 
 // ================= BGM（その場で合成する小さなループ）：昼はのんびり、夜は速くて不穏、ボスはもっと =================
 let BGMON19 = true; try { BGMON19 = localStorage.getItem("chika-bgm") !== "0"; } catch (e) {}
