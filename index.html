@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>ダンジョンマスター（仮）</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -779,6 +779,9 @@ body.night21 .ban19:not(.fix){top:7%!important;transform-origin:top center;scale
 .nlog21.t{color:#ffd34a;font-weight:700}
 .skr21{font:900 italic 9px/1 sans-serif;margin-left:3px;padding:1px 3px;border-radius:3px;vertical-align:1px;font-style:italic}.skr21.r1{color:#aaa;border:1px solid #666}.skr21.r2{color:#7ac0ff;border:1px solid #3a7ac0}.skr21.r3{color:#ffd34a;border:1px solid #c09030}
 .mp21{display:inline-flex;flex-direction:column;align-items:center;gap:2px}.rt19.big21{font-size:13px;margin:0;padding:1px 6px}.rt19.r-N{color:#aaa;border:1px solid #666}
+/* iPhoneは文字が16px未満の入力欄をタップすると勝手に拡大して戻らない → 入力欄は16pxに */
+input,textarea,select{font-size:16px!important}
+html,body{touch-action:manipulation;overflow:hidden;overscroll-behavior:none}
 </style>
 </head>
 <body>
@@ -6913,7 +6916,7 @@ document.addEventListener("click", ev => {
     stage.out.sp = ms[0] ? ms[0].sp : null; (rep.evos || []).forEach(e => queue.push({ k: "evo", ...e })); sfx16("coin"); save(); render(); }
 }, true);
 
-const VER20 = "11/14 10:40";
+const VER20 = "11/14 11:30";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7233,6 +7236,8 @@ mixConfirm = (prev => function () { let h = prev(); try {
   h = h.replace(`${esc(A.nick)} Lv${A.lv}（`, `${esc(A.nick)}【${A.rar19 || "N"}】 Lv${A.lv}（`).replace(`と ${esc(B.nick)} Lv${B.lv}。`, `と ${esc(B.nick)}【${B.rar19 || "N"}】 Lv${B.lv}。`);
 } catch (e) {} return h; })(mixConfirm);
 mixSkillModal = function () { return mixConfirm(); };
+// 拡大されたまま戻らないのを防ぐ（ダブルタップ・ピンチ）
+document.addEventListener("gesturestart", e => e.preventDefault(), { passive: false });
 
 // ================= BGM（その場で合成する小さなループ）：昼はのんびり、夜は速くて不穏、ボスはもっと =================
 let BGMON19 = true; try { BGMON19 = localStorage.getItem("chika-bgm") !== "0"; } catch (e) {}
