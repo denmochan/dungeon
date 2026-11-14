@@ -789,6 +789,7 @@ html,body{width:100%;max-width:100vw;overflow-x:hidden;position:fixed;inset:0}
 .top{overflow:hidden;flex-wrap:nowrap}.top>*{flex-shrink:1;white-space:nowrap;overflow:hidden;text-overflow:clip}.top button{flex-shrink:0}
 .cbar,.flrbar,.ftabs{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;max-width:100%}
 .nav{max-width:100%;overflow:hidden}.nav button{min-width:0;flex:1 1 0}
+.vrow21{align-items:center}.vrow21 .tx{flex:1;min-width:0}.vact21{display:flex;flex-direction:column;gap:4px;flex:0 0 auto}.vact21 button{padding:6px 8px;font-size:12px}.vact21 .bad21{background:#8a2e1a;border-color:#e06040;color:#fff}
 </style>
 </head>
 <body>
@@ -6937,7 +6938,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "11/14 12:30";
+const VER20 = "11/14 12:45";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7272,6 +7273,30 @@ function unzoom21() { try { const vv = window.visualViewport; if (vv && vv.scale
 if (window.visualViewport) { visualViewport.addEventListener("resize", () => setTimeout(unzoom21, 300)); visualViewport.addEventListener("scroll", () => setTimeout(unzoom21, 300)); }
 document.addEventListener("focusout", () => setTimeout(unzoom21, 200)); window.addEventListener("load", unzoom21); setTimeout(unzoom21, 500);
 document.addEventListener("touchend", e => { if (e.touches.length === 0) setTimeout(unzoom21, 250); }, { passive: true });
+
+// ---------- 11) 保管庫を見る・整理する ----------
+let vdel21 = null;
+function vaultManage21() {
+  const V = vaultOf18(S);
+  const row = (v, n) => { const r = v.rar19 || "N";
+    return `<div class="row vrow21">${img(v.sp, 0, "sp", "width:40px;height:40px;flex:0 0 auto")}<div class="tx"><b>${esc(v.nick)}</b> <span class="rt19 r-${r} big21">${r}</span>${v.shiny19 ? "✨" : ""} ${MON[v.sp].forms[0][0]}
+      <span class="apt18 a-${aptOf18(v.sp)}">得意 ${ROLEI18[aptOf18(v.sp)][0]}</span><div class="sks mini">${Object.keys(v.sk || {}).map(k => skChip10(k, 1)).join("")}</div><small class="hint">${v.run}周目に残した子</small></div>
+      <div class="vact21">${vdel21 === n ? `<button class="bad21" data-a="vdel21" data-v="${n}">本当に<br>手放す</button><button data-a="vdelno21">やめる</button>` : `<button data-a="vdelask21" data-v="${n}">🗑 手放す</button>`}</div></div>`; };
+  return `<h2>🏺 保管庫</h2><div class="hint">転生しても残る子たち（${V.length}/${VAULT_MAX18}体）。次の周回のはじめに、${vaultCap18(S)}体まで連れていける。手放した子は戻らない</div>`
+    + (V.length ? V.map(row).reverse().join("") : `<div class="box hint">まだだれもいない。転生するときに1体残せる</div>`)
+    + `<button data-a="close">閉じる</button>`;
+}
+document.addEventListener("click", ev => { const b = ev.target.closest("[data-a]"); if (!b || !S) return; const a = b.dataset.a;
+  if (a === "vopen21") { ev.stopImmediatePropagation(); vdel21 = null; modal = vaultManage21; render(); }
+  else if (a === "vdelask21") { ev.stopImmediatePropagation(); vdel21 = +b.dataset.v; render(); }
+  else if (a === "vdelno21") { ev.stopImmediatePropagation(); vdel21 = null; render(); }
+  else if (a === "vdel21") { ev.stopImmediatePropagation(); const V = vaultOf18(S), n = +b.dataset.v, v = V[n]; if (v) { try { backup18("保管庫から手放す前"); } catch (e) {} V.splice(n, 1); VSEL18 = []; toast(`${v.nick}を手放した`); save(); } vdel21 = null; render(); }
+}, true);
+// タイトル画面と「連れていく」画面から開ける
+{ const _r = render; render = function () { _r.apply(this, arguments); try {
+  if (title && !document.querySelector('[data-a="vopen21"]')) { const bk = document.querySelector('[data-a="bakopen"]'); if (bk) bk.insertAdjacentHTML("beforebegin", `<button data-a="vopen21">🏺 保管庫<small>${vaultOf18(S).length}体</small></button>`); }
+  const vg = document.querySelector('.modal [data-a="vgo"]'); if (vg && !document.querySelector('.modal [data-a="vopen21"]')) vg.insertAdjacentHTML("beforebegin", `<button data-a="vopen21">🏺 保管庫を整理する</button>`);
+} catch (e) {} }; }
 
 // ================= BGM（その場で合成する小さなループ）：昼はのんびり、夜は速くて不穏、ボスはもっと =================
 let BGMON19 = true; try { BGMON19 = localStorage.getItem("chika-bgm") !== "0"; } catch (e) {}
