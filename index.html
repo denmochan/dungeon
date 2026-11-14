@@ -815,6 +815,8 @@ html,body{width:100%;max-width:100vw;overflow-x:hidden;position:fixed;inset:0}
 .ban19{max-width:calc(100vw - 48px)}@media (max-width:340px){.top{gap:3px!important;padding-left:4px!important;padding-right:4px!important}.top button{padding:4px 6px!important;min-width:0!important}}
 .mclose21{bottom:-12px;margin-bottom:-12px;padding:10px 0 12px;background:linear-gradient(transparent,#140e0b 26%)}
 .mbox>button[data-a="close"]:last-child{bottom:-12px;margin-bottom:-12px;box-shadow:0 0 0 12px #140e0b,0 -10px 14px 6px #140e0b}
+body:has(.ban19:not(.mis)) .nt19{opacity:.12;transition:opacity .2s}
+.nt19{top:6px!important;right:52px!important;max-width:calc(100% - 150px)!important;font-size:11px;padding:3px 8px}.nt19 b{font-size:14px}
 </style>
 </head>
 <body>
@@ -6721,7 +6723,7 @@ document.addEventListener("click", ev => { const b = ev.target.closest('[data-a=
 { const _eg = enterGame; enterGame = function () { _eg.apply(this, arguments); setTimeout(loginCheck19, 400); }; }
 // 朝：レベルが上がった子の頭の上に「LV UP!」
 { const _cd = closeDay; closeDay = function () { _cd.apply(this, arguments); try { const r = lastRep; if (!r) return; const ids = [...new Set((r.lvups || []).map(m => m.id))];
-  setTimeout(() => ids.slice(0, 8).forEach((id, k) => setTimeout(() => { const e = CV.ents && CV.ents["m" + id]; if (!e || !e.parentNode) return; const d = document.createElement("div"); d.className = "cpop lvup19"; d.textContent = "LV UP!"; d.style.left = e.style.left; d.style.top = `calc(${e.style.top} - 9%)`; e.parentNode.appendChild(d); setTimeout(() => d.remove(), 1500); }, k * 160)), 500); } catch (e) {} }; }
+  const go21 = f => { if (stage || modal) return setTimeout(() => go21(f), 400); f(); }; setTimeout(() => go21(() => ids.slice(0, 8).forEach((id, k) => setTimeout(() => { const e = CV.ents && CV.ents["m" + id]; if (!e || !e.parentNode) return; const d = document.createElement("div"); d.className = "cpop lvup19"; d.textContent = "LV UP!"; d.style.left = e.style.left; d.style.top = `calc(${e.style.top} - 9%)`; e.parentNode.appendChild(d); setTimeout(() => d.remove(), 1500); }, k * 160))), 500); } catch (e) {} }; }
 // フィーバー：画面が赤く燃える
 function fever19() {
   const host = document.getElementById("dw"); if (!host) return; host.classList.add("fever19"); clearTimeout(fever19.t);
@@ -6991,7 +6993,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.111（11/15 01:50）";
+const VER20 = "No.112（11/15 02:05）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
