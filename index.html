@@ -6985,14 +6985,14 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.107（11/15 03:10）";
+const VER20 = "No.108（11/15 03:30）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
 // ・閉じるはいつも下の「◀ ダンジョン」（左上の✕は使わない）
 let page20 = null, rtab20 = "mons";
 const dens20 = () => S.path.map((r, i) => r && r.kind === "den" ? i : -1).filter(i => i >= 0);
-const roomLab20 = i => { const p = purpose19(S, i); return `${POL13[p] ? POL13[p].icon : ""} ${esc(roomTitle(S, i))}`; };
+const roomLab20 = i => esc(roomTitle(S, i));
 const roleOfIn20 = m => { if (m.home == null) return null; const pl = roomPlan14(S, m.home); return pl[m.id] === "bed" ? "bed" : pl[m.id] || "fight"; };
 function tok20(m) {
   const r = m.rar19 || "N";
@@ -7034,7 +7034,7 @@ function roomPage20(i) {
   const sub = `<div class="sub20"><button class="${rtab20 === "mons" ? "on" : ""}" data-a="st20" data-v="mons">👥 住む子</button><button class="${rtab20 === "fac" ? "on" : ""}" data-a="st20" data-v="fac">🏗 部屋の設備</button></div>`;
   let body;
   if (slotPick18 && slotPick18.i === i) body = slotPickView18();
-  else if (rtab20 === "fac") { noRoles20 = true; try { body = roomSheet(i).replace(/<button class="rsx" data-a="rsclose">✕<\/button>/g, ""); } finally { noRoles20 = false; } }
+  else if (rtab20 === "fac") { noRoles20 = true; try { body = roomSheet(i).replace(/<button class="rsx" data-a="rsclose">✕<\/button>/g, ""); const k = body.indexOf('<div class="lab">ここに住ませる'); if (k >= 0) body = body.slice(0, k) + `<div class="hint">住む子を変えるときは「👥 住む子」のタブで</div>`; } finally { noRoles20 = false; } }
   else body = board20(i);
   return `<div class="pg20" id="pg20">${tabs}${sub}<div class="pgb20">${body}</div></div>${rtab20 === "mons" ? sheet20() : ""}<div class="bar20"><button data-a="pgback">◀ ダンジョン</button><button data-a="g20">🧭 育成</button><button class="main" data-a="af19go">🪄 おまかせ</button></div>`;
 }
