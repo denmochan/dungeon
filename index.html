@@ -6904,7 +6904,10 @@ autoAll19 = function (S) {
   const STEP = {
     teach: () => {
   of("grow").forEach(i => { if (!slotsOf18(S, i).teach || work[i] <= 0 || S.mons.some(m => m.home === i && m.job === "teach")) return;
-    const t = pool.slice().sort((a, b) => (isApt18(b, "teach") - isApt18(a, "teach")) || b.lv - a.lv)[0]; if (t) put(t, i, "teach"); });
+    const t = pool.slice().sort((a, b) => (isApt18(b, "teach") - isApt18(a, "teach")) || b.lv - a.lv)[0];
+    // 鍛える子がいないなら先生はいらない
+    const th = thrLv19(S), learners = S.mons.some(m => m !== t && m.home === i && (m.job === "train")) || pool.some(m => m !== t && m.lv <= th);
+    if (t && learners) put(t, i, "teach"); });
     },
     train: () => {
   const thr = thrLv19(S);
@@ -7000,7 +7003,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.122（11/15 03:08）";
+const VER20 = "No.123（11/15 03:08）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
