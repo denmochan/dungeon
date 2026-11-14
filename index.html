@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="apple-mobile-web-app-title" content="ダンジョン"><meta name="theme-color" content="#120d0a"><link rel="apple-touch-icon" href="icon.png">
 <title>ダンジョンマスター（仮）</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -812,6 +813,8 @@ html,body{width:100%;max-width:100vw;overflow-x:hidden;position:fixed;inset:0}
 .tabs20{flex-wrap:wrap;overflow:visible!important}.tabs20 .tab20{flex:1 1 auto;padding:7px 10px;font-size:12.5px;text-align:center}
 .ban19{width:max-content;max-width:calc(100vw - 24px)}.ban19 i{white-space:normal;text-wrap:balance;line-height:1.25}.ban19.mis i{font-size:18px}
 .ban19{max-width:calc(100vw - 48px)}@media (max-width:340px){.top{gap:3px!important;padding-left:4px!important;padding-right:4px!important}.top button{padding:4px 6px!important;min-width:0!important}}
+.mclose21{bottom:-12px;margin-bottom:-12px;padding:10px 0 12px;background:linear-gradient(transparent,#140e0b 26%)}
+.mbox>button[data-a="close"]:last-child{bottom:-12px;margin-bottom:-12px;box-shadow:0 0 0 12px #140e0b,0 -10px 14px 6px #140e0b}
 </style>
 </head>
 <body>
@@ -6227,7 +6230,7 @@ function mixScreen(){
     const face = (sp, m) => m ? img(m.sp, m.evos, "sp", "width:36px;height:36px") : `<span class="ghost">${img(sp, 0, "sp", "width:36px;height:36px")}</span>`;
     const res = o.special && !known(child) ? `<span class="q">？</span>` : img(child, 0, "sp", "width:40px;height:40px");
     const name = o.special ? (known(child) ? MON[child].forms[0][0] : "？？？") : `${MON[child].forms[0][0]}+${Math.floor(((A.plus || 0) + (B.plus || 0)) / 2) + 1}`;
-    const tag = o.st === "ok" ? `<button class="main" data-a="mixdo" data-v="${o.special ? "h:" + o.k : "s:" + o.x}">🥚 配合</button>` : o.st === "lv" ? `<span class="hint">2体ともLv${o.need}で作れる</span>` : `<span class="hint">あと<b>${MON[A ? o.y : o.x].forms[0][0]}</b>がいれば</span>`;
+    const tag = o.st === "ok" ? `<button class="main" data-a="mixdo" data-v="${o.special ? "h:" + o.k : "s:" + o.x}">🥚 配合</button>` : o.st === "lv" ? `<span class="hint" style="white-space:nowrap">両方Lv${o.need}<br>で作れる</span>` : `<span class="hint">あと<b>${MON[A ? o.y : o.x].forms[0][0]}</b>がいれば</span>`;
     return `<div class="mixrow ${o.st}">${face(o.x, A)}<b>＋</b>${face(o.y, B)}<b>→</b>${res}<div class="tx"><b>${name}</b>${o.special ? '<small class="gold">新しい種族</small>' : '<small>同じ種族で強く</small>'}</div>${tag}</div>`; };
   const ok = L.filter(o => o.st === "ok"), rest = L.filter(o => o.st !== "ok");
   return `<h2>🥚 配合</h2><div class="hint">2体がいなくなり、1体の子が生まれる。子は親のスキルを受け継ぎ（おまかせ）、新しく1つ増える</div>
@@ -6988,7 +6991,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.110（11/15 01:30）";
+const VER20 = "No.111（11/15 01:50）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7278,7 +7281,7 @@ if (S && typeof S.tut === "number" && S.tut > TUT.length) S.tut = TUT.length;
 // ---------- 7) ウィンドウ：閉じるボタンがないものに、下に固定の「閉じる」をつける ----------
 { const _r = render; render = function () { _r.apply(this, arguments); try {
   const mb = document.querySelector(".modal .mbox"); if (!mb || mb.querySelector(".mclose21")) return;
-  if (!mb.querySelector('[data-a="close"]') && !mb.querySelector('[data-a="lord"]') && !mb.querySelector('[data-a="vgo"]')) mb.insertAdjacentHTML("beforeend", `<div class="mclose21"><button data-a="close">閉じる</button></div>`);
+  if (!mb.querySelector('[data-a="close"]') && !mb.querySelector('[data-a="lord"]') && !mb.querySelector('[data-a="vgo"]') && !mb.querySelector('[data-a="vskipask21"],[data-a="vskip"],[data-a="vback21"],[data-a="rebirth"],[data-a="contnext"]')) mb.insertAdjacentHTML("beforeend", `<div class="mclose21"><button data-a="close">閉じる</button></div>`);
 } catch (e) {} }; }
 
 // ---------- 8) 部屋・育成の画面からも「次の日へ」 ----------
