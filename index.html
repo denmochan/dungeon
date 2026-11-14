@@ -6575,6 +6575,7 @@ const KC19 = { n: 0, t: 0 };
 // 見出し（大きな文字）：戦いの連続撃破はすぐ差しかえ、それ以外は順番に見せる
 const BQ19 = []; let BUSY19 = 0;
 function banner19(text, cls, ms = 1300) {
+  if (typeof title !== "undefined" && title) { BQ19.length = 0; return; }   // タイトル画面には出さない（前の周回のお知らせがもれない）
   const quick = /^c\d/.test(cls || "");
   if (!quick && BUSY19 > performance.now()) { BQ19.push([text, cls, ms]); return; }
   // 演出（進化・結果・卵・宝箱など）の上にかぶせない：終わってから出す
@@ -7005,7 +7006,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.125（11/15 03:12）";
+const VER20 = "No.126（11/15 03:27）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
