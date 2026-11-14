@@ -6951,7 +6951,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "11/14 20:45";
+const VER20 = "11/14 21:30";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7310,6 +7310,11 @@ document.addEventListener("click", ev => { const b = ev.target.closest("[data-a]
   if (title && !document.querySelector('[data-a="vopen21"]')) { const bk = document.querySelector('[data-a="bakopen"]'); if (bk) bk.insertAdjacentHTML("beforebegin", `<button data-a="vopen21">🏺 保管庫<small>${vaultOf18(S).length}体</small></button>`); }
   const vg = document.querySelector('.modal [data-a="vgo"]'); if (vg && !document.querySelector('.modal [data-a="vopen21"]')) vg.insertAdjacentHTML("beforebegin", `<button data-a="vopen21">🏺 保管庫を整理する</button>`);
 } catch (e) {} }; }
+
+// ---------- 12) 上納で持っていかれたDPを返す（上納をなくしたので、1回だけ） ----------
+function refund21() { try { if (!S || S.refund21) return; const t = S.lastTribute16; if (!t || !t.dp) return;
+  S.refund21 = 1; S.dp += t.dp; save(); setTimeout(() => toast(`💎 上納で渡したDP ${t.dp} を返したよ`), 600); } catch (e) {} }
+{ const _r = render; render = function () { refund21(); _r.apply(this, arguments); }; }
 
 // ================= BGM（その場で合成する小さなループ）：昼はのんびり、夜は速くて不穏、ボスはもっと =================
 let BGMON19 = true; try { BGMON19 = localStorage.getItem("chika-bgm") !== "0"; } catch (e) {}
