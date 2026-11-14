@@ -818,6 +818,8 @@ html,body{width:100%;max-width:100vw;overflow-x:hidden;position:fixed;inset:0}
 body:has(.ban19:not(.mis)) .nt19{opacity:.12;transition:opacity .2s}
 .nt19{top:6px!important;right:52px!important;max-width:calc(100% - 150px)!important;font-size:11px;padding:3px 8px}.nt19 b{font-size:14px}
 .dsel{display:grid!important;grid-template-columns:repeat(3,1fr);gap:5px!important}.drow{flex-direction:column;gap:1px!important;padding:6px 4px!important;text-align:center!important}.drow .di{font-size:18px!important;width:auto!important}.drow .dn{font-size:12.5px!important;flex:0 0 auto!important;white-space:nowrap}.drow .dr{font-size:11px!important}.title.diff .ddesc{margin-top:2px}.ver20{pointer-events:none;opacity:.55}
+.stage{justify-content:flex-start!important;overflow-y:auto}.stage::before,.stage::after{content:"";flex:1 0 0px;min-height:0}.stage.chest .ch19.feed19{max-height:100%;min-height:0;flex:0 1 auto}.ch19.feed19 .fl19{flex:1 1 auto;min-height:0;overflow-y:auto;width:100%;overscroll-behavior:contain}
+.stage>button.main:last-of-type{position:sticky;bottom:0;z-index:3;box-shadow:0 -10px 18px 4px #070303d0;flex:0 0 auto}
 </style>
 </head>
 <body>
@@ -4659,7 +4661,7 @@ raidResult15 = (prev => function (S, N) { const r = prev(S, N); misAdd19(S, "kil
 // 連勝：勝つたびに+1。手に入れたDPに 5%×連勝（最大+50%）。負けたら0に
 raidResult15 = (prev => function (S, N) {
   const r = prev(S, N); if (N.scout) return r;
-  r.stars = r.win ? 1 + (!r.esc && !N.stolen ? 1 : 0) + (!r.lost ? 1 : 0) : 0;
+  r.stars = r.win ? 1 + (!r.esc && !N.stolen ? 1 : 0) + (!r.lost ? 1 : 0) : 0; r.ok19 = [!!r.win, !!r.win && !r.esc && !N.stolen, !!r.win && !r.lost];
   if (r.win) { S.streak19 = (S.streak19 || 0) + 1; const b = Math.round((N.dp || r.dp || 0) * Math.min(0.5, 0.05 * S.streak19)); if (b > 0) { S.dp += b; r.streakBonus = b; } }
   else S.streak19 = 0;
   r.streak = S.streak19 || 0; S.chestBonus19 = (S.chestBonus19 || 0) + 0.35 * r.stars;
@@ -6689,7 +6691,7 @@ try { const v = +localStorage.getItem("chika-spd"); if (v === 1 || v === 3) spee
 // ---------- 襲撃の結果：★が1つずつ・DPが数え上がる・連勝 ----------
 resultStage15 = (prev => function (r) {
   let h = prev(r); if (r.stars == null) return h;
-  const st = `<div class="rstars19">${[0, 1, 2].map(i => `<span class="${i < r.stars ? "on" : ""}" style="animation-delay:${0.35 + i * 0.35}s">★</span>`).join("")}</div><div class="rsl19"><span class="${r.stars >= 1 ? "ok" : ""}">守りきる</span><span class="${r.stars >= 2 ? "ok" : ""}">逃がさない</span><span class="${r.stars >= 3 ? "ok" : ""}">誰も倒れない</span></div>`;
+  const st = `<div class="rstars19">${[0, 1, 2].map(i => `<span class="${i < r.stars ? "on" : ""}" style="animation-delay:${0.35 + i * 0.35}s">★</span>`).join("")}</div><div class="rsl19"><span class="${(r.ok19 ? r.ok19[0] : r.stars >= 1) ? "ok" : ""}">守りきる</span><span class="${(r.ok19 ? r.ok19[1] : r.stars >= 2) ? "ok" : ""}">逃がさない</span><span class="${(r.ok19 ? r.ok19[2] : r.stars >= 3) ? "ok" : ""}">誰も倒れない</span></div>`;
   h = h.replace(/(<div class="rb-h">[^]*?<\/div>)/, `$1${st}`);
   h = h.replace(/<b class="gold">💎\+(\d+)<\/b>/, (m, v) => `<b class="gold cu19" data-v="${v}">💎+0</b>`);
   if (r.streak >= 2 || r.streakBonus) h = h.replace('<div class="rs-grid">', `<div class="streak19">🔥 <b>${r.streak}連勝</b>${r.streakBonus ? `　ボーナス <b class="gold">💎+${r.streakBonus}</b>` : ""}</div><div class="rs-grid">`);
@@ -6994,7 +6996,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.116（11/15 02:38）";
+const VER20 = "No.117（11/15 02:55）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
