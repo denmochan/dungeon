@@ -6994,7 +6994,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.115（11/15 02:32）";
+const VER20 = "No.116（11/15 02:38）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7469,6 +7469,14 @@ monsModal = (prev => function () { return prev().replace(">🪄 全体おまか�
 newMon5 = (prev => function () { const m = prev.apply(this, arguments); try { if (typeof S !== "undefined" && S && S.mons) { const used = new Set(S.mons.map(o => o.nick));
   if (used.has(m.nick)) { const free = NICK5.filter(n => !used.has(n)); if (free.length) m.nick = free[Math.floor(Math.random() * free.length)];
     else { let k = 2; while (used.has(m.nick + k)) k++; m.nick = m.nick + k; } } } } catch (e) {} return m; })(newMon5);
+
+// ---------- 部屋で子をえらんだら、その子が見える位置までスクロール（下の操作パネルに隠れない） ----------
+{ let lastSel21 = null; const _r = render; render = function () { _r.apply(this, arguments); try {
+  const cur = typeof SW19 !== "undefined" ? SW19 : null;
+  if (cur != null && cur !== lastSel21) { const t = document.querySelector("#pg20 .tok20.sel"), pg = document.getElementById("pg20");
+    if (t && pg) { const r = t.getBoundingClientRect(), pr = pg.getBoundingClientRect(); if (r.bottom > pr.bottom - 6) pg.scrollTop += r.bottom - pr.bottom + 12; else if (r.top < pr.top + 6) pg.scrollTop -= pr.top - r.top + 12; } }
+  lastSel21 = cur;
+} catch (e) {} }; }
 
 // ================= BGM（その場で合成する小さなループ）：昼はのんびり、夜は速くて不穏、ボスはもっと =================
 let BGMON19 = true; try { BGMON19 = localStorage.getItem("chika-bgm") !== "0"; } catch (e) {}
