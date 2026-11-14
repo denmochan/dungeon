@@ -791,6 +791,8 @@ html,body{width:100%;max-width:100vw;overflow-x:hidden;position:fixed;inset:0}
 .nav{max-width:100%;overflow:hidden}.nav button{min-width:0;flex:1 1 0}
 .vrow21{align-items:center}.vrow21 .tx{flex:1;min-width:0}.vact21{display:flex;flex-direction:column;gap:4px;flex:0 0 auto}.vact21 button{padding:6px 8px;font-size:12px}.vact21 .bad21{background:#8a2e1a;border-color:#e06040;color:#fff}
 .vd21{display:flex;align-items:center;gap:10px;margin:8px 0}.vd21 .tx{min-width:0}.bad21b{border-color:#e06040!important;color:#ffb0a0}button.bad21{background:#8a2e1a;border-color:#e06040;color:#fff}
+.mf21{display:flex;flex-direction:column;gap:5px;margin:6px 0;padding:6px;border-radius:10px;background:#1c1512;border:1px solid #3a2d22}.mf21 .chips20{align-items:center;gap:5px}.mf21 b{font-size:12px;color:#ffd860;width:34px}.mf21 .chip20{padding:5px 9px}
+.modal .pk{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.modal .pk button{white-space:nowrap;font-size:13px;padding:8px 4px}
 </style>
 </head>
 <body>
@@ -6952,7 +6954,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "11/15 00:40";
+const VER20 = "11/15 00:35";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7366,8 +7368,9 @@ function relModal21() {
   const sel = rel21.ids.map(id => S.mons.find(m => m.id === id)).filter(Boolean); rel21.ids = sel.map(m => m.id);
   const head = `<h2>👋 魔物を手放す</h2>`;
   if (rel21.step === "pick") {
-    const ms = S.mons.slice().sort((a, b) => rarI19(a) - rarI19(b) || a.lv - b.lv);
-    return head + `<div class="hint">手放す子をタップ（何体でも）。いなくなった子は戻らない</div>`
+    const srt = { lvd: (a, b) => b.lv - a.lv, lva: (a, b) => a.lv - b.lv, rar: (a, b) => rarI19(b) - rarI19(a) || b.lv - a.lv }[mf21.sort] || ((a, b) => rarI19(a) - rarI19(b) || a.lv - b.lv);
+    const ms = S.mons.filter(m => typeof mfOk21 !== "function" || mfOk21(m)).sort(srt);
+    return head + `<div class="hint">手放す子をタップ（何体でも）。いなくなった子は戻らない</div>` + (typeof mfBar21 === "function" ? mfBar21() : "")
       + ms.map(m => { const on = rel21.ids.includes(m.id); return `<div class="row pick18 ${on ? "on" : ""}" data-a="rel21t" data-id="${m.id}">${img(m.sp, m.evos, "sp", "width:34px;height:34px;flex:0 0 auto")}<div class="tx"><b>${esc(m.nick)}</b>${rarTag19(m)}${m.shiny19 ? "✨" : ""} ${monName5(m)} Lv${m.lv}<small class="hint">💎${relDp21(m)}　🍖経験${relXp21(m)}${m.home == null ? "　控え" : "　" + esc(roomTitle(S, m.home))}</small></div><span class="pn18">${on ? "👋" : ""}</span></div>`; }).join("")
       + `<div class="mixbtn18"><button data-a="close">やめる</button><button class="main" data-a="rel21next" ${sel.length ? "" : "disabled"}>${sel.length}体を手放す ▶</button></div>`;
   }
@@ -7397,6 +7400,28 @@ document.addEventListener("click", ev => { const b = ev.target.closest("[data-a]
 // 入口：子をタップしたときの操作／魔物の一覧
 sheet20 = (prev => function () { const h = prev(); if (!h || SW19 == null || S.mons.length < 2) return h; return h.replace('<button class="chip20" data-a="swcard">📋 くわしく</button>', `<button class="chip20" data-a="swcard">📋 くわしく</button><button class="chip20" data-a="rel21open" data-id="${SW19}">👋 手放す</button>`); })(sheet20);
 monsModal = (prev => function () { return prev().replace('<button data-a="mixopen">🥚 配合</button></div>', '<button data-a="mixopen">🥚 配合</button><button data-a="rel21open">👋 まとめて手放す</button></div>'); })(monsModal);
+
+// ---------- 16) 魔物の一覧にフィルターと並びかえ ----------
+let mf21 = { sort: "room", rar: "all", apt: "all" };
+try { Object.assign(mf21, JSON.parse(localStorage.getItem("chika-mf21") || "{}")); } catch (e) {}
+const APTS21 = ["fight", "mine", "teach", "snipe", "watch", "cook", "trapw"];
+function mfBar21() {
+  const c = (k, v, l) => `<button class="chip20 ${mf21[k] === v ? "on" : ""}" data-a="mf21" data-k="${k}" data-v="${v}">${l}</button>`;
+  return `<div class="mf21"><div class="chips20"><b>並び</b>${c("sort", "room", "部屋ごと")}${c("sort", "lvd", "Lv高い順")}${c("sort", "lva", "Lv低い順")}${c("sort", "rar", "レア度順")}</div>
+    <div class="chips20"><b>レア</b>${c("rar", "all", "全部")}${["SSR", "SR", "R", "N"].map(r => c("rar", r, r)).join("")}${c("rar", "shiny", "✨")}</div>
+    <div class="chips20"><b>得意</b>${c("apt", "all", "全部")}${APTS21.filter(k => ROLEI18[k]).map(k => c("apt", k, ROLEI18[k][0])).join("")}</div></div>`;
+}
+const mfOk21 = m => (mf21.rar === "all" || (mf21.rar === "shiny" ? m.shiny19 : (m.rar19 || "N") === mf21.rar)) && (mf21.apt === "all" || aptOf18(m.sp) === mf21.apt || m.apt2 === mf21.apt);
+monsModal = (prev => function () {
+  let h = prev(); const i = h.indexOf('<div class="lab2">'); const head = i < 0 ? h : h.slice(0, i);
+  const list = S.mons.filter(mfOk21); let body;
+  if (mf21.sort === "room") { const g = {}; list.forEach(m => { const k = m.home == null ? -1 : m.home; (g[k] = g[k] || []).push(m); });
+    body = Object.keys(g).map(Number).sort((a, b) => (a < 0) - (b < 0) || a - b).map(k => `<div class="lab2">${k < 0 ? "🪑 控え" : esc(roomTitle(S, k))}（${g[k].length}）</div>` + g[k].sort((a, b) => b.lv - a.lv).map(m => monRow(m)).join("")).join(""); }
+  else { const s = { lvd: (a, b) => b.lv - a.lv, lva: (a, b) => a.lv - b.lv, rar: (a, b) => rarI19(b) - rarI19(a) || b.lv - a.lv }[mf21.sort];
+    body = list.sort(s).map(m => monRow(m)).join(""); }
+  return head.replace("<h2>👾 魔物（" + S.mons.length + "）</h2>", `<h2>👾 魔物（${list.length}/${S.mons.length}）</h2>`) + mfBar21() + (body || `<div class="box hint">あてはまる子がいない</div>`) + `<button data-a="close">閉じる</button>`;
+})(monsModal);
+document.addEventListener("click", ev => { const b = ev.target.closest('[data-a="mf21"]'); if (!b) return; ev.stopImmediatePropagation(); mf21[b.dataset.k] = b.dataset.v; try { localStorage.setItem("chika-mf21", JSON.stringify(mf21)); } catch (e) {} render(); }, true);
 
 // ================= BGM（その場で合成する小さなループ）：昼はのんびり、夜は速くて不穏、ボスはもっと =================
 let BGMON19 = true; try { BGMON19 = localStorage.getItem("chika-bgm") !== "0"; } catch (e) {}
