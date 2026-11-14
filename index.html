@@ -6952,7 +6952,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "11/14 22:20";
+const VER20 = "11/14 22:30";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7346,6 +7346,9 @@ document.addEventListener("click", ev => { const b = ev.target.closest("[data-a]
   vokask21: () => { vok21 = +b.dataset.v; }, vno21: () => { vok21 = false; }, vskipask21: () => { vok21 = "skip"; },
   vsave: () => { vsee21 = null; vok21 = false; return true; }, vskip: () => { vsee21 = null; vok21 = false; return true; } }[a];
   if (!f) return; const pass = f(); if (pass) return; ev.stopImmediatePropagation(); render(); }, true);
+// 転生の直前に、必ずバックアップを残す（あとで「やっぱり選びなおす」ができるように）
+document.addEventListener("click", ev => { const b = ev.target.closest('[data-a="vsave"],[data-a="vskip"],[data-a="rebirth"]'); if (!b || !S || title) return;
+  try { if (!S.__bk21) { S.__bk21 = 1; backup18(`転生する前（${S.day}日目）`); delete S.__bk21; } } catch (e) {} }, true);
 
 // ================= BGM（その場で合成する小さなループ）：昼はのんびり、夜は速くて不穏、ボスはもっと =================
 let BGMON19 = true; try { BGMON19 = localStorage.getItem("chika-bgm") !== "0"; } catch (e) {}
