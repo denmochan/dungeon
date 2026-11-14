@@ -6900,30 +6900,44 @@ sw19Bar = (prev => function (i) { const h = prev(i), m = SW19 != null && S.mons.
   if (c.kind !== "xp") return _oc(S, c);
   return { text: `🍖 ごちそう ×${c.val}`, sub: `食べさせる子を${c.val}体まで選んでね（経験 たっぷり）`, sp: null, feed: c.val, evos: [] };
 }; }
-function feedApply19(S, ids, n) {
-  let ms = ids.map(id => S.mons.find(m => m.id === id)).filter(Boolean).slice(0, n);
-  if (!ms.length) ms = S.mons.filter(m => m.home != null).sort(() => Math.random() - 0.5).slice(0, n);
-  const rep = { lvups: [], evos: [] }; ms.forEach(m => gainXp9(S, m, Math.round(expNext5(m) * 0.6), rep));
-  return { ms, rep };
+function feedApply19(S, ids, n, awaken) {
+  let list = ids.map(id => S.mons.find(m => m.id === id)).filter(Boolean).slice(0, n);
+  if (!list.length) list = awaken ? S.mons.slice().sort((x, y) => y.lv - x.lv).slice(0, 1) : S.mons.filter(m => m.home != null).sort(() => Math.random() - 0.5).slice(0, n);
+  const rep = { lvups: [], evos: [] }, lv0 = new Map(list.map(m => [m.id, m.lv]));
+  list.forEach(m => { if (awaken) { for (let k = 0; k < 3; k++) gainXp9(S, m, expNext5(m) - m.exp, rep); } else gainXp9(S, m, Math.round(expNext5(m) * 0.6), rep); });
+  const ms = [...new Set(list)]; return { ms, rep, lv0 };
 }
+// 1皿＝次のLvまでの6割。同じ子に何皿でも（何回タップしても）あげられる
 function feedPick19(st) {
-  const o = st.out, sel = st.fsel || [], ms = S.mons.slice().sort((a, b) => a.lv - b.lv || a.id - b.id);
-  return `<div class="ch19 open feed19"><div class="chname">🍖 ごちそう</div><div class="hint">食べさせる子を <b>${o.feed}体</b> まで選ぶ（1体につき 次のLvまでの経験の6割）</div>
-    <div class="fl19">${ms.map(m => { const on = sel.includes(m.id), p = Math.min(100, Math.round(100 * (m.exp || 0) / expNext5(m))), p2 = Math.min(100, p + 60);
-      return `<div class="row pick18 ${on ? "on" : ""}" data-a="feed19" data-id="${m.id}">${img(m.sp, m.evos, "sp", "width:34px;height:34px")}<div class="tx"><b>${esc(m.nick)}</b>${typeof rarTag19 === "function" ? rarTag19(m) : ""} ${monName5(m)} Lv${m.lv}${p2 >= 100 ? ' <span class="good">→ Lvアップ！</span>' : ""}<div class="fb19"><i style="width:${p}%"></i><i class="add" style="left:${p}%;width:${on ? p2 - p : 0}%"></i></div></div><span class="pn18">${on ? "🍖" : ""}</span></div>`; }).join("")}</div>
-    <button class="main big" data-a="feedgo">${sel.length ? `🍖 この${sel.length}体に食べさせる` : "🪄 おまかせで食べさせる"}</button></div>`;
+  const o = st.out, sel = st.fsel || [], left = o.feed - sel.length, aw = !!o.awaken, ms = S.mons.slice().sort((a, b) => aw ? b.lv - a.lv : a.lv - b.lv || a.id - b.id);
+  const cnt = id => sel.filter(x => x === id).length;
+  const head = aw ? `<div class="chname">👑 覚醒</div><div class="hint">選んだ1体が <b>Lv+3</b></div>`
+    : `<div class="chname">🍖 ごちそう ×${o.feed}皿</div><div class="hint">1回タップで1皿（次のLvまでの6割）。<b>同じ子に何皿でも</b>あげられる　のこり <b>${left}皿</b></div>`;
+  return `<div class="ch19 open feed19">${head}
+    <div class="fl19">${ms.map(m => { const c = cnt(m.id), p = Math.min(100, Math.round(100 * (m.exp || 0) / expNext5(m))), p2 = Math.min(100, p + 60 * c), up = aw ? (c ? 3 : 0) : Math.floor((p + 60 * c) / 100);
+      return `<div class="row pick18 ${c ? "on" : ""}" data-a="feed19" data-id="${m.id}">${img(m.sp, m.evos, "sp", "width:34px;height:34px")}<div class="tx"><b>${esc(m.nick)}</b>${typeof rarTag19 === "function" ? rarTag19(m) : ""} ${monName5(m)} Lv${m.lv}${up ? ` <span class="good">→ Lv${m.lv + up}${aw || up < 2 ? "" : "くらい"}！</span>` : ""}<div class="fb19"><i style="width:${p}%"></i><i class="add" style="left:${p}%;width:${c ? p2 - p : 0}%"></i></div></div><span class="pn18">${c ? (aw ? "👑" : "🍖×" + c) : ""}</span></div>`; }).join("")}</div>
+    ${sel.length ? `<button data-a="feedclr">↩ やり直す</button>` : ""}
+    <button class="main big" data-a="feedgo">${sel.length ? (aw ? "👑 この子を覚醒させる" : `🍖 ${sel.length}皿 食べさせる${left ? `（のこり${left}皿はおまかせ）` : ""}`) : (aw ? "🪄 おまかせ（いちばんLvの高い子）" : "🪄 おまかせで食べさせる")}</button></div>`;
 }
 chestStage19 = (prev => function (st) { if (st.step === 1 && st.out && st.out.feed && !st.out.fed) return feedPick19(st); return prev(st); })(chestStage19);
 document.addEventListener("click", ev => {
   if (!stage || stage.k !== "chest" || !stage.out || !stage.out.feed || stage.out.fed) return; const b = ev.target.closest("[data-a]"); if (!b) return;
-  if (b.dataset.a === "feed19") { ev.stopImmediatePropagation(); const id = +b.dataset.id, L = stage.fsel || (stage.fsel = []), at = L.indexOf(id);
-    if (at >= 0) L.splice(at, 1); else if (L.length < stage.out.feed) L.push(id); else toast(`${stage.out.feed}体まで`); render(); }
-  else if (b.dataset.a === "feedgo") { ev.stopImmediatePropagation(); const { ms, rep } = feedApply19(S, stage.fsel || [], stage.out.feed);
-    stage.out.fed = true; stage.out.text = "🍖 ごちそう"; stage.out.sub = `${ms.map(m => m.nick).join("・")}がたらふく食べた` + (rep.lvups.length ? `・レベルアップ ${new Set(rep.lvups).size}体！` : "");
-    stage.out.sp = ms[0] ? ms[0].sp : null; (rep.evos || []).forEach(e => queue.push({ k: "evo", ...e })); sfx16("coin"); save(); render(); }
+  const o = stage.out, L = stage.fsel || (stage.fsel = []);
+  if (b.dataset.a === "feed19") { ev.stopImmediatePropagation(); const id = +b.dataset.id;
+    if (o.awaken) { stage.fsel = L[0] === id ? [] : [id]; } else if (L.length < o.feed) L.push(id); else toast(`ごちそうは${o.feed}皿まで。「やり直す」で配りなおせる`); render(); }
+  else if (b.dataset.a === "feedclr") { ev.stopImmediatePropagation(); stage.fsel = []; render(); }
+  else if (b.dataset.a === "feedgo") { ev.stopImmediatePropagation();
+    let ids = L.slice(); if (!o.awaken && ids.length && ids.length < o.feed) { const rest = S.mons.filter(m => m.home != null).sort(() => Math.random() - 0.5); for (let k = 0; ids.length < o.feed && rest.length; k++) ids.push(rest[k % rest.length].id); }
+    const { ms, rep, lv0 } = feedApply19(S, ids, o.feed, o.awaken);
+    o.fed = true; o.text = o.awaken ? "👑 覚醒" : "🍖 ごちそう";
+    o.sub = ms.map(m => `${m.nick} Lv${lv0.get(m.id)}→${m.lv}`).join("・") + (o.awaken ? "！" : "　たらふく食べた");
+    o.sp = ms[0] ? ms[0].sp : null; (rep.evos || []).forEach(e => queue.push({ k: "evo", ...e })); sfx16("coin"); save(); render(); }
 }, true);
+// 覚醒も、自分で1体えらぶ
+{ const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
+  return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "11/14 12:10";
+const VER20 = "11/14 12:30";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
