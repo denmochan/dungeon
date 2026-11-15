@@ -827,6 +827,7 @@ body{-webkit-touch-callout:none}img{-webkit-touch-callout:none;-webkit-user-drag
 .nt19.lo21{top:46px!important;left:10px!important;right:auto!important}
 .pg20,#pn,.mbox,.stage,.sheet20{overflow-x:hidden}
 .mf21 .chips20{gap:4px;row-gap:4px}.mf21 .chip20{padding:3px 8px;font-size:12px;min-height:26px}.mf21 .chips20 b{font-size:11.5px;min-width:26px}.mf21{padding:6px 8px!important}
+.ban19 i{white-space:normal!important;display:block;font-size:17px!important;line-height:1.3}
 </style>
 </head>
 <body>
@@ -7013,7 +7014,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.132（11/15 10:42）";
+const VER20 = "No.133（11/15 10:54）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7064,7 +7065,7 @@ function roomPage20(i) {
   const sub = `<div class="sub20"><button class="${rtab20 === "mons" ? "on" : ""}" data-a="st20" data-v="mons">👥 住む子</button><button class="${rtab20 === "fac" ? "on" : ""}" data-a="st20" data-v="fac">🏗 部屋の設備</button></div>`;
   let body;
   if (slotPick18 && slotPick18.i === i) body = slotPickView18();
-  else if (rtab20 === "fac") { noRoles20 = true; try { body = roomSheet(i).replace(/<button class="rsx" data-a="rsclose">✕<\/button>/g, ""); const k = body.indexOf('<div class="lab">ここに住ませる'); if (k >= 0) body = body.slice(0, k) + `<div class="hint">住む子を変えるときは「👥 住む子」のタブで</div>`; } finally { noRoles20 = false; } }
+  else if (rtab20 === "fac") { noRoles20 = true; try { body = roomSheet(i).replace(/<button class="rsx" data-a="rsclose">✕<\/button>/g, ""); const k = body.indexOf('<div class="lab">ここに住ませる'); if (k >= 0) body = body.slice(0, k) + `<div class="hint">住む子を変えるときは「👥 住む子」のタブで</div>`; body += (typeof swapBox21 === "function" ? swapBox21(i) : ""); } finally { noRoles20 = false; } }
   else body = board20(i);
   return `<div class="pg20" id="pg20">${tabs}${sub}<div class="pgb20">${body}</div></div>${rtab20 === "mons" ? sheet20() : ""}<div class="bar20"><button data-a="pgback">◀ ダンジョン</button><button data-a="g20">🧭 育成</button><button class="main" data-a="af19go">🪄 おまかせ</button></div>`;
 }
@@ -7513,6 +7514,41 @@ function fixOver21(S) {
 { const _r = render; render = function () { try { if (S && !title && !N && !stage && view === "day" && S.mons && S.path) { const mv = fixOver21(S); if (mv.length) { save(); if (!afc19(S).daily) setTimeout(() => toast(`🛏 治った ${mv.map(m => m.nick).join("・")} は部屋がいっぱいなので控えへ`), 300); } } } catch (e) {} _r.apply(this, arguments); }; }
 { const _sr = startRaid9; startRaid9 = function (S) { try { fixOver21(S); } catch (e) {} return _sr.apply(this, arguments); }; }
 { const _dj = dayJobs9; dayJobs9 = function (S, rep) { const r = _dj.apply(this, arguments); try { fixOver21(S); } catch (e) {} return r; }; }
+
+// ---------- 部屋の場所ごと入れかえ（設備・住む子・方針・広さごと動く。入口と脇部屋は動かせない） ----------
+let rsw21 = null;   // 入れかえ相手（確認待ち）
+const swapOk21 = (S, i) => { const r = S.path[i]; return !!r && r.kind === "den" && i !== 0 && r.trait !== "entrance" && r.side == null; };
+function swapRooms21(S, a, b) {
+  if (!swapOk21(S, a) || !swapOk21(S, b) || a === b) return false;
+  const A = S.path[a], B = S.path[b], KEEP = ["kind", "f", "corr", "side"];
+  const pick = (r, keep) => { const o = {}; Object.keys(r).forEach(k => { if (keep === KEEP.includes(k)) o[k] = r[k]; }); return o; };
+  const Amove = pick(A, false), Bmove = pick(B, false), Akeep = pick(A, true), Bkeep = pick(B, true);
+  S.path[a] = Object.assign(Akeep, Bmove); S.path[b] = Object.assign(Bkeep, Amove);
+  S.mons.forEach(m => { if (m.home === a) m.home = b; else if (m.home === b) m.home = a; });
+  if (S.map10) { delete S.map10[S.path[a].uid]; delete S.map10[S.path[b].uid]; }   // 勇者の地図は古くなる
+  return true;
+}
+function swapBox21(i) {
+  if (swapBox21.last !== i) { rsw21 = null; swapBox21.last = i; }
+  if (!swapOk21(S, i)) return "";
+  const others = dens20().filter(j => j !== i && swapOk21(S, j));
+  if (!others.length) return "";
+  const dm = j => typeof depthMul21 === "function" ? ` <small>×${depthMul21(S, j).toFixed(1)}</small>` : "";
+  let h = `<div class="lab">🔀 部屋の場所を入れかえる</div><div class="hint">設備・住む子・方針・広さごと、場所が入れかわる。奥の部屋ほど勇者を倒したときのDPが多い。</div><div class="chips20">`;
+  h += others.map(j => `<button class="chip20 ${rsw21 === j ? "on" : ""}" data-a="rsw21" data-v="${j}">${esc(roomTitle(S, j))}${dm(j)}</button>`).join("") + `</div>`;
+  if (rsw21 != null && others.includes(rsw21)) h += `<div class="box">「${esc(roomTitle(S, i))}」${dm(i)} ⇄ 「${esc(roomTitle(S, rsw21))}」${dm(rsw21)}<div class="pk"><button data-a="rsw21no">やめる</button><button class="main" data-a="rsw21go" data-v="${rsw21}">入れかえる</button></div></div>`;
+  return h;
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-a]"); if (!b) return; const a = b.dataset.a;
+  if (a !== "rsw21" && a !== "rsw21no" && a !== "rsw21go") return;
+  e.stopImmediatePropagation(); e.preventDefault();
+  if (N) return;
+  if (a === "rsw21") { const v = +b.dataset.v; rsw21 = rsw21 === v ? null : v; setTimeout(() => { const g = document.querySelector('[data-a="rsw21go"]'); if (g) g.scrollIntoView({ block: "nearest", behavior: "smooth" }); }, 30); }
+  else if (a === "rsw21no") rsw21 = null;
+  else { const j = +b.dataset.v, i = roomSel; if (swapRooms21(S, i, j)) { roomSel = roomOpen = j; rsw21 = null; save(); toast("🔀 部屋の場所を入れかえた"); } }
+  render();
+}, true);
 
 // ================= BGM（その場で合成する小さなループ）：昼はのんびり、夜は速くて不穏、ボスはもっと =================
 let BGMON19 = true; try { BGMON19 = localStorage.getItem("chika-bgm") !== "0"; } catch (e) {}
