@@ -4617,8 +4617,11 @@ function openChest19(S, c) {
     else { S.dp += 300; out.text = "💎 300 DP"; out.sub = "（スキルの書は使える子がいなかった）"; } }
   else if (c.kind === "egg") { const rank = c.val ? 1 : 0, list = Object.keys(MON).filter(k => (MON[k].rank || 0) === rank && !MON[k].lord && MON[k].forms);
     const sp = list[Math.floor(Math.random() * list.length)] || "slime", m = newMon5(sp, 1, 0); m.sk = rollSkills11(sp); if (c.val) { const ks = Object.keys(SK11); while (Object.keys(m.sk).length < 3) m.sk[ks[Math.floor(Math.random() * ks.length)]] = 1; }
-    if (Math.random() < 0.05 + (c.val ? 0.1 : 0)) makeShiny19(m); S.mons.push(m); const isNew = !S.dex.includes(sp); if (isNew) S.dex.push(sp); m.home = null; if (typeof autoPlace11 === "function") autoPlace11(S);
-    out.text = `🥚 ${m.shiny19 ? "✨色違いの" : ""}${MON[sp].forms[0][0]}`; out.sub = (isNew ? "図鑑に初登録！ " : "") + `${m.nick}が仲間になった`; out.shiny = !!m.shiny19; out.sp = sp; out.isNew = isNew; }
+    if (Math.random() < 0.05 + (c.val ? 0.1 : 0)) makeShiny19(m);
+    // 宝箱の卵はNにしない：金はR以上（R70・SR25・SSR5）、虹はSR以上（SR70・SSR30）
+    { const x = Math.random() * 100; m.rar19 = c.val ? (x < 30 ? "SSR" : "SR") : (x < 5 ? "SSR" : x < 30 ? "SR" : "R"); out.rar19 = m.rar19; }
+    S.mons.push(m); const isNew = !S.dex.includes(sp); if (isNew) S.dex.push(sp); m.home = null; if (typeof autoPlace11 === "function") autoPlace11(S);
+    out.text = `🥚 ${m.rar19} ${m.shiny19 ? "✨色違いの" : ""}${MON[sp].forms[0][0]}`; out.sub = (isNew ? "図鑑に初登録！ " : "") + `${m.nick}が仲間になった`; out.shiny = !!m.shiny19; out.sp = sp; out.isNew = isNew; }
   else if (c.kind === "lvall") { const m = S.mons.slice().sort((x, y) => y.lv - x.lv)[0]; if (m) { const lv0 = m.lv; for (let k = 0; k < 3; k++) gainXp9(S, m, expNext5(m) - m.exp, rep); out.text = `👑 覚醒`; out.sub = `${m.nick} Lv${lv0} → Lv${m.lv}！`; out.sp = m.sp; } else { S.dp += 500; out.text = "💎 500 DP"; } }
   out.evos = rep.evos; return out;
 }
@@ -7010,7 +7013,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.131（11/15 03:49）";
+const VER20 = "No.132（11/15 10:42）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
