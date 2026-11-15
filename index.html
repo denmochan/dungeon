@@ -6969,7 +6969,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.142（11/15 18:58）";
+const VER20 = "No.143（11/15 21:20）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7480,7 +7480,7 @@ function swapRooms21(S, a, b) {
   const Amove = pick(A, false), Bmove = pick(B, false), Akeep = pick(A, true), Bkeep = pick(B, true);
   S.path[a] = Object.assign(Akeep, Bmove); S.path[b] = Object.assign(Bkeep, Amove);
   S.mons.forEach(m => { if (m.home === a) m.home = b; else if (m.home === b) m.home = a; });
-  if (S.map10) { delete S.map10[S.path[a].uid]; delete S.map10[S.path[b].uid]; }   // 勇者の地図は古くなる
+  if (S.map10) { const ka = S.map10[a], kb = S.map10[b]; delete S.map10[a]; delete S.map10[b]; if (kb) S.map10[a] = kb; if (ka) S.map10[b] = ka; }   // 勇者の地図は部屋といっしょに動く（入れかえで地図は消えない）
   return true;
 }
 function swapBox21(i) {
@@ -7489,7 +7489,7 @@ function swapBox21(i) {
   const others = dens20().filter(j => j !== i && swapOk21(S, j));
   if (!others.length) return "";
   const dm = j => typeof depthMul21 === "function" ? ` <small>×${depthMul21(S, j).toFixed(1)}</small>` : "";
-  let h = `<div class="lab">🔀 部屋の場所を入れかえる</div><div class="hint">設備・住む子・方針・広さごと、場所が入れかわる。奥の部屋ほど勇者を倒したときのDPが多い。</div><div class="chips20">`;
+  let h = `<div class="lab">🔀 部屋の場所を入れかえる</div><div class="hint">設備・住む子・方針・広さごと、場所が入れかわる（勇者に知られた地図もいっしょに動く）。奥の部屋ほど勇者を倒したときのDPが多い。</div><div class="chips20">`;
   h += others.map(j => `<button class="chip20 ${rsw21 === j ? "on" : ""}" data-a="rsw21" data-v="${j}">${esc(roomTitle(S, j))}${dm(j)}</button>`).join("") + `</div>`;
   if (rsw21 != null && others.includes(rsw21)) h += `<div class="box">「${esc(roomTitle(S, i))}」${dm(i)} ⇄ 「${esc(roomTitle(S, rsw21))}」${dm(rsw21)}<div class="pk"><button data-a="rsw21no">やめる</button><button class="main" data-a="rsw21go" data-v="${rsw21}">入れかえる</button></div></div>`;
   return h;
