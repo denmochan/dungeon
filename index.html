@@ -2681,7 +2681,8 @@ function metaOf8(S) { S.meta = S.meta || { souls: 0, book: {}, runs: 0, bestNigh
 const bookLv8 = (S, k) => metaOf8(S).book[k] || 0;
 const bookCost8 = (S, k) => Math.round(BOOK8[k].base * Math.pow(1.7, bookLv8(S, k)));
 // 守りきった夜の数で魂が決まる（後半ほど一気に増える）
-const soulsFor8 = S => { const n = Math.max(0, S.ended ? S.best : S.night - 1); return Math.floor(n * (n + 1) / 4); };
+// 途中で自分から転生したとき（契約を達成していない・負けてもいない）は1/4（すぐ転生して魂を稼ぐのを防ぐ）
+const soulsFor8 = S => { const n = Math.max(0, S.ended ? S.best : S.night - 1); return Math.floor(n * (n + 1) / 4 * (S.ended || S.contractDone ? 1 : 0.25)); };
 function newRun8(meta, rnd = Math.random) {
   const S = newRun7(rnd);
   S.meta = meta || null; metaOf8(S);
@@ -5479,7 +5480,7 @@ function nextStage(){ stage = queue.length ? { ...queue.shift(), step: 0 } : nul
 function flash(){ document.body.insertAdjacentHTML("beforeend", `<div class="flash"></div>`); setTimeout(() => { const f = document.querySelector(".flash"); if (f) f.remove(); }, 750); }
 function bookModal(){
   const M = metaOf8(S);
-  return `<h2>📕 魔王の書</h2><div class="box">👻 魂 <b class="gold">${M.souls}</b>　転生${M.runs}回・最高${Math.max(M.bestNight, S.best)}夜</div><div class="hint">転生しても残る強化。魂は主が倒れたとき（または自分から転生したとき）に、守りきった夜の数でもらえる</div>`
+  return `<h2>📕 魔王の書</h2><div class="box">👻 魂 <b class="gold">${M.souls}</b>　転生${M.runs}回・最高${Math.max(M.bestNight, S.best)}夜</div><div class="hint">転生しても残る強化。魂は主が倒れたとき・契約を達成したときに、守りきった夜の数でもらえる（契約の途中で自分から転生すると1/4）</div>`
     + BOOK8_IDS.map(k => { const B = BOOK8[k], lv = bookLv8(S, k), c = bookCost8(S, k);
       return `<div class="row" style="cursor:default"><span style="font-size:24px">${B.icon}</span><div class="tx"><b>${B.name}</b> Lv${lv}<small>${lv ? B.text(lv) + " → " : ""}<span class="good">${B.text(lv + 1)}</span></small></div><div class="fb"><button class="main" data-a="book" data-v="${k}" ${M.souls < c ? "disabled" : ""}>👻${c}</button></div></div>`; }).join("")
     + `<button data-a="lord">← 主へ</button>`;
@@ -5870,12 +5871,12 @@ document.addEventListener("click", ev => {
     case "bakuse": { const L = backups18(), b = L[+d.v]; if (b) { backup18("戻す前"); try { applySave(JSON.parse(b.json)); save(); if (CLOUD) cloudPush(); toast("バックアップから戻した"); modal = null; title = true; } catch (e) { toast("戻せなかった"); } } } break;
     case "vpick": { const n = +d.v, at = VSEL18.indexOf(n); if (at >= 0) VSEL18.splice(at, 1); else if (VSEL18.length < vaultCap18(S)) VSEL18.push(n); else toast(`連れていけるのは${vaultCap18(S)}体まで（🏺主の器で増える）`); } break;
     case "vgo": { const got = bringFromVault18(S, VSEL18); VSEL18 = []; modal = null; if (got.length) toast(`${got.map(m => m.nick).join("・")}がついてきた！`); CV.sig = ""; save(); } break;
-    case "giveup": modal = () => `<h2>転生する？</h2><div class="box gold">👻 魂 +${soulsRate15(S, soulsFor8(S) + contractBonus18(S))}${contractBonus18(S) ? "（契約の報酬こみ）" : ""}</div><div class="hint">魔物とダンジョンは消える。魂・魔王の書・図鑑は残る</div><div class="pk"><button class="main" data-a="rebirth">転生する</button><button data-a="close">やめる</button></div>`; break;
+    case "giveup": modal = () => `<h2>転生する？</h2><div class="box gold">👻 魂 +${soulsRate15(S, soulsFor8(S) + contractBonus18(S))}${contractBonus18(S) ? "（契約の報酬こみ）" : ""}</div><div class="hint">魔物とダンジョンは消える。魂・魔王の書・図鑑は残る</div>${vaultOk22(S) ? `<div class="hint">🏺 1体だけ保管庫に残せる</div>` : `<div class="box bad21b">🏺 この周回はまだ契約を達成していないので、保管庫には<b>だれも残せない</b></div>`}${!S.ended && !S.contractDone ? `<div class="hint">契約の途中で転生すると、夜の分の魂は1/4になる</div>` : ""}<div class="pk"><button class="main" data-a="rebirth">転生する</button><button data-a="close">やめる</button></div>`; break;
     case "vsave": saveToVault18(S, +d.id);
     // fallthrough
     case "vskip": S.vaultDone18 = 1;
     // fallthrough
-    case "rebirth": if (!S.vaultDone18 && S.mons.length) { modal = vaultSaveModal18; break; } { const meta = metaOf8(S), got = soulsRate15(S, soulsFor8(S) + contractBonus18(S)); title = true; meta.souls += got; meta.runs++; meta.bestNight = Math.max(meta.bestNight, S.raidsWon || 0); meta.dex = [...new Set((meta.dex || []).concat(S.dex))]; const tut = S.tut; S = newRun9(meta); S.tut = tut; lastRep = null; } N = null; view = "day"; queue = []; roomSel = roomOpen = null; caveFloor = 0; CV.sig = ""; CV.wander = {}; modal = bookModal; save(); break;
+    case "rebirth": if (!S.vaultDone18 && S.mons.length && vaultOk22(S)) { modal = vaultSaveModal18; break; } { const meta = metaOf8(S), got = soulsRate15(S, soulsFor8(S) + contractBonus18(S)); title = true; meta.souls += got; meta.runs++; meta.bestNight = Math.max(meta.bestNight, S.raidsWon || 0); meta.dex = [...new Set((meta.dex || []).concat(S.dex))]; const tut = S.tut; S = newRun9(meta); S.tut = tut; lastRep = null; } N = null; view = "day"; queue = []; roomSel = roomOpen = null; caveFloor = 0; CV.sig = ""; CV.wander = {}; modal = bookModal; save(); break;
     case "contnext": { const got = nextContract9(S); toast(`次の契約へ！ 👻+${got}`); modal = null; lastRep = null; save(); } break;
     case "bookopen": modal = bookModal; break;
     case "book": if (buyBook8(S, d.v)) { toast(`${BOOK8[d.v].icon}${BOOK8[d.v].name} Lv${bookLv8(S, d.v)}`); save(); } break;
@@ -6968,7 +6969,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.141（11/15 18:21）";
+const VER20 = "No.142（11/15 18:58）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7510,12 +7511,16 @@ const isSS22 = m => !!m && (MON[m.sp] || {}).rank === 3;
 [["mine", "goldkobold sporerat"], ["teach", "mindlord ogremage"], ["watch", "stoneeye firebat"], ["trapw", "webgoblin stonespider"], ["cook", "ghostslime bogtroll"]]
   .forEach(([k, l]) => l.split(" ").forEach(sp => { APT18[sp] = k; }));
 ["goldkobold", "sporerat"].forEach(sp => MINERS11.add(sp));
-{ const _sv = saveToVault18; saveToVault18 = function (S, id) { const m = S.mons.find(o => o.id === id); if (isSS22(m)) { toast("👑 SSの子は保管庫に持って帰れない"); return; } return _sv.apply(this, arguments); }; }
+{ const _sv = saveToVault18; saveToVault18 = function (S, id) { const m = S.mons.find(o => o.id === id); if (!vaultOk22(S)) { toast("契約を達成していないので残せない"); return; } if (isSS22(m)) { toast("👑 SSの子は保管庫に持って帰れない"); return; } return _sv.apply(this, arguments); }; }
 { const _vm = vaultSaveModal18; vaultSaveModal18 = function () {
   const all = S.mons, ss = all.filter(isSS22); if (!ss.length) return _vm.apply(this, arguments);
   S.mons = all.filter(m => !isSS22(m)); let h; try { h = _vm.apply(this, arguments); } finally { S.mons = all; }
   return h.replace("</h2>", `</h2><div class="box">👑 ${ss.map(m => esc(m.nick)).join("・")}（SS）は、この周回だけの子。保管庫には持って帰れない</div>`);
 }; }
+
+// ---------- ズルを防ぐルール（11/15） ----------
+// 保管庫に残せるのは、その周回で契約を1つ以上達成したときだけ（店のSSRを買ってすぐ転生、のくり返しを防ぐ）
+function vaultOk22(S) { return !!S && ((S.contract && S.contract.lv > 1) || !!S.contractDone); }
 
 // ================= BGM（その場で合成する小さなループ）：昼はのんびり、夜は速くて不穏、ボスはもっと =================
 let BGMON19 = true; try { BGMON19 = localStorage.getItem("chika-bgm") !== "0"; } catch (e) {}
