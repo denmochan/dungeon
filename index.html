@@ -4857,7 +4857,7 @@ ORD16.deep = { name: "奥の部屋で2人以上倒せ", ok: (r, N) => r.win && N
 // 試練1〜伝説：勇者の強さ×1.25（後半ほど効く）。その上に「深淵1・深淵2・魔神」を追加
 // 序盤（3回目の襲撃まで）は今までどおり、そのあと6回かけて強さ×1.25まで上がる（始まってすぐ負けないように）
 const HARD21 = 1.25, fame0_21 = DIFF15.map(d => d.fame);
-const hardMul21 = S => { const i = S.diff || 0; if (i < 2) return 1; const c = (S.contract && S.contract.lv) || 1, n = (S.raidNo || 0) + 10 * (c - 1); return 1 + (HARD21 - 1) * Math.max(0, Math.min(1, (n - 3) / 6)); };
+let hardMul21 = S => { const i = S.diff || 0; if (i < 2) return 1; const c = (S.contract && S.contract.lv) || 1, n = (S.raidNo || 0) + 10 * (c - 1); return 1 + (HARD21 - 1) * Math.max(0, Math.min(1, (n - 3) / 6)); };
 { const _sr = startRaid9; startRaid9 = function (S) { const i = S.diff || 0, f0 = DIFF15[i].fame; DIFF15[i].fame = +(f0 * hardMul21(S)).toFixed(3); try { return _sr.apply(this, arguments); } finally { DIFF15[i].fame = f0; } }; }
 DIFF15.push(
   { name: "深淵1", icon: "🌑", add: 10, party: 2, rate: 22, fame: 5.0, text: "勇者がどんどん強くなる。奥まで使いきらないと止まらない" },
@@ -4866,6 +4866,18 @@ DIFF15.push(
 DIFF15.forEach((d, i) => { if (i >= 2) d.text += `（4回目の襲撃から強くなり、最後は×${(d.fame * HARD21).toFixed(1)}）`; });
 // ================= 上納をなくす（11/14）：契約をまたいでもDPはそのまま。魂は契約の報酬だけ =================
 tribute16 = S => ({ dp: 0, souls: 0 });
+// ================= 魂の倍率＝勇者の強さ（11/15 昼） =================
+// 「魂7倍なら相手の強さも7倍でいい」（引き継ぎ魔物と魂の強化で攻略する前提）
+// 試練1より上：勇者の強さ倍率を魂の倍率と同じにする。序盤3回の襲撃は今までの強さ、そこから6回かけて魂と同じ倍率まで上がる。
+{
+  const base22 = DIFF15.map(d => d.fame);
+  const k22 = S => { const c = (S.contract && S.contract.lv) || 1, n = (S.raidNo || 0) + 10 * (c - 1); return Math.max(0, Math.min(1, (n - 3) / 6)); };
+  hardMul21 = S => 1;   // 前の×1.25はやめて、下で直接決める
+  const _sr22 = startRaid9;
+  startRaid9 = function (S) { const i = S.diff || 0, d = DIFF15[i]; if (i < 2) return _sr22.apply(this, arguments);
+    const f0 = d.fame; d.fame = +(base22[i] + (d.rate - base22[i]) * k22(S)).toFixed(3); try { return _sr22.apply(this, arguments); } finally { d.fame = f0; } };
+  DIFF15.forEach((d, i) => { if (i >= 2) d.text = d.text.replace(/（4回目の襲撃から強くなり、最後は×[\d.]+）/, "") + `（勇者の強さも魂と同じ×${d.rate}。4回目の襲撃から上がっていく）`; });
+}
 
 // ================= 洞窟ビュー：勇者から見たダンジョン（上から見たマップ） =================
 let caveOn = (() => { try { return localStorage.getItem("dm8cave") !== "0"; } catch (e) { return true; } })();
@@ -7014,7 +7026,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.133（11/15 10:54）";
+const VER20 = "No.134（11/15 12:30）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
