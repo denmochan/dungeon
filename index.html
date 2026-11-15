@@ -3048,7 +3048,7 @@ let alc10 = (S, i) => i > 0 && !!S.path[i] && S.path[i].kind === "den" && h10(S,
 let known10 = (S, i) => !!(S.map10 && S.map10[i]);
 let mapCount10 = S => Object.keys(S.map10 || {}).filter(k => S.path[k]).length;
 // 地図が古くなる：部屋の用途を変えた・掘った・入れ替えた所は分からなくなる
-const _refit10 = refit9; refit9 = function (S, i, fac) { const ok = _refit10(S, i, fac); if (ok && S.map10) delete S.map10[i]; return ok; };
+// 施設を変えても、勇者に知られた地図は消えない（11/15：安く地図をリセットできる穴をふさぐ）
 const _dig10 = dig9; dig9 = function (S, theme, fac) { const li = lordIdx(S), ok = _dig10(S, theme, fac); if (ok && S.map10) { delete S.map10[li]; delete S.map10[lordIdx(S)]; } return ok; };
 if (typeof swapRoom7 === "function") { const _sw = swapRoom7; swapRoom7 = function (S, a, b) { const ok = _sw(S, a, b); if (ok && S.map10) { delete S.map10[a]; delete S.map10[b]; } return ok; }; }
 // 通路の罠：その部屋に住む「罠作り」が手前の通路に仕掛ける
@@ -3367,7 +3367,7 @@ alc10 = (S, i) => sidesOf11(S, i).some(j => S.path[j].kind === "dead");
 known10 = (S, i) => !!(S.map10 && S.path[i] && S.map10[S.path[i].uid]);
 mapCount10 = S => S.path.filter(r => S.map10 && S.map10[r.uid]).length;
 // 地図が古くなる：改装・掘った部屋
-{ const _rf = refit9; refit9 = function (S, i, fac) { const ok = _rf(S, i, fac); if (ok && S.map10 && S.path[i]) delete S.map10[S.path[i].uid]; return ok; }; }
+// （11/15）施設を変えても勇者の地図は消えない
 // はじめのダンジョン：入口（本道）と、その脇の鉱脈
 const _newRun11 = newRun9;
 newRun9 = function (meta) {
@@ -4167,12 +4167,12 @@ const expCost18 = (S, r) => { const s = szOf18(r); return s >= 3 ? null : Math.r
 capOfSlot7 = (S, i) => { const r = S.path[i]; return r && r.kind === "den" ? SZ18.cap[szOf18(r)] : capOfSlot(S, i); };
 function expand18(S, i) {
   const r = S.path[i]; if (!r || r.kind !== "den") return false; const c = expCost18(S, r); if (c == null || S.dp < c) return false;
-  S.dp -= c; r.sz = szOf18(r) + 1; if (S.map10 && r.uid) delete S.map10[r.uid]; return true;
+  S.dp -= c; r.sz = szOf18(r) + 1; return true;   // 広げても地図は消えない（11/15）
 }
 buildFac12 = function (S, i, k) {
   const r = S.path[i]; if (!r || r.kind !== "den" || facsOf12(r).length >= facSlots18(r) || hasFac12(r, k) || !FAC12.includes(k)) return false;
   if (k !== "alcove" && !facUnlocked9(S, k)) return false; if (S.dp < FAC_COST12) return false;
-  S.dp -= FAC_COST12; r.facs.push(k); if (S.map10 && r.uid) delete S.map10[r.uid]; return true;
+  S.dp -= FAC_COST12; r.facs.push(k); return true;   // 施設を置いても地図は消えない（11/15）
 };
 // 層は「主の間をのぞいて2部屋」ごと。部屋の番号から層が決まる
 function refloor18(S) {
@@ -6060,7 +6060,7 @@ raidBox = function (){
   let add = "";
   if (eye && fc.time) add += `<div class="hint ${fc.time === "day" ? "bad" : ""}">${fc.time === "day" ? "☀ <b>昼</b>に来る：魔物は仕事中で出遅れ、寝床は寝込みを襲われる（見張りがいれば出遅れない）" : "🌙 <b>夜</b>に来る：魔物の時間。みんな起きていて攻撃+10%"}</div>`;
   else if (!eye && (S.raidNo || 0) >= 2) add += `<div class="hint">いつ来るか（☀昼/🌙夜）は見張りがいないと分からない</div>`;
-  if (mk) add += `<div class="hint bad">🗺 勇者は${mk}部屋ぶんの地図を持っている（その部屋では迷わず、待ち伏せも見抜く。用途を変えれば地図は古くなる）</div>`;
+  if (mk) add += `<div class="hint bad">🗺 勇者は${mk}部屋ぶんの地図を持っている（その部屋では迷わず、待ち伏せも見抜く。地図は契約が変わるまで消えない）</div>`;
   if (eye) add += `<div class="hsk">${fc.jobs.map((j, i) => { const sk = fcSk10(fc, i); return `<div class="hskr">${img(j, heroTier(fc.lv), "sp", "width:26px;height:26px")}${Object.entries(sk).map(([k, L]) => skChip10(k, L, true)).join("")}</div>`; }).join("")}</div>`;
   const at = h.lastIndexOf("</div>"); return h.slice(0, at) + add + h.slice(at);
 };
@@ -6969,7 +6969,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.143（11/15 21:20）";
+const VER20 = "No.144（11/15 21:25）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7480,7 +7480,7 @@ function swapRooms21(S, a, b) {
   const Amove = pick(A, false), Bmove = pick(B, false), Akeep = pick(A, true), Bkeep = pick(B, true);
   S.path[a] = Object.assign(Akeep, Bmove); S.path[b] = Object.assign(Bkeep, Amove);
   S.mons.forEach(m => { if (m.home === a) m.home = b; else if (m.home === b) m.home = a; });
-  if (S.map10) { const ka = S.map10[a], kb = S.map10[b]; delete S.map10[a]; delete S.map10[b]; if (kb) S.map10[a] = kb; if (ka) S.map10[b] = ka; }   // 勇者の地図は部屋といっしょに動く（入れかえで地図は消えない）
+  // 勇者の地図は部屋のuidについているので、部屋といっしょに動く（入れかえで地図は消えない）
   return true;
 }
 function swapBox21(i) {
@@ -7576,7 +7576,7 @@ if (S && S.raidPending && !N) {
 // 報告を閉じたあとに、契約達成・転生の画面を必ず出す
 { const _r = render; render = function () { if (S && !title && !N && !stage && !modal && !queue.length) { if (S.ended) modal = rebirthModal; else if (S.contractDone) modal = contractModal; } return _r(); }; }
 // 施設の✕は2回押しで外す
-{ let arm = null, armT = 0; document.addEventListener("click", ev => { const b = ev.target.closest('[data-a="facrm"]'); if (!b) return; const k = b.dataset.v, t = Date.now(); if (arm === k && t - armT < 3000) { arm = null; return; } arm = k; armT = t; ev.stopPropagation(); ev.preventDefault(); toast("もう一度✕で外す（返金なし・勇者の地図は消える）"); }, true); }
+{ let arm = null, armT = 0; document.addEventListener("click", ev => { const b = ev.target.closest('[data-a="facrm"]'); if (!b) return; const k = b.dataset.v, t = Date.now(); if (arm === k && t - armT < 3000) { arm = null; return; } arm = k; armT = t; ev.stopPropagation(); ev.preventDefault(); toast("もう一度✕で外す（返金なし）"); }, true); }
 
 </script>
 </body>
