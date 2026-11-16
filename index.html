@@ -872,6 +872,9 @@ body{-webkit-touch-callout:none}img{-webkit-touch-callout:none;-webkit-user-drag
 .final23{margin:4px 0;padding:6px 8px;border:1px solid #e04030;border-radius:8px;background:#2e1210;color:#ffd0c0;font-size:13px;animation:dng23 1.4s ease-in-out infinite}
 body.finalN23 .cave::before{content:"";position:absolute;inset:0;z-index:31;pointer-events:none;box-shadow:inset 0 0 60px 10px #c0201088}
 .dexc.shx23{box-shadow:0 0 0 1px #ffd76a inset}.dexc.shx23::after{content:"✨";position:absolute;right:4px;top:2px;font-size:12px}.dexc{position:relative}
+.tip23{max-width:360px;margin:6px auto;padding:6px 10px;border-radius:8px;background:#1d1a10;border:1px solid #b09030;font-size:13px;text-align:left;color:#ffe9b0}
+body:has(.stage) .modal{display:none!important}
+.tick21{font-size:12px!important;padding:2px 5px!important;opacity:.8;z-index:4!important}
 </style>
 </head>
 <body>
@@ -2038,7 +2041,7 @@ const capOfSlot = (S, i) => ({ den: DEN_CAP, vault: VAULT_CAP, lord: LORD_CAP, t
 const residents5 = (S, i) => S.mons.filter(m => m.home === i);
 const lordMax5 = S => 300 + 80 * (S.lord.lv - 1);
 const lordAtk5 = S => 25 + 8 * (S.lord.lv - 1);
-const train5Cost = S => 350 * S.lord.lv;
+const train5Cost = S => 200 + 150 * (S.lord.lv - 1);   // 主を鍛える：200→350→500…（前は350→700→1050で高すぎた）
 
 // ---------- 昼の行動 ----------
 const digCost5 = S => 150 + 80 * (S.path.length - 4);
@@ -7036,7 +7039,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.153（11/16 14:28）";
+const VER20 = "No.154（11/16 16:05）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7725,13 +7728,13 @@ const DNG23 = [["🟢", "余裕", "入口で止まりそう"], ["🟡", "注意"
 // 主まで届かれたら少し冷める。4回目の襲撃から。これで「9日目から先は何もしなくても勝てる」をなくす
 const heat23 = S => S.heat23 || 0;
 { const _sr = startRaid9; startRaid9 = function (S, rnd) { const N = _sr.apply(this, arguments);
-  try { const k = heat23(S) * (N && N.heroes && N.heroes.some(h => h.boss) ? 0.6 : 1); if (N && !N.scout && k > 0) { N.heroes.forEach(h => { h.max = Math.round(h.max * (1 + k)); h.hp = h.max; h.atk = Math.round(h.atk * (1 + k * 0.7)); }); N.heat23 = k; } } catch (e) {}
+  try { const k = heat23(S) * (N && N.heroes && N.heroes.some(h => h.boss) && S.day < CONTRACT_LEN9 ? 0.6 : 1); if (N && !N.scout && k > 0) { N.heroes.forEach(h => { h.max = Math.round(h.max * (1 + k)); h.hp = h.max; h.atk = Math.round(h.atk * (1 + k * 0.7)); }); N.heat23 = k; } } catch (e) {}
   return N; }; }
 { const _er = endRaid9; endRaid9 = function (S, N) {
-  try { if (!N.scout && (S.raidNo || 0) >= 2) {
+  try { if (!N.scout && (S.raidNo || 0) >= 1) {
     const dens = S.path.map((r, i) => r.kind === "den" ? i : -1).filter(i => i >= 0), li = S.path.findIndex(r => r.kind === "lord");
     const deep = Math.max(0, ...N.heroes.map(h => h.maxPos || 0)), esc = N.heroes.filter(h => h.st === "escaped").length, hurt = N.lord && N.lord.hp < (N.lord.max || 0);
-    let d = 0; if (N.lord && N.lord.down) d = -0.3; else if (hurt || N.lastStand23) d = -0.2; else d = 0.25;   /* 主が無傷なら毎回すこし強く（逃げられても）。崖はボス4割・ぎりぎり生存・危ない度で和らげる */   // 押されている夜は熱を上げない（見えないまま溜まって最後に崖、をなくす）
+    let d = 0; if (N.lord && N.lord.down) d = -0.3; else if (hurt || N.lastStand23) d = -0.2; else d = 0.2;   /* 主が無傷なら毎回すこし強く（逃げられても）。崖はボス4割・ぎりぎり生存・危ない度で和らげる */   // 押されている夜は熱を上げない（見えないまま溜まって最後に崖、をなくす）
     S.heat23 = Math.max(0, Math.min(3, heat23(S) + d)); N.heatD23 = d; } } catch (e) {}
   return _er.apply(this, arguments); }; }
 // ---------- 6) 店の値段はレア度で変わる（SSRとNが同じ値段だった）。DPの使いみちにもなる ----------
@@ -7859,7 +7862,7 @@ document.addEventListener("click", ev => { const b = ev.target.closest('[data-a=
 // ---------- 19) 細かい直し（3回目の試遊から） ----------
 // 襲撃の前日・当日は「次に来る勇者」を毎日開いておく（準備ボタンに気づけるように）。開いたら中身が見えるところまで動かす
 { let fday = -1; const _r = render; render = function () { try { if (S && S.day !== fday && daysToRaid9(S) != null && daysToRaid9(S) <= 1) { fday = S.day; if (typeof fold21 !== "undefined") fold21.fc = true; } } catch (e) {} return _r.apply(this, arguments); }; }
-document.addEventListener("toggle", ev => { const d = ev.target; if (d && d.classList && d.classList.contains("fold21") && d.open) setTimeout(() => { try { d.scrollIntoView({ block: "start", behavior: "smooth" }); } catch (e) {} }, 30); }, true);
+// （開いたときに自動で動かすのはやめた：上の危ない度・準備が隠れるため）
 // 「⏩ 襲撃の日まで」は進化で止めない（進化は着いた朝にまとめて出る）
 { const _rd = runDay9; let skip = false; skipToRaid = (prev => function () { skip = true; try { return prev.apply(this, arguments); } finally { skip = false; } })(skipToRaid);
   runDay9 = function () { const r = _rd.apply(this, arguments); if (skip && r && r.evos && r.evos.length) { queue.push(...r.evos.map(e => ({ k: "evo", ...e }))); r.evos = []; } return r; }; }
@@ -7926,7 +7929,8 @@ resultStage15 = (prev => function (r) { let h = prev(r); try { if (r.lastStand23
 
 // ---------- 27) 逃げた勇者は💎を持ち逃げする（1人につき手持ちの5%、最大3割）。「逃がさない」に意味を ----------
 { const _er = endRaid9; endRaid9 = function (S, N) { const out = _er.apply(this, arguments);
-  try { if (!N.scout && !N.lastStand23) { const esc = N.heroes.filter(h => h.st === "escaped").length; if (esc && S.dp > 0) { const lost = Math.round(S.dp * Math.min(0.3, 0.05 * esc)); S.dp -= lost; if (out) out.stolen = (out.stolen || 0) + lost; } } } catch (e) {} return out; }; }
+  try { if (!N.scout && !N.lastStand23) { const esc = N.heroes.filter(h => h.st === "escaped").length; if (esc && S.dp > 0) { const lost = Math.round(S.dp * Math.min(0.3, 0.05 * esc)); S.dp -= lost; S.runaway23 = { day: S.day, lost }; } } } catch (e) {} return out; }; }
+resultStage15 = (prev => function (r) { let h = prev(r); try { const R = S.runaway23; if (R && R.lost && r.esc) h = h.replace('<div class="rs-grid">', `<div class="hint bad" style="text-align:center">🏃 逃げた勇者が💎${fmt8(R.lost)}を持ち逃げした</div><div class="rs-grid">`); } catch (e) {} return h; })(resultStage15);
 // ---------- 28) 店：SSRの天井（並ばない回数を数える）と、入れかえ代の上がり方をゆるく ----------
 { const _sh = shop5; shop5 = function (S) { const r = _sh.apply(this, arguments); try { if ((S.shop || []).some(o => o && o.rar === "SSR")) S.pity23 = 0; else S.pity23 = (S.pity23 || 0) + 1; } catch (e) {} return r; }; }
 { const _rc = reroll5Cost; try { reroll5Cost = S => 40 + 20 * (S.rerolls || 0); } catch (e) {} }
@@ -7938,6 +7942,29 @@ try { delete ORD16.fast; } catch (e) {}
 { const _dm = dexModal; dexModal = function () { let h = _dm.apply(this, arguments); try { const sh = metaOf8(S).shiny23 || {};
   Object.keys(sh).forEach(k => { h = h.replace(`<div class="dexc have" data-a="dexsp" data-v="${k}">`, `<div class="dexc have shx23" data-a="dexsp" data-v="${k}">`); });
   if (DX && sh[DX]) h = h.replace('<div class="h2">', '<div class="h2">✨ ') + `<div class="hint gold" style="text-align:center">✨ 色違いも手に入れた！ <span style="display:inline-block;filter:hue-rotate(150deg) saturate(1.5) brightness(1.08)">${img(DX, 0, "sp", "width:48px;height:48px")}</span></div>`; } catch (e) {} return h; }; }
+// ---------- 30) 結果画面に「次の一手」を1行（逃げられた・やられた夜に、何を直せばいいか） ----------
+{ const _rr = raidResult15; raidResult15 = function (S, N) { const r = _rr.apply(this, arguments);
+  try { r.jobs23 = N.heroes.map(h => h.job); r.escJobs23 = N.heroes.filter(h => h.st === "escaped").map(h => h.job); r.lostN23 = N.mons.filter(b => b.down).length; r.lostNames23 = N.mons.filter(b => b.down && b.ref).map(b => b.ref.nick); r.monN23 = N.mons.length;
+    const li = S.path.findIndex(x => x.kind === "lord"); r.deep23 = Math.max(0, ...N.heroes.map(h => h.maxPos || 0)); r.li23 = li; } catch (e) {} return r; }; }
+function tip23(r) {
+  const D = r.dmg23 || {}, t = Object.values(D).reduce((a, b) => a + b, 0) || 1, J = r.escJobs23 || [], all = r.jobs23 || [];
+  if (!r.esc && !(r.lostN23 >= 3)) return "";
+  if (J.includes("thief") && r.esc) return "🗝 盗賊に逃げられた → 入口に👁見張る子か🪤罠を。盗賊は罠を外すので、数で止める";
+  if (all.filter(j => j === "priest").length >= 2 && r.esc) return "💖 僧侶が回復していた → ☠毒や🔥まとめて焼く子で、回復より速く削る";
+  if ((D.fight || 0) / t > 0.8 && r.esc) return "⚔ ほぼ殴り合いだけ → 手前の通路に🪤罠・🏹狙う子を置くと、部屋に着く前に削れる";
+  if (r.lostN23 >= Math.max(3, (r.monN23 || 0) * 0.5)) return "💤 魔物がたくさん倒れた → 💤寝床で回復、体力の高い子を前に。🍖前夜のごちそうも効く";
+  if (r.deep23 >= (r.li23 || 99) - 1) return "👑 奥まで来られた → 奥の部屋にも戦う子を。🔮主の結界も効く";
+  return "🛡 次の襲撃の前日に「迎え撃つ準備」を";
+}
+resultStage15 = (prev => function (r) { let h = prev(r); try { const tp = tip23(r); if (tp) { const at = h.indexOf('<div class="dmg23">'); const box = `<div class="tip23">💡 次の一手：${tp}${(r.lostNames23 || []).length ? `<br><small>💤 倒れた子：${r.lostNames23.slice(0, 8).map(esc).join('・')}${r.lostNames23.length > 8 ? ' ほか' : ''}（1日休めば戻る）</small>` : ''}</div>`; h = at >= 0 ? h.slice(0, at) + box + h.slice(at) : h + box; } } catch (e) {} return h; })(resultStage15);
+// ---------- 31) 卵は自動で割れる（3回タップしなくていい）。演出は見せる ----------
+{ const _r = render; render = function () { _r.apply(this, arguments); try { if (stage && stage.k === "egg" && (stage.step || 0) < 3 && !stage.auto23b) { const st = stage; st.auto23b = 1;
+  const go = () => { if (stage !== st || (st.step || 0) >= 3) return; st.step = (st.step || 0) + 1; if (st.step === 3) flash(); try { sfx16(st.step >= 3 ? "hatch" : "coin"); } catch (e) {} render(); if (st.step < 3) setTimeout(go, 550); }; setTimeout(go, 600); } } catch (e) {} }; }
+// 危ない度と「迎え撃つ準備」は、たたまれた欄の中ではなく、日付のすぐ下に出す（気づけるように）
+{ const _r = render; render = function () { _r.apply(this, arguments); try { const pn = document.getElementById("pn"); if (!pn || N) return; const db = pn.querySelector(".daybox"); if (!db) return;
+  const d = pn.querySelector(".dng23"), p = pn.querySelector(".prep23"); let at = db; [d, p].forEach(e => { if (e) { at.after(e); at = e; } }); } catch (e) {} }; }
+
+{ const _b = banner19; banner19 = function (h, ...a) { return _b.call(this, typeof h === "string" ? dpTx23(h) : h, ...a); }; }
 
 </script>
 </body>
