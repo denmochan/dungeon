@@ -2015,8 +2015,8 @@ function mergeFx5(...list) {
 const monFx5 = m => mergeFx5(...MON[m.sp].forms.slice(0, m.evos + 1).map(f => f[1]));
 var LV_GROW5 = 0.12;   // 1レベルでどれだけ強くなるか（proto7が上書き）
 const monMul5 = m => (1 + LV_GROW5 * (m.lv - 1)) * Math.pow(1.25, m.evos) * (1 + 0.1 * (m.plus || 0)) * (typeof rarMul23 === "function" ? rarMul23(m) : 1);
-const monHp5 = m => Math.round(MON[m.sp].hp * monMul5(m) * QUIRK[m.quirk].hp);
-const monAtk5 = m => Math.round(MON[m.sp].atk * monMul5(m) * QUIRK[m.quirk].atk * (monFx5(m).atkMul || 1));
+const monHp5 = m => Math.round(MON[m.sp].hp * monMul5(m) * QUIRK[m.quirk].hp * (typeof bookMul23 === "function" ? bookMul23("hp") : 1));
+const monAtk5 = m => Math.round(MON[m.sp].atk * monMul5(m) * QUIRK[m.quirk].atk * (monFx5(m).atkMul || 1) * (typeof bookMul23 === "function" ? bookMul23("atk") : 1));
 const expNext5 = m => 6 * m.lv;
 const roleOf = sp => MON[sp].role;
 const mates = (S, m) => m.home == null ? [] : S.mons.filter(o => o !== m && o.home === m.home);
@@ -2720,6 +2720,8 @@ const BOOK8 = {
   lord:  { name: "王の血",   icon: "👑", base: 6, text: lv => `主のLv +${lv}` },
 };
 const BOOK8_IDS = Object.keys(BOOK8);
+// 牙・鱗の書の倍率（いまのSから）。カードの数字にそのまま出る
+function bookMul23(k) { try { return 1 + 0.08 * bookLv8(S, k); } catch (e) { return 1; } }
 function metaOf8(S) { S.meta = S.meta || { souls: 0, book: {}, runs: 0, bestNight: 0, dex: [] }; S.meta.book = S.meta.book || {}; return S.meta; }
 const bookLv8 = (S, k) => metaOf8(S).book[k] || 0;
 const bookCost8 = (S, k) => Math.round(BOOK8[k].base * Math.pow(1.7, bookLv8(S, k)));
@@ -2749,7 +2751,7 @@ function buyBook8(S, k) {
   return true;
 }
 function startNight8(S, rnd) {
-  const N = startNight7(S, rnd), a = 1 + 0.08 * bookLv8(S, "atk"), h = 1 + 0.08 * bookLv8(S, "hp");
+  const N = startNight7(S, rnd), a = 1, h = 1;   // 牙・鱗の書は monAtk5/monHp5 に入れた（カードの数字にも出る）
   N.mons.forEach(bm => { const r = bm.hp / bm.max; bm.atk = Math.round(bm.atk * a); bm.max = Math.round(bm.max * h); bm.hp = Math.max(1, Math.round(bm.max * r)); });
   return N;
 }
@@ -5529,7 +5531,7 @@ function bookModal(){
   const M = metaOf8(S);
   return `<h2>📕 魔王の書</h2><div class="box">👻 魂 <b class="gold">${M.souls}</b>　転生${M.runs}回・最高${Math.max(M.bestNight, S.best)}夜</div><div class="hint">転生しても残る強化。魂は主が倒れたとき・契約を達成したときに、守りきった夜の数でもらえる（契約の途中で自分から転生すると1/4）</div>`
     + BOOK8_IDS.map(k => { const B = BOOK8[k], lv = bookLv8(S, k), c = bookCost8(S, k);
-      return `<div class="row" style="cursor:default"><span style="font-size:24px">${B.icon}</span><div class="tx"><b>${B.name}</b> Lv${lv}<small>${lv ? B.text(lv) + " → " : ""}<span class="good">${B.text(lv + 1)}</span></small></div><div class="fb"><button class="main" data-a="book" data-v="${k}" ${M.souls < c ? "disabled" : ""}>👻${c}</button></div></div>`; }).join("")
+      return `<div class="row" style="cursor:default"><span style="font-size:24px">${B.icon}</span><div class="tx"><b>${B.name}</b> Lv${lv}<small>${lv ? B.text(lv) + " → " : ""}<span class="good">${B.text(lv + 1)}</span>${(() => { const m = S.mons.slice().sort((a, b) => b.lv - a.lv)[0]; if (!m || (k !== "atk" && k !== "hp")) return ""; const f = k === "atk" ? monAtk5 : monHp5, v = f(m), v2 = Math.round(v * (1 + 0.08 * (lv + 1)) / (1 + 0.08 * lv)); return `<br>例：${esc(m.nick)}の${k === "atk" ? "攻撃" : "体力"} ${v} → <b class="good">${v2}</b>`; })()}</small></div><div class="fb"><button class="main" data-a="book" data-v="${k}" ${M.souls < c ? "disabled" : ""}>👻${c}</button></div></div>`; }).join("")
     + `<button data-a="lord">← 主へ</button>`;
 }
 function rebirthModal(){
@@ -6497,7 +6499,7 @@ shopModal = function () {
         <div class="sl"><div class="sim ${o.shiny19 ? "shiny19" : ""}">${img(o.sp)}</div>${o.shiny19 ? '<span class="shtag19 sm">✨色違い</span>' : ""}<div class="gold">★${D.star}</div><button data-a="dexsp" data-v="${o.sp}" class="mini">くわしく</button></div>
         <div class="sr"><div class="sn"><b>${D.forms[0][0]}</b><span class="hint">体力${Math.round(D.hp * rarMul23({ rar19: o.rar, shiny19: o.shiny19 }))}・攻撃${Math.round(D.atk * rarMul23({ rar19: o.rar, shiny19: o.shiny19 }))}・🍖${FOOD16({ sp: o.sp, lv: 1 })}/日</span></div>
           <div class="sline"><b>${R.icon}${R.name}</b></div>
-          <div class="sline"><span class="apt18 a-${k}">得意 ${ROLEI18[k][0]}${ROLEI18[k][1]}</span> ${ROLEI18[k][2]}</div>
+          <div class="sline"><span class="apt18 a-${k}">得意 ${ROLEI18[k][0]}${ROLEI18[k][1]}</span></div>
           ${sks.length ? `<details class="sk23"><summary>${sks.map(s => skChip10(s, 1)).join("")}</summary>${sks.map(s => `<div class="skrow">${skChip10(s, 1)}<span class="hint">${skText11(s, 1)}</span></div>`).join("")}</details>` : `<div class="hint">スキルなし</div>`}
           ${shopWhy13(o)}${shopFit(o.sp)}
           <div class="sb">${o.sold ? "<b>買った</b>" : `<button class="main" data-a="buy" data-v="${i}" ${S.dp < price5(o.sp, o) ? "disabled" : ""}>DP ${price5(o.sp, o)} で呼ぶ</button>`}</div></div></div>`; }).join("")}</div>
@@ -7029,7 +7031,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.150（11/16 11:14）";
+const VER20 = "No.151（11/16 11:19）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
