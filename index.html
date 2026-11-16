@@ -875,6 +875,10 @@ body.finalN23 .cave::before{content:"";position:absolute;inset:0;z-index:31;poin
 .tip23{max-width:360px;margin:6px auto;padding:6px 10px;border-radius:8px;background:#1d1a10;border:1px solid #b09030;font-size:13px;text-align:left;color:#ffe9b0}
 body:has(.stage) .modal{display:none!important}
 .tick21{font-size:12px!important;padding:2px 5px!important;opacity:.8;z-index:4!important}
+/* 結果などの演出画面：画面より長いときは上下が切れずにスクロールできる（つづけるが画面外に出ていた） */
+.stage{overflow-y:auto;justify-content:flex-start;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 24px)}.stage>:first-child{margin-top:auto}.stage>:last-child{margin-bottom:auto}
+.shopc18 .sn{padding-right:36px}/* レア度の札が「🍖2/日」に重なっていた */
+.need23{display:block;text-align:right;font-size:12px;color:#ffcf70;margin-top:3px}
 </style>
 </head>
 <body>
@@ -3921,7 +3925,7 @@ function todo13(S) {
   const empty = S.path.map((r, i) => i).filter(i => S.path[i].kind === "den" && facsOf12(S.path[i]).length === 0);
   if (empty.length) out.push({ t: `施設のない部屋がある（${empty.map(i => roomTitle(S, i)).join("・")}）`, a: "openroom", v: empty[0], b: "開く" });
   const hurt = S.mons.filter(m => restLeft9(S, m) && !hasFac12(S.path[m.home], "bed")).length;
-  if (hurt && S.path.some((r, i) => hasFac12(r, "bed") && residents5(S, i).length < capOfSlot7(S, i))) out.push({ t: `けがをした子が${hurt}体、寝床のない部屋で寝ている`, a: "rebal", b: "全体おまかせ" });
+  if (hurt && S.path.some((r, i) => hasFac12(r, "bed") && residents5(S, i).length < capOfSlot7(S, i))) out.push({ t: `けがをした子が${hurt}体、寝床のない部屋で寝ている`, a: "bedmove23", b: "🛏 寝床へ運ぶ" });
   else if (hurt && !S.path.some(r => hasFac12(r, "bed"))) out.push({ t: `けがをした子が${hurt}体（寝床があればすぐ治る）` });
   if (S.path.some(r => hasFac12(r, "watch")) && !watchOn10(S)) out.push({ t: "見張り台に誰もいない", a: "rebal", b: "全体おまかせ" });
   return out;
@@ -5906,7 +5910,7 @@ document.addEventListener("click", ev => {
     case "mixsel": MX = []; modal = mixSelModal; break;
     case "mixpick": { const id = +d.id, k = MX.indexOf(id); if (k >= 0) MX.splice(k, 1); else { MX.push(id); if (MX.length > 2) MX.shift(); } } break;
     case "mixask": case "mixsel2": { const a = S.mons.find(m => m.id === MX[0]), b = S.mons.find(m => m.id === MX[1]); if (a && b && mixPreview7(S, a, b).ok) { PICKSEL11 = []; modal = mixSkillModal; } } break;
-    case "mixgo": { sfx16("hatch"); PICK11 = d.v === "auto" ? null : PICKSEL11.slice(); const a = S.mons.find(m => m.id === MX[0]); const home = a ? a.home : null; const r = mix7(S, MX[0], MX[1]); if (!r) { const A = S.mons.find(m => m.id === MX[0]), B = S.mons.find(m => m.id === MX[1]), p = A && B && typeof mixPreview7 === "function" ? mixPreview7(S, A, B) : null; toast(`配合できない：${(p && p.why) || "条件をみたしていない（Lvが足りないかも）"}`); break; } modal = null;
+    case "mixgo": { sfx16("hatch"); PICK11 = d.v === "auto" ? null : PICKSEL11.slice(); const a = S.mons.find(m => m.id === MX[0]); const home = a ? a.home : null; const r = mix7(S, MX[0], MX[1]); if (!r) { const A = S.mons.find(m => m.id === MX[0]), B = S.mons.find(m => m.id === MX[1]), p = A && B && typeof mixPreview7 === "function" ? mixPreview7(S, A, B) : null; { const why = (p && p.why) || "条件をみたしていない（Lvが足りないかも）"; toast(`配合できない：${why}`); try { banner19(`<small>🥚 配合できない</small><i>${why}</i>`, "", 2200); } catch (e) {} } break; } modal = null;
       if (r) { const b = r.m; if (home != null && S.path[home] && S.path[home].kind !== "lord") b.home = home; MX = []; queue.push({ k: "egg", ...r }); toast(`${r.inherit.length ? "受け継いだ：" + r.inherit.map(k => SK11[k].icon + SK11[k].name).join("・") + "　" : ""}${r.extra ? "新しく：" + SK11[r.extra].icon + SK11[r.extra].name : ""}`); save(); nextStage(); return; } } break;
     case "release": { const id = +d.id, m = S.mons.find(o => o.id === id); modal = () => `<h2>${m.nick}を逃がす？</h2><div class="quote">「${esc(formOf(m)[2].down)}」</div><div class="pk"><button class="main" data-a="release2" data-id="${id}">逃がす</button><button data-a="close">やめる</button></div>`; } break;
     case "release2": { const m = S.mons.find(o => o.id === +d.id); if (m && m.eq19) unequip19(S, m); } release5(S, +d.id); modal = null; save(); break;
@@ -7039,7 +7043,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.155（11/16 17:29）";
+const VER20 = "No.156（11/16 18:38）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7699,8 +7703,8 @@ function danger23() {
   const S0 = S, base = JSON.stringify(S0), U0 = UID5, res = [];
   const R0 = Math.random, seed0 = S0.raidSeed23 || (S0.seed || 1) * 31 + S0.day;
   try { for (let t = 0; t < 8; t++) { S = JSON.parse(base); S.sim23 = 1; S.fc = S0.fc ? JSON.parse(JSON.stringify(S0.fc)) : null;
-      const gr = rng23(seed0 + t * 7919); Math.random = gr;
-      const N2 = startRaid9(S, gr); N2.rnd = gr; let g = 0; while (!N2.done && g++ < 4000) stepNight5(S, N2); Math.random = R0;
+      const g0 = rng23(seed0); Math.random = g0;   /* 来る勇者は本番と同じ顔ぶれ。戦いの運だけ8通り */
+      const N2 = startRaid9(S, g0); const gr = t ? rng23(seed0 + t * 7919) : g0; Math.random = gr; N2.rnd = gr; let g = 0; while (!N2.done && g++ < 4000) stepNight5(S, N2); Math.random = R0;
       const li = S.path.findIndex(r => r.kind === "lord");
       res.push({ md: N2.mons.filter(b => b.down || b.hp <= 0).length, deep: Math.max(0, ...N2.heroes.map(h => h.maxPos || h.pos || 0)), li, lordLoss: N2.lord ? Math.max(0, (N2.lord.max || 0) - N2.lord.hp) / Math.max(1, N2.lord.max || 1) : 0, down: N2.lord && N2.lord.hp <= 0, esc: N2.heroes.filter(h => h.st === "escaped").length }); }
   } catch (e) { console.error(e); } finally { Math.random = R0; S = S0; UID5 = U0; }
@@ -7738,7 +7742,7 @@ const heat23 = S => S.heat23 || 0;
     S.heat23 = Math.max(0, Math.min(3, heat23(S) + d)); N.heatD23 = d; } } catch (e) {}
   return _er.apply(this, arguments); }; }
 // ---------- 6) 店の値段はレア度で変わる（SSRとNが同じ値段だった）。DPの使いみちにもなる ----------
-{ const _p = price5; price5 = (sp, o) => { const b = _p(sp, o); if (!o) return b; return Math.round(b * [1, 1.5, 2.4, 4][Math.max(0, RARS19.indexOf(o.rar || "N"))] * (o.shiny19 ? 1.6 : 1) / 10) * 10; }; }
+{ const _p = price5; price5 = (sp, o) => { const b = _p(sp, o); if (!o) return b; const v = b * [1, 1.5, 2.2, 3][Math.max(0, RARS19.indexOf(o.rar || "N"))] * (o.shiny19 ? 1.6 : 1); const cap = (typeof S !== "undefined" && S ? 400 + 30 * (S.day || 1) : 1e9); return Math.round(Math.min(v, Math.max(b, cap)) / 10) * 10; }; }   // SSRでも数日ためれば届く値段まで（💎2080で届かない、をなくす）
 // ---------- 7) 夜の戦闘を見やすく：上の黒い帯をなくし、下に「勇者の体力・どこにいるか・できごと」を出す ----------
 // ×1 はゆっくり（1歩0.45秒）。×3 は今までの×3と同じぐらい
 tick = function () { clearTimeout(timer); if (!N) return; timer = setTimeout(() => { stepNight5(S, N); if (N.done) { render(); timer = setTimeout(() => { if (N && N.done) endRaid(); }, speed === 3 ? 600 : 1300); return; } if (Date.now() - touchT > 600) render(); else caveUpdate(); tick(); }, speed === 3 ? 150 : 450); };
@@ -7838,15 +7842,15 @@ function dpFix23(root) { if (!root) return; const w = document.createTreeWalker(
 { const _t = toast; toast = function (m, ...a) { return _t.call(this, typeof m === "string" ? dpTx23(m) : m, ...a); }; }
 // ---------- 18) 迎え撃つ準備：襲撃の前日と当日に、DPを使って一晩だけ守りを固める（たまったDPの使いみち） ----------
 // 危ない度にもすぐ反映される（買うと🟠→🟡のように下がる）。襲撃が終わると消える
-const PREP23 = { feast: ["🍖", "前夜のごちそう", "全員の体力+20%", 1.5], arrow: ["🏹", "矢の補充", "狙う子の攻撃+40%", 1], trap: ["🪤", "罠の追加", "罠の威力+60%", 1], ward: ["🔮", "主の結界", "主の結界+250", 1.2] };
+const PREP23 = { feast: ["🍖", "前夜のごちそう", "全員の体力+20%", 1.5], arrow: ["🏹", "矢の補充", "狙う子の攻撃+40%", 1], trap: ["🪤", "罠の追加", "罠の威力+60%", 1], ward: ["🔮", "主の結界", "主の結界が大きく増える（日ごとに強く）", 1.2] };
 // 値段は日数と、いま持っているDPで上がる（ため込むほど高くつく＝ためずに使う理由）
-const prepCost23 = (S, k) => { const P = S.prep23 || {}; if (P[k]) return P[k]; return Math.round(Math.max(100, 50 + 12 * S.day, S.dp * 0.1) * (1 + 0.6 * (((S.contract && S.contract.lv) || 1) - 1)) * PREP23[k][3] / 10) * 10; };
+const prepCost23 = (S, k) => { const P = S.prep23 || {}; if (P[k]) return P[k]; return Math.round(Math.max(60, 20 + 6 * S.day, S.dp * 0.15) * (1 + 0.6 * (((S.contract && S.contract.lv) || 1) - 1)) * PREP23[k][3] / 10) * 10; };
 const prepOf23 = S => S.prep23 || (S.prep23 = {});
 { const _sr = startRaid9; startRaid9 = function (S, rnd) { const N = _sr.apply(this, arguments);
   try { const P = S.prep23 || {}; if (N && !N.scout) {
     if (P.feast) N.mons.forEach(b => { b.max = Math.round(b.max * 1.2); b.hp = Math.round(b.hp * 1.2); });
     if (P.arrow) N.mons.forEach(b => { if (b.job === "snipe") b.atk = Math.round(b.atk * 1.4); });
-    if (P.ward && N.lord) { N.lord.wardMax = (N.lord.wardMax || 0) + 250; N.lord.ward = (N.lord.ward || 0) + 250; }
+    if (P.ward && N.lord) { const w = 250 + 40 * (S.day || 1); N.lord.wardMax = (N.lord.wardMax || 0) + w; N.lord.ward = (N.lord.ward || 0) + w; }
     N.prep23 = { ...P }; } } catch (e) {} return N; }; }
 trapPow10 = (prev => function (S, N, i) { const v = prev(S, N, i); return N && N.prep23 && N.prep23.trap ? Math.round(v * 1.6) : v; })(trapPow10);
 { const _er = endRaid9; endRaid9 = function (S, N) { const r = _er.apply(this, arguments); if (!N.scout) S.prep23 = {}; return r; }; }
@@ -7888,7 +7892,7 @@ document.addEventListener("click", ev => { const b = ev.target.closest('[data-a=
 
 // ---------- 21) 💎の入りを絞る：襲撃で落とす💎は6割に（中盤から💎があふれて「何でも買える」になっていた） ----------
 { const _er = endRaid9; endRaid9 = function (S, N) { const d0 = S.dp; const out = _er.apply(this, arguments);
-  try { if (!N.scout) { const g = S.dp - d0; if (g > 0) { const k = gainK23(d0), keep = Math.round(g * k); S.dp = d0 + keep; S.gain23 = { day: S.day, v: keep }; if (out) { out.dp = Math.round((out.dp || 0) * k); } } } } catch (e) {} return out; }; }   // 襲撃で入る💎（深さ・ボーナス込み）を6割に。ため込むほど減る
+  try { if (!N.scout) { const g = S.dp - d0; if (g > 0) { const k = gainK23(d0), keep = Math.round(g * k); S.dp = d0 + keep; S.gain23 = { n: S.raidNo, v: keep }; if (out) { out.dp = Math.round((out.dp || 0) * k); } } } } catch (e) {} return out; }; }   // 襲撃で入る💎（深さ・ボーナス込み）を6割に。ため込むほど減る
 // ---------- 22) 夜のカメラ：いちばん奥まで来た勇者の階を映す（B2・主の間へ降りたら追いかける） ----------
 { const _r = render; render = function () { try { if (N && caveFollow && typeof floorOf === "function") { const hs = N.heroes.filter(h => h.st === "in"); if (hs.length) { const p = Math.max(...hs.map(h => h.pos || 0)), f = floorOf(S, Math.min(p, S.path.length - 1)); if (f != null && f >= 0 && caveFloor !== f) { caveFloor = f; CV.sig = ""; } } } } catch (e) {} return _r.apply(this, arguments); }; }
 
@@ -7929,7 +7933,7 @@ resultStage15 = (prev => function (r) { let h = prev(r); try { if (r.lastStand23
 
 // ---------- 27) 逃げた勇者は💎を持ち逃げする（1人につき手持ちの5%、最大3割）。「逃がさない」に意味を ----------
 { const _er = endRaid9; endRaid9 = function (S, N) { const out = _er.apply(this, arguments);
-  try { if (!N.scout && !N.lastStand23) { const esc = N.heroes.filter(h => h.st === "escaped").length; if (esc && S.dp > 0) { const lost = Math.round(S.dp * Math.min(0.3, 0.05 * esc)); S.dp -= lost; S.runaway23 = { day: S.day, lost }; } } } catch (e) {} return out; }; }
+  try { if (!N.scout && !N.lastStand23) { const esc = N.heroes.filter(h => h.st === "escaped").length; if (esc && S.dp > 0) { const lost = Math.round(S.dp * Math.min(0.3, 0.05 * esc)); S.dp -= lost; S.runaway23 = { day: S.day, n: S.raidNo, lost }; } } } catch (e) {} return out; }; }
 resultStage15 = (prev => function (r) { let h = prev(r); try { const R = S.runaway23; if (R && R.lost && r.esc) h = h.replace('<div class="rs-grid">', `<div class="hint bad" style="text-align:center">🏃 逃げた勇者が💎${fmt8(R.lost)}を持ち逃げした</div><div class="rs-grid">`); } catch (e) {} return h; })(resultStage15);
 // ---------- 28) 店：SSRの天井（並ばない回数を数える）と、入れかえ代の上がり方をゆるく ----------
 { const _sh = shop5; shop5 = function (S) { const r = _sh.apply(this, arguments); try { if ((S.shop || []).some(o => o && o.rar === "SSR")) S.pity23 = 0; else S.pity23 = (S.pity23 || 0) + 1; } catch (e) {} return r; }; }
@@ -7971,13 +7975,34 @@ resultStage15 = (prev => function (r) { let h = prev(r); try { const tp = tip23(
 function gainK23(d0) { return 0.55 / (1 + Math.max(0, d0 || 0) / 2500); }
 // 結果画面：「手に入れた」は実際に増えた💎（ボーナス込み）。持ち逃げは「盗まれた」に入れる
 resultStage15 = (prev => function (r) { let h = prev(r); try {
-  const G = S.gain23; if (G && G.day === S.day) h = h.replace(/(<small>手に入れた<\/small><b class="gold">)💎\+[\d,]+/, `$1💎+${fmt8(G.v)}`);
-  const R = S.runaway23; if (R && R.lost && R.day === S.day && r.esc) h = h.replace(/(<small>盗まれた<\/small><b class=")[^"]*(">)[^<]*/, `$1bad$2-${fmt8((r.stolen || 0) + R.lost)}`);
+  const G = S.gain23; if (G && G.n === S.raidNo) h = h.replace(/(<small>手に入れた<\/small><b class="gold">)💎\+[\d,]+/, `$1💎+${fmt8(G.v)}`);
+  const R = S.runaway23; if (R && R.lost && R.n === S.raidNo && r.esc) h = h.replace(/(<small>盗まれた<\/small><b class=")[^"]*(">)[^<]*/, `$1bad$2-${fmt8((r.stolen || 0) + R.lost)}`);
 } catch (e) {} return h; })(resultStage15);
 // 指令「盗ませるな」：逃げた勇者がいたら失敗（持ち逃げされるので）
 try { const o = ORD16.nosteal; if (o) { const ok = o.ok; o.ok = (r, N) => ok(r, N) && !N.heroes.some(h => h.st === "escaped"); } } catch (e) {}
 // 危ない度が注意以上で、主のLvが日数に追いついていなければ「主を鍛える」を出す（21日目まで主Lv1のまま、をなくす）
 { const _rb = raidBox; raidBox = function () { let h = _rb(); try { const v = dng23.v; if (h && v && v.lv >= 1 && S.day >= 8 && S.lord && S.lord.lv < 1 + Math.floor(S.day / 5)) h = h.replace('<span class="hint">並べかえ・罠', `<button class="mini" data-a="lord" style="align-self:flex-start">👑 主を鍛える（いまLv${S.lord.lv}）→ 主が倒れにくくなる</button><span class="hint">並べかえ・罠`); } catch (e) {} return h; }; }
+
+// 主が倒れた夜は「地図 守った」と出さない
+resultStage15 = (prev => function (r) { let h = prev(r); try { if (!r.win) h = h.replace(/(<small>地図<\/small><b class=")[^"]*(">)守った/, "$1bad$2主が倒れた"); } catch (e) {} return h; })(resultStage15);
+// けがの子を寝床のある部屋へ運ぶ（やることの「寝床のない部屋で寝ている」から1タップで）
+document.addEventListener("click", ev => { const b = ev.target.closest('[data-a="bedmove23"]'); if (!b || !S) return; ev.stopPropagation(); let n = 0;
+  try { S.mons.forEach(m => { if (!m.rest || (m.home != null && hasFac12(S.path[m.home], "bed"))) return; const i = S.path.findIndex((r, k) => hasFac12(r, "bed") && residents5(S, k).length < capOfSlot7(S, k)); if (i < 0) return; m.home = i; n++; }); } catch (e) { console.error(e); }
+  toast(n ? `🛏 ${n}体を寝床へ運んだ（早く治る）` : "🛏 寝床に空きがない"); CV.sig = ""; save(); render(); }, true);
+// 夜の速さは、前に選んだ速さで始める（主の間・ボスで×1になっても、次の夜はもどす）
+{ const _sr = startRaid9; startRaid9 = function (S) { const N = _sr.apply(this, arguments); try { if (!S.sim23) { const v = +localStorage.getItem("chika-spd"); if (v === 1 || v === 3) speed = v; } } catch (e) {} return N; }; }
+// 罠を1.5倍に（ダメージのほとんどが「戦う」で、罠・施設を置く意味が薄かった）
+trapPow10 = (prev => function (S, N, i) { return Math.round(prev(S, N, i) * 1.5); })(trapPow10);
+// 配合の確認画面：組み合わせられない2体なら、ボタンを押せなくして理由を出す（押しても何も起きない、をなくす）
+mixSkillModal = (prev => function () { let h = prev(); try { const A = S.mons.find(m => m.id === MX[0]), B = S.mons.find(m => m.id === MX[1]); const p = A && B ? mixPreview7(S, A, B) : null;
+  if (p && !p.ok) h = h.replace(/<button class="main" data-a="mixgo"[^>]*>/g, m => m.replace("<button", "<button disabled")) .replace(/(<div class="mixbtn18">|<div class="pk"><button class="main" data-a="mixgo")/, `<div class="hint bad" style="text-align:center;font-size:13px">🥚 配合できない：${p.why || "条件をみたしていない"}</div>$1`);
+} catch (e) {} return h; })(mixSkillModal);
+
+// 店：買えない子には「あと💎○・約○日」を出す（見せびらかしではなく、ためる目標に）
+shopModal = (prev => function () { let h = prev(); try { const inc = typeof income15 === "function" ? income15(S) : 0, per = Math.max(15, inc + (((S.gain23 && S.gain23.v) || 0) / 3));
+  h = h.replace(/<button class="main" data-a="buy" data-v="(\d+)" disabled>([^<]*)<\/button>/g, (m, i) => { const o = S.shop[+i]; if (!o) return m; const c = price5(o.sp, o), sh = c - S.dp; if (sh <= 0) return m;
+    return m + `<small class="need23">あと💎${fmt8(sh)}・約${Math.max(1, Math.ceil(sh / per))}日</small>`; });
+} catch (e) {} return h; })(shopModal);
 
 </script>
 </body>
