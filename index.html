@@ -869,6 +869,9 @@ body{-webkit-touch-callout:none}img{-webkit-touch-callout:none;-webkit-user-drag
 .al23{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}.al23 span{flex:1 1 30%;min-width:0;background:#0a200f99;border-radius:6px;padding:2px 6px;font-size:12px;display:flex;flex-direction:column;gap:2px}.al23 span b{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.al23 span.dead{opacity:.45}
 .bp23{overflow-y:auto!important}
 .stage .raidban{width:auto!important;max-width:calc(100vw - 24px)!important;min-width:0!important}
+.final23{margin:4px 0;padding:6px 8px;border:1px solid #e04030;border-radius:8px;background:#2e1210;color:#ffd0c0;font-size:13px;animation:dng23 1.4s ease-in-out infinite}
+body.finalN23 .cave::before{content:"";position:absolute;inset:0;z-index:31;pointer-events:none;box-shadow:inset 0 0 60px 10px #c0201088}
+.dexc.shx23{box-shadow:0 0 0 1px #ffd76a inset}.dexc.shx23::after{content:"✨";position:absolute;right:4px;top:2px;font-size:12px}.dexc{position:relative}
 </style>
 </head>
 <body>
@@ -2085,7 +2088,7 @@ function shop5(S, rnd = Math.random) {
   const st = shopStars(S), pool = BASE_IDS5.filter(k => MON[k].star <= st);
   S.shop = [0, 1, 2].map(() => { const r = rnd(); const want = st >= 3 && r < 0.15 ? 3 : st >= 2 && r < 0.45 ? 2 : 1; const c = pool.filter(k => MON[k].star === want); return { sp: pick(c.length ? c : pool, rnd), sold: false }; });
 }
-const reroll5Cost = S => 40 * (1 + S.rerolls);
+let reroll5Cost = S => 40 * (1 + S.rerolls);
 function reroll5(S) { const c = reroll5Cost(S); if (S.dp < c) return false; S.dp -= c; S.rerolls++; shop5(S); return true; }
 function buy5(S, i) {
   const o = S.shop[i]; if (!o || o.sold || S.dp < price5(o.sp, o)) return null;
@@ -4663,7 +4666,7 @@ raidResult15 = (prev => function (S, N) { const r = prev(S, N); misAdd19(S, "kil
 raidResult15 = (prev => function (S, N) {
   const r = prev(S, N); if (N.scout) return r;
   r.stars = r.win ? 1 + (!r.esc && !N.stolen ? 1 : 0) + (!r.lost ? 1 : 0) : 0; r.ok19 = [!!r.win, !!r.win && !r.esc && !N.stolen, !!r.win && !r.lost];
-  if (r.win && !((r.esc || 0) * 2 >= (r.total || 1))) { S.streak19 = (S.streak19 || 0) + 1; const b = Math.round((N.dp || r.dp || 0) * Math.min(0.2, 0.03 * S.streak19)); if (b > 0) { S.dp += b; r.streakBonus = b; } }
+  if (r.win && !r.esc) { S.streak19 = (S.streak19 || 0) + 1; const b = Math.round((N.dp || r.dp || 0) * Math.min(0.2, 0.03 * S.streak19)); if (b > 0) { S.dp += b; r.streakBonus = b; } }
   else S.streak19 = 0;
   r.streak = S.streak19 || 0; S.chestBonus19 = (S.chestBonus19 || 0) + 0.35 * r.stars;
   return r;
@@ -4671,7 +4674,9 @@ raidResult15 = (prev => function (S, N) {
 // ================= 店のレア度：N・R・SR・SSR。SRはスキル+1、SSRはスキル+2 =================
 shop5 = (prev => function (S, rnd = Math.random) {
   const r = prev(S, rnd);
-  (S.shop || []).forEach(o => { if (!o || o.rar) return; const x = rnd() * 100; o.rar = x < 4 ? "SSR" : x < 18 ? "SR" : x < 50 ? "R" : "N";
+  // SSRは7%。5回つづけてSSRが並ばなかったら、次は1枠SSR確定（天井）
+  const pity = (S.pity23 || 0) >= 5 && !(S.shop || []).some(o => o && o.rar === "SSR"); let forced = false;
+  (S.shop || []).forEach(o => { if (!o || o.rar) return; const x = rnd() * 100; o.rar = pity && !forced ? (forced = true, "SSR") : x < 7 ? "SSR" : x < 22 ? "SR" : x < 52 ? "R" : "N";
     const add = o.rar === "SSR" ? 2 : o.rar === "SR" ? 1 : 0, ks = Object.keys(SK11); o.sk = o.sk || {};
     for (let k = 0, g = 0; k < add && g < 40; g++) { const c = ks[Math.floor(rnd() * ks.length)]; if (!o.sk[c] && Object.keys(o.sk).length < 4) { o.sk[c] = 1; k++; } } });
   return r;
@@ -7031,7 +7036,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.152（11/16 12:41）";
+const VER20 = "No.153（11/16 14:28）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7701,7 +7706,8 @@ function danger23() {
   const v = { downs: res.filter(o => o.down).length, lord: res.filter(o => o.lordLoss > 0).length, deep: Math.round(res.reduce((a, o) => a + Math.min(o.deep, li), 0) / res.length * 10) / 10, li, dens, esc: res.reduce((a, o) => a + o.esc, 0) / res.length };
   v.md = res.reduce((a, o) => a + o.md, 0) / res.length;
   const n = res.length; v.n = n;
-  v.lv = v.downs >= n * 0.5 ? 3 : v.downs >= 2 || v.lord >= n * 0.4 ? 2 : v.deep >= Math.max(1, li - 1) || v.lord || v.esc >= 0.6 || v.md >= 3 ? 1 : 0;
+  const nm = Math.max(1, S.mons.filter(m => m.home != null).length);
+  v.lv = v.downs >= n * 0.5 ? 3 : v.downs >= 2 || v.lord >= n * 0.4 || v.md >= nm * 0.6 || v.esc >= 2 ? 2 : v.deep >= Math.max(1, li - 1) || v.lord || v.esc >= 0.6 || v.md >= 3 ? 1 : 0;
   // ひとこと理由
   const R = S.path[Math.min(li, Math.max(0, Math.round(v.deep)))];
   v.why = v.lv === 0 ? "" : v.lord ? "主の間まで来られそう" : v.esc >= 0.6 ? `平均${v.esc.toFixed(1)}人に逃げられそう` : v.md >= 3 ? `魔物が${Math.round(v.md)}体ほどやられそう` : `${R ? roomTitle(S, S.path.indexOf(R)) : "奥"}まで来られそう`;
@@ -7719,13 +7725,13 @@ const DNG23 = [["🟢", "余裕", "入口で止まりそう"], ["🟡", "注意"
 // 主まで届かれたら少し冷める。4回目の襲撃から。これで「9日目から先は何もしなくても勝てる」をなくす
 const heat23 = S => S.heat23 || 0;
 { const _sr = startRaid9; startRaid9 = function (S, rnd) { const N = _sr.apply(this, arguments);
-  try { const k = heat23(S) * (N && N.heroes && N.heroes.some(h => h.boss) ? 0.4 : 1); if (N && !N.scout && k > 0) { N.heroes.forEach(h => { h.max = Math.round(h.max * (1 + k)); h.hp = h.max; h.atk = Math.round(h.atk * (1 + k * 0.7)); }); N.heat23 = k; } } catch (e) {}
+  try { const k = heat23(S) * (N && N.heroes && N.heroes.some(h => h.boss) ? 0.6 : 1); if (N && !N.scout && k > 0) { N.heroes.forEach(h => { h.max = Math.round(h.max * (1 + k)); h.hp = h.max; h.atk = Math.round(h.atk * (1 + k * 0.7)); }); N.heat23 = k; } } catch (e) {}
   return N; }; }
 { const _er = endRaid9; endRaid9 = function (S, N) {
   try { if (!N.scout && (S.raidNo || 0) >= 2) {
     const dens = S.path.map((r, i) => r.kind === "den" ? i : -1).filter(i => i >= 0), li = S.path.findIndex(r => r.kind === "lord");
     const deep = Math.max(0, ...N.heroes.map(h => h.maxPos || 0)), esc = N.heroes.filter(h => h.st === "escaped").length, hurt = N.lord && N.lord.hp < (N.lord.max || 0);
-    let d = 0; if (N.lord && N.lord.down) d = -0.3; else if (hurt) d = -0.15; else { const md = N.mons.filter(b => b.down || b.hp <= 0).length; d = !esc && md <= 1 ? 0.2 : esc * 2 >= N.heroes.length || md >= 4 ? 0 : 0.05; }   // 押されている夜は熱を上げない（見えないまま溜まって最後に崖、をなくす）
+    let d = 0; if (N.lord && N.lord.down) d = -0.3; else if (hurt || N.lastStand23) d = -0.2; else d = 0.25;   /* 主が無傷なら毎回すこし強く（逃げられても）。崖はボス4割・ぎりぎり生存・危ない度で和らげる */   // 押されている夜は熱を上げない（見えないまま溜まって最後に崖、をなくす）
     S.heat23 = Math.max(0, Math.min(3, heat23(S) + d)); N.heatD23 = d; } } catch (e) {}
   return _er.apply(this, arguments); }; }
 // ---------- 6) 店の値段はレア度で変わる（SSRとNが同じ値段だった）。DPの使いみちにもなる ----------
@@ -7831,7 +7837,7 @@ function dpFix23(root) { if (!root) return; const w = document.createTreeWalker(
 // 危ない度にもすぐ反映される（買うと🟠→🟡のように下がる）。襲撃が終わると消える
 const PREP23 = { feast: ["🍖", "前夜のごちそう", "全員の体力+20%", 1.5], arrow: ["🏹", "矢の補充", "狙う子の攻撃+40%", 1], trap: ["🪤", "罠の追加", "罠の威力+60%", 1], ward: ["🔮", "主の結界", "主の結界+250", 1.2] };
 // 値段は日数と、いま持っているDPで上がる（ため込むほど高くつく＝ためずに使う理由）
-const prepCost23 = (S, k) => { const P = S.prep23 || {}; if (P[k]) return P[k]; return Math.round(Math.max(150, 80 + 22 * S.day, S.dp * 0.1) * (1 + 0.6 * (((S.contract && S.contract.lv) || 1) - 1)) * PREP23[k][3] / 10) * 10; };
+const prepCost23 = (S, k) => { const P = S.prep23 || {}; if (P[k]) return P[k]; return Math.round(Math.max(100, 50 + 12 * S.day, S.dp * 0.1) * (1 + 0.6 * (((S.contract && S.contract.lv) || 1) - 1)) * PREP23[k][3] / 10) * 10; };
 const prepOf23 = S => S.prep23 || (S.prep23 = {});
 { const _sr = startRaid9; startRaid9 = function (S, rnd) { const N = _sr.apply(this, arguments);
   try { const P = S.prep23 || {}; if (N && !N.scout) {
@@ -7878,7 +7884,8 @@ document.addEventListener("toggle", ev => { const d = ev.target; if (d && d.clas
     rest.forEach((m, k) => { if (m.keep23) { delete m.keep23; m.job = null; m.job19 = rj[k]; } }); } }; }
 
 // ---------- 21) 💎の入りを絞る：襲撃で落とす💎は6割に（中盤から💎があふれて「何でも買える」になっていた） ----------
-{ const _er = endRaid9; endRaid9 = function (S, N) { try { if (!N.scout && N.dp > 0) N.dp = Math.round(N.dp * 0.6 / (1 + Math.max(0, S.dp) / 4000)); /* ため込むほど入りが減る */ } catch (e) {} return _er.apply(this, arguments); }; }
+{ const _er = endRaid9; endRaid9 = function (S, N) { const d0 = S.dp; const out = _er.apply(this, arguments);
+  try { if (!N.scout) { const g = S.dp - d0; if (g > 0) { const k = 0.6 / (1 + Math.max(0, d0) / 3000), keep = Math.round(g * k); S.dp = d0 + keep; if (out) { out.dp = Math.round((out.dp || 0) * k); } } } } catch (e) {} return out; }; }   // 襲撃で入る💎（深さ・ボーナス込み）を6割に。ため込むほど減る
 // ---------- 22) 夜のカメラ：いちばん奥まで来た勇者の階を映す（B2・主の間へ降りたら追いかける） ----------
 { const _r = render; render = function () { try { if (N && caveFollow && typeof floorOf === "function") { const hs = N.heroes.filter(h => h.st === "in"); if (hs.length) { const p = Math.max(...hs.map(h => h.pos || 0)), f = floorOf(S, Math.min(p, S.path.length - 1)); if (f != null && f >= 0 && caveFloor !== f) { caveFloor = f; CV.sig = ""; } } } } catch (e) {} return _r.apply(this, arguments); }; }
 
@@ -7901,6 +7908,36 @@ function advice23(v) {
   if (!N.lordSlow23 && li >= 0 && N.heroes.some(h => h.st === "in" && h.pos === li)) { N.lordSlow23 = 1; speed = 1; caveFloor = floorOf(S, li); CV.sig = ""; setTimeout(() => { try { banner19("<small>⚠ 主の間</small><i>勇者が主の間に入った！</i>", "wipe", 1600); } catch (e) {} }, 0); } } } catch (e) {} return _r.apply(this, arguments); }; }
 // ---------- 24) 色違いは、どの画面でも色違いの色で（店・MVP・配合・進化…）。ビルドで simg23(m, m.evos…) をこれに置きかえる ----------
 function simg23(m, f, cls = "sp", style = "") { const sp = m && m.sp; return img(sp, f, cls, m && m.shiny19 ? `${style};filter:hue-rotate(150deg) saturate(1.5) brightness(1.08)` : style); }
+
+// ---------- 25) 主は、契約ごとに1回だけ「ぎりぎり生きのびる」。いきなり負けではなく、まず瀕死の夜が来る ----------
+// 主の体力が0になった最初の夜：体力1で耐え、勇者は勝ったつもりで💎を3割持って帰る。次からは本当に倒れる
+{ const _st = stepNight5; stepNight5 = function (S, N) { const r = _st.apply(this, arguments);
+  try { if (N && !N.scout && !S.sim23 && N.lord && N.lord.down && S.lastStand23 !== ((S.contract && S.contract.lv) || 1)) { S.lastStand23 = (S.contract && S.contract.lv) || 1; N.lord.down = false; N.lord.hp = 1; N.lastStand23 = 1;
+    N.heroes.forEach(h => { if (h.st === "in" || h.st === "wait") h.st = "escaped"; }); N.done = true;
+    if (N.events) N.events.push({ t: N.t, who: "", text: "主はぎりぎり生きのびた…！ 勇者は勝ったと思って引き上げていく", kind: "bad" }); } } catch (e) {}
+  return r; }; }
+{ const _er = endRaid9; endRaid9 = function (S, N) { const out = _er.apply(this, arguments);
+  try { if (N.lastStand23) { const lost = Math.round(S.dp * 0.3); S.dp -= lost; out.lastStand23 = lost; } } catch (e) {} return out; }; }
+{ const _rr = raidResult15; raidResult15 = function (S, N) { const r = _rr.apply(this, arguments); try { if (N.lastStand23) r.lastStand23 = 1; } catch (e) {} return r; }; }
+resultStage15 = (prev => function (r) { let h = prev(r); try { if (r.lastStand23) h = h.replace(/<div class="rb-h">[^<]*<\/div>/, '<div class="rb-h">😱 主が瀕死…！</div>') + `<div class="box bad" style="max-width:360px;margin:6px auto;text-align:left">主はぎりぎり生きのびた。勇者は💎を3割持ち去った。<b>次に主が倒れたら終わり</b>（この契約では、もう助からない）。🛡迎え撃つ準備・👑主を鍛える・奥の守りを</div>`; } catch (e) {} return h; })(resultStage15);
+// ---------- 26) 契約の最後の夜は特別に：前の日から予告、夜は画面を赤く ----------
+{ const _rb = raidBox; raidBox = function () { let h = _rb(); try { const last = S.day >= CONTRACT_LEN9 - 1 && daysToRaid9(S) != null && S.day + daysToRaid9(S) >= CONTRACT_LEN9; if (h && last) h = `<div class="final23">🔥 <b>契約の最後の夜</b>：いちばんの大軍と、名のある勇者が来る。これを越えれば契約達成</div>` + h; } catch (e) {} return h; }; }
+{ const _r = render; render = function () { _r.apply(this, arguments); try { document.body.classList.toggle("finalN23", !!(N && !N.scout && S.day >= CONTRACT_LEN9)); } catch (e) {} }; }
+
+// ---------- 27) 逃げた勇者は💎を持ち逃げする（1人につき手持ちの5%、最大3割）。「逃がさない」に意味を ----------
+{ const _er = endRaid9; endRaid9 = function (S, N) { const out = _er.apply(this, arguments);
+  try { if (!N.scout && !N.lastStand23) { const esc = N.heroes.filter(h => h.st === "escaped").length; if (esc && S.dp > 0) { const lost = Math.round(S.dp * Math.min(0.3, 0.05 * esc)); S.dp -= lost; if (out) out.stolen = (out.stolen || 0) + lost; } } } catch (e) {} return out; }; }
+// ---------- 28) 店：SSRの天井（並ばない回数を数える）と、入れかえ代の上がり方をゆるく ----------
+{ const _sh = shop5; shop5 = function (S) { const r = _sh.apply(this, arguments); try { if ((S.shop || []).some(o => o && o.rar === "SSR")) S.pity23 = 0; else S.pity23 = (S.pity23 || 0) + 1; } catch (e) {} return r; }; }
+{ const _rc = reroll5Cost; try { reroll5Cost = S => 40 + 20 * (S.rerolls || 0); } catch (e) {} }
+// ---------- 29) 小さな直し：分かりにくい指令「すばやく片づけろ」はなくす／いなくなった子の名前は使い回さない／図鑑に色違いの印 ----------
+try { delete ORD16.fast; } catch (e) {}
+{ const _nm = newMon5; newMon5 = function () { const m = _nm.apply(this, arguments);
+  try { if (S && m) { const used = new Set([...(S.names23 || []), ...S.mons.map(o => o.nick)]); let k = 0; while (used.has(m.nick) && k++ < 30) { const m2 = _nm.apply(this, arguments); m.nick = m2.nick; } (S.names23 = S.names23 || []).push(m.nick); if (S.names23.length > 200) S.names23.shift(); } } catch (e) {} return m; }; }
+{ const _r = render; render = function () { try { if (S) { const M = metaOf8(S), sh = M.shiny23 || (M.shiny23 = {}); S.mons.forEach(m => { if (m.shiny19) sh[m.sp] = 1; }); } } catch (e) {} return _r.apply(this, arguments); }; }
+{ const _dm = dexModal; dexModal = function () { let h = _dm.apply(this, arguments); try { const sh = metaOf8(S).shiny23 || {};
+  Object.keys(sh).forEach(k => { h = h.replace(`<div class="dexc have" data-a="dexsp" data-v="${k}">`, `<div class="dexc have shx23" data-a="dexsp" data-v="${k}">`); });
+  if (DX && sh[DX]) h = h.replace('<div class="h2">', '<div class="h2">✨ ') + `<div class="hint gold" style="text-align:center">✨ 色違いも手に入れた！ <span style="display:inline-block;filter:hue-rotate(150deg) saturate(1.5) brightness(1.08)">${img(DX, 0, "sp", "width:48px;height:48px")}</span></div>`; } catch (e) {} return h; }; }
 
 </script>
 </body>
