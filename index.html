@@ -880,6 +880,7 @@ body:has(.stage) .modal{display:none!important}
 .shopc18 .sn{padding-right:36px}/* レア度の札が「🍖2/日」に重なっていた */
 .need23{display:block;text-align:right;font-size:12px;color:#ffcf70;margin-top:3px}
 .kept23{position:absolute;left:10px;top:-9px;font-size:12px;color:#ffd76a;background:#3a2a10;border:1px solid #b08a30;border-radius:6px;padding:0 5px;z-index:2}.shopc18{position:relative}
+.sb{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap}.pin23{font-size:12px;padding:4px 8px}.pin23.on{border-color:#d0a030;color:#ffd76a;background:#3a2a10}
 </style>
 </head>
 <body>
@@ -6505,7 +6506,7 @@ function slotPickView18() {
     last18 = roomSel; } catch (e) {} }; }
 // 店：1体ずつ横長のカード。スキル・役割・得意の説明を全部のせる
 shopModal = function () {
-  return `<h2>🛒 魔物を呼ぶ</h2><div class="hint">毎朝入れかわる（SSR・色違いは買うまで残る）。同じ種族でもスキルが違う。買った子はおまかせで空いている部屋に住む</div>
+  return `<h2>🛒 魔物を呼ぶ</h2><div class="hint">毎朝入れかわる（📌を付けた子は買うまで残る・2体まで）。同じ種族でもスキルが違う。買った子はおまかせで空いている部屋に住む</div>
     <div class="pk">${S.freeRoll19 !== S.day ? `<button class="main" data-a="reroll">🎲 入れかえ <b>無料！</b></button>` : `<button data-a="reroll" ${S.dp < reroll5Cost(S) ? "disabled" : ""}>🎲 入れかえ ${reroll5Cost(S)}</button>`}<button data-a="mixsel">🥚 配合の早見表</button></div>
     <div class="shop18">${S.shop.map((o, i) => { const D = MON[o.sp], R = ROLES[D.role], k = aptOf18(o.sp), sks = Object.keys(o.sk || {});
       const rr = shopRar19(o);
@@ -7044,7 +7045,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.157（11/16 18:44）";
+const VER20 = "No.158（11/16 20:00）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -8004,10 +8005,21 @@ shopModal = (prev => function () { let h = prev(); try { const inc = typeof inco
   h = h.replace(/<button class="main" data-a="buy" data-v="(\d+)" disabled>([^<]*)<\/button>/g, (m, i) => { const o = S.shop[+i]; if (!o) return m; const c = price5(o.sp, o), sh = c - S.dp; if (sh <= 0) return m;
     return m + `<small class="need23">あと💎${fmt8(sh)}・約${Math.max(1, Math.ceil(sh / per))}日</small>`; });
 } catch (e) {} return h; })(shopModal);
-// SSR・色違いは、買うまで店に残る（入れかえ・次の日でも消えない。取り置きは2体まで）
-shop5 = (prev => function (S) { const keep = (S.shop || []).filter(o => o && !o.sold && (o.rar === "SSR" || o.shiny19)).slice(0, 2).map(o => ({ ...o, kept23: 1 }));
-  const r = prev.apply(this, arguments); try { if (keep.length) S.shop = keep.concat((S.shop || []).filter(o => o)).slice(0, Math.max(3, keep.length)); } catch (e) {} return r; })(shop5);
-shopModal = (prev => function () { let h = prev(); try { let i = 0; h = h.replace(/<span class="rarl19">/g, m => { const o = S.shop[i++]; return o && o.kept23 && !o.sold ? `<span class="kept23">📌買うまで残る</span>` + m : m; }); } catch (e) {} return h; })(shopModal);
+// 店の取り置き：📌を付けた子は、買うまで残る（入れかえ・次の日でも消えない）。2体まで。SSR・色違いは空きがあれば最初から📌
+const PIN23 = 2;
+shop5 = (prev => function (S) { const keep = (S.shop || []).filter(o => o && !o.sold && (o.pin23 || o.kept23)).slice(0, PIN23).map(o => { const c = { ...o, pin23: 1 }; delete c.kept23; return c; });
+  const r = prev.apply(this, arguments);
+  try { const fresh = (S.shop || []).filter(o => o); let n = keep.length; fresh.forEach(o => { if (n < PIN23 && (o.rar === "SSR" || o.shiny19)) { o.pin23 = 1; n++; } });
+    S.shop = keep.concat(fresh).slice(0, Math.max(3, keep.length)); } catch (e) {} return r; })(shop5);
+shopModal = (prev => function () { let h = prev(); try { let i = 0, j = 0;
+  h = h.replace(/<span class="rarl19">/g, m => { const o = S.shop[i++]; return o && o.pin23 && !o.sold ? `<span class="kept23">📌買うまで残る</span>` + m : m; });
+  h = h.replace(/<div class="sb">/g, m => { const k = j++, o = S.shop[k]; return o && !o.sold ? m + `<button class="mini pin23 ${o.pin23 ? "on" : ""}" data-a="pin23" data-v="${k}">${o.pin23 ? "📌残す中" : "📌残す"}</button>` : m; });
+} catch (e) {} return h; })(shopModal);
+document.addEventListener("click", ev => { const b = ev.target.closest('[data-a="pin23"]'); if (!b || !S) return; ev.stopPropagation(); const o = S.shop[+b.dataset.v]; if (!o) return;
+  if (o.pin23) { delete o.pin23; delete o.kept23; toast("📌はずした（入れかえ・次の日で消える）"); }
+  else if (S.shop.filter(x => x && x.pin23 && !x.sold).length >= PIN23) { toast(`📌は${PIN23}体まで。どれかを外してから`); return; }
+  else { o.pin23 = 1; toast("📌残す：買うまで店に残る"); }
+  save(); render(); }, true);
 
 </script>
 </body>
