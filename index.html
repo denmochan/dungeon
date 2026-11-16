@@ -860,6 +860,15 @@ body{-webkit-touch-callout:none}img{-webkit-touch-callout:none;-webkit-user-drag
 .sk23 summary{list-style:none;cursor:pointer;display:flex;flex-wrap:wrap;gap:3px;align-items:center}.sk23 summary::-webkit-details-marker{display:none}.sk23 summary::after{content:"▾";color:#cbb;font-size:12px;margin-left:2px}.sk23[open] summary::after{content:"▴"}.sk23 .skrow{margin-top:2px}
 .mbox:has(.mclose21) .mixbtn18{bottom:46px;z-index:2}
 .raidban{max-width:100%;box-sizing:border-box}.raidban .rb-h,.raidban .rb-t{white-space:normal!important;overflow-wrap:anywhere}
+.buy23{position:fixed;inset:0;z-index:400;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:#000b;animation:buy23 .35s ease-out;overflow:hidden}
+.buy23 b{font-size:52px;font-weight:900;letter-spacing:4px;background:linear-gradient(90deg,#ff6,#f6f,#6ff,#ff6);-webkit-background-clip:text;color:transparent;filter:drop-shadow(0 0 10px #fffa)}
+.buy23.rSR b{background:linear-gradient(90deg,#ffd76a,#fff4c0,#ffd76a);-webkit-background-clip:text}
+.buy23 i{font-style:normal;font-size:18px;font-weight:800;color:#ffe060}.buy23 small{font-size:14px;color:#ddd}.buy23 span{font-size:12px;color:#aaa;margin-top:8px}
+.buy23 .rays19{position:absolute;inset:-50%;z-index:-1}
+@keyframes buy23{from{opacity:0;transform:scale(1.15)}to{opacity:1;transform:none}}
+.al23{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}.al23 span{flex:1 1 30%;min-width:0;background:#0a200f99;border-radius:6px;padding:2px 6px;font-size:12px;display:flex;flex-direction:column;gap:2px}.al23 span b{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.al23 span.dead{opacity:.45}
+.bp23{overflow-y:auto!important}
+.stage .raidban{width:auto!important;max-width:calc(100vw - 24px)!important;min-width:0!important}
 </style>
 </head>
 <body>
@@ -4580,7 +4589,7 @@ function rollChest19(S, rnd = Math.random, bonus = 0) {
     bronze: [["dp", Math.round((20 + rnd() * 25) * sc)], ["xp", 1]],
     silver: [["dp", Math.round((70 + rnd() * 60) * sc)], ["xp", 2], ["skill", 1]],
     gold:   [["egg", 0], ["dp", Math.round((200 + rnd() * 150) * sc)], ["xp", 3], ["skill", 2]],
-    rainbow: [["egg", 1], ["egg", 1], ["egg", 1], ["egg", 1], ["lvall", 1], ["dp", Math.round((900 + rnd() * 500) * sc)]],   // 虹は2/3で卵（SR以上）。はずれもDPを多めに
+    rainbow: [["egg", 1], ["egg", 1], ["egg", 1], ["egg", 1], ["lvall", 1], ["dp", Math.round((400 + rnd() * 250) * sc)]],   // 虹は2/3で卵（SR以上）。はずれもDPを多めに
   }[CHEST19[t].k];
   const [kind, val] = pool[Math.floor(rnd() * pool.length)];
   return { tier: t, kind, val, seed: Math.floor(rnd() * 1e9) };
@@ -4627,7 +4636,7 @@ function newMissions19(S) {
 function misAdd19(S, k, v = 1) {
   if (!S || !S.mis19) return; let hit = false;
   S.mis19.list.forEach(m => { if (m.k !== k || m.done) return; m.got = k === "combo" ? Math.max(m.got, v) : m.got + v; if (m.got >= m.need) { m.got = m.need; m.done = true; hit = true;
-    const g = Math.round(60 * (1 + 0.6 * (((S.contract && S.contract.lv) || 1) - 1)) * (1 + (S.day || 1) / 30)); S.dp += g; S.chestBonus19 = (S.chestBonus19 || 0) + 0.6;
+    const g = Math.round(40 * (1 + 0.6 * (((S.contract && S.contract.lv) || 1) - 1)) * (1 + (S.day || 1) / 60)); S.dp += g; S.chestBonus19 = (S.chestBonus19 || 0) + 0.6;
     (S.misDone19 = S.misDone19 || []).push({ text: MIS19[k].t(m.need), icon: MIS19[k].icon, g }); } });
   if (hit && !S.mis19.all && S.mis19.list.every(m => m.done)) { S.mis19.all = true; S.chestBonus19 = (S.chestBonus19 || 0) + 1.5; (S.misDone19 = S.misDone19 || []).push({ all: true }); }
 }
@@ -4652,7 +4661,7 @@ raidResult15 = (prev => function (S, N) { const r = prev(S, N); misAdd19(S, "kil
 raidResult15 = (prev => function (S, N) {
   const r = prev(S, N); if (N.scout) return r;
   r.stars = r.win ? 1 + (!r.esc && !N.stolen ? 1 : 0) + (!r.lost ? 1 : 0) : 0; r.ok19 = [!!r.win, !!r.win && !r.esc && !N.stolen, !!r.win && !r.lost];
-  if (r.win) { S.streak19 = (S.streak19 || 0) + 1; const b = Math.round((N.dp || r.dp || 0) * Math.min(0.5, 0.05 * S.streak19)); if (b > 0) { S.dp += b; r.streakBonus = b; } }
+  if (r.win) { S.streak19 = (S.streak19 || 0) + 1; const b = Math.round((N.dp || r.dp || 0) * Math.min(0.2, 0.03 * S.streak19)); if (b > 0) { S.dp += b; r.streakBonus = b; } }
   else S.streak19 = 0;
   r.streak = S.streak19 || 0; S.chestBonus19 = (S.chestBonus19 || 0) + 0.35 * r.stars;
   return r;
@@ -5614,7 +5623,7 @@ function dayHead(){
   const dr = daysToRaid9(S), boss = S.fc && S.fc.boss;
   const tm = S.fc && S.fc.time && intel9(S) ? (S.fc.time === "day" ? "☀昼" : "🌙夜") : "";
   const raid = (dr === 0 ? `<b class="bad">⚔ 今日 襲撃！${tm ? "（" + tm + "）" : ""}${boss ? "（ボス）" : ""}</b>` : dr != null ? `⚔ 次の襲撃まで <b class="gold">あと${dr}日</b>` : "") + (S.scoutDay === S.day ? `　<b class="bad">👣 偵察が近づいている</b>` : "");
-  const skip = dr != null && dr >= 2 && S.scoutDay !== S.day && !tutOn() ? `<button class="skipb" data-a="skipraid">⏩ 襲撃の日まで</button>` : "";
+  const skip = dr != null && dr >= 2 && !tutOn() ? `<button class="skipb" data-a="skipraid">⏩ 襲撃の日まで</button>` : "";
   return `<div class="daybox"><div class="dayl"><b>📅 ${S.day}日目</b>${skip}<span class="hint"> / ${CONTRACT_LEN9}日の契約${S.contract.lv > 1 ? `（${S.contract.lv}回目）` : ""}</span></div><div>${raid}</div><div class="cal">${RAID_DAYS9.map(d => `<i class="${d < S.day ? "past" : d === S.day ? "now" : ""} ${[15, 30].includes(d) ? "boss" : ""}" style="left:${(d - 1) / (CONTRACT_LEN9 - 1) * 100}%"></i>`).join("")}<b style="left:${(S.day - 1) / (CONTRACT_LEN9 - 1) * 100}%"></b></div></div>`;
 }
 function raidBox(){
@@ -5784,7 +5793,7 @@ function skipToRaid(){
   if (S.ended || S.contractDone || N) return;
   roomSel = roomOpen = null; addPick = null;
   const sum = newRep9(); sum.skills = []; sum.skFull = []; sum.multi = 0; sum.from = S.day;
-  while (daysToRaid9(S) > 0 && S.scoutDay !== S.day && !S.ended && !S.contractDone) {
+  while (daysToRaid9(S) > 0 && !S.ended && !S.contractDone) {   // 偵察の日も飛ばす（偵察はその場で決着）
     const r = runDay9(S); sum.multi++; sum.day = r.day; sum.dp += r.dp; ["mined", "trained", "lvups", "evos", "unlocked"].forEach(k => sum[k].push(...(r[k] || []))); sum.skills.push(...(r.skills || [])); sum.food = (sum.food || 0) + (r.food || 0); sum.hungry = sum.hungry || r.hungry; sum.skFull.push(...(r.skFull || []));
     if (r.evos.length) break;
   }
@@ -6647,7 +6656,7 @@ document.addEventListener("click", ev => {
 // 朝：日を閉じたら宝箱（襲撃の日も）。チュートリアル中と、契約達成・転生の画面が出るときはなし
 { const _cd = closeDay; closeDay = function () { _cd.apply(this, arguments);
   try { if (!S.ended && !S.contractDone && !(typeof tutOn === "function" && tutOn())) { const c = rollChest19(S, Math.random, S.chestBonus19 || 0); S.chestBonus19 = 0;
-      if (c.tier <= 1 && c.kind !== "xp" && c.kind !== "lvall") { const o = openChest19(S, c); (o.evos || []).forEach(e => queue.push({ k: "evo", ...e })); save(); setTimeout(() => { banner19(`<small>${c.tier ? "銀の宝箱" : "銅の宝箱"}</small><i>${o.text}</i><small>${o.sub}</small>`, "mis", 1500); sfx16("coin"); render(); }, 1350); }
+      if (c.tier <= 1 && c.kind !== "lvall") { const o = openChest19(S, c); (o.evos || []).forEach(e => queue.push({ k: "evo", ...e })); save(); setTimeout(() => { banner19(`<small>${c.tier ? "銀の宝箱" : "銅の宝箱"}</small><i>${o.text}</i><small>${o.sub}</small>`, "mis", 1500); sfx16("coin"); render(); }, 1350); }
       else queue.unshift({ k: "chest", c }); }
     const r = lastRep; let wait = 0;
     if (r && !r.raid && !modal) { const g = (r.dp || 0) - (r.food || 0), lv = new Set(r.lvups || []).size;
@@ -7020,7 +7029,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.149（11/16 09:37）";
+const VER20 = "No.150（11/16 11:14）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7709,8 +7718,8 @@ const heat23 = S => S.heat23 || 0;
   try { if (!N.scout && (S.raidNo || 0) >= 2) {
     const dens = S.path.map((r, i) => r.kind === "den" ? i : -1).filter(i => i >= 0), li = S.path.findIndex(r => r.kind === "lord");
     const deep = Math.max(0, ...N.heroes.map(h => h.maxPos || 0)), esc = N.heroes.filter(h => h.st === "escaped").length, hurt = N.lord && N.lord.hp < (N.lord.max || 0);
-    let d = 0; if (N.lord && N.lord.down) d = -0.3; else if (hurt) d = -0.1; else d = 0.1;
-    S.heat23 = Math.max(0, Math.min(2.5, heat23(S) + d)); N.heatD23 = d; } } catch (e) {}
+    let d = 0; if (N.lord && N.lord.down) d = -0.3; else if (hurt) d = -0.15; else d = 0.15;
+    S.heat23 = Math.max(0, Math.min(3, heat23(S) + d)); N.heatD23 = d; } } catch (e) {}
   return _er.apply(this, arguments); }; }
 // ---------- 6) 店の値段はレア度で変わる（SSRとNが同じ値段だった）。DPの使いみちにもなる ----------
 { const _p = price5; price5 = (sp, o) => { const b = _p(sp, o); if (!o) return b; return Math.round(b * [1, 1.5, 2.4, 4][Math.max(0, RARS19.indexOf(o.rar || "N"))] * (o.shiny19 ? 1.6 : 1) / 10) * 10; }; }
@@ -7723,8 +7732,11 @@ function bpanel23() {
   const bar = (v, m, c) => `<i class="hb23"><i style="width:${Math.max(0, Math.min(100, v / Math.max(1, m) * 100))}%;background:${c}"></i></i>`;
   const H = N.heroes.map(h => `<div class="br23 ${h.st}">${img(heroId(h), heroTier(h.lv, h.boss), "sp", "width:22px;height:22px")}<b>${esc(h.name)}</b>${bar(h.hp, h.max, h.st === "dead" ? "#555" : "#e05040")}<small>${st(h)}</small></div>`).join("");
   const L = N.lord ? `<div class="br23 lord">👑<b>主</b>${bar(N.lord.hp, N.lord.max || 300, "#e0b030")}<small>${N.lord.hp}/${N.lord.max || 300}</small></div>` : "";
+  const rooms = [...new Set((N.mons || []).map(b => b.home))].filter(i => i != null && S.path[i]).sort((a, b) => a - b);
+  const A = rooms.length ? `<div class="al23">${rooms.map(i => { const bs = N.mons.filter(b => b.home === i), up = bs.filter(b => !b.down && b.hp > 0), hp = up.reduce((a, b) => a + b.hp, 0), mx = bs.reduce((a, b) => a + b.max, 0);
+    return `<span class="${up.length ? "" : "dead"}"><b>${esc(roomTitle(S, i)).replace(/[🛡🗺⛏]/gu, "").replace(/️/g, "")}</b> 👾${up.length}/${bs.length}${bar(hp, mx, "#50c070")}</span>`; }).join("")}</div>` : "";
   const ev = (N.events || []).slice(-3).reverse().map(e => `<div class="ev23 ${e.kind || ""}">${e.who ? `${esc(e.who)}「${esc(e.text)}」` : esc(e.text)}</div>`).join("");
-  return `<div class="bp23">${L}${H}<div class="evs23">${ev}</div></div>`;
+  return `<div class="bp23">${L}${H}${A}<div class="evs23">${ev}</div></div>`;
 }
 { const _r = render; render = function () { _r.apply(this, arguments); try {
   const host = document.getElementById("cavehost"), cv = host && host.querySelector(".cave"); if (!cv || !N) return;
@@ -7765,8 +7777,13 @@ const divEnd23 = (h, at) => { let d = 0, i = at; const re = /<\/?div\b/g; re.las
   if (DX && !seen.has(DX)) { const D = MON[DX];
     return `<div class="card"><div class="big"><span class="sil23">${img(DX, 0, "sp", "width:112px;height:112px")}</span></div><div><div class="h2">？？？</div><div>${rk(DX)}</div><div class="hint">まだ出会っていない</div></div></div>
       <div class="hint">${D.parents ? "配合でしか生まれないらしい…" : "店にふらっと現れることがある"}</div><div class="pk"><button data-a="dex">← 図鑑</button><button data-a="close">閉じる</button></div>`; }
+  const M = metaOf8(S), F = M.form23 || (M.form23 = {}); S.mons.forEach(m => { F[m.sp] = Math.max(F[m.sp] || 0, m.evos || 0); });
+  const fseen = k => F[k] || 0;
+  if (DX && seen.has(DX)) { let h = _dm.apply(this, arguments); const a = h.indexOf('<div class="forms">'); if (a < 0) return h; const D = MON[DX];
+    const forms = `<div class="forms">${D.forms.map((Fm, k) => k <= fseen(DX) ? `<div class="f">${img(DX, k)}<div>${Fm[0]}</div><div>${k ? "Lv" + EVO_LV5[k - 1] : ""}</div><div class="hint" style="font-size:11px">${fxLine(Fm[1])}</div></div>` : `<div class="f"><span class="sil23">${img(DX, k)}</span><div>？？？</div><div>Lv${EVO_LV5[k - 1]}</div></div>`).join("")}</div>`;
+    return h.slice(0, a) + forms + h.slice(divEnd23(h, a)); }
   let h = _dm.apply(this, arguments); const at = h.indexOf('<div class="dexg">'); if (at < 0) return h;
-  const grid = `<div class="dexg">${MON_IDS.map(k => seen.has(k) ? `<div class="dexc have" data-a="dexsp" data-v="${k}"><div class="fs">${[0, 1, 2].map(f => img(k, f)).join("")}</div><b>${MON[k].forms[0][0]}</b><span>${rk(k)}${roleTag(k)}</span></div>`
+  const grid = `<div class="dexg">${MON_IDS.map(k => seen.has(k) ? `<div class="dexc have" data-a="dexsp" data-v="${k}"><div class="fs">${[0, 1, 2].map(f => f <= fseen(k) ? img(k, f) : `<span class="sil23">${img(k, f)}</span>`).join("")}</div><b>${MON[k].forms[0][0]}</b><span>${rk(k)}${roleTag(k)}</span></div>`
     : `<div class="dexc no" data-a="dexsp" data-v="${k}"><div class="fs"><span class="sil23">${img(k, 0)}</span></div><b>？？？</b><span>${rk(k)}</span></div>`).join("")}</div>`;
   return h.slice(0, at) + grid + h.slice(divEnd23(h, at));
 }; }
@@ -7834,12 +7851,29 @@ document.addEventListener("toggle", ev => { const d = ev.target; if (d && d.clas
 { const _rd = runDay9; let skip = false; skipToRaid = (prev => function () { skip = true; try { return prev.apply(this, arguments); } finally { skip = false; } })(skipToRaid);
   runDay9 = function () { const r = _rd.apply(this, arguments); if (skip && r && r.evos && r.evos.length) { queue.push(...r.evos.map(e => ({ k: "evo", ...e }))); r.evos = []; } return r; }; }
 // 毎朝おまかせがオンなら、ごちそうは自分で選ばずに、おまかせで食べさせる
-{ const _oc = openChest19; openChest19 = function (S, c) { const o = _oc(S, c); try { if (o && o.feed && !o.awaken && afc19(S).daily) { const { ms, rep, lv0 } = feedApply19(S, [], o.feed, false); o.fed = true; o.text = "🍖 ごちそう"; o.sub = ms.map(m => `${m.nick} Lv${lv0.get(m.id)}→${m.lv}`).join("・") + "（おまかせ）"; o.sp = ms[0] ? ms[0].sp : null; (rep.evos || []).forEach(e => queue.push({ k: "evo", ...e })); } } catch (e) {} return o; }; }
+{ const _oc = openChest19; openChest19 = function (S, c) { const o = _oc(S, c); try { if (o && o.feed && o.awaken) { const { ms, rep, lv0 } = feedApply19(S, [], 1, true); o.fed = true; o.text = "👑 覚醒"; o.sub = ms.map(m => `${m.nick} Lv${lv0.get(m.id)}→<b>${m.lv}</b>！`).join("・"); o.sp = ms[0] ? ms[0].sp : null; (rep.evos || []).forEach(e => queue.push({ k: "evo", ...e })); }
+    else if (o && o.feed && !o.awaken) { const ex0 = new Map(S.mons.map(m => [m.id, (m.exp || 0) / Math.max(1, expNext5(m))])); const { ms, rep, lv0 } = feedApply19(S, [], o.feed, false); o.fed = true; o.text = "🍖 ごちそう"; o.sub = ms.map(m => m.lv > lv0.get(m.id) ? `${m.nick} Lv${lv0.get(m.id)}→<b>${m.lv}</b>` : `${m.nick} 経験+${Math.max(1, Math.round(((m.exp || 0) / Math.max(1, expNext5(m)) - ex0.get(m.id)) * 100))}%`).join("・"); o.sp = ms[0] ? ms[0].sp : null; (rep.evos || []).forEach(e => queue.push({ k: "evo", ...e })); } } catch (e) {} return o; }; }
 // 名前：案内役の「キキ」と勇者の名前を、魔物にはつけない
 { const ban = new Set(["キキ", ...HERO_NAMES5]); const _nm = newMon5; newMon5 = function () { const m = _nm.apply(this, arguments); try { let k = 0; while (m && ban.has(m.nick) && k++ < 20) { const m2 = _nm.apply(this, arguments); m.nick = m2.nick; } } catch (e) {} return m; }; }
 // 店でSR以上を呼んだら光らせる
 { const _b = buy5; buy5 = function (S, i) { const o = S.shop && S.shop[i], rr = o && o.rar, sh = o && o.shiny19; const m = _b.apply(this, arguments);
-  try { if (m && (rr === "SR" || rr === "SSR" || sh)) { setTimeout(() => { flash(); sfx16(rr === "SSR" ? "hatch" : "win"); banner19(`<small>${sh ? "✨色違い " : ""}${rr || ""}</small><i>${esc(m.nick)}（${monName5(m)}）が来た！</i><small>体力${monHp5(m)}・攻撃${monAtk5(m)}</small>`, "mis", 2000); }, 50); } } catch (e) {} return m; }; }
+  try { if (m && (rr === "SR" || rr === "SSR" || sh)) { setTimeout(() => { flash(); sfx16(rr === "SSR" ? "hatch" : "win"); const el = document.createElement("div"); el.className = "buy23 r" + (rr || "");
+      el.innerHTML = `<div class="rays19"></div><b>${sh ? "✨色違い " : ""}${rr || ""}</b>${img(m.sp, 0, "sp", "width:120px;height:120px")}<i>${esc(m.nick)}（${monName5(m)}）が来た！</i><small>体力${monHp5(m)}・攻撃${monAtk5(m)}</small><span>タップで閉じる</span>`;
+      el.addEventListener("click", () => el.remove()); document.body.appendChild(el); setTimeout(() => el.remove(), 2600); }, 50); } } catch (e) {} return m; }; }
+// ---------- 20) おまかせで並べ直しても、いま掘っている子はそのまま（稼ぎが落ちないように。動かしたいときは手で） ----------
+{ const _aa = autoAll19; autoAll19 = function (S) {
+  const keep = S.mons.filter(m => !m.job && m.home != null && !restLeft9(S, m) && jobOf12(S, m) === "mine");
+  // けがの子も動かさない（休みは1日なので、寝床へ運ぶと治ったあと部屋がかたよる）
+  const rest = S.mons.filter(m => !m.job && m.home != null && restLeft9(S, m)), rj = rest.map(m => m.job19);
+  keep.forEach(m => { m.job = "mine"; m.keep23 = 1; }); rest.forEach(m => { m.job = "guard"; m.keep23 = 2; });
+  try { return _aa.apply(this, arguments); }
+  finally { keep.forEach(m => { if (m.keep23) { delete m.keep23; m.job = null; m.job19 = "mine"; m.job19h = m.home; } });
+    rest.forEach((m, k) => { if (m.keep23) { delete m.keep23; m.job = null; m.job19 = rj[k]; } }); } }; }
+
+// ---------- 21) 💎の入りを絞る：襲撃で落とす💎は6割に（中盤から💎があふれて「何でも買える」になっていた） ----------
+{ const _er = endRaid9; endRaid9 = function (S, N) { try { if (!N.scout && N.dp > 0) N.dp = Math.round(N.dp * 0.6); } catch (e) {} return _er.apply(this, arguments); }; }
+// ---------- 22) 夜のカメラ：いちばん奥まで来た勇者の階を映す（B2・主の間へ降りたら追いかける） ----------
+{ const _r = render; render = function () { try { if (N && caveFollow && typeof floorOf === "function") { const hs = N.heroes.filter(h => h.st === "in"); if (hs.length) { const p = Math.max(...hs.map(h => h.pos || 0)), f = floorOf(S, Math.min(p, S.path.length - 1)); if (f != null && f >= 0 && caveFloor !== f) { caveFloor = f; CV.sig = ""; } } } } catch (e) {} return _r.apply(this, arguments); }; }
 
 </script>
 </body>
