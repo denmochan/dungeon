@@ -4146,7 +4146,7 @@ const ORD16 = {
   nolost:  { name: "魔物を1体も倒されるな", ok: (r, N) => r.win && !r.lost },
   gate:    { name: "入口の部屋で全員止めろ", ok: (r, N) => r.win && N.heroes.every(h => (h.maxPos || 0) === 0) },
   nosteal: { name: "魔石を盗ませるな", ok: (r, N) => r.win && !N.stolen, need: N => N.heroes.some(h => h.job === "thief") },
-  fast:    { name: "30手以内に片づけろ", ok: (r, N) => r.win && !r.esc && N.t <= 30 },
+  fast:    { name: "すばやく片づけろ（夜の時間が半分のうちに・逃がさず）", ok: (r, N) => r.win && !r.esc && N.t <= 30 },
 };
 startRaid9 = (prev => function (S, rnd) {
   const N = prev(S, rnd); if (!N || N.scout) return N;
@@ -4638,7 +4638,7 @@ function newMissions19(S) {
 function misAdd19(S, k, v = 1) {
   if (!S || !S.mis19) return; let hit = false;
   S.mis19.list.forEach(m => { if (m.k !== k || m.done) return; m.got = k === "combo" ? Math.max(m.got, v) : m.got + v; if (m.got >= m.need) { m.got = m.need; m.done = true; hit = true;
-    const g = Math.round(40 * (1 + 0.6 * (((S.contract && S.contract.lv) || 1) - 1)) * (1 + (S.day || 1) / 60)); S.dp += g; S.chestBonus19 = (S.chestBonus19 || 0) + 0.6;
+    const g = Math.round(40 * (1 + 0.6 * (((S.contract && S.contract.lv) || 1) - 1)) * (1 + (S.day || 1) / 60) / (1 + Math.max(0, S.dp) / 4000)); S.dp += g; S.chestBonus19 = (S.chestBonus19 || 0) + 0.6;
     (S.misDone19 = S.misDone19 || []).push({ text: MIS19[k].t(m.need), icon: MIS19[k].icon, g }); } });
   if (hit && !S.mis19.all && S.mis19.list.every(m => m.done)) { S.mis19.all = true; S.chestBonus19 = (S.chestBonus19 || 0) + 1.5; (S.misDone19 = S.misDone19 || []).push({ all: true }); }
 }
@@ -4663,7 +4663,7 @@ raidResult15 = (prev => function (S, N) { const r = prev(S, N); misAdd19(S, "kil
 raidResult15 = (prev => function (S, N) {
   const r = prev(S, N); if (N.scout) return r;
   r.stars = r.win ? 1 + (!r.esc && !N.stolen ? 1 : 0) + (!r.lost ? 1 : 0) : 0; r.ok19 = [!!r.win, !!r.win && !r.esc && !N.stolen, !!r.win && !r.lost];
-  if (r.win) { S.streak19 = (S.streak19 || 0) + 1; const b = Math.round((N.dp || r.dp || 0) * Math.min(0.2, 0.03 * S.streak19)); if (b > 0) { S.dp += b; r.streakBonus = b; } }
+  if (r.win && !((r.esc || 0) * 2 >= (r.total || 1))) { S.streak19 = (S.streak19 || 0) + 1; const b = Math.round((N.dp || r.dp || 0) * Math.min(0.2, 0.03 * S.streak19)); if (b > 0) { S.dp += b; r.streakBonus = b; } }
   else S.streak19 = 0;
   r.streak = S.streak19 || 0; S.chestBonus19 = (S.chestBonus19 || 0) + 0.35 * r.stars;
   return r;
@@ -5469,7 +5469,7 @@ function monCard(id){
   const D = MON[m.sp], f = formOf(m), fx = monFx5(m), Q = QUIRK[m.quirk];
   const friends = COMBOS.filter(c => c.a === m.sp || c.b === m.sp);
   const ms = mates(S, m).map(o => o.sp);
-  return `<div class="card"><div class="big">${img(m.sp, m.evos, "sp", "width:112px;height:112px")}</div><div style="flex:1;min-width:0">
+  return `<div class="card"><div class="big">${simg23(m, m.evos, "sp", "width:112px;height:112px")}</div><div style="flex:1;min-width:0">
       <div class="h2" style="flex-wrap:wrap">${m.nick}<span style="font-size:12px;color:var(--text)">${f[0]}${m.plus ? "+" + m.plus : ""}</span></div>
       <div>Lv${m.lv} ${rk(m.sp)}${roleTag(m.sp)} <span class="chip">${Q.name}：${Q.text}</span></div>
       <div class="hint">体力${monHp5(m)}　攻撃${monAtk5(m)}</div><div class="xp"><i style="width:${m.exp / expNext5(m) * 100}%"></i></div></div></div>
@@ -5504,24 +5504,24 @@ function mixSelModal(){
   const a = S.mons.find(m => m.id === MX[0]), b = S.mons.find(m => m.id === MX[1]), p = a && b ? mixPreview7(S, a, b) : null;
   const known = p && p.sp && (S.dex.includes(p.sp) || !p.special);
   let h = `<h2>🥚 配合</h2><div class="hint">2体えらぶ。2体はいなくなり、1体の子が生まれる。決まった組み合わせは新しい種族に</div>`;
-  h += `<div class="box mixp">${a ? img(a.sp, a.evos, "sp", "width:48px;height:48px") : "<b>？</b>"}<b>＋</b>${b ? img(b.sp, b.evos, "sp", "width:48px;height:48px") : "<b>？</b>"}<b>→</b>${p && p.sp ? (known ? img(p.sp, 0, "sp", "width:48px;height:48px") : '<b style="font-size:34px">❔</b>') : "<b>？</b>"}
+  h += `<div class="box mixp">${a ? simg23(a, a.evos, "sp", "width:48px;height:48px") : "<b>？</b>"}<b>＋</b>${b ? simg23(b, b.evos, "sp", "width:48px;height:48px") : "<b>？</b>"}<b>→</b>${p && p.sp ? (known ? img(p.sp, 0, "sp", "width:48px;height:48px") : '<b style="font-size:34px">❔</b>') : "<b>？</b>"}
     <div class="mixt">${p && p.sp ? `<b>${known ? MON[p.sp].forms[0][0] : "？？？"}</b>${p.plus ? ` <span class="gold">+${p.plus}</span>` : ""}${p.altar ? " 🕯️祭壇" : ""}<br>${p.ok ? '<span class="good">配合できる</span>' : `<span class="bad">${p.why}</span>`}` : "2体えらんでね"}</div></div>`;
   h += S.mons.slice().sort((x, y) => y.lv - x.lv).map(m => { const on = MX.includes(m.id), q = !on && a && !b ? mixPreview7(S, a, m) : null;
-    return `<div class="row pick ${on ? "on" : ""}" data-a="mixpick" data-id="${m.id}">${img(m.sp, m.evos, "sp", "width:36px;height:36px")}<div class="tx"><b>${esc(m.nick)}</b> ${monName5(m)}${m.plus ? `<span class="gold">+${m.plus}</span>` : ""} Lv${m.lv}${q && q.special ? ` <span class="gold">✨新種族</span>` : ""}</div></div>`; }).join("");
+    return `<div class="row pick ${on ? "on" : ""}" data-a="mixpick" data-id="${m.id}">${simg23(m, m.evos, "sp", "width:36px;height:36px")}<div class="tx"><b>${esc(m.nick)}</b> ${monName5(m)}${m.plus ? `<span class="gold">+${m.plus}</span>` : ""} Lv${m.lv}${q && q.special ? ` <span class="gold">✨新種族</span>` : ""}</div></div>`; }).join("");
   return h + `<div class="pk"><button data-a="mons">もどる</button><button class="main" data-a="mixask" ${p && p.ok ? "" : "disabled"}>配合する</button></div>`;
 }
 function evoStage(e){
   const m = e.m;
   if (stage.step === 0) return `<div class="t1">おや…？ ${esc(m.nick)}（${esc(e.before.name)}）の様子が…</div><div class="bigsp shake">${img(m.sp, e.before.evos)}</div><div class="hint">タップで見守る</div>`;
   const f = formOf(m);
-  return `<div class="t1">${esc(m.nick)}は</div><div class="bigsp glow"><div class="burst"></div>${img(m.sp, m.evos)}</div><div class="t2">${esc(f[0])}</div><div class="t1">に進化した！</div>
+  return `<div class="t1">${esc(m.nick)}は</div><div class="bigsp glow"><div class="burst"></div>${simg23(m, m.evos)}</div><div class="t2">${esc(f[0])}</div><div class="t1">に進化した！</div>
     <div class="quote">「${esc(f[2].up || f[2].go)}」</div>
     <div class="stat">体力 ${e.before.hp} → <b>${monHp5(m)}</b>　攻撃 ${e.before.atk} → <b>${monAtk5(m)}</b></div><div class="hint" style="color:#cbb">${esc(fxLine(f[1]))}</div><button class="main" data-a="stagenext">やった！</button>`;
 }
 function eggStage(e){
   if (stage.step < 3) return `<div class="t1">卵が生まれた！</div><div class="egg ${stage.step ? "w" + stage.step : ""}" data-a="crack">${img("egg", 0, "sp", "width:150px;height:150px")}</div><div class="gold" style="font-size:20px;letter-spacing:6px">${"⚡".repeat(stage.step)}${"・".repeat(3 - stage.step)}</div><div class="hint">タップして割る</div>`;
   const m = e.m, f = formOf(m);
-  return `<div class="t1">生まれたのは…</div><div class="bigsp"><div class="burst"></div>${img(m.sp, m.evos)}</div><div class="t2">${esc(f[0])}</div><div>${rk(m.sp)}${roleTag(m.sp)}${m.apt2 ? `<span class="apt18 a-${m.apt2}">受け継いだ得意 ${ROLEI18[m.apt2][0]}${ROLEI18[m.apt2][1]}</span>` : ""} ${e.isNew ? '<span class="newb">はじめて！</span>' : ""} ${m.plus ? `<span class="gold">+${m.plus}</span>` : ""} Lv${m.lv}</div>
+  return `<div class="t1">生まれたのは…</div><div class="bigsp"><div class="burst"></div>${simg23(m, m.evos)}</div><div class="t2">${esc(f[0])}</div><div>${rk(m.sp)}${roleTag(m.sp)}${m.apt2 ? `<span class="apt18 a-${m.apt2}">受け継いだ得意 ${ROLEI18[m.apt2][0]}${ROLEI18[m.apt2][1]}</span>` : ""} ${e.isNew ? '<span class="newb">はじめて！</span>' : ""} ${m.plus ? `<span class="gold">+${m.plus}</span>` : ""} Lv${m.lv}</div>
     <div class="egsk">${Object.keys(m.sk || {}).map(k => `<div class="skrow">${skChip10(k, skStar11(m))}<span class="hint">${skText11(k, skStar11(m))}${(e.inherit || []).includes(k) ? '　<b class="gold">受け継いだ</b>' : k === e.extra ? '　<b class="good">新しく覚えた</b>' : ""}</span></div>`).join("")}</div>
     <div class="quote">「${esc(f[2].go)}」</div><div class="hint" style="color:#cbb;max-width:320px">${esc(MON[m.sp].bio)}</div><button class="main" data-a="stagenext">よろしく！</button>`;
 }
@@ -5531,12 +5531,12 @@ function bookModal(){
   const M = metaOf8(S);
   return `<h2>📕 魔王の書</h2><div class="box">👻 魂 <b class="gold">${M.souls}</b>　転生${M.runs}回・最高${Math.max(M.bestNight, S.best)}夜</div><div class="hint">転生しても残る強化。魂は主が倒れたとき・契約を達成したときに、守りきった夜の数でもらえる（契約の途中で自分から転生すると1/4）</div>`
     + BOOK8_IDS.map(k => { const B = BOOK8[k], lv = bookLv8(S, k), c = bookCost8(S, k);
-      return `<div class="row" style="cursor:default"><span style="font-size:24px">${B.icon}</span><div class="tx"><b>${B.name}</b> Lv${lv}<small>${lv ? B.text(lv) + " → " : ""}<span class="good">${B.text(lv + 1)}</span>${(() => { const m = S.mons.slice().sort((a, b) => b.lv - a.lv)[0]; if (!m || (k !== "atk" && k !== "hp")) return ""; const f = k === "atk" ? monAtk5 : monHp5, v = f(m), v2 = Math.round(v * (1 + 0.08 * (lv + 1)) / (1 + 0.08 * lv)); return `<br>例：${esc(m.nick)}の${k === "atk" ? "攻撃" : "体力"} ${v} → <b class="good">${v2}</b>`; })()}</small></div><div class="fb"><button class="main" data-a="book" data-v="${k}" ${M.souls < c ? "disabled" : ""}>👻${c}</button></div></div>`; }).join("")
+      return `<div class="row" style="cursor:default"><span style="font-size:24px">${B.icon}</span><div class="tx"><b>${B.name}</b> Lv${lv}<small>${lv ? B.text(lv) + " → " : ""}<span class="good">${B.text(lv + 1)}</span>${(() => { if (!S.mons.length || (k !== "atk" && k !== "hp")) return ""; const f = k === "atk" ? monAtk5 : monHp5, v = S.mons.reduce((a, m) => a + f(m), 0), v2 = Math.round(v * (1 + 0.08 * (lv + 1)) / (1 + 0.08 * lv)); return `<br>いまの魔物${S.mons.length}体の${k === "atk" ? "攻撃" : "体力"}の合計 ${v} → <b class="good">${v2}</b>`; })()}</small></div><div class="fb"><button class="main" data-a="book" data-v="${k}" ${M.souls < c ? "disabled" : ""}>👻${c}</button></div></div>`; }).join("")
     + `<button data-a="lord">← 主へ</button>`;
 }
 function rebirthModal(){
   const got = soulsFor8(S), M = metaOf8(S);
-  return `<h2>👑 主が倒れた…</h2><div class="box">${S.best}夜を守りきった（これまでの最高 ${Math.max(M.bestNight, S.best)}夜）</div>
+  return `<h2>👑 主が倒れた…</h2><div class="box">${S.best}夜を守りきった（これまでの最高 ${Math.max(M.bestNight, S.best)}夜）</div><div class="hint" style="text-align:left">💡 次はこうしよう：🔴の前の日に「🛡迎え撃つ準備」（ごちそう・結界）を買う／👑主を鍛える／入口の守りを厚くする。下の刻印で、魔物そのものも強くなる</div>
     <div class="box gold" style="text-align:center;font-size:18px">👻 魂 +${got}</div>
     <div class="hint">魔物も部屋もゼロにもどる。でも魂と📕魔王の書の強化と図鑑は残る。次はもっと奥まで行ける</div>
     <button class="main" data-a="rebirth" style="width:100%">転生する</button>`;
@@ -5678,11 +5678,11 @@ function roomSheet(i){
   if (traitOf(r) && r.trait !== "entrance") h += `<div class="hint">${traitOf(r).icon}${traitOf(r).name}：${traitOf(r).text}</div>`;
   if (addPick != null) {
     const a = S.mons.find(o => o.id === addPick);
-    if (a) return h + `<div class="lab">満室。だれと入れ替える？</div>` + res.map(o => `<div class="row rsm">${img(o.sp, o.evos, "sp", "width:36px;height:36px")}<div class="tx"><b>${esc(o.nick)}</b> ${monName5(o)} Lv${o.lv}<small>${esc(a.nick)}→ここ ${MOOD_FACE(moodAt(S, a.sp, i))}　${esc(o.nick)}→${a.home == null ? "控え" : esc(roomTitle(S, a.home)) + " " + MOOD_FACE(moodAt(S, o.sp, a.home))}</small></div><div class="fb"><button class="main" data-a="rswap" data-id="${o.id}">入れ替え</button></div></div>`).join("") + `<button data-a="rsback">← もどる</button>`;
+    if (a) return h + `<div class="lab">満室。だれと入れ替える？</div>` + res.map(o => `<div class="row rsm">${simg23(o, o.evos, "sp", "width:36px;height:36px")}<div class="tx"><b>${esc(o.nick)}</b> ${monName5(o)} Lv${o.lv}<small>${esc(a.nick)}→ここ ${MOOD_FACE(moodAt(S, a.sp, i))}　${esc(o.nick)}→${a.home == null ? "控え" : esc(roomTitle(S, a.home)) + " " + MOOD_FACE(moodAt(S, o.sp, a.home))}</small></div><div class="fb"><button class="main" data-a="rswap" data-id="${o.id}">入れ替え</button></div></div>`).join("") + `<button data-a="rsback">← もどる</button>`;
     addPick = null;
   }
   h += `<div class="rs-res"><div class="lab">住んでいる ${res.length}/${cap}</div>` + (res.length ? res.map(m => { const w = moodWhy(m.sp, i);
-    return `<div class="row rsm"><span class="bigface">${restLeft9(S, m) ? "💤" : w.face}</span><span data-a="mon" data-id="${m.id}">${img(m.sp, m.evos, "sp", "width:36px;height:36px")}</span><div class="tx" data-a="mon" data-id="${m.id}"><b>${esc(m.nick)}</b> ${monName5(m)} Lv${m.lv} <span class="gold">${gainText(m, i)}</span><small class="why">${w.html}</small>${woundLine(m, i)}</div><div class="fb"><button data-a="rout" data-id="${m.id}">外す</button></div></div>`; }).join("") : `<div class="hint">だれもいない</div>`) + `</div>`;
+    return `<div class="row rsm"><span class="bigface">${restLeft9(S, m) ? "💤" : w.face}</span><span data-a="mon" data-id="${m.id}">${simg23(m, m.evos, "sp", "width:36px;height:36px")}</span><div class="tx" data-a="mon" data-id="${m.id}"><b>${esc(m.nick)}</b> ${monName5(m)} Lv${m.lv} <span class="gold">${gainText(m, i)}</span><small class="why">${w.html}</small>${woundLine(m, i)}</div><div class="fb"><button data-a="rout" data-id="${m.id}">外す</button></div></div>`; }).join("") : `<div class="hint">だれもいない</div>`) + `</div>`;
   if (r.fac === "nest") {
     if (res.length >= 2) { const p = mixPreview7(S, res[0], res[1]), known = p.sp && (S.dex.includes(p.sp) || !p.special);
       h += `<div class="box mixp">${img(res[0].sp, res[0].evos, "sp", "width:40px;height:40px")}<b>＋</b>${img(res[1].sp, res[1].evos, "sp", "width:40px;height:40px")}<b>→</b>${p.sp ? (known ? img(p.sp, 0, "sp", "width:40px;height:40px") : '<b style="font-size:30px">❔</b>') : "？"}<div class="mixt">${p.sp ? `<b>${known ? MON[p.sp].forms[0][0] : "？？？"}</b>${p.plus ? ` <span class="gold">+${p.plus}</span>` : ""}　${p.ok ? '<span class="good">配合できる（2体はいなくなり1体の子が生まれる）</span>' : `<span class="bad">${p.why}</span>`}` : ""}</div></div>${p.ok ? `<button class="main" data-a="nestmix" style="width:100%">🥚 配合する</button>` : ""}`; }
@@ -5690,18 +5690,18 @@ function roomSheet(i){
   }
   const cand = S.mons.filter(m => m.home !== i).sort((a, b) => (a.home != null) - (b.home != null) || moodAt(S, b.sp, i) - moodAt(S, a.sp, i) || b.lv - a.lv);
   if (cand.length) h += `<div class="lab">ここに住ませる</div>` + cand.map(m => { const full = res.length >= cap;
-    return `<div class="row rsm"><span class="bigface">${MOOD_FACE(moodAt(S, m.sp, i))}</span>${img(m.sp, m.evos, "sp", "width:36px;height:36px")}<div class="tx"><b>${esc(m.nick)}</b> ${monName5(m)} Lv${m.lv} <span class="gold">${gainText(m, i)}</span><small>${m.home == null ? '<span class="bad">控え</span>' : "いま " + esc(roomTitle(S, m.home)) + " B" + (floorOf(S, m.home) + 1)}</small></div><div class="fb"><button class="${full ? "" : "main"}" data-a="radd" data-id="${m.id}">${full ? "入れ替え" : "ここへ"}</button></div></div>`; }).join("");
+    return `<div class="row rsm"><span class="bigface">${MOOD_FACE(moodAt(S, m.sp, i))}</span>${simg23(m, m.evos, "sp", "width:36px;height:36px")}<div class="tx"><b>${esc(m.nick)}</b> ${monName5(m)} Lv${m.lv} <span class="gold">${gainText(m, i)}</span><small>${m.home == null ? '<span class="bad">控え</span>' : "いま " + esc(roomTitle(S, m.home)) + " B" + (floorOf(S, m.home) + 1)}</small></div><div class="fb"><button class="${full ? "" : "main"}" data-a="radd" data-id="${m.id}">${full ? "入れ替え" : "ここへ"}</button></div></div>`; }).join("");
   if (i !== 0) h += `<div class="lab">部屋を作りかえる（DP ${REFIT_COST9}）</div><div class="roles">${FAC9_IDS.filter(k => k !== "dead" && (r.side != null) === SIDE_FAC11.includes(k)).map(k => facUnlocked9(S, k) ? `<button class="${r.fac === k ? "on" : ""}" data-a="refit" data-v="${k}" ${r.fac !== k && S.dp < REFIT_COST9 ? "disabled" : ""}>${FAC9[k].icon}${FAC9[k].name}</button>` : `<button disabled>🔒${FAC9[k].name}</button>`).join("")}</div>`;
   return h;
 }
 function monRow(m){
   const f = formOf(m);
-  return `<div class="row" data-a="mon" data-id="${m.id}">${img(m.sp, m.evos, "sp", "width:40px;height:40px")}<div class="tx"><b>${esc(m.nick)}</b> ${f[0]}${m.plus ? `<span class="gold">+${m.plus}</span>` : ""} Lv${m.lv}${roleTag(m.sp)}<small>${restLeft9(S, m) ? '<span class="bad">💤休み</span> ' : ""}${m.home != null ? MOOD_FACE(moodOf(S, m)) + " " + esc(roomTitle(S, m.home)) + " B" + (floorOf(S, m.home) + 1) : '<span class="bad">控え</span>'}</small><div class="xp"><i style="width:${m.exp / expNext5(m) * 100}%"></i></div></div></div>`;
+  return `<div class="row" data-a="mon" data-id="${m.id}">${simg23(m, m.evos, "sp", "width:40px;height:40px")}<div class="tx"><b>${esc(m.nick)}</b> ${f[0]}${m.plus ? `<span class="gold">+${m.plus}</span>` : ""} Lv${m.lv}${roleTag(m.sp)}<small>${restLeft9(S, m) ? '<span class="bad">💤休み</span> ' : ""}${m.home != null ? MOOD_FACE(moodOf(S, m)) + " " + esc(roomTitle(S, m.home)) + " B" + (floorOf(S, m.home) + 1) : '<span class="bad">控え</span>'}</small><div class="xp"><i style="width:${m.exp / expNext5(m) * 100}%"></i></div></div></div>`;
 }
 function monsModal(){ return `<h2>👾 魔物（${S.mons.length}）</h2>` + (S.mons.length >= 2 ? `<button class="main" data-a="mixopen" style="width:100%;margin-bottom:6px">🥚 配合する</button>` : "") + S.mons.slice().sort((a, b) => (a.home == null) - (b.home == null) || b.lv - a.lv).map(m => monRow(m)).join("") + `<button data-a="close">閉じる</button>`; }
 function moveModal(){
   const m = S.mons.find(o => o.id === movePick); if (!m) return `<button data-a="close">閉じる</button>`;
-  return `<h2>${img(m.sp, m.evos, "sp", "width:32px;height:32px")}${esc(m.nick)}の部屋</h2><div class="hint">顔は住んだときの機嫌</div>` + S.path.map((r, i) => r.kind !== "den" ? "" : `<div class="row rsm ${m.home === i ? "on" : ""}" data-a="moveto" data-v="${i}"><span class="bigface">${MOOD_FACE(moodAt(S, m.sp, i))}</span><div class="tx"><b>${esc(roomTitle(S, i))}</b> B${floorOf(S, i) + 1} <span class="gold">${gainText(m, i)}</span><small>${residents5(S, i).length}/${capOfSlot7(S, i)}${m.home === i ? "　いまここ" : ""}</small></div></div>`).join("") + `<div class="pk">${m.home != null ? `<button data-a="rout" data-id="${m.id}">控えへ</button>` : ""}<button data-a="close">閉じる</button></div>`;
+  return `<h2>${simg23(m, m.evos, "sp", "width:32px;height:32px")}${esc(m.nick)}の部屋</h2><div class="hint">顔は住んだときの機嫌</div>` + S.path.map((r, i) => r.kind !== "den" ? "" : `<div class="row rsm ${m.home === i ? "on" : ""}" data-a="moveto" data-v="${i}"><span class="bigface">${MOOD_FACE(moodAt(S, m.sp, i))}</span><div class="tx"><b>${esc(roomTitle(S, i))}</b> B${floorOf(S, i) + 1} <span class="gold">${gainText(m, i)}</span><small>${residents5(S, i).length}/${capOfSlot7(S, i)}${m.home === i ? "　いまここ" : ""}</small></div></div>`).join("") + `<div class="pk">${m.home != null ? `<button data-a="rout" data-id="${m.id}">控えへ</button>` : ""}<button data-a="close">閉じる</button></div>`;
 }
 
 // ---------- 店 ----------
@@ -6072,13 +6072,13 @@ roomSheet = function (i){
 };
 function monRow(m){
   const f = formOf(m);
-  return `<div class="row" data-a="mon" data-id="${m.id}">${img(m.sp, m.evos, "sp", "width:40px;height:40px")}<div class="tx"><b>${esc(m.nick)}</b> ${f[0]}${m.plus ? `<span class="gold">+${m.plus}</span>` : ""} Lv${m.lv}<div class="sks">${skChips10(m)}</div><small>${restLeft9(S, m) ? '<span class="bad">💤休み</span> ' : ""}${m.home != null ? esc(roomTitle(S, m.home)) + " B" + (floorOf(S, m.home) + 1) + "　" + skLearnLine10(m) : '<span class="bad">控え</span>'}</small><div class="xp"><i style="width:${m.exp / expNext5(m) * 100}%"></i></div></div></div>`;
+  return `<div class="row" data-a="mon" data-id="${m.id}">${simg23(m, m.evos, "sp", "width:40px;height:40px")}<div class="tx"><b>${esc(m.nick)}</b> ${f[0]}${m.plus ? `<span class="gold">+${m.plus}</span>` : ""} Lv${m.lv}<div class="sks">${skChips10(m)}</div><small>${restLeft9(S, m) ? '<span class="bad">💤休み</span> ' : ""}${m.home != null ? esc(roomTitle(S, m.home)) + " B" + (floorOf(S, m.home) + 1) + "　" + skLearnLine10(m) : '<span class="bad">控え</span>'}</small><div class="xp"><i style="width:${m.exp / expNext5(m) * 100}%"></i></div></div></div>`;
 }
 // 魔物のカード：まずスキル。相性や性格の細かい話は下に小さく
 function monCard(id){
   const m = S.mons.find(o => o.id === id); if (!m) return `<button data-a="close">閉じる</button>`;
   const D = MON[m.sp], f = formOf(m), fx = monFx5(m), slots = skSlots10(m), list = skList10(m);
-  let h = `<div class="card"><div class="big">${img(m.sp, m.evos, "sp", "width:112px;height:112px")}</div><div style="flex:1;min-width:0">
+  let h = `<div class="card"><div class="big">${simg23(m, m.evos, "sp", "width:112px;height:112px")}</div><div style="flex:1;min-width:0">
       <div class="h2" style="flex-wrap:wrap">${esc(m.nick)}<span style="font-size:12px;color:var(--text)">${f[0]}${m.plus ? "+" + m.plus : ""}</span></div>
       <div>Lv${m.lv} ${rk(m.sp)}${roleTag(m.sp)}</div>
       <div class="hint">体力${monHp5(m)}　攻撃${monAtk5(m)}</div><div class="xp"><i style="width:${m.exp / expNext5(m) * 100}%"></i></div></div></div>
@@ -6178,7 +6178,7 @@ roomSheet = function (i){
 function monCard(id){
   const m = S.mons.find(o => o.id === id); if (!m) return `<button data-a="close">閉じる</button>`;
   const D = MON[m.sp], f = formOf(m), fx = monFx5(m), list = skList10(m), L = skStar11(m);
-  return `<div class="card"><div class="big">${img(m.sp, m.evos, "sp", "width:112px;height:112px")}</div><div style="flex:1;min-width:0">
+  return `<div class="card"><div class="big">${simg23(m, m.evos, "sp", "width:112px;height:112px")}</div><div style="flex:1;min-width:0">
       <div class="h2" style="flex-wrap:wrap">${esc(m.nick)}<span style="font-size:12px;color:var(--text)">${f[0]}${m.plus ? "+" + m.plus : ""}</span></div>
       <div>Lv${m.lv} ${rk(m.sp)}${roleTag(m.sp)}</div>
       <div class="hint">体力${monHp5(m)}　攻撃${monAtk5(m)}</div><div class="xp"><i style="width:${m.exp / expNext5(m) * 100}%"></i></div></div></div>
@@ -6194,7 +6194,7 @@ function monCard(id){
 }
 function monRow(m){
   const f = formOf(m);
-  return `<div class="row" data-a="mon" data-id="${m.id}">${img(m.sp, m.evos, "sp", "width:40px;height:40px")}<div class="tx"><b>${esc(m.nick)}</b> ${f[0]}${m.plus ? `<span class="gold">+${m.plus}</span>` : ""} Lv${m.lv}<div class="sks">${skList10(m).map(([k, L]) => skChip10(k, L)).join("")}</div><small>${restLeft9(S, m) ? '<span class="bad">💤休み</span> ' : ""}${m.home != null ? esc(roomTitle(S, m.home)) + " B" + (floorOf(S, m.home) + 1) : '<span class="bad">控え</span>'}</small><div class="xp"><i style="width:${m.exp / expNext5(m) * 100}%"></i></div></div></div>`;
+  return `<div class="row" data-a="mon" data-id="${m.id}">${simg23(m, m.evos, "sp", "width:40px;height:40px")}<div class="tx"><b>${esc(m.nick)}</b> ${f[0]}${m.plus ? `<span class="gold">+${m.plus}</span>` : ""} Lv${m.lv}<div class="sks">${skList10(m).map(([k, L]) => skChip10(k, L)).join("")}</div><small>${restLeft9(S, m) ? '<span class="bad">💤休み</span> ' : ""}${m.home != null ? esc(roomTitle(S, m.home)) + " B" + (floorOf(S, m.home) + 1) : '<span class="bad">控え</span>'}</small><div class="xp"><i style="width:${m.exp / expNext5(m) * 100}%"></i></div></div></div>`;
 }
 // 朝：盗まれた魔石
 const _repBox10 = repBox;
@@ -6204,7 +6204,7 @@ repBox = function (){ let h = _repBox10(); const r = lastRep; const st = r && ((
 function mixSkillModal(){
   const A = S.mons.find(m => m.id === MX[0]), B = S.mons.find(m => m.id === MX[1]); if (!A || !B) return `<button data-a="mixsel">もどる</button>`;
   const p = mixPreview7(S, A, B), pool = mixPool18(A, B);
-  let h = `<h2>🥚 配合</h2><div class="box mixp">${img(A.sp, A.evos, "sp", "width:44px;height:44px")}<b>＋</b>${img(B.sp, B.evos, "sp", "width:44px;height:44px")}<b>→</b>${p.sp && (S.dex.includes(p.sp) || !p.special) ? img(p.sp, 0, "sp", "width:44px;height:44px") : "<b>？</b>"}</div>`;
+  let h = `<h2>🥚 配合</h2><div class="box mixp">${simg23(A, A.evos, "sp", "width:44px;height:44px")}<b>＋</b>${simg23(B, B.evos, "sp", "width:44px;height:44px")}<b>→</b>${p.sp && (S.dex.includes(p.sp) || !p.special) ? img(p.sp, 0, "sp", "width:44px;height:44px") : "<b>？</b>"}</div>`;
   h += `<div class="pk"><button class="main" data-a="mixgo" data-v="auto" style="flex:1">🪄 おまかせで配合</button></div>`;
   h += `<div class="hint">または、受け継ぐスキルを<b>2つまで</b>選ぶ（生まれつき＋新しく1つ増える）</div>` + mixInnNote18(A, B);
   h += pool.map(k => { const on = PICKSEL11.includes(k); return `<div class="row pick ${on ? "on" : ""}" data-a="nestpick" data-v="${k}">${skChip10(k, 1)}<div class="tx"><small>${skText11(k, 1)}</small></div>${on ? "✅" : ""}</div>`; }).join("");
@@ -6254,10 +6254,10 @@ function altarScreen(){
 function mixScreen(){
   const L = mixList11(S), known = sp => S.dex.includes(sp);
   const row = o => { const A = o.a, B = o.b, child = o.special ? o.k : o.x;
-    const face = (sp, m) => m ? img(m.sp, m.evos, "sp", "width:36px;height:36px") : `<span class="ghost">${img(sp, 0, "sp", "width:36px;height:36px")}</span>`;
+    const face = (sp, m) => m ? simg23(m, m.evos, "sp", "width:36px;height:36px") : `<span class="ghost">${img(sp, 0, "sp", "width:36px;height:36px")}</span>`;
     const res = o.special && !known(child) ? `<span class="q">？</span>` : img(child, 0, "sp", "width:40px;height:40px");
     const name = o.special ? (known(child) ? MON[child].forms[0][0] : "？？？") : `${MON[child].forms[0][0]}+${Math.floor(((A.plus || 0) + (B.plus || 0)) / 2) + 1}`;
-    const tag = o.st === "ok" ? `<button class="main" data-a="mixdo" data-v="${o.special ? "h:" + o.k : "s:" + o.x}">🥚 配合</button>` : o.st === "lv" ? `<span class="hint" style="white-space:nowrap">両方Lv${o.need}<br>で作れる</span>` : `<span class="hint">あと<b>${MON[A ? o.y : o.x].forms[0][0]}</b>がいれば</span>`;
+    const tag = o.st === "ok" ? `<button class="main" data-a="mixdo" data-v="${o.special ? "h:" + o.k : "s:" + o.x}">🥚 配合</button>` : o.st === "lv" ? `<span class="hint" style="white-space:nowrap">両方Lv${o.need}で作れる<br>${[A, B].filter(Boolean).map(m => m.lv >= o.need ? `<span class="good">Lv${m.lv}✔</span>` : `Lv${m.lv}（あと${o.need - m.lv}）`).join("・")}</span>` : `<span class="hint">あと<b>${MON[A ? o.y : o.x].forms[0][0]}</b>がいれば</span>`;
     return `<div class="mixrow ${o.st}">${face(o.x, A)}<b>＋</b>${face(o.y, B)}<b>→</b>${res}<div class="tx"><b>${name}</b>${o.special ? '<small class="gold">新しい種族</small>' : '<small>同じ種族で強く</small>'}</div>${tag}</div>`; };
   const ok = L.filter(o => o.st === "ok"), rest = L.filter(o => o.st !== "ok");
   return `<h2>🥚 配合</h2><div class="hint">2体がいなくなり、1体の子が生まれる。子は親のスキルを受け継ぎ（おまかせ）、新しく1つ増える</div>
@@ -6269,7 +6269,7 @@ function mixScreen(){
 function mixConfirm(){
   const A = S.mons.find(m => m.id === MX[0]), B = S.mons.find(m => m.id === MX[1]); if (!A || !B) return mixScreen();
   const p = mixPreview7(S, A, B), pool = mixPool18(A, B);
-  return `<h2>🥚 配合</h2><div class="box mixp">${img(A.sp, A.evos, "sp", "width:48px;height:48px")}<b>＋</b>${img(B.sp, B.evos, "sp", "width:48px;height:48px")}<b>→</b>${p.special && !S.dex.includes(p.sp) ? "<b>？</b>" : img(p.sp, 0, "sp", "width:52px;height:52px")}</div>
+  return `<h2>🥚 配合</h2><div class="box mixp">${simg23(A, A.evos, "sp", "width:48px;height:48px")}<b>＋</b>${simg23(B, B.evos, "sp", "width:48px;height:48px")}<b>→</b>${p.special && !S.dex.includes(p.sp) ? "<b>？</b>" : img(p.sp, 0, "sp", "width:52px;height:52px")}</div>
     <div class="hint">${esc(A.nick)} Lv${A.lv}（${roomTitle(S, A.home ?? 0)}）と ${esc(B.nick)} Lv${B.lv}。子は${esc(A.nick)}のいた部屋に住む</div>
     ${mixSkillPick18(A, B, pool)}
     <button data-a="mixopen">← もどる</button>`;
@@ -6398,7 +6398,7 @@ function raidStage15(){
 function resultStage15(r){
   const perfect = r.win && !r.esc && !r.stolen && !r.lost;
   return `<div class="raidban ${r.win ? "win" : "lose"}"><div class="rb-h">${!r.win ? "💀 主が倒れた…" : perfect ? "🏆 完全勝利！" : r.esc && r.esc * 2 >= r.total ? "😓 逃げられた…" : "⚔ 撃退！"}</div><div class="rb-t">${r.kills}/${r.total}人を倒した${r.esc ? `・${r.esc}人に逃げられた` : ""}</div></div>
-    ${r.mvp && r.mvp.kills > 0 ? `<div class="mvp"><div class="mvp-t">MVP</div>${img(r.mvp.sp, r.mvp.evos, "sp", "width:96px;height:96px")}<b>${esc(r.mvp.nick)}</b><small>${r.mvp.kills}人を倒した</small></div>` : ""}
+    ${r.mvp && r.mvp.kills > 0 ? `<div class="mvp"><div class="mvp-t">MVP</div>${simg23(r.mvp, r.mvp.evos, "sp", "width:96px;height:96px")}<b>${esc(r.mvp.nick)}</b><small>${r.mvp.kills}人を倒した</small></div>` : ""}
     <div class="rs-grid"><div><small>手に入れた</small><b class="gold">💎+${r.dp}</b></div><div><small>倒れた魔物</small><b>${r.lost}</b></div><div><small>盗まれた</small><b class="${r.stolen ? "bad" : ""}">${r.stolen ? "-" + r.stolen : "0"}</b></div><div><small>地図</small><b class="${r.map ? "bad" : ""}">${r.map ? "+" + r.map + "部屋" : "守った"}</b></div></div>
     ${r.order ? `<div class="order ${r.order.ok ? "ok" : "ng"}">📜 指令「${r.order.name}」 ${r.order.ok ? `達成！ <b class="gold">💎+${r.order.reward}</b>` : "失敗"}</div>` : ""}
     ${(r.ach || []).map(a => `<div class="achpop">🏅 実績「${a.name}」　👻+${a.souls}</div>`).join("")}
@@ -6421,7 +6421,7 @@ roomSheet = function (i){
   h += roomDungeonLine10(i);
   if (addPick != null) {
     const a = S.mons.find(o => o.id === addPick);
-    if (a) return h + `<div class="lab">満室。${esc(a.nick)}と、だれを入れ替える？</div><div class="slots4">${res.map(o => `<button class="slot4" data-a="rswap" data-id="${o.id}">${img(o.sp, o.evos, "sp", "width:48px;height:48px")}<b>${esc(o.nick)}</b><small>Lv${o.lv}</small></button>`).join("")}</div><button data-a="rsback">やめる</button>`;
+    if (a) return h + `<div class="lab">満室。${esc(a.nick)}と、だれを入れ替える？</div><div class="slots4">${res.map(o => `<button class="slot4" data-a="rswap" data-id="${o.id}">${simg23(o, o.evos, "sp", "width:48px;height:48px")}<b>${esc(o.nick)}</b><small>Lv${o.lv}</small></button>`).join("")}</div><button data-a="rsback">やめる</button>`;
     addPick = null;
   }
   if (slotPick18 && slotPick18.i === i) return h + slotPickView18();
@@ -6430,7 +6430,7 @@ roomSheet = function (i){
   h += facSlots12(i);
   // ここに住ませる：おすすめ順（部屋の方針に合う子が上）
   const cand = S.mons.filter(m => m.home !== i).map(m => ({ m, v: placeScore11(S, m, i) ?? (placeScore11(S, { ...m, home: null }, i) || 0) })).sort((a, b) => (a.m.home != null) - (b.m.home != null) || b.v - a.v).slice(0, 12);
-  if (cand.length) h += `<div class="lab">ここに住ませる<span class="hint">　おすすめ順</span></div>` + cand.map(({ m }) => `<div class="row rsm" data-a="radd" data-id="${m.id}">${img(m.sp, m.evos, "sp", "width:36px;height:36px")}<div class="tx"><b>${esc(m.nick)}</b> ${monName5(m)} Lv${m.lv}<div class="why">${whyTag15(m, i)}</div><small>${m.home == null ? "" : "いま " + esc(roomTitle(S, m.home))}</small></div><button class="mini">${res.length >= cap ? "入れ替え" : "ここへ"}</button></div>`).join("");
+  if (cand.length) h += `<div class="lab">ここに住ませる<span class="hint">　おすすめ順</span></div>` + cand.map(({ m }) => `<div class="row rsm" data-a="radd" data-id="${m.id}">${simg23(m, m.evos, "sp", "width:36px;height:36px")}<div class="tx"><b>${esc(m.nick)}</b> ${monName5(m)} Lv${m.lv}<div class="why">${whyTag15(m, i)}</div><small>${m.home == null ? "" : "いま " + esc(roomTitle(S, m.home))}</small></div><button class="mini">${res.length >= cap ? "入れ替え" : "ここへ"}</button></div>`).join("");
   if (i > 0 && (r.corr || corr10base(S, i)) < CORR_MAX11) h += `<div class="pk"><button data-a="corrx">🚶 手前の通路をのばす DP${CORR_COST11}</button></div>`;
   return h;
 };
@@ -6449,7 +6449,7 @@ let slotPick18 = null;   // { i, k }：この枠に入れる子を選んでい�
 function roleSlots18(i) {
   const r = S.path[i], res = residents5(S, i), cap = capOfSlot7(S, i), L = slotsOf18(S, i), pl = roomPlan14(S, i);
   const roleM = m => pl[m.id] === "bed" ? "bed" : pl[m.id] || "fight";
-  const cell = m => { const rest = restLeft9(S, m); return `<div class="rc ${SW19 === m.id ? "sel19" : SW19 != null ? "tgt19" : ""}" data-a="rsw" data-id="${m.id}">${m.job ? '<i class="pin">📌</i>' : ""}<span>${img(m.sp, m.evos, "sp", "width:40px;height:40px")}</span><b>${esc(m.nick)}</b>${aptOf18(m.sp) !== "fight" || roleM(m) === "fight" ? `<i class="ap ${isApt18(m, roleM(m)) ? "on" : ""}">${ROLEI18[aptOf18(m.sp)][0]}</i>` : ""}<small>Lv${m.lv}${rest ? ' <span class="bad">💤' + rest + "</span>" : ""}</small></div>`; };
+  const cell = m => { const rest = restLeft9(S, m); return `<div class="rc ${SW19 === m.id ? "sel19" : SW19 != null ? "tgt19" : ""}" data-a="rsw" data-id="${m.id}">${m.job ? '<i class="pin">📌</i>' : ""}<span>${simg23(m, m.evos, "sp", "width:40px;height:40px")}</span><b>${esc(m.nick)}</b>${aptOf18(m.sp) !== "fight" || roleM(m) === "fight" ? `<i class="ap ${isApt18(m, roleM(m)) ? "on" : ""}">${ROLEI18[aptOf18(m.sp)][0]}</i>` : ""}<small>Lv${m.lv}${rest ? ' <span class="bad">💤' + rest + "</span>" : ""}</small></div>`; };
   let h = `<div class="lab">役目の枠<span class="hint">　住んでいる ${res.length}/${cap}</span><span class="sp"></span><button class="mini" data-a="slotauto" data-v="${i}">🪄 全部おまかせ</button></div>${sw19Bar(i)}<div class="roles18">`;
   const keys = ["fight", ...ROLE18.filter(k => k !== "fight" && L[k]), "bed"];
   keys.forEach(k => {
@@ -6472,7 +6472,7 @@ function slotPickView18() {
   const sc = m => (isApt18(m, k) ? 1e4 : 0) + (k === "mine" ? mineApt11(m) * 100 + m.lv : k === "teach" ? m.lv : k === "train" ? -m.lv : k === "fight" ? power13(m) : -power13(m));
   const inRoom = res.filter(m => roleOf18(S, m) !== k).sort((a, b) => sc(b) - sc(a));
   const others = full ? [] : S.mons.filter(m => m.home == null || (m.home !== i && S.path[m.home] && S.path[m.home].kind === "den")).sort((a, b) => (a.home != null) - (b.home != null) || sc(b) - sc(a)).slice(0, 10);
-  const row = m => `<div class="row rsm" data-a="slotput" data-id="${m.id}">${img(m.sp, m.evos, "sp", "width:36px;height:36px")}<div class="tx"><b>${esc(m.nick)}</b>${typeof rarTag19 === "function" ? rarTag19(m) : ""}${m.shiny19 ? "✨" : ""} ${monName5(m)} Lv${m.lv}<small>${m.home === i ? "いま " + ROLEI18[roleOf18(S, m)].slice(0, 2).join("") : m.home == null ? "控え" : "いま " + esc(roomTitle(S, m.home))}${isApt18(m, k) ? `　<b class="good">${ROLEI18[k][0]}得意</b>` : `　<span class="hint">得意：${ROLEI18[aptOf18(m.sp)].slice(0, 2).join("")}</span>`}</small></div></div>`;
+  const row = m => `<div class="row rsm" data-a="slotput" data-id="${m.id}">${simg23(m, m.evos, "sp", "width:36px;height:36px")}<div class="tx"><b>${esc(m.nick)}</b>${typeof rarTag19 === "function" ? rarTag19(m) : ""}${m.shiny19 ? "✨" : ""} ${monName5(m)} Lv${m.lv}<small>${m.home === i ? "いま " + ROLEI18[roleOf18(S, m)].slice(0, 2).join("") : m.home == null ? "控え" : "いま " + esc(roomTitle(S, m.home))}${isApt18(m, k) ? `　<b class="good">${ROLEI18[k][0]}得意</b>` : `　<span class="hint">得意：${ROLEI18[aptOf18(m.sp)].slice(0, 2).join("")}</span>`}</small></div></div>`;
   let h = `<div class="lab">${I[0]} ${I[1]}に入れる子をえらぶ<span class="sp"></span><button class="mini" data-a="slotback">やめる</button></div><div class="hint">${I[2]}</div>`;
   if (inRoom.length) h += `<div class="lab2">この部屋の子</div>` + inRoom.map(row).join("");
   if (others.length) h += `<div class="lab2">ほかから連れてくる</div>` + others.map(row).join("");
@@ -6497,7 +6497,7 @@ shopModal = function () {
       const rr = shopRar19(o);
       return `<div class="shopc18 ${o.sold ? "sold" : ""} rar-${rr} " style="animation-delay:${i * 0.08}s"><span class="rarl19">${rr}</span>
         <div class="sl"><div class="sim ${o.shiny19 ? "shiny19" : ""}">${img(o.sp)}</div>${o.shiny19 ? '<span class="shtag19 sm">✨色違い</span>' : ""}<div class="gold">★${D.star}</div><button data-a="dexsp" data-v="${o.sp}" class="mini">くわしく</button></div>
-        <div class="sr"><div class="sn"><b>${D.forms[0][0]}</b><span class="hint">体力${Math.round(D.hp * rarMul23({ rar19: o.rar, shiny19: o.shiny19 }))}・攻撃${Math.round(D.atk * rarMul23({ rar19: o.rar, shiny19: o.shiny19 }))}・🍖${FOOD16({ sp: o.sp, lv: 1 })}/日</span></div>
+        <div class="sr"><div class="sn"><b>${D.forms[0][0]}</b><span class="hint">体力${Math.round(D.hp * rarMul23({ rar19: o.rar, shiny19: o.shiny19 }) * bookMul23("hp"))}・攻撃${Math.round(D.atk * rarMul23({ rar19: o.rar, shiny19: o.shiny19 }) * bookMul23("atk"))}前後・🍖${FOOD16({ sp: o.sp, lv: 1 })}/日</span></div>
           <div class="sline"><b>${R.icon}${R.name}</b></div>
           <div class="sline"><span class="apt18 a-${k}">得意 ${ROLEI18[k][0]}${ROLEI18[k][1]}</span></div>
           ${sks.length ? `<details class="sk23"><summary>${sks.map(s => skChip10(s, 1)).join("")}</summary>${sks.map(s => `<div class="skrow">${skChip10(s, 1)}<span class="hint">${skText11(s, 1)}</span></div>`).join("")}</details>` : `<div class="hint">スキルなし</div>`}
@@ -6658,7 +6658,7 @@ document.addEventListener("click", ev => {
 // 朝：日を閉じたら宝箱（襲撃の日も）。チュートリアル中と、契約達成・転生の画面が出るときはなし
 { const _cd = closeDay; closeDay = function () { _cd.apply(this, arguments);
   try { if (!S.ended && !S.contractDone && !(typeof tutOn === "function" && tutOn())) { const c = rollChest19(S, Math.random, S.chestBonus19 || 0); S.chestBonus19 = 0;
-      if (c.tier <= 1 && c.kind !== "lvall") { const o = openChest19(S, c); (o.evos || []).forEach(e => queue.push({ k: "evo", ...e })); save(); setTimeout(() => { banner19(`<small>${c.tier ? "銀の宝箱" : "銅の宝箱"}</small><i>${o.text}</i><small>${o.sub}</small>`, "mis", 1500); sfx16("coin"); render(); }, 1350); }
+      if (c.kind !== "egg") { const o = openChest19(S, c); (o.evos || []).forEach(e => queue.push({ k: "evo", ...e })); save(); setTimeout(() => { banner19(`<small>${["銅の宝箱", "銀の宝箱", "金の宝箱", "虹の宝箱"][c.tier] || "宝箱"}</small><i>${o.text}</i><small>${o.sub}</small>`, "mis", 1500); sfx16("coin"); render(); }, 1350); }
       else queue.unshift({ k: "chest", c }); }
     const r = lastRep; let wait = 0;
     if (r && !r.raid && !modal) { const g = (r.dp || 0) - (r.food || 0), lv = new Set(r.lvups || []).size;
@@ -6793,7 +6793,7 @@ dexModal = (prev => function () {
   return h.replace(/(<h2>📖 図鑑[^<]*<\/h2>)/, "$1" + bar);
 })(dexModal);
 // 称号：結果画面と魔物の情報に
-resultStage15 = (prev => function (r) { let h = prev(r); if (r.titles19 && r.titles19.length) h = h.replace('<button class="main big" data-a="stagenext"', r.titles19.map(t => `<div class="ttl19">${img(t.sp, t.evos, "sp", "width:36px;height:36px")}<span><b>${esc(t.nick)}</b>が称号「<b class="gold">${t.title}</b>」を手に入れた！<small>夜の攻撃 +${Math.round(t.up * 100)}%</small></span></div>`).join("") + '<button class="main big" data-a="stagenext"'); return h; })(resultStage15);
+resultStage15 = (prev => function (r) { let h = prev(r); if (r.titles19 && r.titles19.length) h = h.replace('<button class="main big" data-a="stagenext"', r.titles19.map(t => `<div class="ttl19">${simg23(t, t.evos, "sp", "width:36px;height:36px")}<span><b>${esc(t.nick)}</b>が称号「<b class="gold">${t.title}</b>」を手に入れた！<small>夜の攻撃 +${Math.round(t.up * 100)}%</small></span></div>`).join("") + '<button class="main big" data-a="stagenext"'); return h; })(resultStage15);
 monCard = (prev => function (id) { let h = prev(id); const m = S.mons.find(o => o.id === id); if (!m) return h; const t = titleOf19(m), nx = TITLE19.find(x => (m.kt19 || 0) < x[0]);
   const line = `<div class="ttlc19">${t ? `🏅 称号「<b class="gold">${t[1]}</b>」夜の攻撃+${Math.round(t[2] * 100)}%` : "🏅 称号なし"}<small>　倒した勇者 ${m.kt19 || 0}人${nx ? `（あと${nx[0] - (m.kt19 || 0)}人で「${nx[1]}」）` : ""}</small></div>`;
   const i = h.indexOf('<div class="xp"'); if (i < 0) return h + line; const j = h.indexOf("</div>", i) + 6; return h.slice(0, j) + line + h.slice(j); })(monCard);
@@ -6852,7 +6852,7 @@ mixSkillPick18 = (prev => function (A, B, pool) {
 mixConfirm = (prev => function () { let h = prev(); const A = S.mons.find(m => m.id === MX[0]), B = S.mons.find(m => m.id === MX[1]); if (!A || !B) return h;
   const alt = (n, P, O) => S.mons.filter(m => m.sp === P.sp && m !== O);
   const col = (n, P, O) => { const L = alt(n, P, O); if (L.length < 2) return "";
-    return `<div class="pp19"><div class="lab2">${n ? "右" : "左"}の親を選ぶ</div>${L.sort((x, y) => rarI19(y) - rarI19(x) || y.lv - x.lv).map(m => `<div class="row pick18 ${m === P ? "on" : ""}" data-a="mixswap" data-v="${n}:${m.id}">${img(m.sp, m.evos, "sp", "width:30px;height:30px")}<div class="tx"><b>${esc(m.nick)}</b>${rarTag19(m)}${m.shiny19 ? "✨" : ""}<small>Lv${m.lv}　${Object.keys(skOf10(m)).map(k => SK11[k] ? SK11[k].icon : "").join("")}</small></div></div>`).join("")}</div>`; };
+    return `<div class="pp19"><div class="lab2">${n ? "右" : "左"}の親を選ぶ</div>${L.sort((x, y) => rarI19(y) - rarI19(x) || y.lv - x.lv).map(m => `<div class="row pick18 ${m === P ? "on" : ""}" data-a="mixswap" data-v="${n}:${m.id}">${simg23(m, m.evos, "sp", "width:30px;height:30px")}<div class="tx"><b>${esc(m.nick)}</b>${rarTag19(m)}${m.shiny19 ? "✨" : ""}<small>Lv${m.lv}　${Object.keys(skOf10(m)).map(k => SK11[k] ? SK11[k].icon : "").join("")}</small></div></div>`).join("")}</div>`; };
   const box = col(0, A, B) + col(1, B, A); if (!box) return h;
   const i = h.indexOf('<div class="box rarn19">'); return i < 0 ? h + box : h.slice(0, i) + `<div class="ppw19">${box}</div>` + h.slice(i); })(mixConfirm);
 mixSkillModal = function () { return mixConfirm(); };
@@ -6869,7 +6869,7 @@ let SW19 = null;
 let sw19Bar = function (i) {
   const m = SW19 != null && S.mons.find(o => o.id === SW19);
   if (!m || m.home !== i) { if (SW19 != null) SW19 = null; return `<div class="hint swh19">👆 子をタップ → 入れかえたい子か「＋」をタップ</div>`; }
-  return `<div class="swb19"><span>${img(m.sp, m.evos, "sp", "width:28px;height:28px")}<b>${esc(m.nick)}</b>を選んだ　<small>相手の子か「ここへ」をタップ</small></span><span class="sp"></span><button class="mini" data-a="swcard">くわしく</button>${m.job ? `<button class="mini" data-a="swfree">🪄戻す</button>` : ""}<button class="mini" data-a="swno">やめる</button></div>`;
+  return `<div class="swb19"><span>${simg23(m, m.evos, "sp", "width:28px;height:28px")}<b>${esc(m.nick)}</b>を選んだ　<small>相手の子か「ここへ」をタップ</small></span><span class="sp"></span><button class="mini" data-a="swcard">くわしく</button>${m.job ? `<button class="mini" data-a="swfree">🪄戻す</button>` : ""}<button class="mini" data-a="swno">やめる</button></div>`;
 }
 function swapRole19(S, a, b) {
   const A = S.mons.find(m => m.id === a), B = S.mons.find(m => m.id === b); if (!A || !B) return false;
@@ -7009,7 +7009,7 @@ function feedPick19(st) {
     : `<div class="chname">🍖 ごちそう ×${o.feed}皿</div><div class="hint">1回タップで1皿（次のLvまでの6割）。<b>同じ子に何皿でも</b>あげられる　のこり <b>${left}皿</b></div>`;
   return `<div class="ch19 open feed19">${head}
     <div class="fl19">${ms.map(m => { const c = cnt(m.id), p = Math.min(100, Math.round(100 * (m.exp || 0) / expNext5(m))), p2 = Math.min(100, p + 60 * c), up = aw ? (c ? 3 : 0) : Math.floor((p + 60 * c) / 100);
-      return `<div class="row pick18 ${c ? "on" : ""}" data-a="feed19" data-id="${m.id}">${img(m.sp, m.evos, "sp", "width:34px;height:34px")}<div class="tx"><b>${esc(m.nick)}</b>${typeof rarTag19 === "function" ? rarTag19(m) : ""} ${monName5(m)} Lv${m.lv}${up ? ` <span class="good">→ Lv${m.lv + up}${aw || up < 2 ? "" : "くらい"}！</span>` : ""}<div class="fb19"><i style="width:${p}%"></i><i class="add" style="left:${p}%;width:${c ? p2 - p : 0}%"></i></div></div><span class="pn18">${c ? (aw ? "👑" : "🍖×" + c) : ""}</span></div>`; }).join("")}</div>
+      return `<div class="row pick18 ${c ? "on" : ""}" data-a="feed19" data-id="${m.id}">${simg23(m, m.evos, "sp", "width:34px;height:34px")}<div class="tx"><b>${esc(m.nick)}</b>${typeof rarTag19 === "function" ? rarTag19(m) : ""} ${monName5(m)} Lv${m.lv}${up ? ` <span class="good">→ Lv${m.lv + up}${aw || up < 2 ? "" : "くらい"}！</span>` : ""}<div class="fb19"><i style="width:${p}%"></i><i class="add" style="left:${p}%;width:${c ? p2 - p : 0}%"></i></div></div><span class="pn18">${c ? (aw ? "👑" : "🍖×" + c) : ""}</span></div>`; }).join("")}</div>
     ${sel.length ? `<button data-a="feedclr">↩ やり直す</button>` : ""}
     <button class="main big" data-a="feedgo">${sel.length ? (aw ? "👑 この子を覚醒させる" : `🍖 ${sel.length}皿 食べさせる${left ? `（のこり${left}皿はおまかせ）` : ""}`) : (aw ? "🪄 おまかせ（いちばんLvの高い子）" : "🪄 おまかせで食べさせる")}</button></div>`;
 }
@@ -7031,7 +7031,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.151（11/16 11:19）";
+const VER20 = "No.152（11/16 12:41）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7044,7 +7044,7 @@ const roomShort20 = i => { const t = roomTitle(S, i); const m = t.match(/^第(\d
 const roleOfIn20 = m => { if (m.home == null) return null; const pl = roomPlan14(S, m.home); return pl[m.id] === "bed" ? "bed" : pl[m.id] || "fight"; };
 function tok20(m) {
   const r = m.rar19 || "N";
-  return `<div class="tok20 r-${r} ${SW19 === m.id ? "sel" : ""} ${SW19 != null && SW19 !== m.id ? "tgt" : ""}" data-a="tk20" data-id="${m.id}">${r !== "N" ? `<span class="rr">${r}</span>` : ""}${m.job ? '<span class="pn">📌</span>' : ""}${m.shiny19 ? '<span class="sh">✨</span>' : ""}${img(m.sp, m.evos, "sp", "width:40px !important;height:40px !important;flex:0 0 auto")}<b>${esc(m.nick)}</b><small>Lv${m.lv}${restLeft9(S, m) ? " 💤" : ""}</small></div>`;
+  return `<div class="tok20 r-${r} ${SW19 === m.id ? "sel" : ""} ${SW19 != null && SW19 !== m.id ? "tgt" : ""}" data-a="tk20" data-id="${m.id}">${r !== "N" ? `<span class="rr">${r}</span>` : ""}${m.job ? '<span class="pn">📌</span>' : ""}${m.shiny19 ? '<span class="sh">✨</span>' : ""}${simg23(m, m.evos, "sp", "width:40px !important;height:40px !important;flex:0 0 auto")}<b>${esc(m.nick)}</b><small>Lv${m.lv}${restLeft9(S, m) ? " 💤" : ""}</small></div>`;
 }
 const emp20 = (i, k, t) => `<div class="tok20 emp ${SW19 != null ? "tgt" : ""}" data-a="em20" data-v="${i}:${k}"><span>＋</span><small>${SW19 != null ? "ここへ" : t}</small></div>`;
 // 部屋ボード：役目ごとのレーン
@@ -7072,7 +7072,7 @@ function sheet20() {
   const m = SW19 != null && S.mons.find(o => o.id === SW19); if (!m) return "";
   const k0 = roleOfIn20(m), L = m.home != null ? slotsOf18(S, m.home) : {};
   const roles = m.home != null ? ["fight", ...ROLE18.filter(k => k !== "fight" && L[k])] : [];
-  return `<div class="sheet20"><div class="hd">${img(m.sp, m.evos, "sp", "width:44px !important;height:44px !important;flex:0 0 auto")}<div class="tx"><b>${esc(m.nick)}</b>${rarTag19(m)}${m.shiny19 ? "✨" : ""} ${monName5(m)} Lv${m.lv}<small>得意 ${ROLEI18[aptOf18(m.sp)][0]}${ROLEI18[aptOf18(m.sp)][1]}　${m.home == null ? "控え" : "いま " + esc(roomTitle(S, m.home))}${m.job ? "　📌固定" : ""}</small></div><button class="mini" data-a="swno">やめる</button></div>`
+  return `<div class="sheet20"><div class="hd">${simg23(m, m.evos, "sp", "width:44px !important;height:44px !important;flex:0 0 auto")}<div class="tx"><b>${esc(m.nick)}</b>${rarTag19(m)}${m.shiny19 ? "✨" : ""} ${monName5(m)} Lv${m.lv}<small>得意 ${ROLEI18[aptOf18(m.sp)][0]}${ROLEI18[aptOf18(m.sp)][1]}　${m.home == null ? "控え" : "いま " + esc(roomTitle(S, m.home))}${m.job ? "　📌固定" : ""}</small></div><button class="mini" data-a="swno">やめる</button></div>`
     + (roles.length ? `<div class="chips20">${roles.map(k => `<button class="chip20 ${k0 === k ? "on" : ""}" data-a="sr20" data-v="${k}">${ROLEI18[k][0]}${ROLEI18[k][1]}</button>`).join("")}</div>` : "")
     + `<div class="chips20">${dens20().filter(i => i !== m.home).map(i => `<button class="chip20" data-a="mv20" data-v="${i}">🏠 ${roomLab20(i)}へ</button>`).join("")}${m.home != null ? `<button class="chip20" data-a="mv20" data-v="-1">🪑 控えへ</button>` : ""}</div>`
     + `<div class="chips20">${m.home != null ? (m.job ? `<button class="chip20" data-a="swfree">🪄 固定を外す</button>` : `<button class="chip20" data-a="swpin">📌 固定</button>`) : ""}<button class="chip20" data-a="swcard">📋 くわしく</button></div></div>`;
@@ -7089,7 +7089,7 @@ function roomPage20(i) {
 // 🧭 育成：流れで見る
 function growPage20() {
   const C = afc19(S), D = dens20(), thr = thrLv19(S);
-  const mini = m => `<div class="mini20 r-${m.rar19 || "N"}" data-a="gm20" data-id="${m.id}">${img(m.sp, m.evos, "sp", "width:28px !important;height:28px !important;flex:0 0 auto")}<div><b>${esc(m.nick)}</b><small>Lv${m.lv}${m.rar19 && m.rar19 !== "N" ? " " + m.rar19 : ""}${m.job ? " 📌" : ""}</small></div></div>`;
+  const mini = m => `<div class="mini20 r-${m.rar19 || "N"}" data-a="gm20" data-id="${m.id}">${simg23(m, m.evos, "sp", "width:28px !important;height:28px !important;flex:0 0 auto")}<div><b>${esc(m.nick)}</b><small>Lv${m.lv}${m.rar19 && m.rar19 !== "N" ? " " + m.rar19 : ""}${m.job ? " 📌" : ""}</small></div></div>`;
   const col = p => { const rooms = D.filter(i => purpose19(S, i) === p); if (!rooms.length) return "";
     return `<div class="col20 c-${p}"><h4>${POL13[p].icon} ${POL13[p].name}</h4>${rooms.map(i => { const res = residents5(S, i);
       return `<div class="cr20" data-a="rt20" data-v="${i}"><small>${esc(roomTitle(S, i))}　${res.length}/${capOfSlot7(S, i)} ▶</small></div>${res.sort((a, b) => a.lv - b.lv).map(mini).join("")}`; }).join("")}</div>`; };
@@ -7413,7 +7413,7 @@ function vaultDetail21(m) {
   const r = m.rar19 || "N", ap = aptOf18(m.sp), sks = Object.keys(m.sk || {}), Q = QUIRK[m.quirk];
   const base = MON[m.sp].forms[0][0], now = monName5(m);
   let h = `<button class="mini" data-a="vback21">◀ 一覧にもどる</button>
-    <div class="vd21">${img(m.sp, m.evos, "sp", "width:72px;height:72px;flex:0 0 auto")}<div class="tx"><h2 style="margin:0">${esc(m.nick)} <span class="rt19 r-${r} big21">${r}</span>${m.shiny19 ? " ✨色違い" : ""}</h2>
+    <div class="vd21">${simg23(m, m.evos, "sp", "width:72px;height:72px;flex:0 0 auto")}<div class="tx"><h2 style="margin:0">${esc(m.nick)} <span class="rt19 r-${r} big21">${r}</span>${m.shiny19 ? " ✨色違い" : ""}</h2>
     <div>${now} Lv${m.lv}${now !== base ? `　<span class="hint">（残すと ${base} にもどる）</span>` : ""}</div></div></div>`;
   h += `<div class="lab2">残るもの</div><div class="box">
     <div>🧬 種族：<b>${base}</b>　得意 ${ROLEI18[ap][0]}${ROLEI18[ap][1]}${m.apt2 && ROLEI18[m.apt2] ? `・${ROLEI18[m.apt2][0]}${ROLEI18[m.apt2][1]}` : ""}</div>
@@ -7454,7 +7454,7 @@ function relModal21() {
     const srt = { lvd: (a, b) => b.lv - a.lv, lva: (a, b) => a.lv - b.lv, rar: (a, b) => rarI19(b) - rarI19(a) || b.lv - a.lv }[mf21.sort] || ((a, b) => rarI19(a) - rarI19(b) || a.lv - b.lv);
     const ms = S.mons.filter(m => typeof mfOk21 !== "function" || mfOk21(m)).sort(srt);
     return head + `<div class="hint">手放す子をタップ（何体でも）。いなくなった子は戻らない</div>` + (typeof mfBar21 === "function" ? mfBar21() : "")
-      + ms.map(m => { const on = rel21.ids.includes(m.id); return `<div class="row pick18 ${on ? "on" : ""}" data-a="rel21t" data-id="${m.id}">${img(m.sp, m.evos, "sp", "width:34px;height:34px;flex:0 0 auto")}<div class="tx"><b>${esc(m.nick)}</b>${rarTag19(m)}${m.shiny19 ? "✨" : ""} ${monName5(m)} Lv${m.lv}<small class="hint">💎${relDp21(m)}　🍖経験${relXp21(m)}${m.home == null ? "　控え" : "　" + esc(roomTitle(S, m.home))}</small></div><span class="pn18">${on ? "👋" : ""}</span></div>`; }).join("")
+      + ms.map(m => { const on = rel21.ids.includes(m.id); return `<div class="row pick18 ${on ? "on" : ""}" data-a="rel21t" data-id="${m.id}">${simg23(m, m.evos, "sp", "width:34px;height:34px;flex:0 0 auto")}<div class="tx"><b>${esc(m.nick)}</b>${rarTag19(m)}${m.shiny19 ? "✨" : ""} ${monName5(m)} Lv${m.lv}<small class="hint">💎${relDp21(m)}　🍖経験${relXp21(m)}${m.home == null ? "　控え" : "　" + esc(roomTitle(S, m.home))}</small></div><span class="pn18">${on ? "👋" : ""}</span></div>`; }).join("")
       + `<div class="mixbtn18"><button data-a="close">やめる</button><button class="main" data-a="rel21next" ${sel.length ? "" : "disabled"}>${sel.length}体を手放す ▶</button></div>`;
   }
   const dp = sel.reduce((a, m) => a + relDp21(m), 0), xp = sel.reduce((a, m) => a + relXp21(m), 0);
@@ -7462,7 +7462,7 @@ function relModal21() {
     <div class="lab2">どっちにする？</div><div class="chips20"><button class="chip20 ${rel21.mode === "dp" ? "on" : ""}" data-a="rel21m" data-v="dp">💎 DPにする（+${dp}）</button><button class="chip20 ${rel21.mode === "xp" ? "on" : ""}" data-a="rel21m" data-v="xp">🍖 仲間の経験にする（+${xp}）</button></div>`;
   if (rel21.mode === "xp") { const L = S.mons.filter(m => !rel21.ids.includes(m.id)).sort((a, b) => b.lv - a.lv);
     h += `<div class="lab2">経験をあげる仲間</div>` + L.map(m => { const on = rel21.to === m.id; let lv = m.lv, e = (m.exp || 0) + xp; while (e >= 6 * lv && lv < 99) { e -= 6 * lv; lv++; }
-      return `<div class="row pick18 ${on ? "on" : ""}" data-a="rel21to" data-id="${m.id}">${img(m.sp, m.evos, "sp", "width:30px;height:30px;flex:0 0 auto")}<div class="tx"><b>${esc(m.nick)}</b>${rarTag19(m)} Lv${m.lv}${lv > m.lv ? ` <span class="good">→ Lv${lv}</span>` : ""}</div></div>`; }).join(""); }
+      return `<div class="row pick18 ${on ? "on" : ""}" data-a="rel21to" data-id="${m.id}">${simg23(m, m.evos, "sp", "width:30px;height:30px;flex:0 0 auto")}<div class="tx"><b>${esc(m.nick)}</b>${rarTag19(m)} Lv${m.lv}${lv > m.lv ? ` <span class="good">→ Lv${lv}</span>` : ""}</div></div>`; }).join(""); }
   const ok = rel21.mode === "dp" || (rel21.mode === "xp" && rel21.to != null);
   h += rel21.step === "confirm" ? `<div class="box bad21b">本当に${sel.length}体を手放す？ もう戻らない${sel.length >= S.mons.length ? "<br><b>⚠ 魔物が1体もいなくなる（勇者を止められない）</b>" : ""}</div><button class="bad21" data-a="rel21go">👋 手放す</button><button data-a="rel21back">やめる</button>`
     : `<div class="mixbtn18"><button data-a="rel21back">◀ 選びなおす</button><button class="main" data-a="rel21ask" ${ok ? "" : "disabled"}>決める</button></div>`;
@@ -7690,23 +7690,28 @@ function danger23() {
   if (dng23.key === key) return dng23.v;
   const S0 = S, base = JSON.stringify(S0), U0 = UID5, res = [];
   const R0 = Math.random, seed0 = S0.raidSeed23 || (S0.seed || 1) * 31 + S0.day;
-  try { for (let t = 0; t < 5; t++) { S = JSON.parse(base); S.sim23 = 1; S.fc = S0.fc ? JSON.parse(JSON.stringify(S0.fc)) : null;
+  try { for (let t = 0; t < 8; t++) { S = JSON.parse(base); S.sim23 = 1; S.fc = S0.fc ? JSON.parse(JSON.stringify(S0.fc)) : null;
       const gr = rng23(seed0 + t * 7919); Math.random = gr;
       const N2 = startRaid9(S, gr); N2.rnd = gr; let g = 0; while (!N2.done && g++ < 4000) stepNight5(S, N2); Math.random = R0;
       const li = S.path.findIndex(r => r.kind === "lord");
-      res.push({ deep: Math.max(0, ...N2.heroes.map(h => h.maxPos || h.pos || 0)), li, lordLoss: N2.lord ? Math.max(0, (N2.lord.max || 0) - N2.lord.hp) / Math.max(1, N2.lord.max || 1) : 0, down: N2.lord && N2.lord.hp <= 0, esc: N2.heroes.filter(h => h.st === "escaped").length }); }
+      res.push({ md: N2.mons.filter(b => b.down || b.hp <= 0).length, deep: Math.max(0, ...N2.heroes.map(h => h.maxPos || h.pos || 0)), li, lordLoss: N2.lord ? Math.max(0, (N2.lord.max || 0) - N2.lord.hp) / Math.max(1, N2.lord.max || 1) : 0, down: N2.lord && N2.lord.hp <= 0, esc: N2.heroes.filter(h => h.st === "escaped").length }); }
   } catch (e) { console.error(e); } finally { Math.random = R0; S = S0; UID5 = U0; }
   if (!res.length) return null;
   const li = res[0].li, dens = S.path.filter(r => r.kind === "den").length;
   const v = { downs: res.filter(o => o.down).length, lord: res.filter(o => o.lordLoss > 0).length, deep: Math.round(res.reduce((a, o) => a + Math.min(o.deep, li), 0) / res.length * 10) / 10, li, dens, esc: res.reduce((a, o) => a + o.esc, 0) / res.length };
-  v.lv = v.downs >= 2 ? 3 : v.downs || v.lord >= 2 ? 2 : v.deep >= Math.max(1, li - 1) || v.lord || v.esc >= 1 ? 1 : 0;
+  v.md = res.reduce((a, o) => a + o.md, 0) / res.length;
+  const n = res.length; v.n = n;
+  v.lv = v.downs >= n * 0.5 ? 3 : v.downs >= 2 || v.lord >= n * 0.4 ? 2 : v.deep >= Math.max(1, li - 1) || v.lord || v.esc >= 0.6 || v.md >= 3 ? 1 : 0;
+  // ひとこと理由
+  const R = S.path[Math.min(li, Math.max(0, Math.round(v.deep)))];
+  v.why = v.lv === 0 ? "" : v.lord ? "主の間まで来られそう" : v.esc >= 0.6 ? `平均${v.esc.toFixed(1)}人に逃げられそう` : v.md >= 3 ? `魔物が${Math.round(v.md)}体ほどやられそう` : `${R ? roomTitle(S, S.path.indexOf(R)) : "奥"}まで来られそう`;
   dng23 = { key, v }; return v;
 }
-const DNG23 = [["🟢", "余裕", "入口で止まりそう"], ["🟡", "注意", "奥まで来るか、逃げられそう"], ["🟠", "危ない", "主まで届きそう"], ["🔴", "負けそう", "主が倒れる夜がある"]];
+const DNG23 = [["🟢", "余裕", "入口で止まりそう"], ["🟡", "注意", "魔物がやられるか、逃げられそう"], ["🟠", "危ない", "主まで届きそう"], ["🔴", "負けそう", "主が倒れることが多い"]];
 { const _rb = raidBox; raidBox = function () {
   let h = _rb(); try { const dr = daysToRaid9(S); if (!h || dr == null || dr > 1 || N) return h;
     const v = danger23(); if (!v) return h; const D = DNG23[v.lv], hurt = S.mons.filter(m => m.home != null && restLeft9(S, m)).length;
-    const add = `<div class="dng23 l${v.lv}"><b>${D[0]} 危ない度：${D[1]}</b><span>いまの並びで5回ためすと：${D[2]}${v.downs ? `（5回中${v.downs}回 主が倒れる）` : v.lord ? `（5回中${v.lord}回 主が傷つく）` : ""}</span>${hurt ? `<span class="bad">💤 けがの子${hurt}体は、体力半分で戦う</span>` : ""}${v.lv >= 2 ? `<span class="bad">主が倒れると、この周回は終わり。DP（いま${fmt8(S.dp)}）は持ち帰れない。使うなら今のうち</span>` : ""}<span class="hint">並べかえ・罠・寝床・準備で変わる</span></div>` + (typeof prepBox23 === "function" ? prepBox23() : "");
+    const add = `<div class="dng23 l${v.lv}"><b>${D[0]} 危ない度：${D[1]}</b><span>いまの並びで${v.n || 5}回ためすと：${v.why || D[2]}${v.downs ? `（${v.n || 5}回中${v.downs}回 主が倒れる）` : v.lord ? `（${v.n || 5}回中${v.lord}回 主が傷つく）` : ""}</span>${hurt ? `<span class="bad">💤 けがの子${hurt}体は、体力半分で戦う</span>` : ""}${v.lv >= 2 ? advice23(v) : ""}${v.lv >= 2 ? `<span class="bad">主が倒れると、この周回は終わり。DP（いま${fmt8(S.dp)}）は持ち帰れない。使うなら今のうち</span>` : ""}<span class="hint">並べかえ・罠・寝床・準備で変わる</span></div>` + (typeof prepBox23 === "function" ? prepBox23() : "");
     const at = h.lastIndexOf("</div>"); return h.slice(0, at) + add + h.slice(at);
   } catch (e) { console.error(e); return h; } }; }
 // ---------- 5) 楽勝が続くと、うわさが広まって勇者が強くなる（悪名の熱） ----------
@@ -7714,13 +7719,13 @@ const DNG23 = [["🟢", "余裕", "入口で止まりそう"], ["🟡", "注意"
 // 主まで届かれたら少し冷める。4回目の襲撃から。これで「9日目から先は何もしなくても勝てる」をなくす
 const heat23 = S => S.heat23 || 0;
 { const _sr = startRaid9; startRaid9 = function (S, rnd) { const N = _sr.apply(this, arguments);
-  try { const k = heat23(S); if (N && !N.scout && k > 0) { N.heroes.forEach(h => { h.max = Math.round(h.max * (1 + k)); h.hp = h.max; h.atk = Math.round(h.atk * (1 + k * 0.7)); }); N.heat23 = k; } } catch (e) {}
+  try { const k = heat23(S) * (N && N.heroes && N.heroes.some(h => h.boss) ? 0.4 : 1); if (N && !N.scout && k > 0) { N.heroes.forEach(h => { h.max = Math.round(h.max * (1 + k)); h.hp = h.max; h.atk = Math.round(h.atk * (1 + k * 0.7)); }); N.heat23 = k; } } catch (e) {}
   return N; }; }
 { const _er = endRaid9; endRaid9 = function (S, N) {
   try { if (!N.scout && (S.raidNo || 0) >= 2) {
     const dens = S.path.map((r, i) => r.kind === "den" ? i : -1).filter(i => i >= 0), li = S.path.findIndex(r => r.kind === "lord");
     const deep = Math.max(0, ...N.heroes.map(h => h.maxPos || 0)), esc = N.heroes.filter(h => h.st === "escaped").length, hurt = N.lord && N.lord.hp < (N.lord.max || 0);
-    let d = 0; if (N.lord && N.lord.down) d = -0.3; else if (hurt) d = -0.15; else d = 0.15;
+    let d = 0; if (N.lord && N.lord.down) d = -0.3; else if (hurt) d = -0.15; else { const md = N.mons.filter(b => b.down || b.hp <= 0).length; d = !esc && md <= 1 ? 0.2 : esc * 2 >= N.heroes.length || md >= 4 ? 0 : 0.05; }   // 押されている夜は熱を上げない（見えないまま溜まって最後に崖、をなくす）
     S.heat23 = Math.max(0, Math.min(3, heat23(S) + d)); N.heatD23 = d; } } catch (e) {}
   return _er.apply(this, arguments); }; }
 // ---------- 6) 店の値段はレア度で変わる（SSRとNが同じ値段だった）。DPの使いみちにもなる ----------
@@ -7803,7 +7808,7 @@ const divEnd23 = (h, at) => { let d = 0, i = at; const re = /<\/?div\b/g; re.las
   if (queue.length && queue[0].k === "evo" && queue.filter(q => q.k === "evo").length >= 2) { const first = queue.shift(), more = queue.filter(q => q.k === "evo"); queue = queue.filter(q => q.k !== "evo"); queue.unshift({ ...first, more23: more }); }
   return _ns.apply(this, arguments); }; }
 evoStage = (prev => function (e) { let h = prev(e); try { if (stage.step === 0 && e.more23 && e.more23.length) h = h.replace('<div class="hint">タップで見守る</div>', `<div class="hint">ほかに${e.more23.length}体も…！ タップで見守る</div>`);
-  if (stage.step === 1 && e.more23 && e.more23.length) h = h.replace('<button class="main" data-a="stagenext">', `<div class="evm23">${e.more23.map(x => { const f = formOf(x.m); return `<div class="row">${img(x.m.sp, x.m.evos, "sp", "width:40px;height:40px")}<div class="tx"><b>${esc(x.m.nick)}</b>：${esc(x.before.name)} → <b class="gold">${esc(f[0])}</b><br><small>体力 ${x.before.hp}→${monHp5(x.m)}　攻撃 ${x.before.atk}→${monAtk5(x.m)}</small></div></div>`; }).join("")}</div><button class="main" data-a="stagenext">`);
+  if (stage.step === 1 && e.more23 && e.more23.length) h = h.replace('<button class="main" data-a="stagenext">', `<div class="evm23">${e.more23.map(x => { const f = formOf(x.m); return `<div class="row">${simg23(x.m, x.m.evos, "sp", "width:40px;height:40px")}<div class="tx"><b>${esc(x.m.nick)}</b>：${esc(x.before.name)} → <b class="gold">${esc(f[0])}</b><br><small>体力 ${x.before.hp}→${monHp5(x.m)}　攻撃 ${x.before.atk}→${monAtk5(x.m)}</small></div></div>`; }).join("")}</div><button class="main" data-a="stagenext">`);
 } catch (e2) {} return h; })(evoStage);
 
 // ---------- 16) 勇者は「何が効いたか」を覚えて、次の襲撃で対策してくる ----------
@@ -7873,9 +7878,29 @@ document.addEventListener("toggle", ev => { const d = ev.target; if (d && d.clas
     rest.forEach((m, k) => { if (m.keep23) { delete m.keep23; m.job = null; m.job19 = rj[k]; } }); } }; }
 
 // ---------- 21) 💎の入りを絞る：襲撃で落とす💎は6割に（中盤から💎があふれて「何でも買える」になっていた） ----------
-{ const _er = endRaid9; endRaid9 = function (S, N) { try { if (!N.scout && N.dp > 0) N.dp = Math.round(N.dp * 0.6); } catch (e) {} return _er.apply(this, arguments); }; }
+{ const _er = endRaid9; endRaid9 = function (S, N) { try { if (!N.scout && N.dp > 0) N.dp = Math.round(N.dp * 0.6 / (1 + Math.max(0, S.dp) / 4000)); /* ため込むほど入りが減る */ } catch (e) {} return _er.apply(this, arguments); }; }
 // ---------- 22) 夜のカメラ：いちばん奥まで来た勇者の階を映す（B2・主の間へ降りたら追いかける） ----------
 { const _r = render; render = function () { try { if (N && caveFollow && typeof floorOf === "function") { const hs = N.heroes.filter(h => h.st === "in"); if (hs.length) { const p = Math.max(...hs.map(h => h.pos || 0)), f = floorOf(S, Math.min(p, S.path.length - 1)); if (f != null && f >= 0 && caveFloor !== f) { caveFloor = f; CV.sig = ""; } } } } catch (e) {} return _r.apply(this, arguments); }; }
+
+// 危ない夜は「何をすれば下がるか」を、準備ごとに試して見せる
+let adv23 = { key: "", h: "" };
+function advice23(v) {
+  const P = prepOf23(S), ks = Object.keys(PREP23).filter(k => !P[k]); if (!ks.length) return "";
+  const key = dng23.key + "|" + ks.join(); if (adv23.key === key) return adv23.h;
+  const save0 = dng23, out = [];
+  try { ks.forEach(k => { S.prep23 = { ...P, [k]: 1 }; dng23 = { key: "", v: null }; const w = danger23(); out.push([k, w ? w.lv : v.lv]); });
+    S.prep23 = { ...P, ...Object.fromEntries(ks.map(k => [k, 1])) }; dng23 = { key: "", v: null }; const all = danger23(); out.push(["all", all ? all.lv : v.lv]); }
+  finally { S.prep23 = P; dng23 = save0; }
+  const best = out.filter(([k]) => k !== "all").sort((a, b) => a[1] - b[1]);
+  const h = `<span class="hint">💡 ためしてみると：${best.slice(0, 2).map(([k, l]) => `${PREP23[k][0]}${PREP23[k][1]}→${DNG23[l][0]}`).join("　")}${out.find(o => o[0] === "all") ? `　全部→${DNG23[out.find(o => o[0] === "all")[1]][0]}` : ""}</span>`;
+  adv23 = { key, h }; return h;
+}
+// ---------- 23) 主の間に勇者が入ったら、速さを×1にもどして見せる（いちばんの見せ場を見のがさない）。ボスの夜も×1から ----------
+{ const _r = render; render = function () { try { if (N && !N.scout) { const li = S.path.findIndex(r => r.kind === "lord");
+  if (!N.boss23 && N.heroes.some(h => h.boss)) { N.boss23 = 1; speed = 1; }
+  if (!N.lordSlow23 && li >= 0 && N.heroes.some(h => h.st === "in" && h.pos === li)) { N.lordSlow23 = 1; speed = 1; caveFloor = floorOf(S, li); CV.sig = ""; setTimeout(() => { try { banner19("<small>⚠ 主の間</small><i>勇者が主の間に入った！</i>", "wipe", 1600); } catch (e) {} }, 0); } } } catch (e) {} return _r.apply(this, arguments); }; }
+// ---------- 24) 色違いは、どの画面でも色違いの色で（店・MVP・配合・進化…）。ビルドで simg23(m, m.evos…) をこれに置きかえる ----------
+function simg23(m, f, cls = "sp", style = "") { const sp = m && m.sp; return img(sp, f, cls, m && m.shiny19 ? `${style};filter:hue-rotate(150deg) saturate(1.5) brightness(1.08)` : style); }
 
 </script>
 </body>
