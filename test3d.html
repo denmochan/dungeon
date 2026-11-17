@@ -1769,7 +1769,9 @@ KIT24.lich = () => { const K = KIT24.skeleton(); return { body: addBody24(K.body
 Object.assign(KITOF24, { lich: "lich" }); SPBOUND24.lich = SPBOUND24.skeleton; SPCOL24.lich = SPCOLX24.lich;
 Object.assign(SPVAR24, { lich: [[0, 0, 0, 0], [0.4, 1.0, 0.5]] }); SPCOLX24.lich = [[0.88, 0.86, 0.78], [0.38, 0.24, 0.5]];
 // 乗り手は少し持ち上げる
-{ const R1 = rigSp24; rigSp24 = function (sp0, mode, t){ if (sp0 === "webgoblin") { const R = rig24(mode === "sleep" ? "idle" : mode, t); R.J = R.J.map(v => v[1] < -5 ? v : [v[0], v[1] + 0.5, v[2]]); return R; }
+{ const R1 = rigSp24; rigSp24 = function (sp0, mode, t){ if (sp0 === "webgoblin") { const R = rig24(mode === "sleep" || mode === "walk" ? "idle" : mode, t); R.J = R.J.map(v => v[1] < -5 ? v : [v[0], v[1] + 0.62, v[2] - 0.22]);
+    [[9, 10, 11, 15, -1], [12, 13, 14, 16, 1]].forEach(([h, k, an, to, sg]) => { const H = R.J[h]; R.J[k] = [H[0] + sg * 0.2, H[1] - 0.04, H[2] + 0.18]; R.J[an] = [H[0] + sg * 0.3, H[1] - 0.24, H[2] - 0.02]; R.J[to] = [H[0] + sg * 0.32, H[1] - 0.27, H[2] + 0.06]; });
+    return R; }
   const k = kitOf24(sp0); if (k === "gobx" || k === "lich") return rig24(mode, t); return R1(sp0, mode, t); }; }
 SP3D24.gobx = 1; SP3D24.lich = 1;
 // ---------- 広い洞窟：壁を高く、坑道を大きく、壁ぎわに松明 ----------
