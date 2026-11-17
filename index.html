@@ -7175,7 +7175,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.168（11/17 18:38）";
+const VER20 = "No.169（11/17 18:46）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -8522,12 +8522,13 @@ const hash24 = (x, y, z) => { let h = (x * 374761393 + y * 668265263 + z * 21474
 // 面を作る（となりが空の面だけ）。pivot はボクセル座標で、その点が部品の原点になる
 const FACES24 = [[[1, 0, 0], [[1, 0, 0], [1, 1, 0], [1, 1, 1], [1, 0, 1]], 0.86], [[-1, 0, 0], [[0, 0, 1], [0, 1, 1], [0, 1, 0], [0, 0, 0]], 0.8], [[0, 1, 0], [[0, 1, 1], [1, 1, 1], [1, 1, 0], [0, 1, 0]], 1.0], [[0, -1, 0], [[0, 0, 0], [1, 0, 0], [1, 0, 1], [0, 0, 1]], 0.55], [[0, 0, 1], [[1, 0, 1], [1, 1, 1], [0, 1, 1], [0, 0, 1]], 0.92], [[0, 0, -1], [[0, 0, 0], [0, 1, 0], [1, 1, 0], [1, 0, 0]], 0.75]];
 function mesh24(gl, G, pivot = [0, 0, 0], vs = VS){
-  const P = [], Nn = [], C = [], I = []; let n = 0;
+  const P = [], Nn = [], C = [], I = []; let n = 0; const lo = [1e9, 1e9, 1e9], hi = [-1e9, -1e9, -1e9];
   G.map.forEach(([c, e], k) => { const [x, y, z] = k.split(",").map(Number);
     FACES24.forEach(([d, q, sh]) => { if (G.map.has((x + d[0]) + "," + (y + d[1]) + "," + (z + d[2]))) return;
       q.forEach(v => { P.push((x + v[0] - pivot[0]) * vs, (y + v[1] - pivot[1]) * vs, (z + v[2] - pivot[2]) * vs); Nn.push(d[0], d[1], d[2]); C.push(c[0] * sh, c[1] * sh, c[2] * sh, e); });
       I.push(n, n + 1, n + 2, n, n + 2, n + 3); n += 4; }); });
-  return vbuf24(gl, P, Nn, C, I);
+  for (let k = 0; k < P.length; k += 3) for (let a = 0; a < 3; a++) { lo[a] = Math.min(lo[a], P[k + a]); hi[a] = Math.max(hi[a], P[k + a]); }
+  const b = vbuf24(gl, P, Nn, C, I); b.ctr = [(lo[0] + hi[0]) / 2, (lo[1] + hi[1]) / 2, (lo[2] + hi[2]) / 2]; b.ext = [hi[0] - lo[0], hi[1] - lo[1], hi[2] - lo[2]]; return b;
 }
 function vbuf24(gl, P, Nn, C, I){
   const mk = (t, a) => { const b = gl.createBuffer(); gl.bindBuffer(t, b); gl.bufferData(t, a, gl.STATIC_DRAW); return b; };
@@ -8668,7 +8669,7 @@ function trapMesh24(k){
 }
 // ---------- 部屋をまるごと組み立てて描く ----------
 const VW24 = 8, VD24 = 6;   // 床の広さ（横・奥）
-const THC24 = { soil: ["#7a5636", "#5e4128", "#8a6a48"], damp: ["#4a5a58", "#34403e", "#6a7a72"], tomb: ["#6a6670", "#4a4650", "#8a8690"], lava: ["#4a2a22", "#2e1a16", "#7a3a22"], fungal: ["#4a3a52", "#30243a", "#6a4a6a"], crystal: ["#3a4a6a", "#26304a", "#5a6a9a"] };
+const THC24 = { soil: ["#6a5440", "#4e3e30", "#7e6a56"], damp: ["#4a5a58", "#34403e", "#6a7a72"], tomb: ["#6a6670", "#4a4650", "#8a8690"], lava: ["#4a2a22", "#2e1a16", "#7a3a22"], fungal: ["#4a3a52", "#30243a", "#6a4a6a"], crystal: ["#3a4a6a", "#26304a", "#5a6a9a"] };
 let VX24 = null;   // いま開いている3D
 function voxOk24(){ try { const c = document.createElement("canvas"); return !!(c.getContext("webgl") || c.getContext("experimental-webgl")); } catch (e) { return false; } }
 function Vox24(host, i){
@@ -8704,16 +8705,16 @@ function Vox24(host, i){
 }
 // ---------- 魔物：部品の行列を関節の角度から作る ----------
 function vxChar24(gl, m){
-  const B = body24(m.sp), parts = {}, root = B.parts.root || {};
-  Object.entries(B.parts).forEach(([k, p]) => { if (k === "root") return; parts[k] = { ...p, m: mesh24(gl, p.g, p.pv, VS) }; });
-  return { B, parts, root, rot: {}, tool: null };
+  const B = body24v2(m.sp), parts = {}, root = B.parts.root || {}, vs = root.vs || VS;
+  Object.entries(B.parts).forEach(([k, p]) => { if (k === "root") return; parts[k] = { ...p, m: mesh24(gl, p.g, p.pv, vs) }; });
+  return { B, parts, root, rot: {}, tool: null, vs };
 }
 function vxPose24(ch, base){   // 部品ごとの最終行列
   const out = [], P = ch.parts, M = {}, s = (ch.root.scale || 1);
   const order = ["body", ...Object.keys(P).filter(k => k !== "body")];
   order.forEach(k => { const p = P[k]; if (!p) return; const r = ch.rot[k] || [0, 0, 0];
     const parent = p.par === "root" || !M[p.par] ? VM.mul(base, VM.sc(s, s, s)) : M[p.par];
-    let L = VM.tr(p.at[0] * VS, p.at[1] * VS, p.at[2] * VS); L = VM.mul(L, VM.ry(r[1])); L = VM.mul(L, VM.rx(r[0])); L = VM.mul(L, VM.rz(r[2]));
+    const vs = ch.vs || VS; let L = VM.tr(p.at[0] * vs, p.at[1] * vs, p.at[2] * vs); L = VM.mul(L, VM.ry(r[1])); L = VM.mul(L, VM.rx(r[0])); L = VM.mul(L, VM.rz(r[2]));
     M[k] = VM.mul(parent, L); out.push([p.m, M[k]]); });
   if (ch.tool && M.armR) out.push([ch.tool, VM.mul(M.armR, VM.mul(VM.tr(0, -6 * VS, 1 * VS), VM.rx(Math.PI / 2 * (ch.toolTilt || 1))))]);
   return { out, M };
@@ -8798,7 +8799,7 @@ function vxFrame24(me, now){
   gl.uniformMatrix4fv(P.U.VP, false, VP); gl.uniform3fv(P.U.eye, me.eye);
   // 光：たいまつ2つ（揺れる）＋施設の光＋ほのかな上の光
   const fl = k => 0.85 + 0.15 * Math.sin(now / 90 + k * 1.7) + 0.08 * Math.sin(now / 37 + k);
-  const Lp = [], Lc = []; me.torches.slice(0, 3).forEach(([x, y, z], k) => { Lp.push(x, y + 0.7, z + 0.4); const f = fl(k) * 1.5; Lc.push(1.0 * f, 0.68 * f, 0.38 * f); });
+  const Lp = [], Lc = []; me.torches.slice(0, 3).forEach(([x, y, z], k) => { Lp.push(x, y + 0.7, z + 0.4); const f = fl(k) * 1.3; Lc.push(1.0 * f, 0.74 * f, 0.5 * f); });
   const gf = Object.values(me.facs).find(o => o.d.glow || o.d.fire); if (gf) { Lp.push(gf.x, 1.2, gf.z + 0.6); const c = gf.d.glow || [1, .5, .2], f = gf.d.fire ? fl(9) * 1.6 : 1.3; Lc.push(c[0] * f, c[1] * f, c[2] * f); } else { Lp.push(VW24 / 2, 3, VD24); Lc.push(.25, .22, .2); }
   gl.uniform3fv(P.U.Lp, Lp); gl.uniform3fv(P.U.Lc, Lc); gl.uniform3fv(P.U.amb, [0.34, 0.31, 0.34]);
   const draw = (m, M, tint = [1, 1, 1, 1]) => { gl.uniformMatrix4fv(P.U.M, false, M); gl.uniform4fv(P.U.tint, tint);
@@ -8808,13 +8809,14 @@ function vxFrame24(me, now){
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, m.i); gl.drawElements(gl.TRIANGLES, m.cnt, gl.UNSIGNED_SHORT, 0); };
   // 手前の壁は消す（中が見えるように）
   const yaw = me.camYaw, sideHide = Math.sin(yaw);
+  vxOutline24(gl, P, me.objs.filter(o => o.d).map(o => [o.m, o.M]), 0.04);
   me.objs.forEach(o => { if (o === me.wall) return; if (o.flame) { const s = 0.85 + 0.25 * Math.sin(now / 70 + o.M[12] * 3); draw(o.m, VM.mul(o.M, VM.sc(s, 0.8 + 0.4 * Math.abs(Math.sin(now / 110 + o.M[12])), s))); } else draw(o.m, o.M); });
   draw(me.wall.m, me.wall.M);
   // 魔物
   gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
   me.acts.forEach(A => { const lift = A.lift || 0; draw(me.shadow, VM.mul(VM.tr(A.x, 0.02, A.z), VM.sc(1 + (A.lie ? .6 : 0), 1, 1)), [1, 1, 1, Math.max(0.15, 0.45 - lift * 0.15)]); });
   me.acts.forEach(A => { let base = VM.mul(VM.tr(A.x, A.lift || 0, A.z), VM.ry(A.face)); if (A.sq) base = VM.mul(base, VM.sc(1 + (A.sq - 1) * .5, 2 - A.sq, 1 + (A.sq - 1) * .5));
-    const pose = vxPose24(A.ch, base); A.headM = pose.M.head || pose.M.body; const tint = [1, 1, 1, A.ch.root.alpha || 1]; pose.out.forEach(([m, M]) => draw(m, M, tint)); });
+    const pose = vxPose24(A.ch, base); A.headM = pose.M.head || pose.M.body; const tint = [1, 1, 1, A.ch.root.alpha || 1]; if (!A.ch.root.alpha) { gl.disable(gl.BLEND); vxOutline24(gl, P, pose.out, 0.035); gl.enable(gl.BLEND); } pose.out.forEach(([m, M]) => draw(m, M, tint)); });
   // 粒
   me.fx = me.fx.filter(f => (f.life -= dt) > 0);
   me.fx.forEach(f => { if (f.arrow) { const k = 1 - f.life / f.t0; const x = f.x + (f.tx - f.x) * k, y = f.y + (f.ty - f.y) * k + Math.sin(k * Math.PI) * 0.3, z = f.z + (f.tz - f.z) * k; draw(me.cube, VM.mul(VM.tr(x, y, z), VM.mul(VM.ry(Math.atan2(f.tx - f.x, f.tz - f.z)), VM.sc(.04, .04, .45))), [...f.c, 1]); return; }
@@ -8857,6 +8859,141 @@ function vxMount24(host, i){
   return true;
 }
 function vxStop24(){ if (VX24) { VX24.alive = false; try { const ext = VX24.gl.getExtension("WEBGL_lose_context"); ext && ext.loseContext(); } catch (e) {} VX24 = null; } }
+// =================== 2代目：ちびキャラの体（形を目で確かめながら作る） ===================
+// 角の丸い箱：中心の箱からの距離が r 以内なら埋める
+VG.rbox = (g, x, y, z, w, h, d, r, c, e = 0) => { for (let i = 0; i < w; i++) for (let j = 0; j < h; j++) for (let k = 0; k < d; k++) {
+  const dx = Math.max(0, r - i - 0.5, i + 0.5 - (w - r)), dy = Math.max(0, r - j - 0.5, j + 0.5 - (h - r)), dz = Math.max(0, r - k - 0.5, k + 0.5 - (d - r));
+  if (dx * dx + dy * dy + dz * dz <= r * r + 0.01) g.set(x + i, y + j, z + k, typeof c === "function" ? c(i, j, k) : c, e); } return g; };
+const grad24 = (c, h, lo = 0.82) => (i, j) => shade24(c, lo + (1 - lo) * Math.min(1, j / Math.max(1, h - 1)));
+// 目：白目＋黒目＋光（正面＝+z）。x,y は左下
+function eye24(g, x, y, z, big = 1){
+  const W = [0.97, 0.96, 0.94], K = [0.06, 0.05, 0.08];
+  if (big) { g.box(x, y, z, 3, 4, 1, W, 0, 0).box(x + 1, y, z, 2, 3, 1, K, 0, 0).set(x + 2, y + 2, z, [1, 1, 1], 0.6); }
+  else { g.box(x, y, z, 2, 3, 1, W, 0, 0).box(x + 1, y, z, 1, 2, 1, K, 0, 0); }
+  return g;
+}
+const VS2 = 0.034;   // 2代目は細かいボクセル（なめらかに見える）
+// 正面（+z）のいちばん手前のボクセルに色をぬる：fn(x,y) が色を返したらぬる
+function paintFront24(g, fn){ const top = {}; g.map.forEach((v, k) => { const [x, y, z] = k.split(",").map(Number), kk = x + "," + y; if (top[kk] == null || z > top[kk]) top[kk] = z; });
+  Object.entries(top).forEach(([kk, z]) => { const [x, y] = kk.split(",").map(Number), c = fn(x, y); if (c) g.set(x, y, z, c[0], c[1] || 0); }); return g; }
+const inEl24 = (x, y, cx, cy, rx, ry) => ((x + .5 - cx) / rx) ** 2 + ((y + .5 - cy) / ry) ** 2 <= 1;
+// 目（白目・黒目・光）をぬる関数を作る
+function eyes24(L, R, y, rx, ry, look = 0.6){
+  return (x, yy) => { for (const cx of [L, R]) { if (!inEl24(x, yy, cx, y, rx, ry)) continue;
+    if (inEl24(x, yy, cx + (cx === L ? look : -look) * 0 + 0.4, y + ry * 0.45, rx * 0.34, ry * 0.3)) return [[1, 1, 1], 0.7];
+    if (inEl24(x, yy, cx + 0.3, y - 0.3, rx * 0.62, ry * 0.7)) return [[0.05, 0.04, 0.07]];
+    return [[0.97, 0.96, 0.95]]; } return null; };
+}
+function body24v2(sp){
+  const D = MON[sp] || {}, P = D.pal || {}, A = hx24(P.a), B = hx24(P.b), C = hx24(P.c), plan = plan24(sp), parts = {};
+  const add = (k, g, pv, at, par = "root") => { parts[k] = { g, pv, at, par }; };
+  if (plan === "blob") {
+    const base = mix24(A, [1, 1, 1], 0.22), g = VG(), W = 32, H = 26;
+    for (let x = 0; x < W; x++) for (let y = 0; y < H; y++) for (let z = 0; z < W; z++) { const nx = (x + .5 - W / 2) / (W / 2), ny = (y + .5) / H, nz = (z + .5 - W / 2) / (W / 2), r = Math.sqrt(Math.max(0, 1 - Math.pow(Math.max(0, ny - 0.28) / 0.72, 2))) * (1 + 0.06 * (1 - ny)); if (nx * nx + nz * nz <= r * r) g.set(x, y, z, shade24(base, 0.78 + 0.34 * ny)); }
+    const ey = eyes24(10.5, 21.5, 11, 3.4, 4.4); paintFront24(g, (x, y) => ey(x, y) || (y === 7 && x >= 14 && x <= 17 ? [shade24(B, 0.45)] : (inEl24(x, y, 9, 20, 2.2, 1.6) ? [shade24(base, 1.5), 0.3] : null)));
+    add("body", g, [W / 2, 0, W / 2], [0, 0, 0]); parts.root = { scale: 1, vs: VS2 }; return { plan, parts, v2: 1 };
+  }
+  if (plan === "biped") {
+    const skel = /skeleton|bone|emberskel|lich/.test(sp), shroom = /myconid|fungus|spore/.test(sp), brute = /orc|troll|ogre|berserker/.test(sp), stone = /golem|gargoyle/.test(sp);
+    const skin = mix24(A, [1, 1, 1], 0.06), cloth = skel ? shade24(A, 0.8) : B, acc = C;
+    const head = VG();
+    if (shroom) { head.ell(14, 8, 12, 9, 8, 9, mix24(B, [1, 1, 1], .3), 0, 0); for (let y = 12; y < 26; y++) for (let x = -4; x < 32; x++) for (let z = -4; z < 28; z++) { const nx = (x + .5 - 14) / 18, nz = (z + .5 - 12) / 16, ny = (y - 12) / 13; if (nx * nx + nz * nz + ny * ny * 1.6 <= 1 && ny >= 0) head.set(x, y, z, (hash24(x >> 2, y >> 2, z >> 2) > 0.8 && ny > .2) ? [0.97, 0.95, 0.9] : shade24(A, 0.85 + ny * .25)); } }
+    else if (stone) VG.rbox(head, 0, 0, 0, 26, 22, 22, 4, grad24(skin, 22, 0.8));
+    else VG.rbox(head, 0, 0, 0, 28, 24, 24, 9, grad24(skin, 24, 0.86));
+    const ey = skel ? ((x, y) => (inEl24(x, y, 8.5, 12, 3.6, 4.4) || inEl24(x, y, 19.5, 12, 3.6, 4.4)) ? (inEl24(x, y, 8.5, 12, 1.4, 1.6) || inEl24(x, y, 19.5, 12, 1.4, 1.6) ? [hx24("#5af0ff"), 1] : [[0.05, 0.04, 0.06]]) : null) : shroom ? eyes24(10, 18, 7, 2.6, 3.2) : eyes24(8.5, 19.5, 11, 3.6, 4.6);
+    if (skel) paintFront24(head, (x, y) => ey(x, y) || (y >= 3 && y <= 5 && x >= 9 && x <= 18 ? [x % 2 ? [0.96, 0.94, 0.86] : [0.2, 0.18, 0.2]] : (inEl24(x, y, 14, 8, 1.4, 1.4) ? [[0.15, 0.13, 0.15]] : null)));
+    else if (shroom) paintFront24(head, (x, y) => ey(x, y) || (y === 3 && x >= 12 && x <= 15 ? [shade24(B, .5)] : null));
+    else paintFront24(head, (x, y) => ey(x, y) || (brute && (y === 5 || y === 6) && (x === 9 || x === 18) ? [[0.97, 0.95, 0.85]] : null) || (y === 5 && x >= 11 && x <= 16 ? [shade24(skin, 0.45)] : (y === 6 && (x === 11 || x === 16) ? [[0.96, 0.95, 0.88]] : (y === 17 && ((x >= 5 && x <= 11) || (x >= 16 && x <= 22)) ? [shade24(skin, 0.6)] : null))));
+    if (/goblin|sapper|shaman|webgoblin/.test(sp)) for (let k = 0; k < 11; k++) { const hh = Math.max(1, 6 - (k >> 1)), y0 = 11 + (k >> 1); head.box(-1 - k, y0, 9, 1, hh, 5, shade24(skin, 0.95), 0, 0); head.box(28 + k, y0, 9, 1, hh, 5, shade24(skin, 0.95), 0, 0); }
+    if (/imp|ifrit|underlord|vampire|count/.test(sp)) for (let k = 0; k < 7; k++) { head.box(5 - (k >> 2), 23 + k, 10, 3 - (k >> 2), 1, 3, acc, 0, 0); head.box(20 + (k >> 2), 23 + k, 10, 3 - (k >> 2), 1, 3, acc, 0, 0); }
+    add("head", head, [14, 0, 12], [0, 19, 0], "body");
+    const torso = VG(); VG.rbox(torso, 0, 0, 0, 20, 18, 15, 6, (i, j) => skel ? ((j % 4 === 1 && j > 6) ? [0.2, 0.18, 0.2] : skin) : j < 8 ? shade24(cloth, 0.86 + j * 0.02) : shade24(skin, 0.86 + j * 0.01)); for (let x = 0; x < 20; x++) for (let z = 0; z < 15; z++) if (torso.map.has(x + ",7," + z)) torso.set(x, 7, z, shade24(acc, 0.6)).set(x, 6, z, shade24(acc, 0.7));
+    add("body", torso, [10, 0, 7.5], [0, 10, 0]);
+    const arm = () => { const g = VG(); VG.rbox(g, 0, 0, 0, 6, 12, 6, 2.6, skin); g.ell(3, -2, 3, 4, 3.6, 4, shade24(skin, 1.04), 0, 0); return g; };
+    add("armL", arm(), [3, 12, 3], [-12, 17, 0], "body"); add("armR", arm(), [3, 12, 3], [12, 17, 0], "body");
+    const leg = () => { const g = VG(); VG.rbox(g, 0, 3, 0, 7, 8, 7, 2.6, cloth); VG.rbox(g, -1, 0, -1, 9, 4, 10, 2, shade24(cloth, 0.55)); return g; };
+    add("legL", leg(), [3.5, 10, 3.5], [-5, 0, 0], "body"); add("legR", leg(), [3.5, 10, 3.5], [5, 0, 0], "body");
+    if (/knight/.test(sp)) { const hm = VG(); VG.rbox(hm, 0, 0, 0, 30, 14, 26, 6, hx24("#c0c8d8")); hm.box(4, 4, 25, 22, 2, 1, [0.08, 0.08, 0.12], 0, 0); add("helm", hm, [15, 0, 13], [0, 12, 0], "head"); }
+    parts.root = { scale: brute || stone ? 0.82 : /rat|kobold|imp|goblin|sapper/.test(sp) ? 0.68 : 0.74, vs: VS2 }; return { plan, parts, v2: 1 };
+  }
+  const EYE = (g, L, R, y, rx = 3, ry = 3.8, extra) => paintFront24(g, (x, yy) => eyes24(L, R, y, rx, ry)(x, yy) || (extra ? extra(x, yy) : null));
+  if (plan === "quad") {
+    const fur = mix24(A, [1, 1, 1], 0.05), g = VG(); VG.rbox(g, 0, 0, 0, 18, 15, 30, 6, (i, j) => shade24(fur, 0.85 + j * 0.012)); add("body", g, [9, 0, 15], [0, 10, 0]);
+    const h = VG(); VG.rbox(h, 0, 0, 0, 20, 18, 18, 7, fur); VG.rbox(h, 5, 1, 14, 10, 8, 9, 3, shade24(fur, 1.08)); h.box(8, 6, 22, 4, 2, 1, [0.06, 0.05, 0.06], 0, 0);
+    EYE(h, 5.5, 14.5, 12, 2.8, 3.4);
+    if (/wolf|jackal|chimera|nightwolf/.test(sp)) for (let k = 0; k < 6; k++) { h.box(1 + (k >> 1), 17 + k, 6, 4 - (k >> 1), 1, 3, fur, 0, 0); h.box(15, 17 + k, 6, 4 - (k >> 1), 1, 3, fur, 0, 0); }
+    if (/rat/.test(sp)) { h.ell(1, 16, 8, 4, 4, 1.5, mix24(C, [1, 1, 1], .2), 0, 0); h.ell(19, 16, 8, 4, 4, 1.5, mix24(C, [1, 1, 1], .2), 0, 0); }
+    if (/dragon|salamander/.test(sp)) for (let k = 0; k < 6; k++) { h.box(4, 17 + k, 6, 2, 1, 2, C, 0, 0); h.box(14, 17 + k, 6, 2, 1, 2, C, 0, 0); }
+    add("head", h, [10, 0, 6], [0, 7, 22], "body");
+    const lg = () => { const q = VG(); VG.rbox(q, 0, 0, 0, 6, 11, 6, 2.6, shade24(fur, .9)); VG.rbox(q, -1, -1, 0, 8, 3, 8, 2, shade24(B, .8)); return q; };
+    add("legL", lg(), [3, 11, 3], [-6, 0, 9], "body"); add("legR", lg(), [3, 11, 3], [6, 0, 9], "body"); add("armL", lg(), [3, 11, 3], [-6, 0, -9], "body"); add("armR", lg(), [3, 11, 3], [6, 0, -9], "body");
+    const tl = VG(); for (let k = 0; k < 14; k++) tl.ell(3, 3 + k * 0.4, k, 2.6 - k * 0.08, 2.6 - k * 0.08, 1.2, k > 10 && /salamander|dragon|flame/.test(sp) ? C : fur, k > 10 && /salamander|dragon|flame/.test(sp) ? 0.7 : 0, 0);
+    add("tail", tl, [3, 3, 0], [0, 9, -15], "body"); parts.tail.at = [0, 9, -14]; parts.tail.pv = [3, 3, 0]; parts.tail.flip = 1;
+    if (/dragon|chimera/.test(sp)) { const w = side => { const q = VG(); for (let i = 0; i < 16; i++) q.box(side < 0 ? -i : i, 0, 0, 1, 1, Math.max(2, 14 - i), shade24(B, .9), 0, 0); return q; }; add("wingL", w(-1), [0, 0, 6], [-8, 14, 0], "body"); add("wingR", w(1), [0, 0, 6], [8, 14, 0], "body"); }
+    parts.root = { scale: /dragon|chimera/.test(sp) ? 0.9 : /rat/.test(sp) ? 0.6 : 0.75, vs: VS2 }; return { plan, parts, v2: 1 };
+  }
+  if (plan === "spider") {
+    const g = VG(); g.ell(14, 10, 10, 13, 10, 12, A, 0, 0); for (let k = 0; k < 5; k++) g.set(8 + k * 3, 19, 10, C, 0.5); add("body", g, [14, 0, 10], [0, 6, -6]);
+    const h = VG(); h.ell(10, 8, 8, 10, 8, 9, shade24(A, 1.05), 0, 0); EYE(h, 5.5, 14.5, 9, 2.6, 3.2, (x, y) => (inEl24(x, y, 10, 13, 1.5, 1.5) ? [C, 0.8] : null)); add("head", h, [10, 0, 8], [0, 2, 18], "body");
+    for (let k = 0; k < 4; k++) { const l = s2 => { const q = VG(); for (let i = 0; i < 14; i++) q.box(s2 * i, Math.round(Math.sin(i / 13 * Math.PI) * 6), 0, 1, 2, 2, B, 0, 0); for (let j = 0; j < 8; j++) q.box(s2 * 14, 6 - j, 0, 2, 1, 2, B, 0, 0); return q; }; add("lgL" + k, l(-1), [0, 0, 1], [-11, 6, -2 + k * 5], "body"); add("lgR" + k, l(1), [0, 0, 1], [11, 6, -2 + k * 5], "body"); }
+    parts.root = { scale: 0.75, vs: VS2 }; return { plan, parts, v2: 1 };
+  }
+  if (plan === "bat") {
+    const g = VG(); g.ell(10, 10, 10, 10, 10, 9, A, 0, 0); EYE(g, 5.5, 14.5, 11, 2.8, 3.4, (x, y) => (y === 5 && (x === 8 || x === 12) ? [[0.97, 0.96, 0.9]] : null)); for (let k = 0; k < 6; k++) { g.box(2 + (k >> 1), 18 + k, 8, 3 - (k >> 1), 1, 3, A, 0, 0); g.box(15 + (k >> 1), 18 + k, 8, 3 - (k >> 1), 1, 3, A, 0, 0); }
+    add("body", g, [10, 0, 10], [0, 26, 0]);
+    const w = side => { const q = VG(); for (let i = 0; i < 18; i++) { const hh = Math.round(8 - Math.abs(i - 9) * 0.5 + (i % 6 === 5 ? -3 : 0)); q.box(side < 0 ? -i : i, -hh + 6, 0, 1, Math.max(1, hh), 2, shade24(B, 0.9), 0, 0); } return q; };
+    add("wingL", w(-1), [0, 4, 1], [-9, 10, 0], "body"); add("wingR", w(1), [0, 4, 1], [9, 10, 0], "body"); parts.root = { fly: 1, scale: 0.8, vs: VS2 }; return { plan, parts, v2: 1 };
+  }
+  if (plan === "ghost") {
+    const g = VG(), W = 24; for (let x = 0; x < W; x++) for (let y = 0; y < 32; y++) for (let z = 0; z < W; z++) { const nx = (x + .5 - 12) / 12, nz = (z + .5 - 12) / 12, ny = y / 32, r = y > 20 ? Math.sqrt(Math.max(0, 1 - ((y - 20) / 12) ** 2)) : 1; if (nx * nx + nz * nz <= r * r && !(y < 3 && ((x + z) >> 2) % 2)) g.set(x, y, z, shade24(A, 0.86 + ny * 0.2)); }
+    EYE(g, 8.5, 15.5, 20, 2.6, 3.8, (x, y) => (inEl24(x, y, 12, 13, 2.4, 2.8) ? [[0.1, 0.08, 0.14]] : null));
+    add("body", g, [12, 0, 12], [0, 6, 0]); const arm = () => { const q = VG(); VG.rbox(q, 0, 0, 0, 5, 9, 5, 2.4, A); return q; };
+    add("armL", arm(), [2.5, 9, 2.5], [-13, 20, 0], "body"); add("armR", arm(), [2.5, 9, 2.5], [13, 20, 0], "body"); parts.root = { fly: 1, alpha: 0.86, scale: 0.85, vs: VS2 }; return { plan, parts, v2: 1 };
+  }
+  if (plan === "eye") {
+    const g = VG(); g.ell(14, 14, 14, 14, 14, 14, A, 0, 0); g.ell(14, 14, 25, 8, 8, 4, [0.97, 0.96, 0.95], 0, 0); g.ell(14, 14, 28, 4.5, 4.5, 1.5, C, 0.4, 0); g.ell(14, 14, 29, 2.4, 2.4, 1, [0.04, 0.03, 0.05], 0, 0); g.set(16, 17, 29, [1, 1, 1], 0.8);
+    for (let k = 0; k < 5; k++) for (let j = 0; j < 9; j++) g.box(4 + k * 5, -j, 12 + (j % 2), 2, 1, 2, B, 0, 0);
+    add("body", g, [14, 0, 14], [0, 16, 0]); parts.root = { fly: 1, scale: 0.85, vs: VS2 }; return { plan, parts, v2: 1 };
+  }
+  if (plan === "chest") {
+    const wd = mix24(A, [1, 1, 1], 0.05), bx = VG(); VG.rbox(bx, 0, 0, 0, 28, 16, 20, 2, wd); for (let x = 0; x < 28; x++) for (let z = 0; z < 20; z++) for (const y of [0, 15]) if (bx.map.has(x + "," + y + "," + z)) bx.set(x, y, z, C);
+    EYE(bx, 8, 20, 9, 3, 3.6, (x, y) => (y >= 13 && x >= 12 && x <= 15 ? [C, 0.3] : null));
+    const lid = VG(); VG.rbox(lid, 0, 0, 0, 28, 8, 20, 3, wd); for (let x = 1; x < 27; x += 3) lid.box(x, -2, 17, 2, 2, 1, [0.96, 0.95, 0.9], 0, 0); lid.box(0, 0, 0, 28, 1, 20, C, 0, 0);
+    add("body", bx, [14, 0, 10], [0, 0, 0]); add("head", lid, [14, 0, 0], [0, 16, -10], "body"); parts.root = { scale: 0.8, vs: VS2 }; return { plan, parts, v2: 1 };
+  }
+  return body24(sp);
+}
+// ---------- 1体だけ大きく見る（形を確かめる用） ----------
+function vxView24(canvas, sp, yawDeg = 25, pose = "idle", t = 0, v2 = 1){
+  const gl = canvas.getContext("webgl", { antialias: true, preserveDrawingBuffer: true }); const P = prog24(gl);
+  const B = v2 ? body24v2(sp) : body24(sp), parts = {}, vs0 = (B.parts.root && B.parts.root.vs) || VS; Object.entries(B.parts).forEach(([k, p]) => { if (k !== "root") parts[k] = { ...p, m: mesh24(gl, p.g, p.pv, vs0) }; });
+  const ch = { B, parts, root: B.parts.root || {}, rot: {}, vs: vs0 };
+  if (pose === "mine") { const c = t % 1; ch.rot.armR = [c < 0.55 ? -2.6 * c / 0.55 : 0.7, 0, 0]; }
+  if (pose === "walk") { const a = Math.sin(t * Math.PI * 2) * 0.7; ch.rot = { legL: [a, 0, 0], legR: [-a, 0, 0], armL: [-a * .8, 0, 0], armR: [a * .8, 0, 0] }; }
+  const w = canvas.width, h = canvas.height; gl.viewport(0, 0, w, h); gl.clearColor(0.16, 0.13, 0.12, 1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); gl.enable(gl.DEPTH_TEST);
+  gl.useProgram(P.p); const yaw = yawDeg * Math.PI / 180, e = [Math.sin(yaw) * 4.2, 1.9, Math.cos(yaw) * 4.2], VP = VM.mul(VM.persp(0.6, w / h, 0.1, 30), VM.look(e, [0, 0.85, 0], [0, 1, 0]));
+  gl.uniformMatrix4fv(P.U.VP, false, VP); gl.uniform3fv(P.U.eye, e); gl.uniform3fv(P.U.Lp, [2, 3, 3, -3, 2, 1, 0, 3, -3, 0, -5, 0]); gl.uniform3fv(P.U.Lc, [1.2, 1.0, .9, .4, .45, .6, .5, .5, .55, 0, 0, 0]); gl.uniform3fv(P.U.amb, [0.35, 0.33, 0.36]);
+  const pose2 = vxPose24(ch, VM.id());
+  vxOutline24(gl, P, pose2.out);
+  pose2.out.forEach(([m, M]) => { gl.uniformMatrix4fv(P.U.M, false, M); gl.uniform4fv(P.U.tint, [1, 1, 1, 1]);
+    gl.bindBuffer(gl.ARRAY_BUFFER, m.p); gl.enableVertexAttribArray(P.a.p); gl.vertexAttribPointer(P.a.p, 3, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, m.n); gl.enableVertexAttribArray(P.a.n); gl.vertexAttribPointer(P.a.n, 3, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, m.c); gl.enableVertexAttribArray(P.a.c); gl.vertexAttribPointer(P.a.c, 4, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, m.i); gl.drawElements(gl.TRIANGLES, m.cnt, gl.UNSIGNED_SHORT, 0); });
+}
+
+// 輪郭線：部品を少し大きくして裏側だけ黒で描く（アニメの線のように）
+function vxOutline24(gl, P, out, k = 0.05){
+  gl.enable(gl.CULL_FACE); gl.cullFace(gl.FRONT);
+  out.forEach(([m, M]) => { const c = m.ctr || [0, 0, 0], e = m.ext || [1, 1, 1], s = [1 + k / Math.max(.05, e[0]) * .6, 1 + k / Math.max(.05, e[1]) * .6, 1 + k / Math.max(.05, e[2]) * .6];
+    const MM = VM.mul(M, VM.mul(VM.tr(c[0], c[1], c[2]), VM.mul(VM.sc(s[0], s[1], s[2]), VM.tr(-c[0], -c[1], -c[2]))));
+    gl.uniformMatrix4fv(P.U.M, false, MM); gl.uniform4fv(P.U.tint, [0, 0, 0, 1]);
+    gl.bindBuffer(gl.ARRAY_BUFFER, m.p); gl.enableVertexAttribArray(P.a.p); gl.vertexAttribPointer(P.a.p, 3, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, m.n); gl.enableVertexAttribArray(P.a.n); gl.vertexAttribPointer(P.a.n, 3, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, m.c); gl.enableVertexAttribArray(P.a.c); gl.vertexAttribPointer(P.a.c, 4, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, m.i); gl.drawElements(gl.TRIANGLES, m.cnt, gl.UNSIGNED_SHORT, 0); });
+  gl.disable(gl.CULL_FACE);
+}
 
 // ================= のぞく画面を3Dに：部屋を斜め上から見る箱にして、ドット絵を立て看板のように置く（指で回せる） =================
 // ライブラリは使わず、CSSの3D変形だけで描く（iPhoneでも軽い）
