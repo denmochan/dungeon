@@ -899,7 +899,7 @@ body:has(.stage) .modal{display:none!important}
 /* ---- 部屋をのぞく ---- */
 #peek24{position:fixed;inset:0;z-index:60;background:#000a;display:none;align-items:flex-end;justify-content:center}
 #peek24.on{display:flex}
-.pk24box{width:100%;max-width:520px;max-height:92vh;overflow-y:auto;background:#1a120d;border:1px solid #6a4a2a;border-bottom:0;border-radius:14px 14px 0 0;padding:10px 12px calc(env(safe-area-inset-bottom,0px) + 14px);animation:pk24in .22s ease-out}
+.pk24box{width:100%;max-width:520px;max-height:92vh;overflow-y:auto;background:#1a120d;border:1px solid #6a4a2a;border-bottom:0;border-radius:14px 14px 0 0;padding:10px 12px calc(env(safe-area-inset-bottom,0px) + 14px)}#peek24.opening .pk24box{animation:pk24in .22s ease-out}
 @keyframes pk24in{from{transform:translateY(40px);opacity:0}}
 .pk24head{display:flex;align-items:center;gap:8px;margin-bottom:8px}.pk24head b{font-size:16px;color:#ffe2a8}.pk24head .sp{flex:1}
 .pk24scene{position:relative;height:290px;border-radius:10px;overflow:hidden;background:var(--fl) 0 0/40px 40px repeat;image-rendering:pixelated;box-shadow:inset 0 0 40px #000c,inset 0 0 0 2px #0008}
@@ -7141,7 +7141,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.165（11/17 18:09）";
+const VER20 = "No.166（11/17 18:17）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -8333,12 +8333,13 @@ function peekScene24(i){
   // 立ち位置：同じ施設の子は施設のまわりの4か所に、構えの子は床の好きな場所（ドラッグで決めた所）に。重ならないように割りふる
   const used = {}, taken = [];
   const free = (x, y) => !taken.some(([a, b]) => Math.abs(a - x) < 14 && Math.abs(b - y) < 14);
-  res.forEach(m => { const p = peekMon24(m, i); let x, y;
+  const ord = res.slice().sort((a, b) => (L.fac[peekMon24(b, i).job] ? 1 : 0) - (L.fac[peekMon24(a, i).job] ? 1 : 0));   // 施設で働く子を先に置いて、構えの子はあいた所へ
+  ord.forEach(m => { const p = peekMon24(m, i); let x, y;
     const sp = L.fac[p.job] && L.fac[p.job].spots;
     if (sp) { const u = used[p.job] = (used[p.job] || 0); const s0 = sp.find((q, k) => k >= u && free(q[0], q[1])) || sp[u % 4]; used[p.job]++; [x, y] = s0; }
     else if (m.pk24 && m.pk24.r === i) { x = m.pk24.x; y = m.pk24.y; }
     else { const cand = [[20, 94], [80, 94], [50, 96], [35, 86], [65, 86], [10, 84], [90, 84]]; [x, y] = cand.find(q => free(q[0], q[1])) || [50, 92]; }
-    for (let t = 0; t < 6 && !free(x, y); t++) x += (x < 50 ? 9 : -9);
+    for (let t = 0; t < 8 && !free(x, y); t++) { x += (x < 50 ? 10 : -10); if (t === 3) y = y > 88 ? 82 : 94; }
     taken.push([x, y]);
     const an = p.rest ? "an-sleep" : (PKJOB24[p.job] || PKJOB24[""]).an;
     h += `<div class="pk24m ${an}${p.rest ? " rest" : ""}" data-id="${m.id}" data-job="${p.rest ? "rest" : p.job}" data-x="${x}" data-y="${y}" style="left:${Math.max(7, Math.min(93, x))}%;top:${y}%">${simg23(m, m.evos, "sp")}<b>${esc(m.nick)}</b></div>`; });
@@ -8369,7 +8370,7 @@ function peekOpen24(i){
   if (!el) { el = document.createElement("div"); el.id = "peek24"; document.body.appendChild(el);
     el.addEventListener("click", ev => { if (ev.target === el) peekClose24(); });
     pkDragInit24(el); }
-  el.innerHTML = `<div class="pk24box">${peekModal24(i)}</div>`; el.classList.add("on");
+  el.innerHTML = `<div class="pk24box">${peekModal24(i)}</div>`; el.classList.add("on", "opening"); setTimeout(() => el.classList.remove("opening"), 300);
   clearInterval(peekT24); peekT24 = setInterval(peekLife24, 120); pkAct24 = {};
 }
 function peekClose24(){ peek24 = null; clearInterval(peekT24); const el = document.getElementById("peek24"); if (el) { el.classList.remove("on"); el.innerHTML = ""; } }
