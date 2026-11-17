@@ -934,6 +934,17 @@ body:has(.stage) .modal{display:none!important}
 .cdec2.z24{z-index:3;filter:drop-shadow(0 2px 1px #0008)}
 .cave:not(.town)::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:30;opacity:.35;background-image:radial-gradient(1px 1px at 20% 30%,#ffe2a8,transparent),radial-gradient(1px 1px at 70% 60%,#ffe2a8,transparent),radial-gradient(1px 1px at 45% 80%,#ffd08a,transparent),radial-gradient(1px 1px at 85% 15%,#ffe2a8,transparent),radial-gradient(1px 1px at 10% 70%,#ffd08a,transparent);background-size:180px 220px;animation:dust24 18s linear infinite}
 @keyframes dust24{from{background-position:0 0,0 0,0 0,0 0,0 0}to{background-position:30px -220px,-20px -220px,10px -220px,-30px -220px,20px -220px}}
+/* ---- 夜：打たれたときは白くとばさず、赤く一瞬（乱戦が白い塊にならない） ---- */
+.cent.knock .cfl{filter:brightness(1.2) drop-shadow(0 0 2px #ff3a2a) drop-shadow(0 0 1px #ff3a2a)!important}
+.cent.u.hit .cfl{filter:brightness(1.15) drop-shadow(0 0 2px #ff3a2a)}
+/* 主の間の決戦 */
+.cave.lordfight24::before{content:"";position:absolute;inset:0;z-index:29;pointer-events:none;box-shadow:inset 0 0 70px 10px #c0101888;animation:lf24 1.4s ease-in-out infinite}
+@keyframes lf24{50%{box-shadow:inset 0 0 90px 20px #e0202aaa}}
+.cent.lordbig24{width:calc(100% / 15 * 3.2)!important;z-index:60!important}
+.cent.lordbig24 .chp{height:6px;border:1px solid #000}
+.cent.lordhit24 .cfl{animation:lh24 .45s}
+@keyframes lh24{0%{filter:brightness(2) drop-shadow(0 0 6px #ff2020)}30%{transform:translateX(-4px)}60%{transform:translateX(4px)}100%{filter:none;transform:none}}
+.cpop.lordd24{color:#ffd76a!important;font-size:20px!important;text-shadow:0 0 4px #000,0 0 8px #c00!important}
 </style>
 </head>
 <body>
@@ -7100,7 +7111,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.162（11/17 17:45）";
+const VER20 = "No.163（11/17 17:54）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7973,6 +7984,14 @@ function advice23(v) {
 // ---------- 24) 色違いは、どの画面でも色違いの色で（店・MVP・配合・進化…）。ビルドで simg23(m, m.evos…) をこれに置きかえる ----------
 function simg23(m, f, cls = "sp", style = "") { const sp = m && m.sp; return img(sp, f, cls, m && m.shiny19 ? `${style};filter:hue-rotate(150deg) saturate(1.5) brightness(1.08)` : style); }
 
+// ---------- 24b) 主の間の決戦は一瞬で終わらせない：主が1手で受けるダメージは最大の34%まで（少なくとも3手は打ち合う） ----------
+{ const _st = stepNight5; stepNight5 = function (S, N) {
+  const L = N && N.lord, on = L && !L.down && !N.scout, h0 = on ? L.hp : 0, BUF = 1e6;
+  if (on) L.hp += BUF;
+  const r = _st.apply(this, arguments);
+  if (on) { try { const taken = h0 + BUF - L.hp, cap = Math.max(1, Math.round((L.max || h0) * 0.34)); L.hp = h0 - Math.min(taken, cap);
+    if (L.hp <= 0) { L.hp = 0; L.down = true; N.done = true; N.heroes.filter(h => h.st === "in" || h.st === "wait").forEach(h => h.st = "escaped"); } } catch (e) { L.hp = Math.max(0, L.hp - BUF); } }
+  return r; }; }
 // ---------- 25) 主は、契約ごとに1回だけ「ぎりぎり生きのびる」。いきなり負けではなく、まず瀕死の夜が来る ----------
 // 主の体力が0になった最初の夜：体力1で耐え、勇者は勝ったつもりで💎を3割持って帰る。次からは本当に倒れる
 { const _st = stepNight5; stepNight5 = function (S, N) { const r = _st.apply(this, arguments);
@@ -8041,7 +8060,7 @@ try { const o = ORD16.nosteal; if (o) { const ok = o.ok; o.ok = (r, N) => ok(r, 
 { const _rb = raidBox; raidBox = function () { let h = _rb(); try { const v = dng23.v; if (h && v && v.lv >= 1 && S.day >= 8 && S.lord && S.lord.lv < 1 + Math.floor(S.day / 5)) h = h.replace('<span class="hint">並べかえ・罠', `<button class="mini" data-a="lord" style="align-self:flex-start">👑 主を鍛える（いまLv${S.lord.lv}）→ 主が倒れにくくなる</button><span class="hint">並べかえ・罠`); } catch (e) {} return h; }; }
 
 // 主が倒れた夜は「地図 守った」と出さない
-resultStage15 = (prev => function (r) { let h = prev(r); try { if (!r.win) h = h.replace(/(<small>地図<\/small><b class=")[^"]*(">)守った/, "$1bad$2主が倒れた"); } catch (e) {} return h; })(resultStage15);
+resultStage15 = (prev => function (r) { let h = prev(r); try { if (S.ended || (S.lord && S.lord.hp <= 0)) h = h.replace(/(<small>地図<\/small><b class=")[^"]*(">)守った/, "$1bad$2主が倒れた"); } catch (e) {} return h; })(resultStage15);
 // けがの子を寝床のある部屋へ運ぶ（やることの「寝床のない部屋で寝ている」から1タップで）
 document.addEventListener("click", ev => { const b = ev.target.closest('[data-a="bedmove23"]'); if (!b || !S) return; ev.stopPropagation(); let n = 0;
   try { S.mons.forEach(m => { if (!m.rest || (m.home != null && hasFac12(S.path[m.home], "bed"))) return; const i = S.path.findIndex((r, k) => hasFac12(r, "bed") && residents5(S, k).length < capOfSlot7(S, k)); if (i < 0) return; m.home = i; n++; }); } catch (e) { console.error(e); }
@@ -8334,6 +8353,32 @@ document.addEventListener("click", ev => {
 { const _r = render; render = function (){ const v = _r.apply(this, arguments); try { if (peek24 != null) { if (N || !S.path[peek24]) peekClose24(); else { const el = document.getElementById("peek24"); if (el) el.innerHTML = `<div class="pk24box">${peekModal24(peek24)}</div>`; } } } catch (e) {} return v; }; }
 // 部屋のページ（住む子／設備のタブ）にも「のぞく」
 roomPage20 = (prev => function (i){ let h = prev(i); try { h = h.replace(/(<div class="sub20">[\s\S]*?)(<\/div>)/, `$1<button class="pk24btn" data-a="peek24" data-v="${i}">🔍 のぞく</button>$2`); } catch (e) {} return h; })(roomPage20);
+
+// ================= 夜の戦いを見やすく：主の間の決戦・打たれた光・終わりの「間」 =================
+// 主の間で戦っているあいだは、1手をゆっくり（×1で750ms）。決戦が一瞬で終わらないように
+tick = function () { clearTimeout(timer); if (!N) return;
+  const slow = N.lordFight24 && speed === 1 && !N.done;
+  timer = setTimeout(() => { stepNight5(S, N);
+    if (N.done) { render(); const hold = N.lordFight24 ? 2400 : speed === 3 ? 600 : 1300; timer = setTimeout(() => { if (N && N.done) endRaid(); }, hold); return; }
+    if (Date.now() - touchT > 600) render(); else caveUpdate(); tick(); }, slow ? 750 : speed === 3 ? 150 : 450); };
+// 主の間の様子を見張る（画面だけ）
+caveUpdate = (prev => function (){
+  prev.apply(this, arguments);
+  try { if (!N || N.scout || !CV.el) { if (CV.el) CV.el.classList.remove("lordfight24"); return; }
+    const li = lordIdx(S), inLord = N.heroes.some(h => h.st === "in" && h.pos === li), near = N.heroes.some(h => h.st === "in" && h.cor === li);
+    if ((inLord || near) && !N.lordFight24) { N.lordFight24 = 1; speed = 1; caveFollow = true; try { banner19("<small>⚔ 決戦</small><i>勇者が主の間へ向かっている！</i>", "wipe", 1500); } catch (e) {} }
+    CV.el.classList.toggle("lordfight24", inLord);
+    const le = CV.ents.lordn; if (!le) return;
+    le.classList.toggle("lordbig24", inLord);
+    const hp = N.lord.hp; if (N.lordHp24 != null && hp < N.lordHp24 - 0.5) {
+      const d = Math.round(N.lordHp24 - hp); le.classList.remove("lordhit24"); void le.offsetWidth; le.classList.add("lordhit24");
+      CV.el.classList.remove("shake"); void CV.el.offsetWidth; CV.el.classList.add("shake");
+      const o = hallOf(li); if (o) cPop(o.M.f, o.h.x0 + 3, o.h.y0 + 0.4, `👑 -${d}`, "big lordd24", 1100);
+      try { sfx16("down"); } catch (e) {}
+    }
+    N.lordHp24 = hp;
+  } catch (e) {}
+})(caveUpdate);
 
 </script>
 </body>
