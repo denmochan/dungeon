@@ -1803,6 +1803,102 @@ SPBOUND24.mindlord = [0.7, 1.3];
 // 冥王：段階で翼（2段目〜）と光輪（3段目）
 function varOf24(sp, evo){ const v = spVar24(sp), a = v[0].slice();
   if (sp === "underlord") a[3] = evo || 0; return [a, v[1]]; }
+// ---------- ガーゴイル：台座の上でうずくまる石像。VAR.w=段階で翼が大きくなる ----------
+KIT24.gargoyle = () => ({ body: `
+vec2 body(vec3 p){
+ vec3 q=p-J[0];float d;
+ float bs=sRBox(q-vec3(0.0,0.08,0.02),vec3(0.62,0.08,0.5),0.03);bs=min(bs,sRBox(q-vec3(0.0,0.2,0.02),vec3(0.54,0.05,0.43),0.02));
+ vec2 r=vec2(bs,7.0);
+ vec3 c=q-vec3(0.0,0.0,0.0);
+ d=sEll(c-vec3(0.0,0.72,-0.05),vec3(0.36,0.34,0.3));
+ d=smin(d,sEll(c-vec3(0.0,0.92,0.08),vec3(0.38,0.24,0.28)),0.1);
+ for(int s=0;s<2;s++){float sg=s==0?-1.0:1.0;
+  vec3 hp=vec3(sg*0.24,0.56,-0.05),kn=vec3(sg*0.44,0.62,0.22),an=vec3(sg*0.32,0.3,0.0),ft=vec3(sg*0.32,0.28,0.24);
+  d=smin(d,smin(sTap(c,hp,kn,0.17,0.13),sTap(c,kn,an,0.12,0.09),0.05),0.06);d=smin(d,sTap(c,an,ft,0.09,0.08),0.04);
+  vec3 sh=vec3(sg*0.36,0.95,0.06),el=vec3(sg*0.42,0.66,0.32),hd=vec3(sg*0.22,0.32,0.36);
+  d=smin(d,smin(sTap(c,sh,el,0.12,0.1),sTap(c,el,hd,0.09,0.08),0.04),0.06);
+  for(int k=0;k<3;k++){float o=float(k)-1.0;vec3 a=hd+vec3(o*0.05,-0.02,0.04);float cl=sTap(c,a,a+vec3(o*0.02,-0.05,0.07),0.025,0.004);if(cl<r.x)r=vec2(cl,2.0);}
+  for(int k=0;k<3;k++){float o=float(k)-1.0;vec3 a=ft+vec3(o*0.05,-0.02,0.06);float cl=sTap(c,a,a+vec3(o*0.02,-0.04,0.07),0.025,0.004);if(cl<r.x)r=vec2(cl,2.0);}}
+ vec3 h=HR*(c-vec3(0.0,1.2,0.22));vec3 e=vec3(abs(h.x),h.y,h.z);
+ float hd=sEll(h,vec3(0.25,0.22,0.23));hd=smin(hd,sTap(h,vec3(0.0,-0.04,0.08),vec3(0.0,-0.08,0.3),0.14,0.1),0.06);
+ hd=smin(hd,sEll(e-vec3(0.1,0.08,0.14),vec3(0.09,0.04,0.08)),0.03);
+ hd=max(hd,-sRBox(h-vec3(0.0,-0.13,0.32),vec3(0.11,0.012,0.08),0.005));
+ d=smin(d,hd,0.06);
+ if(d<r.x)r=vec2(d,1.0);
+ float ear=sTap(e,vec3(0.2,0.08,-0.02),vec3(0.38,0.2,-0.08),0.06,0.005);if(ear<r.x)r=vec2(ear,1.0);
+ float hn=min(sTap(e,vec3(0.11,0.17,0.0),vec3(0.18,0.36,-0.12),0.05,0.02),sTap(e,vec3(0.18,0.36,-0.12),vec3(0.14,0.46,-0.26),0.02,0.004));if(hn<r.x)r=vec2(hn,VAR.w>1.5?8.0:1.0);
+ float fg=sTap(e,vec3(0.07,-0.13,0.32),vec3(0.07,-0.2,0.33),0.018,0.003);if(fg<r.x)r=vec2(fg,2.0);
+ float ey=sEll(e-vec3(0.1,0.04,0.2),vec3(0.05,0.025,0.03));if(ey<r.x)r=vec2(ey,6.0);
+ float ws=1.0+VAR.w*0.28;float fl=J[9].x;
+ for(int s=0;s<2;s++){float sg=s==0?1.0:-1.0;vec3 w=vec3(c.x*sg,c.y,c.z)-vec3(0.2,1.0,-0.2);w/=ws;float ca=cos(fl),sa=sin(fl);w=vec3(ca*w.x+sa*w.y,-sa*w.x+ca*w.y,w.z);
+  vec3 el=vec3(0.32,0.32,-0.12),wr=vec3(0.6,0.72,-0.16);float bn=min(sTap(w,vec3(0.0),el,0.07,0.05),sTap(w,el,wr,0.05,0.03));
+  vec3 f1=vec3(0.95,0.5,-0.2),f2=vec3(0.9,0.1,-0.22),f3=vec3(0.6,-0.12,-0.2);bn=min(bn,min(sTap(w,wr,f1,0.03,0.01),min(sTap(w,wr,f2,0.028,0.01),sTap(w,wr,f3,0.026,0.01))));
+  float tp=sTap(w,wr,wr+vec3(-0.02,0.14,0.0),0.03,0.004);bn=min(bn,tp);
+  vec2 q2=w.xy;float sh=sEll(vec3(q2.x-0.52,q2.y-0.3,0.0),vec3(0.52,0.5,1.0));sh=max(sh,-(length(q2-vec2(0.98,0.28))-0.16));sh=max(sh,-(length(q2-vec2(0.8,-0.12))-0.17));sh=max(sh,-(length(q2-vec2(0.42,-0.26))-0.16));sh=max(sh,-q2.x+0.04);
+  float mem=max(abs(w.z+0.18+w.x*0.04)-0.025,sh);bn=min(bn,mem);bn*=ws;if(bn<r.x)r=vec2(bn,1.0);}
+ float tl=smin(sTap(c,vec3(0.0,0.5,-0.3),vec3(0.3,0.26,-0.48),0.08,0.05),sTap(c,vec3(0.3,0.26,-0.48),vec3(0.5,0.24,-0.2),0.05,0.02),0.03);if(tl<r.x)r=vec2(smin(tl,r.x,0.04),1.0);
+ return r;}
+`, col: `
+vec4 charCol(vec3 p,vec3 n,float m){vec3 c;float sp=0.08;
+ if(m<1.5||m>6.5&&m<7.5){vec3 b=lin(m<1.5?skin:skin*0.85);c=b*(0.72+0.38*fbm(p*9.0));float cr=smoothstep(0.035,0.0,abs(vnoise(p*vec3(5.0,3.0,5.0))-0.5));c*=1.0-cr*0.6;
+  c=mix(c,lin(vec3(0.38,0.5,0.25)),smoothstep(0.62,0.82,fbm(p*6.0))*smoothstep(0.7,0.2,p.y-J[0].y)*0.8);c*=0.8+0.3*smoothstep(-0.3,0.7,n.y);}
+ else if(m<2.5)c=lin(skin*0.7)*(0.8+0.3*fbm(p*20.0));
+ else if(m<6.5)c=lin(ACC)*2.6;
+ else c=lin(vec3(0.95,0.75,0.3));
+ return vec4(c,sp);}
+` });
+// ---------- 吸血鬼・伯爵：床までのマントと高い襟。VAR.x 0 吸血鬼 1 伯爵（帽子・大きい赤襟） VAR.w 段階 ----------
+KIT24.noble = () => ({ common: COMMON24, body: ROOM_PARTS24.handTxt + addBody24(ROOM_PARTS24.bodyTxt.replace("sHead(", "sHeadNE(").replace("if(tool>0.5&&tool<1.5){", "if(tool>9.0){"), `
+ {vec3 h=HR*(p-J[2]);vec3 e=vec3(abs(h.x),h.y,h.z);
+  float hr=sEll(h-vec3(0.0,0.1,-0.05),vec3(0.49,0.48,0.47));float fc=max(sEll(h-vec3(0.0,-0.06,0.27),vec3(0.43,0.43,0.33)),h.y-(0.15+0.6*abs(h.x)));hr=max(hr,-fc);
+  if(VAR.x>0.5)hr=max(hr,h.y-0.12);
+  if(hr<r.x)r=vec2(hr,13.0);
+  float ey=sEll(e-vec3(0.14,0.0,0.36),vec3(0.07,0.035,0.03));if(ey<r.x)r=vec2(ey,6.0);
+  float br=sTap(e,vec3(0.06,0.1,0.38),vec3(0.24,0.14,0.32),0.022,0.018);if(br<r.x)r=vec2(br,13.0);
+  float fg=sTap(e,vec3(0.07,-0.17,0.35),vec3(0.07,-0.27,0.35),0.025,0.003);if(fg<r.x)r=vec2(fg,2.0);
+  float mo=sRBox(h-vec3(0.0,-0.17,0.37),vec3(0.1,0.012,0.03),0.005);if(mo<r.x)r=vec2(mo,14.0);
+  if(VAR.x>0.5){vec2 hq=h.xz-vec2(0.0,-0.03);float ht=max(length(hq)-0.29,abs(h.y-0.56)-0.3)-0.02;ht=min(ht,max(length(hq)-0.5,abs(h.y-0.27)-0.025)-0.01);if(ht<r.x)r=vec2(ht,13.0);
+   float bd=max(abs(length(hq)-0.3)-0.02,abs(h.y-0.36)-0.06);if(bd<r.x)r=vec2(bd,15.0);}}
+ {float yy=clamp((0.55-tp.y)/1.15,0.0,1.0);float rb=length(tp.xz*vec2(1.0,1.05))-mix(0.36,0.62,yy);rb=abs(rb)-0.03;rb=max(rb,max(tp.y-0.56,-0.6-tp.y));
+  rb=max(rb,-sRBox(tp-vec3(0.0,0.0,0.62),vec3(0.06+0.16*yy,1.2,0.3),0.02));
+  if(rb<r.x)r=vec2(rb,9.0);
+  float sh=sEll(tp-vec3(0.0,0.08,0.06),vec3(0.36,0.5,0.34));if(sh<r.x)r=vec2(sh,13.0);
+  float sf=sEll(tp-vec3(0.0,0.34,0.3),vec3(0.13,0.18,0.06));if(sf<r.x)r=vec2(sf,16.0);
+  float gm=length(tp-vec3(0.0,0.44,0.36))-0.045;if(gm<r.x)r=vec2(gm,6.0);
+  vec3 q=TR*(p-J[1])-vec3(0.0,0.3,-0.08);float cs=VAR.x>0.5?1.4:1.0+VAR.w*0.12;
+  float cl=abs(length(q.xz*vec2(1.0,1.3))-(0.4+0.2*clamp(q.y/0.45,0.0,1.0))*cs)-0.025;cl=max(cl,q.z-0.02);float top=(0.22+0.34*smoothstep(0.12,0.42,abs(q.x)/cs))*cs;cl=max(cl,max(-q.y-0.02,q.y-top));
+  float sl=min(min(sTap(p,J[3],J[4],0.14,0.12),sTap(p,J[6],J[7],0.14,0.12)),min(sTap(p,J[4],mix(J[4],J[5],0.75),0.12,0.12),sTap(p,J[7],mix(J[7],J[8],0.75),0.12,0.12)));if(sl<r.x)r=vec2(sl,13.0);
+  if(cl<r.x)r=vec2(cl,VAR.x>0.5?15.0:9.0);}
+ if(VAR.w>1.5){for(int s=0;s<2;s++){float sg=s==0?1.0:-1.0;vec3 w=TR*(p-J[1]);w.x*=sg;w-=vec3(0.2,0.1,-0.3);float fl=0.3+0.2*sin(tm*6.0);float ca=cos(fl),sa=sin(fl);w=vec3(ca*w.x-sa*w.z,w.y,sa*w.x+ca*w.z);
+   vec2 q2=w.xy;float sh=sEll(vec3(q2.x-0.35,q2.y-0.1,0.0),vec3(0.38,0.32,1.0));sh=max(sh,-(length(q2-vec2(0.62,-0.22))-0.16));sh=max(sh,-(length(q2-vec2(0.3,-0.3))-0.15));sh=max(sh,-q2.x+0.03);
+   float mem=max(abs(w.z)-0.02,sh);if(mem<r.x)r=vec2(mem,13.0);}
+  for(int k=0;k<4;k++){float fk=float(k);vec3 c=J[1]+vec3(sin(tm*1.6+fk*1.57)*0.75,0.5+0.1*sin(tm*3.0+fk),cos(tm*1.6+fk*1.57)*0.6);float dr=length(p-c)-0.05;if(dr<r.x)r=vec2(dr,15.0);}}
+`), col: `
+vec4 charCol(vec3 p,vec3 n,float m){vec3 c;float sp=0.1;vec3 lp=p-J[0];
+ if(m<1.5){c=lin(skin)*(0.88+0.15*fbm(p*12.0));c*=0.82+0.25*smoothstep(-0.3,0.6,n.y);}
+ else if(m<2.5){c=lin(vec3(0.97,0.95,0.9));}
+ else if(m<5.5){c=lin(vec3(0.15,0.13,0.17))*(0.8+0.3*fbm(p*12.0));}
+ else if(m<6.5){c=lin(ACC)*2.4;}
+ else if(m<9.5){vec3 rd=normalize(vec3(lp.x,0.0,lp.z)+vec3(0.0001));float inn=step(dot(n,rd),-0.05);c=mix(lin(cloth)*(0.75+0.3*fbm(p*vec3(8.0,22.0,8.0))),lin(ACC)*(0.8+0.25*fbm(p*9.0)),inn);sp=0.15;}
+ else if(m<13.5){c=lin(vec3(0.1,0.09,0.12))*(0.85+0.3*fbm(p*14.0));sp=0.3;}
+ else if(m<14.5){c=lin(vec3(0.75,0.08,0.1));}
+ else if(m<15.5){c=lin(ACC)*(0.8+0.25*fbm(p*10.0));sp=0.3;}
+ else {c=lin(vec3(0.95,0.94,0.92));}
+ return vec4(c,sp);}
+` });
+Object.assign(KITOF24, { gargoyle: "gargoyle", vampire: "noble", count: "noble" });
+FACEIDX24.noble = -1; FACEIDX24.gargoyle = -1; SPCOL24.noble = SPCOLX24.vampire; SPCOL24.gargoyle = [[0.6, 0.6, 0.62], [0.5, 0.5, 0.5]];
+Object.assign(SPCOLX24, { vampire: [[0.9, 0.88, 0.9], [0.12, 0.1, 0.14]], count: [[0.92, 0.9, 0.92], [0.12, 0.1, 0.14]], gargoyle: [[0.6, 0.6, 0.63], [0.5, 0.5, 0.5]] });
+Object.assign(SPVAR24, { vampire: [[0, 0, 0, 0], [0.85, 0.1, 0.14]], count: [[1, 0, 0, 0], [0.85, 0.1, 0.14]], gargoyle: [[0, 0, 0, 0], [1.0, 0.4, 0.15]] });
+Object.assign(SPBOUND24, { noble: [1.0, 1.7], gargoyle: [0.8, 1.6] });
+SP3D24.noble = 1; SP3D24.gargoyle = 1; LOOPK24.gargoyle = 3.2;
+{ const V0 = varOf24; varOf24 = function (sp, evo){ const v = V0(sp, evo); if (sp === "vampire" || sp === "count" || sp === "gargoyle") v[0][3] = evo || 0; return v; }; }
+{ const R2 = rigSp24; rigSp24 = function (sp0, mode, t){ const k = kitOf24(sp0);
+  if (k === "noble") return rig24(mode, t);
+  if (k === "gargoyle") { const ph = t * Math.PI * 2, J = Array.from({ length: 40 }, () => [0, -9, 0]); J[0] = [0, 0, 0];
+    const HR = mode === "sleep" ? rotX(0.35) : m3mul(rotY(0.25 * Math.sin(ph / 3.2)), rotX(-0.05)); J[9] = [mode === "sleep" ? -0.3 : 0.05 * Math.sin(ph / 1.6), 0, 0];
+    return { J, HR, TR: rotX(0), tool: 0, deb: [] }; }
+  return R2(sp0, mode, t); }; }
 
 // ================= 3D洞窟テストページ（中身は src/cave3d24.js） =================
 (() => {
