@@ -168,6 +168,13 @@ function rig24(mode, t){
   let R_anL = null, R_anR = null;
   if (mode === "sleep") { const br = Math.sin(ph / 3.2); tool = 0;
     pel = [0, 0.5 + br * 0.008, 0]; lean = 0.05 + br * 0.02; headR = [0.25 + br * 0.03, 0.2, 0.15]; wl = [-0.36, 0.5, 0.28]; wr = [0.34, 0.62 + br * 0.01, 0.34]; R_anL = [-0.25, 0.11, 0.1]; R_anR = [0.3, 0.11, 0.25]; }
+  if (mode === "walk") { const k = (t % 0.8) / 0.8 * Math.PI * 2, st = Math.sin(k), lf = Math.max(0, Math.cos(k)), rf = Math.max(0, -Math.cos(k)); tool = 1;
+    pel = [0, 0.5 + Math.abs(Math.cos(k)) * 0.035, 0]; lean = 0.12; twist = st * 0.12; headR = [0.05, -st * 0.05, 0];
+    R_anL = [-0.2, 0.11 + lf * 0.12, st * 0.26]; R_anR = [0.2, 0.11 + rf * 0.12, -st * 0.26]; wl = [-0.42, 0.5, -st * 0.22 + 0.08]; wr = [0.42, 0.52, st * 0.22 + 0.1]; }
+  if (mode === "hurt") { const k = t % 0.6 / 0.6, j = Math.sin(k * Math.PI); tool = 1;
+    pel = [0, 0.5 - j * 0.03, -j * 0.06]; lean = -0.2 * j + 0.05; headR = [-0.35 * j, 0.15, 0.1 * j]; wl = [-0.55, 0.85 + j * 0.15, 0.1]; wr = [0.55, 0.8 + j * 0.15, 0.05]; R_anL = [-0.32, 0.11, 0.12]; R_anR = [0.34, 0.11, -0.12]; }
+  if (mode === "cast") { const k = t % 1.2 / 1.2, j = Math.sin(k * Math.PI * 2) * 0.5 + 0.5; tool = 1;
+    pel = [0, 0.5, 0]; lean = 0.02 - j * 0.06; headR = [-0.1 - j * 0.1, 0, 0]; wr = [0.32, 0.9 + j * 0.35, 0.28]; wl = [-0.38, 0.7 + j * 0.2, 0.3]; R_anL = [-0.3, 0.11, 0.1]; R_anR = [0.32, 0.11, -0.05]; }
   if (mode === "slash") { const k = t % 1, sw = k < 0.6 ? ease.io(k / 0.6) : 1 - ease.io((k - 0.6) / 0.4); tool = 1;
     pel = [0, 0.5, 0.02]; lean = 0.12 + sw * 0.12; twist = 0.4 - sw * 0.8; headR = [0.08, -0.15 + sw * 0.2, 0];
     wr = V3.mix([0.55, 1.28, -0.28], [0.12, 0.66, 0.62], sw); wl = V3.mix([-0.45, 0.8, 0.4], [-0.55, 0.85, -0.1], sw); R_anL = [-0.36, 0.11, 0.32]; R_anR = [0.4, 0.11, -0.22]; }
@@ -332,6 +339,25 @@ async function sdfSprite24(out, sp, mode, t, opt = {}){
   x.putImageData(d, 0, 0); out.width = res; out.height = res; const o = out.getContext("2d"); o.clearRect(0, 0, res, res); o.drawImage(tmp, 0, 0); return out;
 }
 
+// ---------- 元のドット絵を読む（色を取る・確認用） ----------
+const SPRCACHE24 = {};
+function spriteImg24(sp, evo = 0){ return new Promise(res => { const key = sp + evo; if (SPRCACHE24[key]) return res(SPRCACHE24[key]);
+  let url = null; try { const css = [...document.styleSheets].flatMap(s => { try { return [...s.cssRules]; } catch (e) { return []; } }).map(r => r.cssText).find(t => t.includes(".a-" + sp + "-" + evo + " ")); if (css) url = css.match(/url\("([^"]+)"\)/)[1]; } catch (e) {}
+  if (!url) return res(null); const im = new Image(); im.onload = () => { SPRCACHE24[key] = im; res(im); }; im.src = url; }); }
+
+function domColor24(im, box){ const fw = im.width / 17, cv = document.createElement("canvas"); cv.width = 32; cv.height = 32; const x = cv.getContext("2d"); x.imageSmoothingEnabled = false;
+  x.drawImage(im, box[0] * fw, box[1] * im.height, (box[2] - box[0]) * fw, (box[3] - box[1]) * im.height, 0, 0, 32, 32); const a = x.getImageData(0, 0, 32, 32).data, H = {};
+  for (let k = 0; k < a.length; k += 4) { if (a[k + 3] < 200) continue; const lv = (a[k] + a[k + 1] + a[k + 2]) / 765; if (lv < 0.3 || lv > 0.75) continue; const q = (a[k] >> 4) + "," + (a[k + 1] >> 4) + "," + (a[k + 2] >> 4); H[q] = (H[q] || 0) + 1; }
+  const best = Object.entries(H).sort((p, q) => q[1] - p[1])[0]; if (!best) return [0.5, 0.6, 0.3]; return best[0].split(",").map(v => (+v * 16 + 8) / 255); }
+// ---------- ゴブリン型（人型）の粘土の体 ----------
+
+// 1コマ目の中で絵がある範囲（0〜1）
+function sprBox24(im){ const fw = im.width / 17, cv = document.createElement("canvas"); cv.width = fw; cv.height = im.height; const x = cv.getContext("2d"); x.drawImage(im, 0, 0, fw, im.height, 0, 0, fw, im.height);
+  const a = x.getImageData(0, 0, fw, im.height).data; let x0 = 1e9, y0 = 1e9, x1 = -1, y1 = -1;
+  for (let y = 0; y < im.height; y++) for (let k = 0; k < fw; k++) if (a[(y * fw + k) * 4 + 3] > 128) { x0 = Math.min(x0, k); x1 = Math.max(x1, k); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+  return [x0 / fw, y0 / im.height, (x1 + 1) / fw, (y1 + 1) / im.height]; }
+
+
 // ================= ためし：部屋ごと3D（床・壁・松明・施設・子2体）を光で描く =================
 // キャラの式（sdf24.js）をそのまま使い、2体目は名前を置きかえて作る
 var ROOM_PARTS24 = null;
@@ -490,15 +516,17 @@ async function roomDraw24(cv, A, B, tm, cam, idm = 0){
 // ================= 3Dの洞窟：部屋の種類（訓練所・採掘場・寝床）×いろんな種族の子 =================
 // 1つのシェーダーに「部屋」と「子5体」を入れる。子ごとに種族の式（KIT24）を名前を変えて並べる
 const SLOTS24 = ["", "B", "C", "D", "E"];
-const FACEIDX24 = { goblin: 0, slime: 1, bat: 2, ghost: 3, imp: 4, myconid: 5, orc: 6 };   // 顔の絵（横に4つ並べた1枚）の何番目か
-const SPCOL24 = { mimic: [[0.55, 0.36, 0.18], [0.85, 0.3, 0.35]], eye: [[0.92, 0.9, 0.86], [0.75, 0.2, 0.15]], golem: [[0.55, 0.52, 0.47], [0.35, 0.75, 1.0]], orc: [[0.30, 0.42, 0.21], [0.42, 0.27, 0.15]], myconid: [[0.93, 0.87, 0.72], [0.78, 0.2, 0.15]], wolf: [[0.5, 0.52, 0.56], [0.3, 0.3, 0.33]], spider: [[0.32, 0.22, 0.28], [0.75, 0.12, 0.12]], imp: [[0.76, 0.27, 0.2], [0.42, 0.1, 0.14]], kobold: [[0.62, 0.47, 0.3], [0.42, 0.35, 0.52]], ghost: [[0.88, 0.91, 0.96], [0.7, 0.75, 0.82]], goblin: [[0.570, 0.627, 0.240], [0.45, 0.29, 0.16]], skeleton: [[0.86, 0.82, 0.70], [0.50, 0.15, 0.12]], slime: [[0.20, 0.47, 0.23], [0.3, 0.6, 0.3]],
+const FACEIDX24 = { goblin: 0, slime: 1, bat: 2, ghost: 3, imp: 4, myconid: 5, orc: 6, human: 7 };   // 顔の絵（横に4つ並べた1枚）の何番目か
+const SPCOL24 = { human: [[0.95, 0.74, 0.58], [0.5, 0.4, 0.3]], dragon: [[0.78, 0.2, 0.15], [0.55, 0.12, 0.12]], salamander: [[0.55, 0.32, 0.15], [0.9, 0.45, 0.1]], chimera: [[0.78, 0.58, 0.3], [0.55, 0.32, 0.12]], wolfrider: [[0.5, 0.52, 0.56], [0.3, 0.3, 0.33]], mindlord: [[0.9, 0.62, 0.72], [0.45, 0.2, 0.55]], mimic: [[0.55, 0.36, 0.18], [0.85, 0.3, 0.35]], eye: [[0.92, 0.9, 0.86], [0.75, 0.2, 0.15]], golem: [[0.55, 0.52, 0.47], [0.35, 0.75, 1.0]], orc: [[0.30, 0.42, 0.21], [0.42, 0.27, 0.15]], myconid: [[0.93, 0.87, 0.72], [0.78, 0.2, 0.15]], wolf: [[0.5, 0.52, 0.56], [0.3, 0.3, 0.33]], spider: [[0.32, 0.22, 0.28], [0.75, 0.12, 0.12]], imp: [[0.76, 0.27, 0.2], [0.42, 0.1, 0.14]], kobold: [[0.62, 0.47, 0.3], [0.42, 0.35, 0.52]], ghost: [[0.88, 0.91, 0.96], [0.7, 0.75, 0.82]], goblin: [[0.570, 0.627, 0.240], [0.45, 0.29, 0.16]], skeleton: [[0.86, 0.82, 0.70], [0.50, 0.15, 0.12]], slime: [[0.20, 0.47, 0.23], [0.3, 0.6, 0.3]],
   bat: [[0.47, 0.34, 0.64], [0.66, 0.38, 0.55]], rat: [[0.62, 0.58, 0.50], [0.88, 0.58, 0.58]] };
 // 似た種族は同じ式を使い、色だけ変える
-const KITOF24 = { gargoyle: "imp", ifrit: "imp", underlord: "imp", lich: "skeleton", vaultkeeper: "mimic", hauntchest: "mimic", stoneeye: "eye", fortgolem: "golem", webgoblin: "goblin", sapper: "goblin", shaman: "goblin", ghoul: "goblin", goldkobold: "kobold", emberskel: "skeleton", bonewarden: "skeleton",
+const KITOF24 = { warrior: "human", thief: "human", priest: "human", mage: "human", knight: "human", vampire: "human", count: "human", slimeknight: "human", bonedragon: "dragon", elderdragon: "dragon", flamechimera: "chimera", maou: "imp", rotlord: "slime", gargoyle: "imp", ifrit: "imp", underlord: "imp", lich: "skeleton", vaultkeeper: "mimic", hauntchest: "mimic", stoneeye: "eye", fortgolem: "golem", webgoblin: "goblin", sapper: "goblin", shaman: "goblin", ghoul: "goblin", goldkobold: "kobold", emberskel: "skeleton", bonewarden: "skeleton",
   rotslime: "slime", lavaslime: "slime", ghostslime: "slime", gemeater: "slime", eyebat: "bat", firebat: "bat", nightspider: "spider", eyespider: "spider", stonespider: "spider",
   nightwolf: "wolf", jackal: "wolf", sporerat: "rat", ratking: "rat", minerorc: "orc", berserker: "orc", ogremage: "orc", bogtroll: "orc", wraitheye: "ghost", sporewraith: "ghost", fungus: "myconid" };
 const kitOf24 = sp => KITOF24[sp] || sp;
-const SPCOLX24 = { gargoyle: [[0.5, 0.5, 0.52], [0.36, 0.36, 0.4]], ifrit: [[0.95, 0.5, 0.15], [0.9, 0.3, 0.08]], underlord: [[0.42, 0.2, 0.42], [0.2, 0.1, 0.25]], lich: [[0.78, 0.78, 0.72], [0.38, 0.2, 0.5]],
+const SPCOLX24 = { warrior: [[0.95, 0.74, 0.58], [0.6, 0.4, 0.22]], thief: [[0.95, 0.74, 0.58], [0.33, 0.58, 0.3]], priest: [[0.95, 0.76, 0.6], [0.92, 0.9, 0.85]], mage: [[0.95, 0.74, 0.58], [0.3, 0.45, 0.82]],
+  knight: [[0.95, 0.74, 0.58], [0.7, 0.72, 0.8]], vampire: [[0.9, 0.88, 0.86], [0.14, 0.12, 0.17]], count: [[0.9, 0.88, 0.86], [0.14, 0.12, 0.17]], slimeknight: [[0.45, 0.62, 0.42], [0.5, 0.58, 0.52]],
+  bonedragon: [[0.85, 0.82, 0.72], [0.3, 0.28, 0.32]], elderdragon: [[0.25, 0.4, 0.3], [0.5, 0.42, 0.2]], flamechimera: [[0.85, 0.5, 0.2], [0.9, 0.35, 0.1]], maou: [[0.45, 0.32, 0.55], [0.6, 0.1, 0.12]], rotlord: [[0.5, 0.36, 0.55], [0.5, 0.4, 0.6]], gargoyle: [[0.5, 0.5, 0.52], [0.36, 0.36, 0.4]], ifrit: [[0.95, 0.5, 0.15], [0.9, 0.3, 0.08]], underlord: [[0.42, 0.2, 0.42], [0.2, 0.1, 0.25]], lich: [[0.78, 0.78, 0.72], [0.38, 0.2, 0.5]],
   vaultkeeper: [[0.7, 0.6, 0.3], [0.85, 0.3, 0.35]], hauntchest: [[0.4, 0.42, 0.5], [0.4, 0.8, 0.7]], stoneeye: [[0.6, 0.6, 0.58], [0.85, 0.3, 0.2]], fortgolem: [[0.5, 0.48, 0.45], [0.3, 0.7, 1.0]], webgoblin: [[0.57, 0.627, 0.24], [0.47, 0.35, 0.41]], sapper: [[0.5, 0.58, 0.26], [0.3, 0.3, 0.3]], shaman: [[0.6, 0.66, 0.28], [0.6, 0.45, 0.15]], ghoul: [[0.4, 0.45, 0.3], [0.35, 0.28, 0.35]],
   goldkobold: [[0.78, 0.58, 0.22], [0.45, 0.29, 0.16]], emberskel: [[0.9, 0.72, 0.52], [0.85, 0.4, 0.1]], bonewarden: [[0.8, 0.82, 0.75], [0.35, 0.45, 0.42]],
   rotslime: [[0.52, 0.55, 0.24], [0.4, 0.4, 0.2]], lavaslime: [[0.86, 0.38, 0.08], [0.9, 0.6, 0.1]], ghostslime: [[0.45, 0.72, 0.66], [0.5, 0.8, 0.7]], gemeater: [[0.35, 0.6, 0.62], [0.4, 0.7, 0.7]],
@@ -507,11 +535,17 @@ const SPCOLX24 = { gargoyle: [[0.5, 0.5, 0.52], [0.36, 0.36, 0.4]], ifrit: [[0.9
   minerorc: [[0.4, 0.46, 0.25], [0.47, 0.28, 0.16]], berserker: [[0.42, 0.45, 0.24], [0.55, 0.15, 0.12]], ogremage: [[0.5, 0.56, 0.34], [0.47, 0.22, 0.6]], bogtroll: [[0.5, 0.58, 0.3], [0.35, 0.3, 0.2]],
   wraitheye: [[0.55, 0.78, 0.72], [0.4, 0.6, 0.55]], sporewraith: [[0.66, 0.52, 0.7], [0.6, 0.66, 0.6]], fungus: [[0.93, 0.87, 0.72], [0.75, 0.38, 0.12]] };
 const spCol24 = sp => SPCOLX24[sp] || SPCOL24[kitOf24(sp)];
+// 見た目の切りかえ（VAR）と、3つ目の色（ACC）
+const SPVAR24 = { warrior: [[0, 0, 0, 1], [0.52, 0.34, 0.18]], thief: [[0, 0, 1, 0], [0.28, 0.5, 0.25]], priest: [[4, 1, 2, 0], [0.95, 0.8, 0.35]], mage: [[1, 1, 2, 0], [0.25, 0.38, 0.78]],
+  knight: [[2, 2, 0, 2], [0.2, 0.45, 0.9]], vampire: [[4, 3, 1, 0], [0.6, 0.08, 0.12]], count: [[5, 3, 1, 0], [0.6, 0.08, 0.12]], slimeknight: [[2, 2, 0, 1], [0.3, 0.6, 0.35]],
+  wolfrider: [[0, 0, 0, 0], [0.45, 0.62, 0.25]], chimera: [[0, 0, 0, 0], [0.5, 0.5, 0.52]], flamechimera: [[0, 0, 0, 0], [0.4, 0.15, 0.1]], dragon: [[0, 0, 0, 0], [0.95, 0.75, 0.4]], bonedragon: [[0, 0, 0, 0], [0.6, 0.6, 0.55]],
+  elderdragon: [[0, 0, 0, 0], [0.85, 0.75, 0.4]], rotlord: [[1, 0, 0, 0], [0.5, 0.4, 0.6]], mindlord: [[0, 0, 0, 0], [0.75, 0.45, 0.6]] };
+const spVar24 = sp => SPVAR24[sp] || [[0, 0, 0, 0], spCol24(sp)[1]];
 // 種族ごとの大きさ
-const SPSCL24 = { golem: 1.3, fortgolem: 1.45, orc: 1.25, myconid: 0.95, ogremage: 1.35, bogtroll: 1.35, berserker: 1.3, ratking: 1.2 };
+const SPSCL24 = { elderdragon: 1.25, bonedragon: 1.15, maou: 1.7, rotlord: 1.6, chimera: 1.1, flamechimera: 1.15, golem: 1.3, fortgolem: 1.45, orc: 1.25, myconid: 0.95, ogremage: 1.35, bogtroll: 1.35, berserker: 1.3, ratking: 1.2 };
 const spScl24 = sp => SPSCL24[sp] || SPSCL24[kitOf24(sp)] || 1;
 // 体の当たりの球（中心y・半径）
-const SPBOUND24 = { mimic: [0.4, 0.9], eye: [1.0, 1.1], golem: [0.95, 1.7], orc: [0.9, 1.6], myconid: [0.6, 0.9], wolf: [0.6, 1.25], spider: [0.45, 1.3], imp: [0.9, 1.6], kobold: [0.9, 1.6], ghost: [0.9, 1.25], goblin: [0.9, 1.55], skeleton: [0.9, 1.55], slime: [0.4, 0.95], bat: [1.0, 1.35], rat: [0.3, 1.15] };
+const SPBOUND24 = { human: [0.9, 1.75], dragon: [0.9, 1.95], salamander: [0.3, 1.45], chimera: [0.6, 1.65], wolfrider: [0.8, 1.65], mindlord: [0.9, 1.25], mimic: [0.4, 0.9], eye: [1.0, 1.1], golem: [0.95, 1.7], orc: [0.9, 1.6], myconid: [0.6, 0.9], wolf: [0.6, 1.25], spider: [0.45, 1.3], imp: [0.9, 1.6], kobold: [0.9, 1.6], ghost: [0.9, 1.25], goblin: [0.9, 1.55], skeleton: [0.9, 1.55], slime: [0.4, 0.95], bat: [1.0, 1.35], rat: [0.3, 1.15] };
 
 // ---------- 種族ごとの式 ----------
 const KIT24 = {};
@@ -595,8 +629,12 @@ vec2 body(vec3 p){
 vec4 charCol(vec3 p,vec3 n,float m){vec3 c;float sp=0.05;
  if(m<1.5){vec3 lp=p-J[0];c=lin(skin)*(0.7+0.4*fbm(vec3(lp.x*16.0,lp.y*16.0,lp.z*5.0)));c=mix(c,lin(skin*1.25),smoothstep(-0.05,-0.2,lp.y)*0.6);float st=step(0.6,fract(lp.z*4.5))*smoothstep(0.12,0.24,lp.y)*step(abs(lp.x),0.18);c*=1.0-0.35*st;}
  else if(m<3.5){c=lin(vec3(0.1,0.08,0.08));}
+ else if(m<4.5){c=lin(vec3(0.45,0.29,0.15))*(0.8+0.3*fbm(p*20.0));}
+ else if(m<5.5){c=lin(vec3(0.7,0.72,0.78))*(0.8+0.3*fbm(p*14.0));sp=0.7;}
  else if(m<6.5){c=lin(vec3(1.0,0.85,0.2))*2.0;sp=0.6;}
- else c=lin(vec3(0.42,0.36,0.30));
+ else if(m<8.5){c=lin(vec3(0.42,0.36,0.30));}
+ else if(m<9.5){c=lin(ACC)*(0.75+0.35*fbm(p*10.0));}
+ else c=lin(cloth)*(0.7+0.4*fbm(p*14.0));
  return vec4(c,sp);}
 ` });
 KIT24.spider = () => ({ body: `
@@ -675,6 +713,119 @@ vec4 charCol(vec3 p,vec3 n,float m){vec3 c;float sp=0.05;
  else c=lin(cloth)*2.5;
  return vec4(c,sp);}
 ` });
+
+// 人間（勇者・吸血鬼など）：頭・服・かぶり物・武器・盾を VAR で切りかえ
+// VAR.x かぶり物 0フード 1とんがり帽 2かぶと 3角かぶと 4髪 5シルクハット / VAR.y 服 0上着 1ローブ 2よろい 3マント / VAR.z 武器 0剣 1短剣 2杖 / VAR.w 盾 0なし 1丸 2十字
+KIT24.human = () => ({ common: COMMON24, body: ROOM_PARTS24.handTxt + addBody24(ROOM_PARTS24.bodyTxt.replace("sHead(", "sHeadNE("), `
+ {vec3 h=HR*(p-J[2]);float hg=1e3;float hm=3.0;
+  if(VAR.x<0.5){hg=max(abs(sEll(h-vec3(0.0,0.06,-0.03),vec3(0.47,0.5,0.45)))-0.035,-sEll(h-vec3(0.0,-0.06,0.3),vec3(0.31,0.33,0.3)));hg=min(hg,sTap(h,vec3(0.0,0.3,-0.3),vec3(0.0,0.05,-0.55),0.12,0.02));}
+  else if(VAR.x<1.5){hg=min(sEll(h-vec3(0.0,0.3,0.0),vec3(0.62,0.05,0.62)),sTap(h,vec3(0.0,0.3,0.0),vec3(0.12,1.05,-0.25),0.38,0.02));hm=9.0;}
+  else if(VAR.x<3.5){hg=max(sEll(h-vec3(0.0,0.1,0.0),vec3(0.46,0.42,0.43)),-sRBox(h-vec3(0.0,-0.08,0.35),vec3(0.24,0.16,0.2),0.05));hg=max(hg,-h.y-0.12);hm=5.0;
+   if(VAR.x>2.5){vec3 e=vec3(abs(h.x),h.y,h.z);float hn=min(sTap(e,vec3(0.38,0.22,0.0),vec3(0.62,0.42,0.0),0.08,0.04),sTap(e,vec3(0.62,0.42,0.0),vec3(0.66,0.72,0.0),0.04,0.01));if(hn<r.x)r=vec2(hn,2.0);}
+   else{float cr=sRBox(h-vec3(0.0,0.42,-0.02),vec3(0.03,0.12,0.25),0.02);if(cr<r.x)r=vec2(cr,9.0);}}
+  else if(VAR.x<4.5){hg=max(sEll(h-vec3(0.0,0.12,-0.06),vec3(0.46,0.43,0.43)),-(sEll(h-vec3(0.0,-0.12,0.3),vec3(0.34,0.3,0.25))));hm=9.0;}
+  else{hg=min(sRBox(h-vec3(0.0,0.55,0.0),vec3(0.27,0.25,0.27),0.02),sEll(h-vec3(0.0,0.31,0.0),vec3(0.5,0.035,0.5)));hg=min(hg,max(sEll(h-vec3(0.0,0.1,-0.06),vec3(0.45,0.36,0.42)),-(sEll(h-vec3(0.0,-0.12,0.3),vec3(0.34,0.3,0.25)))));hm=9.0;}
+  if(hg<r.x)r=vec2(hg,hm);}
+ if(VAR.y>0.5&&VAR.y<1.5){float yy=clamp((0.12-tp.y)/0.62,0.0,1.0);float rb=length(tp.xz*vec2(1.0,1.15))-mix(0.33,0.47,yy);rb=max(rb,max(tp.y-0.15,-0.5-tp.y));if(rb<r.x)r=vec2(rb,3.0);}
+ if(VAR.y>1.5&&VAR.y<2.5){float ar=sEll(tp-vec3(0.0,0.28,0.03),vec3(0.36,0.29,0.28));ar=min(ar,min(sEll(tp-vec3(-0.34,0.43,0.0),vec3(0.16,0.12,0.16)),sEll(tp-vec3(0.34,0.43,0.0),vec3(0.16,0.12,0.16))));if(ar<r.x)r=vec2(ar,5.0);
+  float gv=min(sTap(p,mix(J[10],J[11],0.3),J[11]+vec3(0,0.03,0),0.085,0.08),sTap(p,mix(J[13],J[14],0.3),J[14]+vec3(0,0.03,0),0.085,0.08));if(gv<r.x)r=vec2(gv,5.0);}
+ if(VAR.y>2.5){float cp=sRBox(tp-vec3(0.0,0.05,-0.27),vec3(0.36+max(0.0,-tp.y)*0.15,0.55,0.025),0.02);cp=max(cp,-0.5-tp.y);if(cp<r.x)r=vec2(cp,9.0);
+  float cl=max(abs(length(tp.xz-vec2(0.0,-0.02))-0.3)-0.03,abs(tp.y-0.6)-0.12);if(cl<r.x)r=vec2(cl,9.0);}
+ if(tool<-0.5){vec3 a=J[34],d=J[35]-J[34];
+  if(VAR.z<0.5){float hd=sTap(p,J[33],a,0.03,0.03);if(hd<r.x)r=vec2(hd,4.0);float b=sOBox(p,a,a+d*1.45,J[36],vec2(0.06,0.012))-0.004;if(b<r.x)r=vec2(b,5.0);float gd=sOBox(p,a-d*0.04,a+d*0.04,J[36],vec2(0.15,0.03));if(gd<r.x)r=vec2(gd,5.0);}
+  else if(VAR.z<1.5){float hd=sTap(p,J[33],a,0.025,0.025);if(hd<r.x)r=vec2(hd,4.0);float b=sOBox(p,a,a+d*0.8,J[36],vec2(0.045,0.01))-0.003;if(b<r.x)r=vec2(b,5.0);}
+  else{vec3 w=J[8],up=normalize(vec3(0.0,1.0,0.15));float st=sTap(p,w-up*0.55,w+up*0.75,0.035,0.03);if(st<r.x)r=vec2(st,4.0);float ob=length(p-(w+up*0.85))-0.1;if(ob<r.x)r=vec2(ob,6.0);}}
+ if(VAR.w>0.5){vec3 sc=J[5]+vec3(-0.12,0.04,0.06);float sd=sEll(p-sc,vec3(0.05,0.24,0.24));if(sd<r.x)r=vec2(sd,VAR.w>1.5?5.0:4.0);float rm=max(abs(sEll(p-sc,vec3(0.07,0.25,0.25)))-0.012,-(p.x-sc.x)-0.01);if(rm<r.x)r=vec2(rm,5.0);}
+`), col: `
+vec4 charCol(vec3 p,vec3 n,float m){vec3 c;float sp=0.08;vec3 hp=HR*(p-J[2]);
+ if(m<1.5){bool hd=length(hp)<0.52;bool hn=length(p-J[5])<0.17||length(p-J[8])<0.17;
+  if(hd||hn){c=lin(skin)*(0.88+0.15*fbm(p*10.0));
+   if(hd&&hasFace>0.5&&FIDX>-0.5){vec3 hn2=HR*n;float fz=smoothstep(0.05,0.3,hn2.z);vec2 fu=vec2(hp.x/0.84+0.5,0.5-hp.y/0.86);
+    if(fu.x>0.0&&fu.x<1.0&&fu.y>0.0&&fu.y<1.0){vec4 tx=texture2D(face,vec2((fu.x+FIDX)/8.0,fu.y));c=mix(c,lin(tx.rgb),tx.a*fz);}}}
+  else if(p.y<J[0].y-0.1){c=lin(cloth*0.55)*(0.8+0.3*fbm(p*12.0));if(p.y<0.16)c=lin(vec3(0.35,0.22,0.12))*(0.8+0.3*fbm(p*15.0));}
+  else c=lin(cloth)*(0.78+0.3*fbm(p*10.0));}
+ else if(m<2.5){if(length(hp)<0.9)c=lin(vec3(0.92,0.88,0.75));else if(p.y<0.2)c=lin(vec3(0.35,0.22,0.12))*(0.8+0.3*fbm(p*15.0));else c=lin(skin)*0.9;sp=0.2;}
+ else if(m<3.5){c=lin(cloth)*(0.75+0.3*fbm(p*9.0));sp=0.04;}
+ else if(m<4.5){c=lin(vec3(0.45,0.29,0.15))*(0.8+0.3*fbm(p*vec3(25.0,4.0,25.0)));sp=0.1;}
+ else if(m<5.5){c=lin(vec3(0.72,0.74,0.8))*(0.8+0.3*fbm(p*14.0));sp=0.8;if(VAR.w>1.5){vec3 sc=J[5]+vec3(-0.12,0.04,0.06);vec3 q=p-sc;if(q.x<-0.03&&(abs(q.y)<0.045||abs(q.z-0.0)<0.045)&&length(q.yz)<0.2)c=lin(ACC)*1.2;}}
+ else if(m<6.5){c=lin(ACC)*2.5;}
+ else if(m<7.5){c=lin(vec3(0.42,0.36,0.30))*(0.8+0.4*fbm(p*30.0));}
+ else {c=lin(ACC)*(0.75+0.3*fbm(p*9.0));sp=0.12;if(VAR.y>2.5&&length(hp)<0.62)c=lin(vec3(0.07,0.06,0.09))*(0.8+0.4*fbm(p*20.0));}
+ return vec4(c,sp);}
+` });
+
+KIT24.chimera = () => { const W = KIT24.wolf(); return { body: addBody24(W.body, `
+ {vec3 h=HR*(p-J[1]);float mn=sEll(h-vec3(0.0,0.0,-0.08),vec3(0.36,0.36,0.3))+(vnoise(p*12.0)-0.5)*0.06;if(mn<r.x)r=vec2(mn,10.0);}
+ {float fl=0.45+0.3*sin(tm*3.0);for(int s=0;s<2;s++){float sg=s==0?1.0:-1.0;vec3 w=vec3((p.x-J[0].x)*sg,p.y,p.z)-vec3(0.18,J[0].y+0.22,J[0].z+0.15);float ca=cos(fl),sa=sin(fl);w=vec3(ca*w.x+sa*w.y,-sa*w.x+ca*w.y,w.z);
+  float wg=sEll(w-vec3(0.42,0.0,-0.1),vec3(0.45,0.06,0.32));for(int k=0;k<3;k++){wg=max(wg,-(length(w.xz-vec2(0.15+0.27*float(k),-0.45))-0.14));}if(wg<r.x)r=vec2(wg,9.0);}}
+ {float sn=length(p-J[4])-0.09;if(sn<r.x)r=vec2(sn,10.0);}
+`), col: W.col }; };
+KIT24.wolfrider = () => { const W = KIT24.wolf(); return { body: addBody24(W.body, `
+ {vec3 b=p-J[0]-vec3(0.0,0.42,0.02);float t=sEll(b,vec3(0.16,0.2,0.14));vec3 hh=b-vec3(0.0,0.32,0.03);float hd=sEll(hh,vec3(0.2,0.19,0.18));vec3 e=vec3(abs(hh.x),hh.y,hh.z);
+  hd=smin(hd,sTap(e,vec3(0.16,0.03,-0.02),vec3(0.38,0.12,-0.06),0.06,0.01),0.03);float rd=min(t,hd);
+  rd=min(rd,min(sTap(b,vec3(-0.14,0.1,0.0),vec3(-0.2,-0.08,0.15),0.05,0.045),sTap(b,vec3(0.14,0.1,0.0),vec3(0.22,0.02,0.2),0.05,0.045)));
+  rd=min(rd,min(sTap(b,vec3(-0.1,-0.12,0.0),vec3(-0.24,-0.28,0.08),0.055,0.05),sTap(b,vec3(0.1,-0.12,0.0),vec3(0.24,-0.28,0.08),0.055,0.05)));if(rd<r.x)r=vec2(rd,9.0);
+  float ey=length(e-vec3(0.08,0.03,0.17))-0.03;if(ey<r.x)r=vec2(ey,6.0);
+  float sp=sTap(b,vec3(0.24,-0.15,-0.25),vec3(0.2,0.25,0.85),0.025,0.02);if(sp<r.x)r=vec2(sp,4.0);float tp2=sTap(b,vec3(0.2,0.25,0.85),vec3(0.2,0.28,1.0),0.05,0.005);if(tp2<r.x)r=vec2(tp2,5.0);}
+`), col: W.col }; };
+KIT24.dragon = () => ({ body: `
+vec2 body(vec3 p){
+ float d=sEll(p-J[0],vec3(0.34,0.33,0.55));d=smin(d,sEll(p-J[0]-vec3(0.0,0.08,0.32),vec3(0.33,0.34,0.3)),0.1);
+ vec3 h=HR*(p-J[1]);
+ d=smin(d,sTap(p,J[0]+vec3(0.0,0.2,0.42),J[1]-vec3(0.0,0.08,0.05),0.2,0.13),0.08);
+ float hd=smin(sEll(h,vec3(0.21,0.2,0.26)),sTap(h,vec3(0.0,-0.04,0.1),vec3(0.0,-0.08,0.48),0.15,0.08),0.06);d=smin(d,hd,0.06);
+ for(int i=0;i<4;i++){vec3 f=J[5+i];vec3 top=vec3(f.x*0.8,J[0].y-0.05,J[0].z+(i<2?0.35:-0.3));vec3 kn=mix(top,f,0.5)+vec3(0.0,0.0,i<2?0.06:-0.1);d=smin(d,min(sTap(p,top,kn,0.13,0.1),sTap(p,kn,f+vec3(0,0.05,0),0.1,0.08)),0.06);}
+ d=smin(d,min(sTap(p,J[2],J[3],0.17,0.1),sTap(p,J[3],J[4],0.1,0.02)),0.08);
+ vec2 r=vec2(d,1.0);
+ vec3 e=vec3(abs(h.x),h.y,h.z);float hn=sTap(e,vec3(0.1,0.12,-0.12),vec3(0.18,0.3,-0.42),0.06,0.01);if(hn<r.x)r=vec2(hn,2.0);
+ float ey=length(e-vec3(0.12,0.05,0.15))-0.04;if(ey<r.x)r=vec2(ey,6.0);
+ for(int i=0;i<5;i++){float k=float(i)/4.0;vec3 c=mix(J[1]-vec3(0.0,0.0,0.15),J[3],k)+vec3(0.0,0.18-k*0.05,0.0);if(i>1)c=mix(J[0]+vec3(0.0,0.3,0.2),J[3],k);float sp=sTap(p,c,c+vec3(0.0,0.14,-0.06),0.06,0.005);if(sp<r.x)r=vec2(sp,2.0);}
+ float fl=J[9].x;for(int s=0;s<2;s++){float sg=s==0?1.0:-1.0;vec3 w=vec3((p.x-J[0].x)*sg,p.y,p.z)-vec3(0.22,J[0].y+0.25,J[0].z+0.2);float ca=cos(fl),sa=sin(fl);w=vec3(ca*w.x+sa*w.y,-sa*w.x+ca*w.y,w.z);
+  float wg=sEll(w-vec3(0.55,0.05,-0.15),vec3(0.58,0.05,0.45));for(int k=0;k<3;k++){wg=max(wg,-(length(w.xz-vec2(0.22+0.3*float(k),-0.62))-0.17));}
+  wg=min(wg,sTap(w,vec3(0.0,0.0,0.0),vec3(1.05,0.12,0.0),0.05,0.015));if(wg<r.x)r=vec2(wg,3.0);}
+ return r;}
+`, col: `
+vec4 charCol(vec3 p,vec3 n,float m){vec3 c;float sp=0.25;
+ if(m<1.5){vec3 lp=p-J[0];c=lin(skin)*(0.75+0.35*fbm(p*9.0));float sc=step(0.5,fract((lp.x+lp.z)*8.0))*0.12;c*=1.0-sc;c=mix(c,lin(ACC),smoothstep(-0.05,-0.25,n.y)*0.8);}
+ else if(m<2.5){c=lin(vec3(0.9,0.85,0.72));}
+ else if(m<3.5){c=lin(cloth)*(0.7+0.35*fbm(p*8.0));sp=0.05;}
+ else c=lin(vec3(1.0,0.75,0.15))*2.5;
+ return vec4(c,sp);}
+` });
+KIT24.salamander = () => ({ body: `
+vec2 body(vec3 p){
+ float d=sEll(p-J[0],vec3(0.27,0.18,0.55));
+ vec3 h=HR*(p-J[1]);float hd=smin(sEll(h,vec3(0.18,0.13,0.2)),sTap(h,vec3(0.0,-0.02,0.08),vec3(0.0,-0.04,0.36),0.13,0.07),0.05);d=smin(d,hd,0.1);
+ for(int i=0;i<4;i++){vec3 f=J[5+i];vec3 top=vec3(f.x*0.55,J[0].y,f.z);vec3 kn=vec3(f.x*0.95,J[0].y+0.05,f.z);d=smin(d,min(sTap(p,top,kn,0.08,0.06),sTap(p,kn,f+vec3(0,0.03,0),0.06,0.05)),0.04);}
+ d=smin(d,min(sTap(p,J[2],J[3],0.14,0.08),sTap(p,J[3],J[4],0.08,0.015)),0.06);
+ vec2 r=vec2(d,1.0);
+ vec3 e=vec3(abs(h.x),h.y,h.z);float ey=length(e-vec3(0.11,0.07,0.1))-0.045;if(ey<r.x)r=vec2(ey,2.0);
+ for(int i=0;i<4;i++){vec3 c=J[0]+vec3(0.0,0.16,0.35-float(i)*0.25);float fh=0.2+0.06*sin(tm*12.0+float(i)*1.7);float f=sTap(p,c,c+vec3(0.02*sin(tm*9.0+float(i)),fh,0.0),0.07,0.0);if(f<r.x)r=vec2(f,6.0);}
+ return r;}
+`, col: `
+vec4 charCol(vec3 p,vec3 n,float m){vec3 c;float sp=0.3;
+ if(m<1.5){c=lin(skin)*(0.7+0.4*fbm(p*10.0));c=mix(c,lin(cloth),step(0.62,vnoise(p*9.0))*0.7);}
+ else if(m<2.5){c=lin(vec3(1.0,0.8,0.2))*2.0;}
+ else {float hh=fract(p.y*3.0);c=mix(lin(vec3(1.0,0.85,0.35)),lin(vec3(1.0,0.35,0.05)),hh)*2.2;}
+ return vec4(c,sp);}
+` });
+KIT24.mindlord = () => ({ body: `
+vec2 body(vec3 p){
+ vec3 b=HR*(p-J[0]);
+ float hd=sEll(b-vec3(0.0,0.25,0.0),vec3(0.42,0.38,0.4));hd+=0.025*sin(b.x*30.0+sin(b.y*20.0)*2.0)*sin(b.z*25.0);
+ float rb=max(length(b.xz)-mix(0.32,0.45,clamp(-b.y/0.6,0.0,1.0)),max(b.y-0.0,-0.75-b.y));
+ vec2 r=vec2(hd,1.0);if(rb<r.x)r=vec2(rb,3.0);
+ for(int i=0;i<4;i++){float a=float(i)*0.6-0.9;vec3 o=vec3(sin(a)*0.18,-0.02,0.3);vec3 tip=o+vec3(sin(a)*0.15+0.06*sin(tm*2.0+float(i)),-0.45,0.12+0.05*cos(tm*1.7+float(i)));float t=sTap(b,o,tip,0.05,0.012);if(t<r.x)r=vec2(t,9.0);}
+ float ey=sEll(b-vec3(0.0,0.2,0.36),vec3(0.16,0.13,0.06));if(ey<r.x)r=vec2(ey,6.0);
+ return r;}
+`, col: `
+vec4 charCol(vec3 p,vec3 n,float m){vec3 b=HR*(p-J[0]);vec3 c;float sp=0.4;
+ if(m<1.5){c=lin(skin)*(0.75+0.35*fbm(b*9.0));}
+ else if(m<3.5){c=lin(cloth)*(0.7+0.35*fbm(b*vec3(8.0,2.0,8.0)));sp=0.1;}
+ else if(m<6.5){vec2 q=(b-vec3(0.0,0.2,0.4)).xy;c=lin(vec3(0.95,0.9,0.9));if(length(q)<0.09)c=lin(vec3(0.9,0.15,0.3))*1.6;if(length(q)<0.04)c=vec3(0.01);}
+ else c=lin(ACC)*(0.75+0.3*fbm(p*12.0));
+ return vec4(c,sp);}
+` });
 KIT24.skeleton = () => ({ body: `
 vec2 body(vec3 p){
  vec3 tp=TR*(p-J[0]);vec3 h=HR*(p-J[2]);
@@ -723,6 +874,7 @@ vec2 body(vec3 p){
  d=smin(d,sEll(p-J[0]-vec3(0.12*R.x,R.y*0.82,-0.1),vec3(0.18,0.1,0.16)),0.1);
  d=max(d,-p.y);
  vec2 r=vec2(d,1.0);
+ if(VAR.x>0.5){for(int i=0;i<3;i++){float a=float(i)*0.9-0.9;vec3 o=J[0]+vec3(sin(a)*R.x*0.5,R.y*0.8,cos(a)*R.z*0.2);vec3 tp2=o+vec3(sin(a)*0.15+0.05*sin(tm*2.0+float(i)),0.35,0.05);float st=sTap(p,o,tp2,0.05,0.035);if(st<r.x)r=vec2(smin(st,r.x,0.05),1.0);float eb=length(p-tp2)-0.08;if(eb<r.x)r=vec2(eb,8.0);}}
  vec3 sq=HR*(p-J[3]);float sk=smin(sEll(sq,vec3(0.12,0.11,0.11)),sEll(sq-vec3(0,-0.07,0.03),vec3(0.07,0.05,0.06)),0.03);if(sk<r.x)r=vec2(sk,8.0);
  return r;}
 `, col: `
@@ -787,7 +939,18 @@ vec4 charCol(vec3 p,vec3 n,float m){vec3 c;float sp=0.06;
 function rigSp24(sp0, mode, t){
   const sp = kitOf24(sp0);
   if (sp === "goblin" || sp === "skeleton" || sp === "imp" || sp === "kobold" || sp === "orc" || sp === "golem") return rig24(mode, t);
+  if (sp === "human") { const R = rig24(mode, t); if (R.tool === 1) R.tool = -1; return R; }
+  if (sp === "chimera" || sp === "wolfrider") return rigSp24("wolf", mode, t);
   const J = Array.from({ length: 40 }, () => [0, -9, 0]), ph = t * Math.PI * 2; let HR = rotX(0);
+  if (sp === "dragon") { const sl = mode === "sleep", s = Math.sin(ph / (sl ? 3.2 : 1.6)), sw = Math.sin(ph / 2.4);
+    J[0] = [0, (sl ? 0.4 : 0.75) + s * 0.015, 0]; J[1] = sl ? [0.35, 0.35, 0.75] : [sw * 0.08, 1.5 + s * 0.03, 0.62]; HR = sl ? m3mul(rotY(-0.5), rotX(0.3)) : m3mul(rotY(sw * 0.3), rotX(-0.1 + s * 0.05));
+    J[2] = [0, J[0][1], -0.5]; J[3] = [sw * 0.3, sl ? 0.2 : 0.5, -1.0]; J[4] = sl ? [-0.6, 0.1, -0.6] : [sw * 0.6, 0.3, -1.45];
+    J[5] = [-0.27, 0.0, sl ? 0.45 : 0.38]; J[6] = [0.27, 0.0, sl ? 0.45 : 0.38]; J[7] = [-0.3, 0.0, -0.32]; J[8] = [0.3, 0.0, -0.32]; J[9] = [sl ? -0.7 : 0.4 + 0.3 * Math.sin(ph / 1.1), 0, 0];
+    return { J, HR, TR: rotX(0), tool: 0, deb: [] }; }
+  if (sp === "salamander") { const sl = mode === "sleep", sw = Math.sin(ph / (sl ? 3 : 1.4));
+    J[0] = [0, 0.24, 0]; J[1] = [sw * 0.05, 0.27, 0.62]; HR = rotY(sw * 0.3); J[2] = [0, 0.24, -0.5]; J[3] = [sw * 0.3, 0.14, -0.95]; J[4] = [sw * 0.6, 0.07, -1.4];
+    J[5] = [-0.42, 0.03, 0.32]; J[6] = [0.42, 0.03, 0.32]; J[7] = [-0.45, 0.03, -0.3]; J[8] = [0.45, 0.03, -0.3]; return { J, HR, TR: rotX(0), tool: 0, deb: [] }; }
+  if (sp === "mindlord") { const sl = mode === "sleep", bob = Math.sin(ph / 1.8) * 0.06; J[0] = [0, (sl ? 0.75 : 1.05) + bob, 0]; HR = m3mul(rotY(Math.sin(ph / 3) * 0.25), rotX(sl ? 0.25 : 0)); return { J, HR, TR: rotX(0), tool: 0, deb: [] }; }
   if (sp === "mimic") { const sl = mode === "sleep", ch = Math.max(0, Math.sin(ph / 0.8)); J[0] = [0, 0, 0]; J[1] = [sl ? 0 : 0.15 + ch * 0.75, 0, 0]; HR = rotY(Math.sin(ph / 3) * 0.1); return { J, HR, TR: rotX(0), tool: 0, deb: [] }; }
   if (sp === "eye") { const sl = mode === "sleep", bob = Math.sin(ph / 1.7) * 0.08; J[0] = [0, sl ? 0.5 : 1.05 + bob, 0]; HR = m3mul(rotY(Math.sin(ph / 2.6) * 0.5), rotX(Math.sin(ph / 3.3) * 0.2 - 0.15)); return { J, HR, TR: rotX(0), tool: 0, deb: [] }; }
   if (sp === "myconid") { const sl = mode === "sleep", sw = Math.sin(ph / 1.9);
@@ -839,7 +1002,7 @@ FACE24.bat = { rows: [
   "................................", "................................", "................................", "................................"],
   pal: { K: [30, 10, 30], R: [235, 50, 50] } };
 function faceAtlas24(gl){ const cv = document.createElement("canvas"); cv.width = 256; cv.height = 32; const x = cv.getContext("2d"), d = x.createImageData(256, 32);
-  ["goblin", "slime", "bat", "ghost", "imp", "myconid", "orc"].forEach((sp, i) => { const F = FACE24[sp]; F.rows.forEach((r, y) => [...r].forEach((ch, k) => { const c = F.pal[ch]; if (!c) return; const j = (y * 256 + i * 32 + k) * 4; d.data[j] = c[0]; d.data[j + 1] = c[1]; d.data[j + 2] = c[2]; d.data[j + 3] = 255; })); });
+  ["goblin", "slime", "bat", "ghost", "imp", "myconid", "orc", "human"].forEach((sp, i) => { const F = FACE24[sp]; F.rows.forEach((r, y) => [...r].forEach((ch, k) => { const c = F.pal[ch]; if (!c) return; const j = (y * 256 + i * 32 + k) * 4; d.data[j] = c[0]; d.data[j + 1] = c[1]; d.data[j + 2] = c[2]; d.data[j + 3] = 255; })); });
   x.putImageData(d, 0, 0); const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, cv);
   [gl.TEXTURE_MIN_FILTER, gl.TEXTURE_MAG_FILTER].forEach(k => gl.texParameteri(gl.TEXTURE_2D, k, gl.NEAREST)); [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T].forEach(k => gl.texParameteri(gl.TEXTURE_2D, k, gl.CLAMP_TO_EDGE)); return t; }
 
@@ -895,10 +1058,10 @@ const LIGHT24 = (x, y, z, r, g, b, pw) => `{vec3 dl=vec3(${x},${y},${z})-p;float
 // ---------- 組み立て ----------
 function caveFS24(room, sps){
   const P = ROOM_PARTS24, R = ROOMS24[room], N = sps.length;
-  const sfx = (s, k) => { const S = SLOTS24[k]; let o = s.replace(/\bskin\b/g, `SKIN[${k}]`).replace(/\bcloth\b/g, `CLOTH[${k}]`).replace(/\bFIDX\b/g, `FI[${k}]`);
+  const sfx = (s, k) => { const S = SLOTS24[k]; let o = s.replace(/\bskin\b/g, `SKIN[${k}]`).replace(/\bcloth\b/g, `CLOTH[${k}]`).replace(/\bFIDX\b/g, `FI[${k}]`).replace(/\bVAR\b/g, `VAR[${k}]`).replace(/\bACC\b/g, `ACC[${k}]`);
     if (!k) return o; return o.replace(/\bJ\[/g, "J" + S + "[").replace(/\bHR\b/g, "HR" + S).replace(/\bTR\b/g, "TR" + S).replace(/\btool\b/g, "tool" + S).replace(/\bdeb\[/g, "deb" + S + "[")
       .replace(/vec2 body\(/g, "vec2 body" + S + "(").replace(/\bsHand\(/g, "sHand" + S + "(").replace(/vec4 charCol\(/g, "vec4 charCol" + S + "("); };
-  let uni = `uniform float CS;uniform float SCL[${N}];uniform vec3 OC[${N}];uniform float RC[${N}];uniform float LIE[${N}];uniform vec3 SKIN[${N}];uniform vec3 CLOTH[${N}];uniform float FI[${N}];uniform float tm;uniform float idm;\n`;
+  let uni = `uniform float CS;uniform float SCL[${N}];uniform vec4 VAR[${N}];uniform vec3 ACC[${N}];uniform vec3 OC[${N}];uniform float RC[${N}];uniform float LIE[${N}];uniform vec3 SKIN[${N}];uniform vec3 CLOTH[${N}];uniform float FI[${N}];uniform float tm;uniform float idm;\n`;
   for (let k = 1; k < N; k++) { const S = SLOTS24[k]; uni += `uniform vec3 J${S}[40];uniform mat3 HR${S};uniform mat3 TR${S};uniform vec4 deb${S}[6];uniform float tool${S};\n`; }
   let bodies = "", mats = ""; const commons = new Set();
   for (let k = 0; k < N; k++) { const K = KIT24[kitOf24(sps[k])](); if (K.common) commons.add(K.common); bodies += sfx(K.body, k); mats += sfx(K.col, k); }
@@ -962,7 +1125,7 @@ async function caveDraw24(cv, room, CH, tm, cam, idm = 0){
     const f = new Float32Array(24); (R.deb || []).forEach((d, i) => f.set(d, i * 4)); gl.uniform4fv(U("deb" + s2), f); });
   gl.uniform3fv(U("OC"), new Float32Array(CH.flatMap(c => c.o))); gl.uniform1fv(U("RC"), new Float32Array(CH.map(c => c.r))); gl.uniform1fv(U("LIE"), new Float32Array(CH.map(c => c.lie ? 1 : 0)));
   gl.uniform3fv(U("SKIN"), new Float32Array(CH.flatMap(c => spCol24(c.sp)[0]))); gl.uniform3fv(U("CLOTH"), new Float32Array(CH.flatMap(c => spCol24(c.sp)[1]))); gl.uniform1fv(U("FI"), new Float32Array(CH.map(c => FACEIDX24[kitOf24(c.sp)] ?? -1)));
-  gl.uniform1f(U("tm"), tm); gl.uniform1f(U("idm"), idm); gl.uniform1f(U("CS"), 1.0); gl.uniform1fv(U("SCL"), new Float32Array(CH.map(c => spScl24(c.sp)))); gl.uniform1f(U("hasFace"), 2);
+  gl.uniform1f(U("tm"), tm); gl.uniform1f(U("idm"), idm); gl.uniform1f(U("CS"), 1.0); gl.uniform1fv(U("SCL"), new Float32Array(CH.map(c => spScl24(c.sp)))); gl.uniform4fv(U("VAR"), new Float32Array(CH.flatMap(c => spVar24(c.sp)[0]))); gl.uniform3fv(U("ACC"), new Float32Array(CH.flatMap(c => spVar24(c.sp)[1]))); gl.uniform1f(U("hasFace"), 2);
   gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, S.tex); gl.uniform1i(U("face"), 0);
   gl.drawArrays(gl.TRIANGLES, 0, 3);
 }
@@ -1016,6 +1179,20 @@ FACE24.orc = { rows: [
   "................................", "................................", "................................", "................................",
   "................................", "................................", "................................", "................................"],
   pal: { K: [20, 25, 12], R: [230, 40, 30], W: [235, 230, 205], D: [70, 20, 18] } };
+FACE24.human = { rows: [
+  "................................", "................................", "................................", "................................",
+  "................................", "................................", "................................", "................................",
+  "................................", "................................", "................................", "................................",
+  "................................", "..........KK........KK..........", "..........KK........KK..........", "..........KK........KK..........",
+  "................................", "................................", "..............PP................", "................................",
+  "...............KKK..............", "................................", "................................", "................................",
+  "................................", "................................", "................................", "................................",
+  "................................", "................................", "................................", "................................"],
+  pal: { K: [40, 25, 20], P: [225, 150, 130] } };
+// たくさん並べる確認用（5体の制限がないことを見る）
+function caveCastMany24(room){ const base = caveCast24(room), extra = [["warrior", "walk", -3.2, 2.2, 0.4], ["mage", "cast", -1.9, 2.9, 0.2], ["knight", "idle", 3.6, 1.0, -0.6], ["priest", "idle", 4.6, 2.4, -0.5], ["thief", "walk", -4.4, 3.2, 0.8],
+  ["dragon", "idle", 1.5, -2.2, -0.4], ["slime", "idle", -2.6, -1.6, 0.3], ["wolf", "idle", 0.4, 2.7, -1.2], ["spider", "idle", 2.0, 3.2, -0.3], ["ghost", "idle", -0.8, -1.2, 0.2], ["mimic", "idle", 5.8, 0.6, -0.8], ["vampire", "idle", -5.6, 2.6, 0.6]];
+  return base.concat(extra.map(([sp, mode, x, z, r], i) => ({ sp, mode, t: i * 0.31, o: [x, 0, z], r }))); }
 
 // ================= 3Dの洞窟を画面に出す（軽い方式）：洞窟は最初に一度だけ描いて取っておき、毎コマは子だけ描く =================
 const PAL24 = [14, 5, 5, 14, 15, 6, 20, 17, 6, 21, 21, 9, 23, 16, 28, 26, 18, 30, 27, 13, 11, 28, 22, 11, 28, 24, 30, 28, 34, 14, 29, 12, 11, 30, 27, 15, 33, 16, 13, 33, 28, 33, 34, 32, 15, 40, 20, 18, 41, 21, 17, 41, 35, 51, 41, 36, 22, 42, 37, 21, 46, 10, 19, 47, 22, 15, 47, 39, 57, 47, 44, 21, 48, 66, 19, 49, 43, 29, 51, 11, 12, 51, 44, 31, 52, 14, 12, 52, 40, 27, 53, 26, 13, 54, 25, 28, 54, 28, 24, 55, 43, 38, 55, 46, 41, 57, 13, 23, 57, 42, 54, 58, 34, 20, 58, 48, 69, 60, 47, 48, 61, 50, 72, 62, 38, 21, 62, 42, 42, 63, 48, 39, 64, 50, 48, 66, 52, 56, 68, 53, 63, 68, 71, 20, 69, 19, 13, 69, 27, 27, 69, 54, 67, 72, 88, 28, 73, 37, 25, 76, 46, 32, 79, 70, 85, 87, 78, 89, 90, 56, 34, 90, 57, 32, 94, 94, 35, 94, 103, 89, 97, 54, 35, 102, 116, 45, 111, 67, 39, 111, 118, 99, 115, 137, 45, 120, 80, 46, 122, 29, 25, 136, 87, 53, 137, 90, 50, 137, 153, 66, 138, 146, 152, 140, 157, 63, 154, 43, 57, 154, 80, 64, 158, 166, 169, 159, 186, 63, 161, 109, 63, 166, 181, 87, 171, 48, 38, 172, 187, 93, 174, 169, 81, 178, 109, 39, 182, 105, 85, 182, 120, 72, 185, 195, 122, 186, 182, 112, 190, 176, 159, 193, 57, 68, 196, 202, 204, 200, 196, 142, 206, 211, 212, 208, 160, 64, 209, 178, 124, 210, 201, 117, 214, 176, 97, 216, 209, 142, 223, 217, 166, 229, 221, 188, 232, 80, 41, 233, 115, 80, 233, 227, 199, 255, 192, 96, 18, 13, 16, 27, 23, 17, 38, 26, 20, 45, 33, 24, 50, 44, 40, 62, 48, 38, 68, 51, 37, 71, 54, 39, 72, 58, 43, 77, 57, 40, 77, 60, 44, 81, 60, 41, 82, 62, 44, 84, 64, 45, 85, 65, 47, 85, 67, 51, 89, 63, 44, 90, 68, 48, 91, 69, 48, 91, 70, 50, 92, 72, 53, 93, 76, 61, 94, 70, 50, 96, 73, 52, 96, 76, 58, 99, 72, 52, 99, 75, 52, 99, 76, 54, 99, 80, 63, 100, 77, 53, 100, 78, 56, 101, 77, 54, 101, 96, 75, 102, 78, 55, 103, 79, 55, 103, 84, 68, 104, 77, 55, 104, 80, 55, 104, 80, 56, 104, 81, 58, 106, 81, 58, 107, 83, 60, 108, 80, 56, 108, 81, 58, 108, 84, 60, 108, 84, 70, 110, 84, 58, 111, 83, 59, 112, 82, 58, 112, 84, 60, 116, 73, 59, 121, 95, 72, 125, 84, 35, 143, 102, 74, 169, 151, 105, 206, 201, 173, 0, 0, 0, 0, 0, 1, 6, 5, 6, 7, 7, 7, 8, 7, 8, 8, 9, 8, 9, 8, 9, 11, 10, 10, 11, 11, 11, 12, 12, 13, 12, 14, 11, 15, 12, 10, 15, 13, 13, 15, 14, 14, 15, 16, 14, 17, 13, 11, 17, 16, 14, 18, 14, 12, 19, 14, 12, 19, 15, 12, 20, 17, 14, 21, 16, 13, 24, 18, 14, 25, 23, 23, 31, 24, 19, 31, 28, 28, 32, 33, 31, 41, 31, 23, 43, 36, 29, 48, 37, 28, 49, 44, 35, 52, 38, 28, 57, 38, 27, 57, 44, 33, 62, 46, 33, 67, 59, 47, 72, 49, 33, 87, 61, 39, 89, 77, 62, 119, 117, 92, 255, 236, 140, 255, 190, 70, 240, 120, 30, 180, 40, 40, 140, 28, 32, 220, 70, 70, 90, 200, 240, 50, 130, 190, 250, 248, 235, 150, 165, 190, 115, 130, 155, 185, 198, 215, 85, 96, 118, 210, 215, 225, 130, 140, 150];
@@ -1024,9 +1201,10 @@ const CAMP24 = (() => { const yaw = 0.1, pitch = 0.62, d = 30.5, tg = [0, 0.4, -
   const fw = V3.n(V3.s(tg, e)), rt = V3.n(V3.x(fw, [0, 1, 0])), up = V3.x(rt, fw); return { e, M: [...rt, ...up, ...fw], fl: 2.05 }; })();
 const SPEED24 = { slash: 0.85, mine: 1, lift: 1, idle: 1, sleep: 1 };
 // PASS 0=全部 1=背景の色 2=背景の奥行き 3=子だけ（背景の絵に重ねる）
-function makeFS24(ROOM, CH){
+function makeFS24(ROOM, CH, bakeOnly){
   let s = caveFS24(ROOM, CH.map(c => c.sp));
-  s = s.replace("uniform float clr;", "uniform float clr;uniform float PASS;uniform vec2 vres;uniform vec2 crop;uniform float zoom;uniform sampler2D bgC;uniform sampler2D bgD;");
+  if (bakeOnly) { const i = s.indexOf("vec2 room(vec3 p){"), j = s.indexOf("vec3 scene(vec3 p){"); s = s.slice(0, i) + "vec2 room(vec3 p){return vec2(1e3,0.0);}\n" + s.slice(j); }
+  s = s.replace("uniform float clr;", "uniform float clr;uniform float PASS;uniform vec2 vres;uniform vec2 crop;uniform float zoom;uniform sampler2D bgC;uniform sampler2D bgD;uniform float tA;");
   s = s.replace("vec2 r=room(p);vec3 o=vec3(r,0.0);vec3 q;float bb;", "vec2 r=PASS>2.5?vec2(1e3,0.0):room(p);vec3 o=vec3(r,0.0);vec3 q;float bb;");
   s = s.replace(/\n q=toC\(p,OC\[(\d)\][^\n]*/g, m => "\n if(PASS<0.5||PASS>2.5){" + m.slice(1) + "}");
   const a = s.indexOf("void main(){"), sh0 = s.indexOf(" vec3 col=vec3(0.0);", a), sh1 = s.indexOf(" col=col/(1.0+col*0.2);", sh0);
@@ -1034,14 +1212,15 @@ function makeFS24(ROOM, CH){
   const main = `void main(){
  vec2 vp=crop+gl_FragCoord.xy/zoom;vec2 uv=(vp-0.5*vres)/vres.y;vec3 rd=normalize(camM*vec3(uv,fl));vec3 ro=cam;
  float t=0.0,hit=0.0;vec3 sc;float tmax=40.0;vec2 bt=vp/vres;float bgT=40.0;vec4 bgc=vec4(0.0);
- if(PASS>2.5){bgc=texture2D(bgC,bt);vec4 dd=texture2D(bgD,bt);bgT=(dd.r+dd.g/255.0)*60.0;tmax=min(bgT,40.0);}
+ if(PASS>2.5&&PASS<3.5){bgc=texture2D(bgC,bt);vec4 dd=texture2D(bgD,bt);bgT=(dd.r+dd.g/255.0)*60.0;tmax=min(bgT,40.0);}
  for(int i=0;i<180;i++){sc=scene(ro+rd*t);if(sc.x<0.0008*t&&sc.z>-0.5){hit=1.0;break;}t+=sc.x*0.8;if(t>tmax)break;}
+ if(PASS>4.5&&hit<0.5){gl_FragColor=vec4(0.0);return;}
  if(PASS>1.5&&PASS<2.5){float T=hit>0.5?min(t,59.9):59.9;float v=T/60.0;float hi=floor(v*255.0)/255.0;gl_FragColor=vec4(hi,(v-hi)*255.0,0.0,1.0);return;}
  float id=hit<0.5?0.0:(sc.z>0.5?sc.z+9.0:(sc.y<10.5?1.0:((sc.y>16.5&&sc.y<17.5)||sc.y>20.5?6.0:5.0)));
- if(PASS>2.5&&hit<0.5){vec3 cb=bgc.rgb;if(bgT<39.0){vec3 p=ro+rd*bgT;float d0=mapd(p);if(d0<1.2){vec3 L=normalize(vec3(-0.25,0.95,0.3));float s=shadow(p+vec3(0.0,0.02,0.0),L);float a=clamp(d0/0.4,0.0,1.0);cb*=mix(0.5,1.0,s)*mix(0.65,1.0,a);}}
+ if(PASS>2.5&&PASS<3.5&&hit<0.5){vec3 cb=bgc.rgb;if(bgT<39.0){vec3 p=ro+rd*bgT;float d0=mapd(p);if(d0<1.2){vec3 L=normalize(vec3(-0.25,0.95,0.3));float s=shadow(p+vec3(0.0,0.02,0.0),L);float a=clamp(d0/0.4,0.0,1.0);cb*=mix(0.5,1.0,s)*mix(0.65,1.0,a);}}
   gl_FragColor=vec4(cb,bgc.a);return;}
 ${shade}
- col=col/(1.0+col*0.2);col=pow(col,vec3(1.0/2.2));gl_FragColor=vec4(col,id/20.0);}`;
+ col=col/(1.0+col*0.2);col=pow(col,vec3(1.0/2.2));gl_FragColor=vec4(col,PASS>4.5?(1.0+clamp((t-tA+2.0)/4.0,0.0,1.0)*254.0)/255.0:id/20.0);}`;
   return s.slice(0, a) + main;
 }
 
@@ -1058,87 +1237,138 @@ void main(){vec2 p=gl_FragCoord.xy;vec4 s=texture2D(src,p/sz);float id=floor(s.a
  gl_FragColor=vec4(best,1.0);}`;
 
 
+// 合成：洞窟の絵（取っておいたもの）＋足もとの影
+const BGCOPY_FS24 = `precision highp float;uniform sampler2D bgC;uniform vec2 vres;uniform vec2 crop;uniform float zoom;uniform vec4 SH[32];uniform float nsh;
+void main(){vec2 vp=crop+gl_FragCoord.xy/zoom;vec4 c=texture2D(bgC,vp/vres);float dk=1.0;
+ for(int i=0;i<32;i++){if(float(i)>=nsh)break;vec2 d=(vp-SH[i].xy)/vec2(SH[i].z,SH[i].z*0.42);float q=length(d);dk*=mix(0.5,1.0,smoothstep(0.55,1.0,q));}
+ gl_FragColor=vec4(c.rgb*dk,c.a);}`;
+// 子の絵（先に焼いた1コマ）を、奥行きを比べながら重ねる
+const SPR_VS24 = `attribute vec2 a;uniform vec4 R;varying vec2 vq;void main(){vec2 q=a*0.5+0.5;vq=q;gl_Position=vec4(R.xy+q*R.zw,0.0,1.0);}`;
+const SPR_FS24 = `precision highp float;uniform sampler2D atl;uniform sampler2D bgD;uniform vec2 vres;uniform vec2 crop;uniform float zoom;uniform vec4 rect;uniform vec2 slot;uniform vec2 asz;uniform float tA;uniform float sid;
+void main(){vec2 vp=crop+gl_FragCoord.xy/zoom;vec2 l=floor(vp-rect.xy);if(l.x<0.0||l.y<0.0||l.x>=rect.z||l.y>=rect.w)discard;
+ vec4 s=texture2D(atl,(slot+l+0.5)/asz);if(s.a<0.5/255.0)discard;float d=tA-2.0+(s.a*255.0-1.0)/254.0*4.0;
+ vec4 dd=texture2D(bgD,vp/vres);float bgT=(dd.r+dd.g/255.0)*60.0;if(d>bgT+0.08)discard;
+ gl_FragColor=vec4(s.rgb,sid/20.0);}`;
+const LOOP24 = { idle: 3.6, sleep: 3.2, mine: 1.35, slash: 1, lift: 1.3, walk: 0.8, cast: 1.2, hurt: 0.6 };
+const LOOPK24 = { slime: 2.6, bat: 2.2, rat: 3.4, ghost: 2.3, wolf: 2.2, chimera: 2.2, wolfrider: 2.2, spider: 2.8, dragon: 3.2, salamander: 2.8, mindlord: 3.6, mimic: 1.6, eye: 3.4, myconid: 1.9 };
 function Cave3D24(cv, info, opt = {}){
-  const VK = opt.vk || 1, VRES = [Math.round(720 * VK), Math.round(472 * VK)];
+  const VK = opt.vk || 1, VRES = [Math.round(720 * VK), Math.round(472 * VK)], FPS = 12;
   const gl = cv.getContext("webgl", { antialias: false, preserveDrawingBuffer: false });
   const say = t => { if (info) info.textContent = t; };
   if (!gl) { say("この端末ではWebGLが使えない"); return null; }
   const sh = (ty, s) => { const o = gl.createShader(ty); gl.shaderSource(o, s); gl.compileShader(o); if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(o)); return o; };
   const prog = (vs, fs) => { const p = gl.createProgram(); gl.attachShader(p, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(p, sh(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(p); if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p)); const U = {}; return { p, U: n => U[n] !== undefined ? U[n] : (U[n] = gl.getUniformLocation(p, n)) }; };
   const quad = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, quad); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-  const useQuad = P => { gl.useProgram(P.p); gl.bindBuffer(gl.ARRAY_BUFFER, quad); const a = gl.getAttribLocation(P.p, "a"); gl.enableVertexAttribArray(a); gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0); };
+  const quad4 = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, quad4); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  const useQ = (P, b = quad) => { gl.useProgram(P.p); gl.bindBuffer(gl.ARRAY_BUFFER, b); const a = gl.getAttribLocation(P.p, "a"); gl.enableVertexAttribArray(a); gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0); };
   const tex = (w, h, data) => { const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, data || null);
     [gl.TEXTURE_MIN_FILTER, gl.TEXTURE_MAG_FILTER].forEach(k => gl.texParameteri(gl.TEXTURE_2D, k, gl.NEAREST)); [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T].forEach(k => gl.texParameteri(gl.TEXTURE_2D, k, gl.CLAMP_TO_EDGE)); return t; };
   const fbo = t => { const f = gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER, f); gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t, 0); gl.bindFramebuffer(gl.FRAMEBUFFER, null); return f; };
-  let S = null, ROOM = "train", CH = [], vT, vF, vW = 0, vH = 0;
-  const st = { mode: "light", scale: 1, zoom: 1, cx: 360 * VK, cy: 236 * VK, bake: 0, bakeN: 16, t0: performance.now(), frames: [], alive: true, compileMs: 0, bakeMs: 0 };
-  const PROGS = {}, P = prog(SDF_VS, POST_FS24), faceT = faceAtlas24(gl);
+  const ASZ = Math.min(2048, gl.getParameter(gl.MAX_TEXTURE_SIZE));
+  let S = null, ROOM = "train", CH = [], vT, vF, vW = 0, vH = 0, jobs = [], inst = [];
+  const st = { scale: 1, zoom: 1, cx: 360 * VK, cy: 236 * VK, bake: 0, bakeN: 16, t0: performance.now(), frames: [], alive: true, compileMs: 0, bakeMs: 0, ready: false };
+  const PROGS = {}, P = prog(SDF_VS, POST_FS24), PB = prog(SDF_VS, BGCOPY_FS24), PS = prog(SPR_VS24, SPR_FS24), faceT = faceAtlas24(gl);
   let palT; { const d = new Uint8Array(256 * 4); for (let i = 0; i < PAL24.length / 3; i++) { d[i * 4] = PAL24[i * 3]; d[i * 4 + 1] = PAL24[i * 3 + 1]; d[i * 4 + 2] = PAL24[i * 3 + 2]; d[i * 4 + 3] = 255; } palT = tex(256, 1, d); }
-  const bgCT = tex(VRES[0], VRES[1]), bgDT = tex(VRES[0], VRES[1]), bgCF = fbo(bgCT), bgDF = fbo(bgDT);
-  function setCast(room, cast){ ROOM = room; CH = cast; const key = room + ":" + cast.map(c => kitOf24(c.sp)).join(","), t0 = performance.now();
-    S = PROGS[key] || (PROGS[key] = prog(SDF_VS, makeFS24(room, cast))); st.compileMs = Math.round(performance.now() - t0); st.bake = 0; st.bakeMs = 0; st.frames = []; }
+  const bgCT = tex(VRES[0], VRES[1]), bgDT = tex(VRES[0], VRES[1]), bgCF = fbo(bgCT), bgDF = fbo(bgDT), atT = tex(ASZ, ASZ), atF = fbo(atT);
+  const camv = CAMP24, rt = camv.M.slice(0, 3), up = camv.M.slice(3, 6), fw = camv.M.slice(6, 9);
+  const proj = p => { const v = V3.s(p, camv.e), z = V3.d(v, fw); return [V3.d(v, rt) / z * camv.fl * VRES[1] + VRES[0] / 2, V3.d(v, up) / z * camv.fl * VRES[1] + VRES[1] / 2, z]; };
+  const progFor = (room, sps, bk) => { const key = room + ":" + sps.map(kitOf24).join(",") + (bk ? ":b" : ""); if (!PROGS[key]) { const t0 = performance.now(); PROGS[key] = prog(SDF_VS, makeFS24(room, sps.map(sp => ({ sp })), bk)); st.compileMs += Math.round(performance.now() - t0); } return PROGS[key]; };
+  // 子1体ずつ：見えている四角・奥行き・何コマ分か を決めて、絵の置き場（アトラス）を割りあてる
+  function plan(){ inst = []; let sx = 0, sy = 0, rowH = 0;
+    CH.forEach((c, k) => { const kit = kitOf24(c.sp), B = SPBOUND24[kit], sc = spScl24(c.sp);
+      const ctr = [c.o[0], c.o[1] + B[0] * sc, c.o[2]], pc = proj(ctr), rad = B[1] * sc * camv.fl / pc[2] * VRES[1] + 3;
+      const w = Math.ceil(rad * 2), h = Math.ceil(rad * 2), x0 = Math.floor(pc[0] - rad), y0 = Math.floor(pc[1] - rad);
+      const L = c.mode === "idle" || c.mode === "sleep" ? (LOOPK24[kit] || LOOP24[c.mode]) : (LOOP24[c.mode] || 2), F = Math.max(4, Math.round(L * FPS));
+      const foot = proj([c.o[0], c.o[1], c.o[2]]), tA = V3.l(V3.s(ctr, camv.e));
+      const slots = []; for (let f = 0; f < F; f++) { if (sx + w > ASZ) { sx = 0; sy += rowH; rowH = 0; } if (sy + h > ASZ) break; slots.push([sx, sy]); sx += w; rowH = Math.max(rowH, h); }
+      inst.push({ c, k, kit, rect: [x0, y0, w, h], L, F: slots.length, slots, tA, foot, shr: Math.max(10, rad * (kit === "bat" || kit === "eye" || kit === "ghost" || kit === "mindlord" ? 0.35 : 0.55)) }); });
+    jobs = []; inst.forEach(I => I.slots.forEach((s, f) => jobs.push([I, f]))); st.jobsN = jobs.length; }
+  function setCast(room, cast){ ROOM = room; CH = cast; st.compileMs = 0; st.bake = 0; st.bakeMs = 0; st.frames = []; st.ready = false;
+    S = progFor(room, CH.length ? [CH[0].sp] : ["goblin"]); plan(); st.jobsDone = 0;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, atF); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); gl.bindFramebuffer(gl.FRAMEBUFFER, null); }
   function resize(){ const r = cv.getBoundingClientRect(); if (!r.width) return; const w = Math.round(360 * VK * st.scale), h = Math.round(w * r.height / r.width);
     if (w === vW && h === vH) return; vW = w; vH = h; cv.width = w; cv.height = h; vT = tex(w, h); vF = fbo(vT); clampView(); }
   function clampView(){ const vw = vW / st.zoom, vh = vH / st.zoom; st.cx = Math.max(vw / 2, Math.min(VRES[0] - vw / 2, st.cx)); st.cy = Math.max(vh / 2, Math.min(VRES[1] - vh / 2, st.cy));
     if (vw > VRES[0]) st.cx = VRES[0] / 2; if (vh > VRES[1]) st.cy = VRES[1] / 2; }
   const minZoom = () => Math.min(vW / VRES[0], vH / VRES[1]) * 0.98;
-  function setScene(tm, pass, cropX, cropY, zoom, w, h){
-    const U = S.U; useQuad(S);
-    gl.uniform2f(U("res"), w, h); gl.uniform3fv(U("cam"), CAMP24.e); gl.uniformMatrix3fv(U("camM"), false, new Float32Array(CAMP24.M)); gl.uniform1f(U("fl"), CAMP24.fl);
-    gl.uniform1f(U("PASS"), pass); gl.uniform2f(U("vres"), VRES[0], VRES[1]); gl.uniform2f(U("crop"), cropX, cropY); gl.uniform1f(U("zoom"), zoom);
-    CH.forEach((c, k) => { const R = rigSp24(c.sp, c.mode, tm * (SPEED24[c.mode] || 1) + c.t), s2 = SLOTS24[k]; gl.uniform3fv(U("J" + s2), new Float32Array(R.J.flat())); gl.uniformMatrix3fv(U("HR" + s2), false, new Float32Array(R.HR)); gl.uniformMatrix3fv(U("TR" + s2), false, new Float32Array(R.TR)); gl.uniform1f(U("tool" + s2), R.tool);
+  // 洞窟の式に値を入れる。one=1体だけ（焼くとき）
+  function setScene(Sx, tm, pass, cropX, cropY, w, h, list){
+    const U = Sx.U; useQ(Sx);
+    gl.uniform2f(U("res"), w, h); gl.uniform3fv(U("cam"), camv.e); gl.uniformMatrix3fv(U("camM"), false, new Float32Array(camv.M)); gl.uniform1f(U("fl"), camv.fl);
+    gl.uniform1f(U("PASS"), pass); gl.uniform2f(U("vres"), VRES[0], VRES[1]); gl.uniform2f(U("crop"), cropX, cropY); gl.uniform1f(U("zoom"), 1);
+    list.forEach((c, k) => { const R = rigSp24(c.sp, c.mode, c.tt), s2 = SLOTS24[k]; gl.uniform3fv(U("J" + s2), new Float32Array(R.J.flat())); gl.uniformMatrix3fv(U("HR" + s2), false, new Float32Array(R.HR)); gl.uniformMatrix3fv(U("TR" + s2), false, new Float32Array(R.TR)); gl.uniform1f(U("tool" + s2), R.tool);
       const f = new Float32Array(24); (R.deb || []).forEach((d, i) => f.set(d, i * 4)); gl.uniform4fv(U("deb" + s2), f); });
-    gl.uniform3fv(U("OC"), new Float32Array(CH.flatMap(c => c.o))); gl.uniform1fv(U("RC"), new Float32Array(CH.map(c => c.r))); gl.uniform1fv(U("LIE"), new Float32Array(CH.map(c => c.lie ? 1 : 0)));
-    gl.uniform3fv(U("SKIN"), new Float32Array(CH.flatMap(c => spCol24(c.sp)[0]))); gl.uniform3fv(U("CLOTH"), new Float32Array(CH.flatMap(c => spCol24(c.sp)[1]))); gl.uniform1fv(U("FI"), new Float32Array(CH.map(c => FACEIDX24[kitOf24(c.sp)] ?? -1)));
-    gl.uniform1f(U("tm"), tm); gl.uniform1f(U("CS"), 1.0); gl.uniform1fv(U("SCL"), new Float32Array(CH.map(c => spScl24(c.sp)))); gl.uniform1f(U("idm"), 0); gl.uniform1f(U("hasFace"), 2);
+    gl.uniform3fv(U("OC"), new Float32Array(list.flatMap(c => c.o))); gl.uniform1fv(U("RC"), new Float32Array(list.map(c => c.r))); gl.uniform1fv(U("LIE"), new Float32Array(list.map(c => c.lie ? 1 : 0)));
+    gl.uniform3fv(U("SKIN"), new Float32Array(list.flatMap(c => spCol24(c.sp)[0]))); gl.uniform3fv(U("CLOTH"), new Float32Array(list.flatMap(c => spCol24(c.sp)[1]))); gl.uniform1fv(U("FI"), new Float32Array(list.map(c => FACEIDX24[kitOf24(c.sp)] ?? -1)));
+    gl.uniform1fv(U("SCL"), new Float32Array(list.map(c => spScl24(c.sp)))); gl.uniform4fv(U("VAR"), new Float32Array(list.flatMap(c => spVar24(c.sp)[0]))); gl.uniform3fv(U("ACC"), new Float32Array(list.flatMap(c => spVar24(c.sp)[1])));
+    gl.uniform1f(U("tm"), tm); gl.uniform1f(U("CS"), 1.0); gl.uniform1f(U("idm"), 0); gl.uniform1f(U("hasFace"), 2);
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, faceT); gl.uniform1i(U("face"), 0);
-    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, bgCT); gl.uniform1i(U("bgC"), 1);
-    gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, bgDT); gl.uniform1i(U("bgD"), 2); }
-  function bakeStep(){ const n = st.bakeN, k = st.bake, i = k % n, y0 = Math.floor(VRES[1] * i / n), y1 = Math.floor(VRES[1] * (i + 1) / n), pass = k < n ? 1 : 2;
+    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, null); gl.uniform1i(U("bgC"), 1); gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, null); gl.uniform1i(U("bgD"), 2); }
+  // 洞窟（子なし）を帯に分けて焼く
+  function bakeBg(){ const n = st.bakeN, k = st.bake, i = k % n, y0 = Math.floor(VRES[1] * i / n), y1 = Math.floor(VRES[1] * (i + 1) / n), pass = k < n ? 1 : 2;
     gl.bindFramebuffer(gl.FRAMEBUFFER, pass === 1 ? bgCF : bgDF); gl.viewport(0, 0, VRES[0], VRES[1]);
-    setScene(1.0, pass, 0, 0, 1, VRES[0], VRES[1]); gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, null); gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, null);
+    setScene(S, 1.0, pass, 0, 0, VRES[0], VRES[1], (CH.length ? CH.slice(0, 1) : [{ sp: "goblin", mode: "idle", t: 0, o: [0, -50, 0], r: 0 }]).map(c => Object.assign({}, c, { tt: c.t })));
     gl.enable(gl.SCISSOR_TEST); gl.scissor(0, y0, VRES[0], y1 - y0); gl.drawArrays(gl.TRIANGLES, 0, 3); gl.disable(gl.SCISSOR_TEST); gl.bindFramebuffer(gl.FRAMEBUFFER, null); st.bake++; }
+  // 子の1コマを焼く（その場所・その部屋の明かりで）
+  function bakeSprite(I, f){ const c = I.c, Sx = progFor(ROOM, [c.sp], 1), s = I.slots[f], tt = c.t + I.L * f / I.F;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, atF); gl.viewport(0, 0, ASZ, ASZ);
+    setScene(Sx, tt, 5, I.rect[0] - s[0], I.rect[1] - s[1], ASZ, ASZ, [Object.assign({}, c, { tt })]); gl.uniform1f(Sx.U("tA"), I.tA);
+    gl.enable(gl.SCISSOR_TEST); gl.scissor(s[0], s[1], I.rect[2], I.rect[3]); gl.drawArrays(gl.TRIANGLES, 0, 3); gl.disable(gl.SCISSOR_TEST); gl.bindFramebuffer(gl.FRAMEBUFFER, null); }
   function drawAt(tm){ const z = st.zoom, cropX = st.cx - vW / z / 2, cropY = st.cy - vH / z / 2;
-    gl.bindFramebuffer(gl.FRAMEBUFFER, vF); gl.viewport(0, 0, vW, vH); setScene(tm, st.mode === "light" ? 3 : 0, cropX, cropY, z, vW, vH); gl.drawArrays(gl.TRIANGLES, 0, 3);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.viewport(0, 0, vW, vH); useQuad(P);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, vF); gl.viewport(0, 0, vW, vH);
+    useQ(PB); gl.uniform2f(PB.U("vres"), VRES[0], VRES[1]); gl.uniform2f(PB.U("crop"), cropX, cropY); gl.uniform1f(PB.U("zoom"), z);
+    const SH = new Float32Array(128); inst.slice(0, 32).forEach((I, i) => SH.set([I.foot[0], I.foot[1], I.shr, 0], i * 4)); gl.uniform4fv(PB.U("SH"), SH); gl.uniform1f(PB.U("nsh"), Math.min(32, inst.length));
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, bgCT); gl.uniform1i(PB.U("bgC"), 0); gl.drawArrays(gl.TRIANGLES, 0, 3);
+    useQ(PS, quad4); gl.uniform2f(PS.U("vres"), VRES[0], VRES[1]); gl.uniform2f(PS.U("crop"), cropX, cropY); gl.uniform1f(PS.U("zoom"), z); gl.uniform2f(PS.U("asz"), ASZ, ASZ);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, atT); gl.uniform1i(PS.U("atl"), 0); gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, bgDT); gl.uniform1i(PS.U("bgD"), 1);
+    inst.slice().sort((a, b) => b.tA - a.tA).forEach(I => { if (!I.F) return; const sp = SPEED24[I.c.mode] || 1, f = Math.floor((((tm * sp) % I.L) + I.L) % I.L / I.L * I.F) % I.F, s = I.slots[f];
+      const x = (I.rect[0] - cropX) * z / vW * 2 - 1, y = (I.rect[1] - cropY) * z / vH * 2 - 1;
+      gl.uniform4f(PS.U("R"), x, y, I.rect[2] * z / vW * 2, I.rect[3] * z / vH * 2); gl.uniform4f(PS.U("rect"), I.rect[0], I.rect[1], I.rect[2], I.rect[3]); gl.uniform2f(PS.U("slot"), s[0], s[1]);
+      gl.uniform1f(PS.U("tA"), I.tA); gl.uniform1f(PS.U("sid"), 10 + Math.min(9, I.k)); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); });
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.viewport(0, 0, vW, vH); useQ(P);
     gl.uniform2f(P.U("sz"), vW, vH); gl.uniform1f(P.U("npal"), PAL24.length / 3); gl.uniform1f(P.U("tm"), tm);
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, vT); gl.uniform1i(P.U("src"), 0); gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, palT); gl.uniform1i(P.U("pal"), 1);
     gl.drawArrays(gl.TRIANGLES, 0, 3); }
+  function prep(budgetMs){ const t0 = performance.now();
+    while (performance.now() - t0 < budgetMs) {
+      if (st.bake < st.bakeN * 2) { bakeBg(); continue; }
+      if (st.jobsDone < jobs.length) { const [I, f] = jobs[st.jobsDone++]; bakeSprite(I, f); continue; }
+      st.ready = true; break; }
+    st.bakeMs += performance.now() - t0; }
   function frame(now){
     if (!st.alive) return; requestAnimationFrame(frame); if (!S || !cv.isConnected) { if (!cv.isConnected) destroy(); return; } resize(); if (!vW) return;
-    if (st.mode === "light" && st.bake < st.bakeN * 2) { const t0 = performance.now(); bakeStep(); st.bakeMs += performance.now() - t0; say(`洞窟を描いています… ${Math.round(st.bake / st.bakeN / 2 * 100)}%`); return; }
-    if (st.hold) return; const tm = (now - st.t0) / 1000, z = st.zoom; drawAt(tm);
+    if (!st.ready) { prep(opt.budget || 30); if (!st.ready) { say(`洞窟を描いています… ${Math.round((st.bake + st.jobsDone) / (st.bakeN * 2 + jobs.length) * 100)}%`); return; } say(""); }
+    if (st.hold) return; drawAt((now - st.t0) / 1000);
     st.frames.push(now); while (st.frames.length && now - st.frames[0] > 2000) st.frames.shift();
     if (!st.lastInfo || now - st.lastInfo > 500) { st.lastInfo = now; st.fps = st.frames.length > 1 ? (st.frames.length - 1) / ((st.frames[st.frames.length - 1] - st.frames[0]) / 1000) : 0;
-      if (opt.onInfo) opt.onInfo(st, vW, vH, z / minZoom()); else say(""); } }
-  // 指で寄せる・動かす
+      if (opt.onInfo) opt.onInfo(st, vW, vH, st.zoom / minZoom()); } }
   const pts = new Map(); let g0 = null;
   cv.addEventListener("pointerdown", e => { cv.setPointerCapture(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]); g0 = null; e.preventDefault(); });
   cv.addEventListener("pointermove", e => { if (!pts.has(e.pointerId)) return; pts.set(e.pointerId, [e.clientX, e.clientY]); const r = cv.getBoundingClientRect(), k = vW / r.width, P2 = [...pts.values()];
     const mid = P2.reduce((a, b) => [a[0] + b[0] / P2.length, a[1] + b[1] / P2.length], [0, 0]), dist = P2.length > 1 ? Math.hypot(P2[0][0] - P2[1][0], P2[0][1] - P2[1][1]) : 0;
     if (g0 && g0.n === P2.length) { st.cx -= (mid[0] - g0.mid[0]) * k / st.zoom; st.cy += (mid[1] - g0.mid[1]) * k / st.zoom; if (dist && g0.dist) st.zoom = Math.max(minZoom(), Math.min(1.6, st.zoom * dist / g0.dist)); clampView(); }
     g0 = { mid, dist, n: P2.length }; });
-  const up = e => { pts.delete(e.pointerId); g0 = null; }; cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up);
+  const upE = e => { pts.delete(e.pointerId); g0 = null; }; cv.addEventListener("pointerup", upE); cv.addEventListener("pointercancel", upE);
   cv.addEventListener("wheel", e => { e.preventDefault(); st.zoom = Math.max(minZoom(), Math.min(1.6, st.zoom * (e.deltaY < 0 ? 1.1 : 0.9))); clampView(); }, { passive: false });
   function destroy(){ if (!st.alive) return; st.alive = false; try { const x = gl.getExtension("WEBGL_lose_context"); x && x.loseContext(); } catch (e) {} }
   requestAnimationFrame(frame);
-  return { st, setCast, destroy, renderAt: tm => { resize(); drawAt(tm); return cv.toDataURL(); }, zoomBy: k => { st.zoom = Math.max(minZoom(), Math.min(1.6, st.zoom * k)); clampView(); }, look: (x, y) => { st.cx = x; st.cy = y; clampView(); } };
+  return { st, setCast, destroy, prepAll: () => { while (!st.ready) prep(1000); }, renderAt: tm => { resize(); drawAt(tm); return cv.toDataURL(); }, zoomBy: k => { st.zoom = Math.max(minZoom(), Math.min(1.6, st.zoom * k)); clampView(); }, look: (x, y) => { st.cx = x; st.cy = y; clampView(); } };
 }
 // ---------- ゲームの部屋 → 3Dの配役 ----------
 // 3Dにできる種族（それ以外はまだ）
-const SP3D24 = { goblin: 1, skeleton: 1, slime: 1, bat: 1, rat: 1, imp: 1, kobold: 1, ghost: 1, orc: 1, myconid: 1, wolf: 1, spider: 1, mimic: 1, eye: 1, golem: 1 };
+const SP3D24 = { goblin: 1, skeleton: 1, slime: 1, bat: 1, rat: 1, imp: 1, kobold: 1, ghost: 1, orc: 1, myconid: 1, wolf: 1, spider: 1, mimic: 1, eye: 1, golem: 1, human: 1, dragon: 1, salamander: 1, chimera: 1, wolfrider: 1, mindlord: 1 };
 // list: [{sp, job, rest, nick}]。部屋の種類と立ち位置を決める
 function castGame24(facs, list){
   const room = facs.includes("train") ? "train" : facs.includes("mine") ? "mine" : facs.includes("bed") ? "sleep" : "train";
-  const biped = sp0 => { const sp = kitOf24(sp0); return sp === "goblin" || sp === "skeleton" || sp === "imp" || sp === "kobold" || sp === "orc" || sp === "golem"; };
+  const biped = sp0 => { const sp = kitOf24(sp0); return sp === "goblin" || sp === "skeleton" || sp === "imp" || sp === "kobold" || sp === "orc" || sp === "golem" || sp === "human"; };
   const spots = {
     train: { train: [[-5.4, -0.1, 0.15, "slash"], [-1.15, 0.0, 0.8, "slash"], [1.05, 0.12, -0.8, "slash"], [5.9, -2.6, -0.3, "lift"]],
       mine: [], bed: [] },
     mine: { mine: (() => { const o1 = [-4.15, 0.35, -2.75], o2 = [3.7, 0.35, -3.4], o3 = [5.7, 0.35, 0.9]; return [[...placeMine24(o1, 2.6)].filter((v, i) => i !== 1).concat([2.6, "mine"]), [...placeMine24(o2, -2.3)].filter((v, i) => i !== 1).concat([-2.3, "mine"]), [...placeMine24(o3, -1.9)].filter((v, i) => i !== 1).concat([-1.9, "mine"])]; })(), train: [], bed: [] },
     sleep: { bed: [[-4.7, -2.4, 0.3, "sleep"], [2.3, -3.5, -0.2, "sleep"], [4.9, -1.25, -0.4, "sleep"], [-1.9, -3.45, 0.6, "sleep"], [-5.0, 1.6, 0.5, "sleep"]], train: [], mine: [] } }[room];
-  const free = [[-2.0, 1.4, 0.4], [1.9, 1.8, -0.6], [3.4, 2.6, -0.5], [-0.4, 2.4, 0.1], [0.9, 1.0, -0.3]], used = {};
+  const free = [[-2.0, 1.4, 0.4], [1.9, 1.8, -0.6], [3.4, 2.6, -0.5], [-0.4, 2.4, 0.1], [0.9, 1.0, -0.3], [-3.6, 2.4, 0.6], [4.6, 1.2, -0.7], [-1.2, 3.2, 0.3], [2.6, 3.3, -0.4], [-4.8, 0.2, 0.9], [5.4, -0.6, -1.0], [0.2, 3.6, 0.0], [-2.8, -0.6, 0.5], [3.0, -0.4, -0.5], [-5.2, 2.9, 0.5], [5.0, 3.0, -0.6]], used = {};
   const cast = [], skipped = [];
-  list.forEach((m, k) => { if (!SP3D24[kitOf24(m.sp)]) { skipped.push(m); return; } if (cast.length >= 5) { skipped.push(m); return; }
+  list.forEach((m, k) => { if (!SP3D24[kitOf24(m.sp)]) { skipped.push(m); return; } if (cast.length >= 16) { skipped.push(m); return; }
     const job = m.rest ? "bed" : m.job; let s = null;
     if (spots[job] && spots[job].length && (biped(m.sp) || job === "bed")) { const arr = spots[job], u = used[job] = (used[job] || 0); if (u < arr.length) { s = arr[u]; used[job]++; } }
     let mode, x, z, r, y = 0, lie = 0;
@@ -1155,12 +1385,12 @@ function castGame24(facs, list){
 const QS = new URLSearchParams(location.search), VK = +(QS.get('v') || 1);
 const cv = document.getElementById("cv"), info = document.getElementById("info");
 const names = { train: "訓練所", mine: "採掘場", sleep: "寝床" };
-let room = QS.get('room') || 'train';
-const C = Cave3D24(cv, info, { vk: VK, onInfo: (st, w, h, z) => { info.textContent = `${st.fps.toFixed(1)} コマ/秒　（${names[room]}・${st.mode === "light" ? "軽い方式" : "全部方式"}・${w}×${h}ドット・寄せ${z.toFixed(1)}倍）`; window.__FPS = st.fps; } });
+let room = QS.get('room') || 'train'; const castOf = rm => QS.get('many') ? caveCastMany24(rm) : caveCast24(rm);
+const C = Cave3D24(cv, info, { vk: VK, onInfo: (st, w, h, z) => { info.textContent = `${st.fps.toFixed(1)} コマ/秒　（${names[room]}・${C.st ? "" : ""}${w}×${h}ドット・寄せ${z.toFixed(1)}倍・子${(window.__CN||0)}体）`; window.__FPS = st.fps; } });
 if (!C) return;
-try { C.setCast(room, caveCast24(room)); } catch (e) { info.textContent = "準備でエラー: " + e.message.slice(0, 300); return; }
-window.__ST = C.st; window.__C = C;
-document.querySelectorAll("[data-r]").forEach(b => { b.classList.toggle("on", b.dataset.r === room); b.onclick = () => { info.textContent = "部屋を作っています…"; setTimeout(() => { try { room = b.dataset.r; C.setCast(room, caveCast24(room)); document.querySelectorAll("[data-r]").forEach(x => x.classList.toggle("on", x === b)); } catch (e) { info.textContent = "エラー: " + e.message.slice(0, 200); } }, 30); }; });
+try { C.setCast(room, castOf(room)); } catch (e) { info.textContent = "準備でエラー: " + e.message.slice(0, 300); return; }
+window.__ST = C.st; window.__C = C; window.__CN = castOf(room).length;
+document.querySelectorAll("[data-r]").forEach(b => { b.classList.toggle("on", b.dataset.r === room); b.onclick = () => { info.textContent = "部屋を作っています…"; setTimeout(() => { try { room = b.dataset.r; C.setCast(room, castOf(room)); document.querySelectorAll("[data-r]").forEach(x => x.classList.toggle("on", x === b)); } catch (e) { info.textContent = "エラー: " + e.message.slice(0, 200); } }, 30); }; });
 document.querySelectorAll("[data-m]").forEach(b => b.onclick = () => { C.st.mode = b.dataset.m; document.querySelectorAll("[data-m]").forEach(x => x.classList.toggle("on", x === b)); C.st.frames = []; });
 document.querySelectorAll("[data-s]").forEach(b => b.onclick = () => { C.st.scale = +b.dataset.s; document.querySelectorAll("[data-s]").forEach(x => x.classList.toggle("on", x === b)); C.st.frames = []; });
 document.getElementById("zin").onclick = () => C.zoomBy(1.25);
