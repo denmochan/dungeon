@@ -896,6 +896,36 @@ body:has(.stage) .modal{display:none!important}
 .ti24{width:34px;flex:none}.ti24 img{width:100%;image-rendering:pixelated}
 .tt24{flex:1;min-width:0;font-size:12px;line-height:1.35}.tt24 small{display:block;color:#b9a68c;font-size:12px}
 .tp24 button{flex:none;font-size:12px;padding:6px 10px}
+/* ---- 部屋をのぞく ---- */
+#peek24{position:fixed;inset:0;z-index:60;background:#000a;display:none;align-items:flex-end;justify-content:center}
+#peek24.on{display:flex}
+.pk24box{width:100%;max-width:520px;max-height:92vh;overflow-y:auto;background:#1a120d;border:1px solid #6a4a2a;border-bottom:0;border-radius:14px 14px 0 0;padding:10px 12px calc(env(safe-area-inset-bottom,0px) + 14px);animation:pk24in .22s ease-out}
+@keyframes pk24in{from{transform:translateY(40px);opacity:0}}
+.pk24head{display:flex;align-items:center;gap:8px;margin-bottom:8px}.pk24head b{font-size:16px;color:#ffe2a8}.pk24head .sp{flex:1}
+.pk24scene{position:relative;height:250px;border-radius:10px;overflow:hidden;background:var(--fl) 0 0/40px 40px repeat;image-rendering:pixelated;box-shadow:inset 0 0 40px #000c,inset 0 0 0 2px #0008}
+.pk24wall{position:absolute;left:0;right:0;top:0;height:46px;background:var(--wl) 0 0/40px 46px repeat-x;box-shadow:0 6px 10px #0009}
+.pk24corr{position:absolute;left:50%;top:0;transform:translateX(-50%);height:46px;min-width:70px;padding:0 8px;display:flex;align-items:center;gap:6px;background:#0007;border-left:2px solid #0009;border-right:2px solid #0009;z-index:3}
+.pk24trap{position:relative;width:40px}.pk24trap img{width:100%;image-rendering:pixelated;display:block}.pk24trap i{position:absolute;right:-4px;top:-6px;font-style:normal;font-size:11px;color:#ffd76a;text-shadow:0 0 2px #000}
+.pk24none{font-size:12px;color:#9a8670;white-space:nowrap}
+.pk24fac{position:absolute;top:56px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;z-index:2}
+.pk24fac img{image-rendering:pixelated;filter:drop-shadow(0 3px 2px #000a)}.pk24fac small{margin-top:2px;font-size:12px;color:#f2dcb2;background:#000a;border-radius:6px;padding:0 6px;white-space:nowrap}
+.pk24fi{font-size:40px}
+.pk24m{position:absolute;width:62px;transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;z-index:4}
+.pk24m img.sp{width:62px;height:62px}.pk24m b{font-size:11px;color:#fff;background:#0009;border-radius:6px;padding:0 5px;margin-top:-4px;white-space:nowrap}
+.pk24m::before{content:"";position:absolute;left:22%;right:22%;top:54px;height:8px;border-radius:50%;background:#0007;z-index:-1}
+.pk24m.rest{filter:saturate(.5) brightness(.85)}.pk24m.bump img{animation:pk24bump .3s}
+@keyframes pk24bump{50%{transform:translateY(-4px)}}
+.pk24empty{position:absolute;left:50%;top:62%;transform:translate(-50%,-50%);color:#b9a68c;font-size:13px}
+.pk24fx{position:absolute;inset:0;pointer-events:none;z-index:5}
+.pk24pop{position:absolute;transform:translateX(-50%);font-size:14px;font-weight:700;color:#ffe9a8;text-shadow:0 1px 2px #000,0 0 4px #000;animation:pk24pop 1.5s ease-out forwards;white-space:nowrap}
+@keyframes pk24pop{0%{opacity:0;margin-top:6px}15%{opacity:1}100%{opacity:0;margin-top:-26px}}
+.pk24sum{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0;font-size:13px;color:#f2dcb2}
+.pk24list{display:flex;flex-direction:column;gap:4px;margin-bottom:8px}
+.pk24row{display:flex;align-items:center;gap:8px;padding:5px 6px;background:#24190f;border-radius:8px}.pk24row .tx{flex:1;min-width:0;font-size:13px}.pk24row small{display:block;color:#d9c49e;font-size:12px}
+.pk24role{font-size:12px;color:#ffcf70;margin-left:4px}
+.pk24bar{display:block;height:4px;background:#0008;border-radius:2px;margin-top:3px;overflow:hidden}.pk24bar i{display:block;height:100%;background:#7ec8ff}
+.pk24btn{margin-left:auto;font-size:12px;padding:4px 10px}
+.pk24prop{border:1px solid #6a4a2a;border-radius:8px;padding:6px 8px;margin-top:4px}
 </style>
 </head>
 <body>
@@ -7062,7 +7092,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.160（11/17 17:38）";
+const VER20 = "No.161（11/17 17:41）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -8152,6 +8182,104 @@ stepNight5 = (prev => function (S, N){
     const rr = N.rnd || Math.random; if (rr() < 0.35 * ((h.sk && h.sk.disarm) || 0)) { say5(N, h.name, "罠を外したぜ", 0); return; }
     const pw = trapPow10(S, N, 0); if (pw > 0) hurtHero5(S, N, h, Math.round(pw * (0.85 + rr() * 0.3)), null); }); } catch (e) {}
   return r; })(stepNight5);
+
+// ================= 部屋を「のぞく」：大きな絵で、誰が何をしていて何が増えているか・罠の中身 =================
+let peek24 = null, peekT24 = null;
+const PKJOB24 = {   // 仕事ごとの動きと、ひとこと
+  mine:  { an: "an-work",  say: ["⛏", "+💎", "いい石だ"] },
+  train: { an: "an-fight", say: ["💥", "+経験", "もう一本！"] },
+  teach: { an: "an-glare", say: ["🎓", "そこだ！"] },
+  bed:   { an: "an-sleep", say: ["💤", "むにゃ…"] },
+  watch: { an: "an-glare", say: ["👀", "上が静かだ"] },
+  snipe: { an: "an-work",  say: ["🎯", "弓の手入れ"] },
+  trapw: { an: "an-work",  say: ["🔧", "罠の手入れ"] },
+  cook:  { an: "an-work",  say: ["🍖", "うまそう"] },
+  nest:  { an: "an-hop",   say: ["💕", "たまご…"] },
+  "":    { an: "an-glare", say: ["⚔", "来るなら来い"] },
+};
+function peekMon24(m, i){
+  const job = jobOf12(S, m) || "", g = jobGain9(S, m, i) || {}, rest = restLeft9(S, m);
+  const role = job ? FAC9[job].icon + FAC9[job].job : "🛡構え";
+  let out = "", bar = null;
+  if (rest) out = `💤 けが・あと${rest}日で治る`;
+  else if (g.dp) out = `💎 +${g.dp}/日`;
+  else if (g.xp) { const nx = expNext5(m); out = `📚 経験 +${g.xp}/日`; bar = Math.min(1, (m.xp || 0) / Math.max(1, nx)); }
+  else if (g.eye) out = `👁 見張り +${g.eye}`;
+  else if (job === "trapw") out = "🪤 罠の手入れ（罠+30%）";
+  else if (job === "snipe") out = "🏹 夜、通路を撃つ";
+  else if (job === "cook") out = "🍖 部屋のみんなの夜の体力+10%";
+  else if (job === "nest") out = "🥚 配合できる";
+  else out = "⚔ 夜、一番前で戦う";
+  return { job, role, out, bar, rest };
+}
+function peekScene24(i){
+  const R = S.path[i], th = themeOf7(S, i), T = CAVE8[th] || CAVE8.soil, res = residents5(S, i), F = facsOf12(R), n = Math.max(1, F.length);
+  const floor = (T.hallV && T.hallV[0]) || T.hall, wall = (T.faceV && T.faceV[0]) || T.face;
+  let h = `<div class="pk24scene" style="--fl:url(${floor});--wl:url(${wall})"><div class="pk24wall"></div>`;
+  // 手前の通路と罠
+  const TR = trapsOf24(R);
+  h += `<div class="pk24corr">${TR.length ? TR.map(t => `<div class="pk24trap lv${t.lv}"><img src="${TRAP24IMG[t.k].src}">${t.lv ? `<i>${"★".repeat(t.lv)}</i>` : ""}</div>`).join("") : `<span class="pk24none">通路（罠なし）</span>`}</div>`;
+  // 施設
+  F.forEach((f, k) => { const x = (k + 0.5) / n * 100, P = typeof PROP16 !== "undefined" && PROP16[f];
+    h += `<div class="pk24fac" style="left:${x}%">${P ? `<img src="${P}" style="width:${PROP16D[f][0] * 2.1}px">` : `<span class="pk24fi">${FAC9[f].icon}</span>`}<small>${FAC9[f].icon}${FAC9[f].name}${flv16(R, f) > 1 ? " " + "★".repeat(flv16(R, f)) : ""}</small></div>`; });
+  if (R.kind === "lord") h += `<div class="pk24fac" style="left:50%"><img src="${ROOMIMG.throne.src}" style="width:90px"></div>`;
+  // 住んでいる子：仕事の施設のそばに並ぶ
+  const cnt = {}, nofac = res.filter(m => F.indexOf(peekMon24(m, i).job) < 0).length;
+  res.forEach(m => { const p = peekMon24(m, i), k = F.indexOf(p.job), c = cnt[p.job] = (cnt[p.job] || 0) + 1;
+    if (k < 0) { const x = (c - 0.5) / Math.max(1, nofac) * 84 + 8; h += `<div class="pk24m ${p.rest ? "an-sleep rest" : PKJOB24[""].an}" data-id="${m.id}" data-job="" style="left:${x}%;top:${c % 2 ? 94 : 82}%">${simg23(m, m.evos, "sp")}<b>${esc(m.nick)}</b></div>`; return; }
+    const cx = (k + 0.5) / n * 100, dx = ((c - 1) % 3 - 1) * (n >= 3 ? 10 : 15) + (c > 3 ? 6 : 0), y = c > 3 ? 74 : 94;
+    const an = p.rest ? "an-sleep" : (PKJOB24[p.job] || PKJOB24[""]).an;
+    h += `<div class="pk24m ${an}${p.rest ? " rest" : ""}" data-id="${m.id}" data-job="${p.job}" style="left:${Math.max(9, Math.min(91, cx + dx))}%;top:${y}%">${simg23(m, m.evos, "sp")}<b>${esc(m.nick)}</b></div>`; });
+  if (!res.length && R.kind !== "lord") h += `<div class="pk24empty">だれも住んでいない</div>`;
+  return h + `<div class="pk24fx"></div></div>`;
+}
+function peekModal24(i){
+  const R = S.path[i]; if (!R) return "";
+  const res = residents5(S, i), f = floorOf(S, i), TH = THEME7[themeOf7(S, i)];
+  let dpSum = 0; res.forEach(m => { const g = jobGain9(S, m, i) || {}; if (!restLeft9(S, m) && g.dp) dpSum += g.dp; });
+  let h = `<div class="pk24head"><b>🔍 ${esc(roomTitle(S, i))}</b><span class="hint">B${f + 1} ${TH.name}</span><span class="sp"></span><button class="rsx" data-a="peek24x">✕</button></div>`;
+  h += peekScene24(i);
+  h += `<div class="pk24sum">${dpSum ? `<span>💎 この部屋 +${dpSum}/日</span>` : ""}<span>👾 ${res.length}/${capOfSlot7(S, i)}</span>${corr10(S, i) ? `<span>🚶 通路 ${"▮".repeat(corr10(S, i))}</span>` : ""}</div>`;
+  if (res.length) h += `<div class="lab2">いま何してる？</div><div class="pk24list">` + res.map(m => { const p = peekMon24(m, i);
+    return `<div class="pk24row" data-a="mon" data-id="${m.id}">${simg23(m, m.evos, "sp", "width:34px;height:34px")}<div class="tx"><b>${esc(m.nick)}</b> Lv${m.lv} <span class="pk24role">${p.role}</span><small>${p.out}</small>${p.bar != null ? `<span class="pk24bar"><i style="width:${Math.round(p.bar * 100)}%"></i></span>` : ""}</div></div>`; }).join("") + `</div>`;
+  const TR = trapsOf24(R);
+  if (R.kind === "den") {
+    h += `<div class="lab2">🪤 手前の罠 ${TR.length}/${slots24(S, i)}</div>`;
+    h += TR.length ? `<div class="pk24list">` + TR.map(t => `<div class="pk24row"><img src="${TRAP24IMG[t.k].src}" style="width:34px;image-rendering:pixelated"><div class="tx"><b>${TRAP24[t.k].ic}${TRAP24[t.k].n}${t.lv ? " " + TLVN24[t.lv] : ""}</b><small>${TRAP24[t.k].text}</small></div></div>`).join("") + `</div>` : `<div class="hint">まだ罠はない。住んでいる子が提案してくれる</div>`;
+    const p = proposal24(S, i);
+    if (p) h += `<div class="tp24 pk24prop"><div class="ti24"><img src="${TRAP24IMG[p.k].src}"></div><div class="tt24">${esc(propText24(S, p))}</div><button class="${S.dp >= p.cost ? "main" : ""}" data-a="trap24go" data-v="${i}" ${S.dp >= p.cost ? "" : "disabled"}>${S.dp >= p.cost ? "作らせる" : `あと💎${fmt8(S.dp < p.cost ? p.cost - S.dp : 0)}`}</button></div>`;
+  }
+  return h;
+}
+function peekOpen24(i){
+  peek24 = i; let el = document.getElementById("peek24");
+  if (!el) { el = document.createElement("div"); el.id = "peek24"; document.body.appendChild(el);
+    el.addEventListener("click", ev => { if (ev.target === el) peekClose24(); }); }
+  el.innerHTML = `<div class="pk24box">${peekModal24(i)}</div>`; el.classList.add("on");
+  clearInterval(peekT24); peekT24 = setInterval(peekLife24, 900);
+}
+function peekClose24(){ peek24 = null; clearInterval(peekT24); const el = document.getElementById("peek24"); if (el) { el.classList.remove("on"); el.innerHTML = ""; } }
+// ぽつぽつ出る「⛏」「+💎」など（見ていて楽しいように）
+function peekLife24(){
+  const el = document.getElementById("peek24"); if (!el || peek24 == null || !S) return peekClose24();
+  const fx = el.querySelector(".pk24fx"), ms = [...el.querySelectorAll(".pk24m:not(.rest)")]; if (!fx || !ms.length) return;
+  const m = ms[Math.floor(Math.random() * ms.length)], J = PKJOB24[m.dataset.job] || PKJOB24[""], t = J.say[Math.floor(Math.random() * J.say.length)];
+  const d = document.createElement("span"); d.className = "pk24pop"; d.textContent = t; d.style.left = m.style.left; d.style.top = `calc(${m.style.top} - 22%)`; fx.appendChild(d); setTimeout(() => d.remove(), 1500);
+  if (m.dataset.job === "mine" || m.dataset.job === "train") { m.classList.remove("bump"); void m.offsetWidth; m.classList.add("bump"); }
+}
+// 開きかた：部屋のシートの🔍、または選んでいる部屋をもう一度タップ
+roomSheet = (prev => function (i){ let h = prev(i); try { h = h.replace('<button class="rsx" data-a="rsclose">', `<button class="mini pk24btn" data-a="peek24" data-v="${i}">🔍 のぞく</button><button class="rsx" data-a="rsclose">`); } catch (e) {} return h; })(roomSheet);
+document.addEventListener("click", ev => {
+  const b = ev.target.closest('[data-a="peek24"],[data-a="peek24x"]');
+  if (b) { ev.stopPropagation(); ev.preventDefault(); if (b.dataset.a === "peek24x") peekClose24(); else peekOpen24(+b.dataset.v); return; }
+  if (ev.target.closest('#peek24 [data-a="mon"]')) { peekClose24(); return; }
+  if (N || peek24 != null) return;
+  const r = ev.target.closest("#dw .chall[data-room]"); if (r && roomSel === +r.dataset.room && !ev.target.closest("button")) { ev.stopPropagation(); peekOpen24(+r.dataset.room); }
+}, true);
+// 罠を作ったり、ほかの画面が動いたら中身を作りなおす（開いたまま）
+{ const _r = render; render = function (){ const v = _r.apply(this, arguments); try { if (peek24 != null) { if (N || !S.path[peek24]) peekClose24(); else { const el = document.getElementById("peek24"); if (el) el.innerHTML = `<div class="pk24box">${peekModal24(peek24)}</div>`; } } } catch (e) {} return v; }; }
+// 部屋のページ（住む子／設備のタブ）にも「のぞく」
+roomPage20 = (prev => function (i){ let h = prev(i); try { h = h.replace(/(<div class="sub20">[\s\S]*?)(<\/div>)/, `$1<button class="pk24btn" data-a="peek24" data-v="${i}">🔍 のぞく</button>$2`); } catch (e) {} return h; })(roomPage20);
 
 </script>
 </body>
