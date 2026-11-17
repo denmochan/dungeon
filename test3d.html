@@ -1306,7 +1306,7 @@ function Cave3D24(cv, info, opt = {}){
       const f = new Float32Array(24); (R.deb || []).forEach((d, i) => f.set(d, i * 4)); gl.uniform4fv(U("deb" + s2), f); });
     gl.uniform3fv(U("OC"), new Float32Array(list.flatMap(c => c.o))); gl.uniform1fv(U("RC"), new Float32Array(list.map(c => c.r))); gl.uniform1fv(U("LIE"), new Float32Array(list.map(c => c.lie ? 1 : 0)));
     gl.uniform3fv(U("SKIN"), new Float32Array(list.flatMap(c => spCol24(c.sp)[0]))); gl.uniform3fv(U("CLOTH"), new Float32Array(list.flatMap(c => spCol24(c.sp)[1]))); gl.uniform1fv(U("FI"), new Float32Array(list.map(c => FACEIDX24[kitOf24(c.sp)] ?? -1)));
-    gl.uniform1fv(U("SCL"), new Float32Array(list.map(c => sclOf24(c)))); gl.uniform4fv(U("VAR"), new Float32Array(list.flatMap(c => spVar24(c.sp)[0]))); gl.uniform3fv(U("ACC"), new Float32Array(list.flatMap(c => spVar24(c.sp)[1])));
+    gl.uniform1fv(U("SCL"), new Float32Array(list.map(c => sclOf24(c)))); gl.uniform4fv(U("VAR"), new Float32Array(list.flatMap(c => (typeof varOf24 !== 'undefined' ? varOf24(c.sp, c.evo) : spVar24(c.sp))[0]))); gl.uniform3fv(U("ACC"), new Float32Array(list.flatMap(c => spVar24(c.sp)[1])));
     gl.uniform1f(U("tm"), tm); gl.uniform1f(U("CS"), 1.0); gl.uniform1f(U("idm"), 0); gl.uniform1f(U("hasFace"), 2);
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, faceT); gl.uniform1i(U("face"), 0);
     gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, null); gl.uniform1i(U("bgC"), 1); gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, null); gl.uniform1i(U("bgD"), 2); }
@@ -1520,8 +1520,28 @@ vec4 charCol(vec3 p,vec3 n,float m){vec3 c;float sp=0.35;
 // ---------- 悪魔の王（冥王・魔王・主・ガーゴイル）：2本足 ----------
 // VAR.x 角：0 小さい角 1 大きい曲がり角（象牙） 2 角＋冠   VAR.y 体：0 よろい 1 ローブとマント 2 怪物（幅広・巨体）
 // VAR.z 武器：0 剣を前で立てる 1 杖と玉 2 なし   VAR.w 翼：0 なし 1 あり    ACC=目・玉の光
-KIT24.demon = () => ({ common: COMMON24, body: ROOM_PARTS24.handTxt + addBody24(ROOM_PARTS24.bodyTxt.replace("sHead(", "sHeadNE("), `
- {vec3 h=HR*(p-J[2]);vec3 e=vec3(abs(h.x),h.y,h.z);
+KIT24.demon = () => ({ common: COMMON24, body: ROOM_PARTS24.handTxt + addBody24(ROOM_PARTS24.bodyTxt.replace("sHead(", "sHeadNE(").replace("d=smin(d,sHeadNE(HR*(p-J[2])),0.07);", "d=smin(d,VAR.x<0.5?sHeadNE((HR*(p-J[2])-vec3(0.0,-0.12,0.03))/0.7)*0.7:sHeadNE(HR*(p-J[2])),0.07);"), `
+ if(VAR.x<0.5){vec3 hs=(HR*(p-J[2])-vec3(0.0,-0.12,0.03))/0.7;vec3 es=vec3(abs(hs.x),hs.y,hs.z);float S=0.7;
+  float hm=mix(sRBox(hs-vec3(0.0,0.05,0.0),vec3(0.36,0.38,0.36),0.16),sEll(hs-vec3(0.0,0.05,0.0),vec3(0.46,0.47,0.45)),0.4);
+  hm=smin(hm,sRBox(hs-vec3(0.0,-0.22,0.22),vec3(0.26,0.12,0.16),0.06),0.05);
+  hm=min(hm,sRBox(hs-vec3(0.0,0.3,0.1),vec3(0.04,0.18,0.32),0.03));
+  hm=max(hm,-sRBox(es-vec3(0.16,0.06,0.44),vec3(0.13,0.035,0.12),0.01));
+  if(hm*S<r.x)r=vec2(hm*S,5.0);
+  float ey=sEll(es-vec3(0.16,0.06,0.36),vec3(0.1,0.03,0.04));if(ey*S<r.x)r=vec2(ey*S,6.0);
+  float hb=VAR.w>1.5?1.3:1.0;float hn=min(sTap(es,vec3(0.32,0.22,0.0),vec3(0.58,0.42,-0.04),0.11,0.08),sTap(es,vec3(0.58,0.42,-0.04),vec3(0.6+0.08*hb,0.62+0.42*hb,0.02),0.08,0.012));
+  if(hn*S<r.x)r=vec2(hn*S,5.0);}
+ // 冥王の体：大きい肩当て・赤い垂れ布・胸の赤い玉・腕と脚のよろい・光輪
+ if(VAR.x<0.5){for(int s=0;s<2;s++){float sg=s==0?-1.0:1.0;vec3 sh=s==0?J[3]:J[6];vec3 q=TR*(p-sh);q.x*=sg;
+   float pa=sEll(q-vec3(0.06,0.12,0.0),vec3(0.3,0.24,0.3));pa=smin(pa,sEll(q-vec3(0.14,0.0,0.0),vec3(0.24,0.18,0.26)),0.05);if(pa<r.x)r=vec2(pa,5.0);
+   float rim=max(abs(sEll(q-vec3(0.06,0.12,0.0),vec3(0.32,0.26,0.32)))-0.015,-(q.y-0.0));rim=max(rim,q.y-0.06);if(rim<r.x)r=vec2(rim,8.0);
+   float cl=sRBox(q-vec3(0.26,-0.42,0.0),vec3(0.035,0.42,0.2),0.02);float bot=-0.82+0.05*sin(q.z*30.0);cl=max(cl,bot-q.y);if(cl<r.x)r=vec2(cl,9.0);}
+  float ar=min(min(sTap(p,J[3],J[4],0.15,0.14),sTap(p,J[6],J[7],0.15,0.14)),min(sTap(p,J[4],J[5],0.14,0.12),sTap(p,J[7],J[8],0.14,0.12)));if(ar<r.x)r=vec2(ar,5.0);
+  float lg=min(min(sTap(p,J[9],J[10],0.17,0.15),sTap(p,J[12],J[13],0.17,0.15)),min(sTap(p,J[10],J[11],0.14,0.13),sTap(p,J[13],J[14],0.14,0.13)));if(lg<r.x)r=vec2(lg,5.0);
+  float ch=sEll(tp-vec3(0.0,0.3,0.05),vec3(0.42,0.3,0.3));if(ch<r.x)r=vec2(ch,5.0);
+  float gm=sEll(tp-vec3(0.0,0.2,0.33),vec3(0.055,0.07,0.035));if(gm<r.x)r=vec2(gm,6.0);
+  if(VAR.w>1.5){vec3 q=TR*(p-J[2])-vec3(0.0,0.42,-0.3);float hl=max(abs(length(q.xy)-0.56)-0.028,abs(q.z)-0.02);if(hl<r.x)r=vec2(hl,8.0);
+   for(int k=0;k<5;k++){float fk=float(k);vec3 c=vec3(sin(tm*1.3+fk*1.26)*0.75,0.25+0.4*fract(tm*0.4+fk*0.21),cos(tm*1.3+fk*1.26)*0.5);float sp=length(p-J[0]-c)-0.05;if(sp<r.x)r=vec2(sp,6.0);}}}
+ if(VAR.x>0.5){vec3 h=HR*(p-J[2]);vec3 e=vec3(abs(h.x),h.y,h.z);
   float br=sEll(e-vec3(0.14,0.13,0.27),vec3(0.13,0.05,0.08));if(br<r.x)r=vec2(smin(br,r.x,0.04),1.0);
   if(VAR.x<0.5){float hm=sEll(h-vec3(0.0,0.08,0.0),vec3(0.48,0.48,0.45));hm=max(hm,-sRBox(h-vec3(0.0,0.04,0.42),vec3(0.27,0.035,0.14),0.01));hm=max(hm,-h.y-0.18);
    hm=min(hm,sRBox(h-vec3(0.0,0.3,0.25),vec3(0.03,0.2,0.2),0.02));if(hm<r.x)r=vec2(hm,5.0);}
@@ -1534,7 +1554,7 @@ KIT24.demon = () => ({ common: COMMON24, body: ROOM_PARTS24.handTxt + addBody24(
   if(VAR.x>1.5){float cr=sRBox(h-vec3(0.0,0.4,0.0),vec3(0.2,0.05,0.2),0.03);cr=max(cr,-sRBox(h-vec3(0.0,0.4,0.0),vec3(0.16,0.2,0.16),0.02));
    for(int k=0;k<5;k++){float a=float(k)*1.2566;vec3 c=vec3(sin(a)*0.19,0.43,cos(a)*0.19);cr=min(cr,sTap(h,c,c+vec3(0.0,0.16,0.0),0.04,0.005));}if(cr<r.x)r=vec2(cr,8.0);}}
  // 肩当て（とげつき）・胸当て
- if(VAR.y<0.5||VAR.y>1.5){float big=VAR.y>1.5?1.35:1.0;for(int s=0;s<2;s++){vec3 sh=s==0?J[3]:J[6];vec3 o=normalize(vec3(sh.x-J[1].x,0.0,sh.z-J[1].z)+vec3(0.0001));
+ if(VAR.y>1.5){float big=VAR.y>1.5?1.35:1.0;for(int s=0;s<2;s++){vec3 sh=s==0?J[3]:J[6];vec3 o=normalize(vec3(sh.x-J[1].x,0.0,sh.z-J[1].z)+vec3(0.0001));
    float pa=sEll(p-sh-vec3(0.0,0.08,0.0),vec3(0.24,0.17,0.22)*big);if(pa<r.x)r=vec2(pa,5.0);
    for(int k=0;k<2;k++){vec3 c=sh+vec3(0.0,0.18*big,0.0)+o*(0.05+float(k)*0.1)*big;float sp=sTap(p,c,c+vec3(o.x*0.12,0.2,o.z*0.12)*big,0.05*big,0.004);if(sp<r.x)r=vec2(sp,2.0);}}
   float ch=sEll(tp-vec3(0.0,0.28,0.06),vec3(0.36,0.27,0.27)*vec3(big,1.0,1.0));if(ch<r.x)r=vec2(ch,5.0);
@@ -1581,7 +1601,7 @@ vec4 charCol(vec3 p,vec3 n,float m){vec3 c;float sp=0.1;vec3 lp=p-J[0];
 // ---------- 割り当て ----------
 Object.assign(KITOF24, { underlord: "demon", maou: "demon", lord: "demon", elderdragon: "serpent" });
 Object.assign(SPCOLX24, {
-  underlord: [[0.36, 0.32, 0.4], [0.55, 0.1, 0.1]], maou: [[0.42, 0.36, 0.5], [0.62, 0.12, 0.12]], lord: [[0.62, 0.6, 0.68], [0.7, 0.12, 0.15]],
+  underlord: [[0.36, 0.32, 0.4], [0.8, 0.12, 0.12]], maou: [[0.42, 0.36, 0.5], [0.62, 0.12, 0.12]], lord: [[0.62, 0.6, 0.68], [0.7, 0.12, 0.15]],
   elderdragon: [[0.86, 0.7, 0.3], [0.85, 0.45, 0.2]], bonedragon: [[0.88, 0.86, 0.78], [0.3, 0.32, 0.34]], dragon: [[0.78, 0.2, 0.14], [0.5, 0.1, 0.12]] });
 Object.assign(SPVAR24, {
   underlord: [[0, 0, 0, 1], [1.0, 0.25, 0.2]], maou: [[2, 2, 0, 0], [1.0, 0.3, 0.2]], lord: [[2, 1, 1, 1], [0.8, 0.4, 1.0]],
@@ -1779,6 +1799,10 @@ SP3D24.gobx = 1; SP3D24.lich = 1;
       .replace("vec2 r=vec2(hd,1.0);if(rb<r.x)r=vec2(rb,3.0);", "vec2 r=vec2(hd,1.0);if(rb<r.x)r=vec2(rb,3.0);if(tr<r.x)r=vec2(tr,7.0);"),
     col: K.col.replace(" else c=lin(ACC)", " else if(m<7.5){c=lin(vec3(0.95,0.75,0.3));sp=0.8;}\n else c=lin(ACC)") }; }; }
 SPBOUND24.mindlord = [0.7, 1.3];
+
+// 冥王：段階で翼（2段目〜）と光輪（3段目）
+function varOf24(sp, evo){ const v = spVar24(sp), a = v[0].slice();
+  if (sp === "underlord") a[3] = evo || 0; return [a, v[1]]; }
 
 // ================= 3D洞窟テストページ（中身は src/cave3d24.js） =================
 (() => {
