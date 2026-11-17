@@ -7182,7 +7182,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.172（11/17 22:44）";
+const VER20 = "No.173（11/17 22:46）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -9730,8 +9730,22 @@ const SLOTS24 = ["", "B", "C", "D", "E"];
 const FACEIDX24 = { goblin: 0, slime: 1, bat: 2, ghost: 3, imp: 4, myconid: 5, orc: 6 };   // 顔の絵（横に4つ並べた1枚）の何番目か
 const SPCOL24 = { orc: [[0.30, 0.42, 0.21], [0.42, 0.27, 0.15]], myconid: [[0.93, 0.87, 0.72], [0.78, 0.2, 0.15]], wolf: [[0.5, 0.52, 0.56], [0.3, 0.3, 0.33]], spider: [[0.32, 0.22, 0.28], [0.75, 0.12, 0.12]], imp: [[0.76, 0.27, 0.2], [0.42, 0.1, 0.14]], kobold: [[0.62, 0.47, 0.3], [0.42, 0.35, 0.52]], ghost: [[0.88, 0.91, 0.96], [0.7, 0.75, 0.82]], goblin: [[0.570, 0.627, 0.240], [0.45, 0.29, 0.16]], skeleton: [[0.86, 0.82, 0.70], [0.50, 0.15, 0.12]], slime: [[0.20, 0.47, 0.23], [0.3, 0.6, 0.3]],
   bat: [[0.47, 0.34, 0.64], [0.66, 0.38, 0.55]], rat: [[0.62, 0.58, 0.50], [0.88, 0.58, 0.58]] };
+// 似た種族は同じ式を使い、色だけ変える
+const KITOF24 = { webgoblin: "goblin", sapper: "goblin", shaman: "goblin", ghoul: "goblin", goldkobold: "kobold", emberskel: "skeleton", bonewarden: "skeleton",
+  rotslime: "slime", lavaslime: "slime", ghostslime: "slime", gemeater: "slime", eyebat: "bat", firebat: "bat", nightspider: "spider", eyespider: "spider", stonespider: "spider",
+  nightwolf: "wolf", jackal: "wolf", sporerat: "rat", ratking: "rat", minerorc: "orc", berserker: "orc", ogremage: "orc", bogtroll: "orc", wraitheye: "ghost", sporewraith: "ghost", fungus: "myconid" };
+const kitOf24 = sp => KITOF24[sp] || sp;
+const SPCOLX24 = { webgoblin: [[0.57, 0.627, 0.24], [0.47, 0.35, 0.41]], sapper: [[0.5, 0.58, 0.26], [0.3, 0.3, 0.3]], shaman: [[0.6, 0.66, 0.28], [0.6, 0.45, 0.15]], ghoul: [[0.4, 0.45, 0.3], [0.35, 0.28, 0.35]],
+  goldkobold: [[0.78, 0.58, 0.22], [0.45, 0.29, 0.16]], emberskel: [[0.9, 0.72, 0.52], [0.85, 0.4, 0.1]], bonewarden: [[0.8, 0.82, 0.75], [0.35, 0.45, 0.42]],
+  rotslime: [[0.52, 0.55, 0.24], [0.4, 0.4, 0.2]], lavaslime: [[0.86, 0.38, 0.08], [0.9, 0.6, 0.1]], ghostslime: [[0.45, 0.72, 0.66], [0.5, 0.8, 0.7]], gemeater: [[0.35, 0.6, 0.62], [0.4, 0.7, 0.7]],
+  eyebat: [[0.7, 0.2, 0.28], [0.5, 0.15, 0.2]], firebat: [[0.85, 0.6, 0.15], [0.85, 0.35, 0.1]], nightspider: [[0.33, 0.22, 0.44], [0.6, 0.4, 0.9]], eyespider: [[0.45, 0.08, 0.12], [1.0, 0.35, 0.2]], stonespider: [[0.42, 0.42, 0.4], [0.95, 0.3, 0.2]],
+  nightwolf: [[0.3, 0.3, 0.36], [0.2, 0.2, 0.22]], jackal: [[0.7, 0.52, 0.26], [0.3, 0.22, 0.15]], sporerat: [[0.7, 0.4, 0.38], [0.9, 0.6, 0.6]], ratking: [[0.6, 0.55, 0.38], [0.9, 0.62, 0.6]],
+  minerorc: [[0.4, 0.46, 0.25], [0.47, 0.28, 0.16]], berserker: [[0.42, 0.45, 0.24], [0.55, 0.15, 0.12]], ogremage: [[0.5, 0.56, 0.34], [0.47, 0.22, 0.6]], bogtroll: [[0.5, 0.58, 0.3], [0.35, 0.3, 0.2]],
+  wraitheye: [[0.55, 0.78, 0.72], [0.4, 0.6, 0.55]], sporewraith: [[0.66, 0.52, 0.7], [0.6, 0.66, 0.6]], fungus: [[0.93, 0.87, 0.72], [0.75, 0.38, 0.12]] };
+const spCol24 = sp => SPCOLX24[sp] || SPCOL24[kitOf24(sp)];
 // 種族ごとの大きさ
-const SPSCL24 = { orc: 1.25, myconid: 0.95 };
+const SPSCL24 = { orc: 1.25, myconid: 0.95, ogremage: 1.35, bogtroll: 1.35, berserker: 1.3, ratking: 1.2 };
+const spScl24 = sp => SPSCL24[sp] || SPSCL24[kitOf24(sp)] || 1;
 // 体の当たりの球（中心y・半径）
 const SPBOUND24 = { orc: [0.9, 1.6], myconid: [0.6, 0.9], wolf: [0.6, 1.25], spider: [0.45, 1.3], imp: [0.9, 1.6], kobold: [0.9, 1.6], ghost: [0.9, 1.25], goblin: [0.9, 1.55], skeleton: [0.9, 1.55], slime: [0.4, 0.95], bat: [1.0, 1.35], rat: [0.3, 1.15] };
 
@@ -9948,7 +9962,8 @@ vec4 charCol(vec3 p,vec3 n,float m){vec3 c;float sp=0.06;
 ` });
 
 // ---------- 種族ごとの動き（関節の置き方） ----------
-function rigSp24(sp, mode, t){
+function rigSp24(sp0, mode, t){
+  const sp = kitOf24(sp0);
   if (sp === "goblin" || sp === "skeleton" || sp === "imp" || sp === "kobold" || sp === "orc") return rig24(mode, t);
   const J = Array.from({ length: 40 }, () => [0, -9, 0]), ph = t * Math.PI * 2; let HR = rotX(0);
   if (sp === "myconid") { const sl = mode === "sleep", sw = Math.sin(ph / 1.9);
@@ -10062,7 +10077,7 @@ function caveFS24(room, sps){
   let uni = `uniform float CS;uniform float SCL[${N}];uniform vec3 OC[${N}];uniform float RC[${N}];uniform float LIE[${N}];uniform vec3 SKIN[${N}];uniform vec3 CLOTH[${N}];uniform float FI[${N}];uniform float tm;uniform float idm;\n`;
   for (let k = 1; k < N; k++) { const S = SLOTS24[k]; uni += `uniform vec3 J${S}[40];uniform mat3 HR${S};uniform mat3 TR${S};uniform vec4 deb${S}[6];uniform float tool${S};\n`; }
   let bodies = "", mats = ""; const commons = new Set();
-  for (let k = 0; k < N; k++) { const K = KIT24[sps[k]](); if (K.common) commons.add(K.common); bodies += sfx(K.body, k); mats += sfx(K.col, k); }
+  for (let k = 0; k < N; k++) { const K = KIT24[kitOf24(sps[k])](); if (K.common) commons.add(K.common); bodies += sfx(K.body, k); mats += sfx(K.col, k); }
   bodies = [...commons].join("") + bodies;
   let sc = P.scene;
   const cut = (a, b) => { const i = sc.indexOf(a), j = sc.indexOf(b, i); if (i < 0 || j < 0) throw new Error("cave24 cut " + a); sc = sc.slice(0, i) + sc.slice(j); };
@@ -10075,7 +10090,7 @@ function caveFS24(room, sps){
   rep("float v=smoothstep(0.68,0.72,fbm(p*5.0+9.0));c=mix(c,lin(vec3(0.35,0.75,0.95)),v*0.8);emi=v*0.4;sp=0.3;", "sp=0.1;");
   // 子
   let scene = "vec3 scene(vec3 p){\n vec2 r=room(p);vec3 o=vec3(r,0.0);vec3 q;float bb;\n";
-  for (let k = 0; k < N; k++) { const B = SPBOUND24[sps[k]]; scene += ` q=toC(p,OC[${k}],RC[${k}])/(CS*SCL[${k}]);if(LIE[${k}]>0.5)q=vec3(0.45-q.y,q.x,q.z);bb=(length(q-vec3(0,${B[0].toFixed(2)},0))-${B[1].toFixed(2)})*CS*SCL[${k}];if(bb<0.3){vec2 b=body${SLOTS24[k]}(q);b.x*=CS*SCL[${k}];if(b.x<o.x)o=vec3(b,${k + 1}.0);}else if(bb<o.x)o=vec3(bb,0.0,-1.0);\n`; }
+  for (let k = 0; k < N; k++) { const B = SPBOUND24[kitOf24(sps[k])]; scene += ` q=toC(p,OC[${k}],RC[${k}])/(CS*SCL[${k}]);if(LIE[${k}]>0.5)q=vec3(0.45-q.y,q.x,q.z);bb=(length(q-vec3(0,${B[0].toFixed(2)},0))-${B[1].toFixed(2)})*CS*SCL[${k}];if(bb<0.3){vec2 b=body${SLOTS24[k]}(q);b.x*=CS*SCL[${k}];if(b.x<o.x)o=vec3(b,${k + 1}.0);}else if(bb<o.x)o=vec3(bb,0.0,-1.0);\n`; }
   scene += " return o;}\n";
   sc = sc.slice(0, sc.indexOf("vec3 scene(vec3 p){")) + scene + sc.slice(sc.indexOf("float mapd(vec3 p)"));
   let shade = "  if(ob>0.5){vec4 cc;vec3 q;vec3 nl;\n";
@@ -10111,7 +10126,7 @@ function caveFS24(room, sps){
 function placeMine24(ore, r){ const R = rig24("mine", 0.84), s = R.strike, c = Math.cos(r), sn = Math.sin(r); return [ore[0] - (c * s[0] + sn * s[2]), 0, ore[2] - (-sn * s[0] + c * s[2])]; }
 // 静止画・確認用の描画（CH: [{sp,mode,t,o,r,lie}]）
 async function caveDraw24(cv, room, CH, tm, cam, idm = 0){
-  const key = room + ":" + CH.map(c => c.sp).join(","); let S = cv.__cave && cv.__cave[key]; const gl = cv.__gl || (cv.__gl = cv.getContext("webgl", { preserveDrawingBuffer: true, antialias: false }));
+  const key = room + ":" + CH.map(c => kitOf24(c.sp)).join(","); let S = cv.__cave && cv.__cave[key]; const gl = cv.__gl || (cv.__gl = cv.getContext("webgl", { preserveDrawingBuffer: true, antialias: false }));
   if (!S) { const sh = (ty, s) => { const o = gl.createShader(ty); gl.shaderSource(o, s); gl.compileShader(o); if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(o)); return o; };
     const p = gl.createProgram(); gl.attachShader(p, sh(gl.VERTEX_SHADER, SDF_VS)); gl.attachShader(p, sh(gl.FRAGMENT_SHADER, caveFS24(room, CH.map(c => c.sp)))); gl.linkProgram(p); if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
     const b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
@@ -10122,8 +10137,8 @@ async function caveDraw24(cv, room, CH, tm, cam, idm = 0){
   CH.forEach((c, k) => { const R = rigSp24(c.sp, c.mode, c.t), s2 = SLOTS24[k]; gl.uniform3fv(U("J" + s2), new Float32Array(R.J.flat())); gl.uniformMatrix3fv(U("HR" + s2), false, new Float32Array(R.HR)); gl.uniformMatrix3fv(U("TR" + s2), false, new Float32Array(R.TR)); gl.uniform1f(U("tool" + s2), R.tool);
     const f = new Float32Array(24); (R.deb || []).forEach((d, i) => f.set(d, i * 4)); gl.uniform4fv(U("deb" + s2), f); });
   gl.uniform3fv(U("OC"), new Float32Array(CH.flatMap(c => c.o))); gl.uniform1fv(U("RC"), new Float32Array(CH.map(c => c.r))); gl.uniform1fv(U("LIE"), new Float32Array(CH.map(c => c.lie ? 1 : 0)));
-  gl.uniform3fv(U("SKIN"), new Float32Array(CH.flatMap(c => SPCOL24[c.sp][0]))); gl.uniform3fv(U("CLOTH"), new Float32Array(CH.flatMap(c => SPCOL24[c.sp][1]))); gl.uniform1fv(U("FI"), new Float32Array(CH.map(c => FACEIDX24[c.sp] ?? -1)));
-  gl.uniform1f(U("tm"), tm); gl.uniform1f(U("idm"), idm); gl.uniform1f(U("CS"), 1.0); gl.uniform1fv(U("SCL"), new Float32Array(CH.map(c => SPSCL24[c.sp] || 1))); gl.uniform1f(U("hasFace"), 2);
+  gl.uniform3fv(U("SKIN"), new Float32Array(CH.flatMap(c => spCol24(c.sp)[0]))); gl.uniform3fv(U("CLOTH"), new Float32Array(CH.flatMap(c => spCol24(c.sp)[1]))); gl.uniform1fv(U("FI"), new Float32Array(CH.map(c => FACEIDX24[kitOf24(c.sp)] ?? -1)));
+  gl.uniform1f(U("tm"), tm); gl.uniform1f(U("idm"), idm); gl.uniform1f(U("CS"), 1.0); gl.uniform1fv(U("SCL"), new Float32Array(CH.map(c => spScl24(c.sp)))); gl.uniform1f(U("hasFace"), 2);
   gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, S.tex); gl.uniform1i(U("face"), 0);
   gl.drawArrays(gl.TRIANGLES, 0, 3);
 }
@@ -10282,7 +10297,7 @@ function Cave3D24(cv, info, opt = {}){
   const PROGS = {}, P = prog(SDF_VS, POST_FS24), faceT = faceAtlas24(gl);
   let palT; { const d = new Uint8Array(256 * 4); for (let i = 0; i < PAL24.length / 3; i++) { d[i * 4] = PAL24[i * 3]; d[i * 4 + 1] = PAL24[i * 3 + 1]; d[i * 4 + 2] = PAL24[i * 3 + 2]; d[i * 4 + 3] = 255; } palT = tex(256, 1, d); }
   const bgCT = tex(VRES[0], VRES[1]), bgDT = tex(VRES[0], VRES[1]), bgCF = fbo(bgCT), bgDF = fbo(bgDT);
-  function setCast(room, cast){ ROOM = room; CH = cast; const key = room + ":" + cast.map(c => c.sp).join(","), t0 = performance.now();
+  function setCast(room, cast){ ROOM = room; CH = cast; const key = room + ":" + cast.map(c => kitOf24(c.sp)).join(","), t0 = performance.now();
     S = PROGS[key] || (PROGS[key] = prog(SDF_VS, makeFS24(room, cast))); st.compileMs = Math.round(performance.now() - t0); st.bake = 0; st.bakeMs = 0; st.frames = []; }
   function resize(){ const r = cv.getBoundingClientRect(); if (!r.width) return; const w = Math.round(360 * VK * st.scale), h = Math.round(w * r.height / r.width);
     if (w === vW && h === vH) return; vW = w; vH = h; cv.width = w; cv.height = h; vT = tex(w, h); vF = fbo(vT); clampView(); }
@@ -10296,8 +10311,8 @@ function Cave3D24(cv, info, opt = {}){
     CH.forEach((c, k) => { const R = rigSp24(c.sp, c.mode, tm * (SPEED24[c.mode] || 1) + c.t), s2 = SLOTS24[k]; gl.uniform3fv(U("J" + s2), new Float32Array(R.J.flat())); gl.uniformMatrix3fv(U("HR" + s2), false, new Float32Array(R.HR)); gl.uniformMatrix3fv(U("TR" + s2), false, new Float32Array(R.TR)); gl.uniform1f(U("tool" + s2), R.tool);
       const f = new Float32Array(24); (R.deb || []).forEach((d, i) => f.set(d, i * 4)); gl.uniform4fv(U("deb" + s2), f); });
     gl.uniform3fv(U("OC"), new Float32Array(CH.flatMap(c => c.o))); gl.uniform1fv(U("RC"), new Float32Array(CH.map(c => c.r))); gl.uniform1fv(U("LIE"), new Float32Array(CH.map(c => c.lie ? 1 : 0)));
-    gl.uniform3fv(U("SKIN"), new Float32Array(CH.flatMap(c => SPCOL24[c.sp][0]))); gl.uniform3fv(U("CLOTH"), new Float32Array(CH.flatMap(c => SPCOL24[c.sp][1]))); gl.uniform1fv(U("FI"), new Float32Array(CH.map(c => FACEIDX24[c.sp] ?? -1)));
-    gl.uniform1f(U("tm"), tm); gl.uniform1f(U("CS"), 1.0); gl.uniform1fv(U("SCL"), new Float32Array(CH.map(c => SPSCL24[c.sp] || 1))); gl.uniform1f(U("idm"), 0); gl.uniform1f(U("hasFace"), 2);
+    gl.uniform3fv(U("SKIN"), new Float32Array(CH.flatMap(c => spCol24(c.sp)[0]))); gl.uniform3fv(U("CLOTH"), new Float32Array(CH.flatMap(c => spCol24(c.sp)[1]))); gl.uniform1fv(U("FI"), new Float32Array(CH.map(c => FACEIDX24[kitOf24(c.sp)] ?? -1)));
+    gl.uniform1f(U("tm"), tm); gl.uniform1f(U("CS"), 1.0); gl.uniform1fv(U("SCL"), new Float32Array(CH.map(c => spScl24(c.sp)))); gl.uniform1f(U("idm"), 0); gl.uniform1f(U("hasFace"), 2);
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, faceT); gl.uniform1i(U("face"), 0);
     gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, bgCT); gl.uniform1i(U("bgC"), 1);
     gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, bgDT); gl.uniform1i(U("bgD"), 2); }
@@ -10337,7 +10352,7 @@ const SP3D24 = { goblin: 1, skeleton: 1, slime: 1, bat: 1, rat: 1, imp: 1, kobol
 // list: [{sp, job, rest, nick}]。部屋の種類と立ち位置を決める
 function castGame24(facs, list){
   const room = facs.includes("train") ? "train" : facs.includes("mine") ? "mine" : facs.includes("bed") ? "sleep" : "train";
-  const biped = sp => sp === "goblin" || sp === "skeleton" || sp === "imp" || sp === "kobold" || sp === "orc";
+  const biped = sp0 => { const sp = kitOf24(sp0); return sp === "goblin" || sp === "skeleton" || sp === "imp" || sp === "kobold" || sp === "orc"; };
   const spots = {
     train: { train: [[-5.4, -0.1, 0.15, "slash"], [-1.15, 0.0, 0.8, "slash"], [1.05, 0.12, -0.8, "slash"], [5.9, -2.6, -0.3, "lift"]],
       mine: [], bed: [] },
@@ -10345,7 +10360,7 @@ function castGame24(facs, list){
     sleep: { bed: [[-4.7, -2.4, 0.3, "sleep"], [2.3, -3.5, -0.2, "sleep"], [4.9, -1.25, -0.4, "sleep"], [-1.9, -3.45, 0.6, "sleep"], [-5.0, 1.6, 0.5, "sleep"]], train: [], mine: [] } }[room];
   const free = [[-2.0, 1.4, 0.4], [1.9, 1.8, -0.6], [3.4, 2.6, -0.5], [-0.4, 2.4, 0.1], [0.9, 1.0, -0.3]], used = {};
   const cast = [], skipped = [];
-  list.forEach((m, k) => { if (!SP3D24[m.sp]) { skipped.push(m); return; } if (cast.length >= 5) { skipped.push(m); return; }
+  list.forEach((m, k) => { if (!SP3D24[kitOf24(m.sp)]) { skipped.push(m); return; } if (cast.length >= 5) { skipped.push(m); return; }
     const job = m.rest ? "bed" : m.job; let s = null;
     if (spots[job] && spots[job].length && (biped(m.sp) || job === "bed")) { const arr = spots[job], u = used[job] = (used[job] || 0); if (u < arr.length) { s = arr[u]; used[job]++; } }
     let mode, x, z, r, y = 0, lie = 0;
