@@ -966,6 +966,32 @@ body:has(.stage) .modal{display:none!important}
 .pk24spark{position:absolute;color:#ffd76a;font-size:12px;animation:hitp24 .5s ease-out forwards}
 .pk24zz{position:absolute;font-size:13px;font-weight:700;color:#cfe3ff;animation:zz24 1.8s ease-out forwards}@keyframes zz24{to{transform:translate(12px,-28px) scale(1.5);opacity:0}}
 .pk24tip{position:absolute;left:0;right:0;bottom:2px;text-align:center;font-size:11px;color:#e8d6b0aa;z-index:5;pointer-events:none}
+/* ---- 効果の外側／内側 ---- */
+.fxw{position:absolute;width:0;height:0;pointer-events:none}.fxw>span{left:0!important;top:0!important}
+.fxw-pk24gem{transition:left 1s cubic-bezier(.3,-.4,.7,1),top 1s cubic-bezier(.3,-.6,.7,1)}.fxw-pk24arrow{transition:left .55s linear,top .55s linear}
+.fxw>.pk24gem,.fxw>.pk24arrow{transition:none}
+/* ---- のぞく：3D ---- */
+.pk3d{position:relative;height:340px;perspective:640px;perspective-origin:50% 50%;overflow:hidden;border-radius:10px;background:radial-gradient(ellipse at 50% 40%,#3a2818 0%,#140d08 70%);touch-action:none;cursor:grab}
+.pk3d .pk24scene{position:absolute;left:50%;top:54%;width:320px;height:250px;margin:-125px 0 0 -160px;overflow:visible;border-radius:4px;transform-style:preserve-3d;transform:rotateX(var(--tl)) rotateZ(var(--rz));background:var(--fl) 0 0/36px 36px repeat;box-shadow:none}
+.pk3d .pk24wall{display:none}
+.pk3d .flr3{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 55%,transparent 30%,#0008 100%),radial-gradient(circle at 12% 8%,#ffb04a30,transparent 40%),radial-gradient(circle at 88% 8%,#ffb04a30,transparent 40%)}
+.pk3d .pk24fx{transform-style:preserve-3d;z-index:auto}
+.pk3d .pk24m,.pk3d .pk24fac,.pk3d .fxw{transform-origin:50% 100%;transform:rotateZ(calc(var(--rz) * -1)) rotateX(calc(var(--tl) * -1))}
+.pk3d .pk24m{width:62px;height:78px;margin:-78px 0 0 -31px;justify-content:flex-end}
+.pk3d .pk24m::before{display:none}
+.pk3d .pk24fac{top:30%;width:140px;height:118px;margin:-118px 0 0 -70px;justify-content:flex-end}
+.pk3d .pk24corr{height:30px;top:0;background:#0009;transform:none}
+.pk3d .pk24trap{width:30px}
+.pk3d .w3{position:absolute;background:var(--wl) 0 0/36px 58px repeat-x;box-shadow:inset 0 -14px 18px #0009;pointer-events:none}
+.pk3d .w3n,.pk3d .w3s{left:0;width:100%;height:58px;transform-origin:0 0}
+.pk3d .w3n{top:0;transform:rotateX(90deg)}
+.pk3d .w3s{top:100%;transform:rotateX(90deg)}
+.pk3d .w3w,.pk3d .w3e{top:0;height:100%;width:58px;transform-origin:0 0;background-size:58px 36px;background-repeat:repeat-y}
+.pk3d .w3w{left:0;transform:rotateY(-90deg)}
+.pk3d .w3e{left:100%;transform:rotateY(-90deg)}
+.pk3d .pk24gain{left:10px;top:8px}
+.pk3dhint{position:absolute;left:0;right:0;bottom:4px;text-align:center;font-size:11px;color:#e8d6b099;pointer-events:none}
+.pk3dt{font-size:12px;padding:4px 8px}
 </style>
 </head>
 <body>
@@ -7141,7 +7167,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.166（11/17 18:17）";
+const VER20 = "No.167（11/17 18:25）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -8376,7 +8402,9 @@ function peekOpen24(i){
 function peekClose24(){ peek24 = null; clearInterval(peekT24); const el = document.getElementById("peek24"); if (el) { el.classList.remove("on"); el.innerHTML = ""; } }
 // ---------- 動き：仕事ごとに本当に働いて見える ----------
 let pkAct24 = {}, pkGain24 = 0;
-const pkFx24 = (sc, cls, txt, x, y, ms = 1200, style = "") => { const fx = sc.querySelector(".pk24fx"); if (!fx) return null; const d = document.createElement("span"); d.className = cls; if (txt) d.textContent = txt; d.style.cssText = `left:${x}%;top:${y}%;${style}`; fx.appendChild(d); setTimeout(() => d.remove(), ms); return d; };
+// 効果の文字・粒は「位置を持つ外側」と「動く内側」に分ける（3Dでは外側がこちらを向く）
+const pkFx24 = (sc, cls, txt, x, y, ms = 1200, style = "") => { const fx = sc.querySelector(".pk24fx"); if (!fx) return null;
+  const w = document.createElement("span"), d = document.createElement("span"); w.className = "fxw fxw-" + cls; d.className = cls; if (txt) d.textContent = txt; d.style.cssText = style; w.style.left = x + "%"; w.style.top = y + "%"; w.appendChild(d); fx.appendChild(w); setTimeout(() => w.remove(), ms); return w; };
 const pkMove24 = (e, x, y, ms) => { e.style.transition = `left ${ms}ms linear,top ${ms}ms linear`; e.classList.toggle("left", x < parseFloat(e.style.left)); e.style.left = x + "%"; e.style.top = y + "%"; };
 function peekLife24(){
   const el = document.getElementById("peek24"); if (!el || peek24 == null || !S) return peekClose24();
@@ -8425,7 +8453,7 @@ function pkDragInit24(root){
     D = { e, sc, id: +e.dataset.id, x0: ev.clientX, y0: ev.clientY, moved: false, r: sc.getBoundingClientRect() }; e.setPointerCapture(ev.pointerId); ev.preventDefault(); });
   root.addEventListener("pointermove", ev => { if (!D) return; const dx = ev.clientX - D.x0, dy = ev.clientY - D.y0; if (!D.moved && Math.hypot(dx, dy) < 6) return;
     D.moved = true; D.sc.dataset.drag = 1; D.e.classList.add("drag24"); D.e.style.transition = "none";
-    const x = (ev.clientX - D.r.left) / D.r.width * 100, y = (ev.clientY - D.r.top + 40) / D.r.height * 100; D.e.style.left = Math.max(5, Math.min(95, x)) + "%"; D.e.style.top = Math.max(30, Math.min(99, y)) + "%";
+    const P = typeof pk3dFloor24 === "function" && D.sc.closest(".pk3d") ? pk3dFloor24(D.sc, ev.clientX, ev.clientY) : { x: (ev.clientX - D.r.left) / D.r.width * 100, y: (ev.clientY - D.r.top + 40) / D.r.height * 100 }, x = P.x, y = P.y; D.e.style.left = Math.max(5, Math.min(95, x)) + "%"; D.e.style.top = Math.max(30, Math.min(99, y)) + "%";
     D.sc.querySelectorAll(".pk24fac").forEach(f => f.classList.toggle("tgt24", Math.abs(parseFloat(f.style.left) - x) < 14 && y < 72)); });
   const end = ev => { if (!D) return; const { e, sc, id, moved } = D; D = null; delete sc.dataset.drag; e.classList.remove("drag24");
     const m = S.mons.find(o => o.id === id); if (!m) return;
@@ -8449,6 +8477,49 @@ document.addEventListener("click", ev => {
 { const _r = render; render = function (){ const v = _r.apply(this, arguments); try { if (peek24 != null) { if (N || !S.path[peek24]) peekClose24(); else { const el = document.getElementById("peek24"); if (el) el.innerHTML = `<div class="pk24box">${peekModal24(peek24)}</div>`; } } } catch (e) {} return v; }; }
 // 部屋のページ（住む子／設備のタブ）にも「のぞく」
 roomPage20 = (prev => function (i){ let h = prev(i); try { h = h.replace(/(<div class="sub20">[\s\S]*?)(<\/div>)/, `$1<button class="pk24btn" data-a="peek24" data-v="${i}">🔍 のぞく</button>$2`); } catch (e) {} return h; })(roomPage20);
+
+// ================= のぞく画面を3Dに：部屋を斜め上から見る箱にして、ドット絵を立て看板のように置く（指で回せる） =================
+// ライブラリは使わず、CSSの3D変形だけで描く（iPhoneでも軽い）
+let pk3dOn24 = (() => { try { return localStorage.getItem("pk3d24") !== "0"; } catch (e) { return true; } })();
+let pk3dRz24 = -16, pk3dTl24 = 52;
+const PK3D_P = 640;   // 遠近の強さ（CSS perspective と同じ値）
+function pk3dWalls24(){ return ["n", "s", "w", "e"].map(k => `<div class="w3 w3${k}"></div>`).join(""); }
+// 手前の壁は消す（部屋の中が見えるように）
+function pk3dSync24(box){
+  if (!box) return; box.style.setProperty("--rz", pk3dRz24 + "deg"); box.style.setProperty("--tl", pk3dTl24 + "deg");
+  const r = pk3dRz24 * Math.PI / 180, out = { n: [0, -1], s: [0, 1], w: [-1, 0], e: [1, 0] };
+  Object.entries(out).forEach(([k, [dx, dy]]) => { const y = dx * Math.sin(r) + dy * Math.cos(r); const w = box.querySelector(".w3" + k); if (w) w.style.display = y > 0.25 ? "none" : ""; });
+}
+// 画面の点 → 床の上の位置（％）。回転と遠近を逆にたどる
+function pk3dFloor24(sc, X, Y){
+  const box = sc.closest(".pk3d"), b = box.getBoundingClientRect(), W = sc.offsetWidth, H = sc.offsetHeight;
+  const sx = X - (b.left + b.width / 2), sy = Y - (b.top + b.height * 0.54) + 30;   // 床の中心＝箱の中心。指は体の上なので、足元は少し下
+  const t = pk3dTl24 * Math.PI / 180, rz = pk3dRz24 * Math.PI / 180, P = PK3D_P;
+  const y1 = sy * P / (P * Math.cos(t) + sy * Math.sin(t)), s = P / (P - y1 * Math.sin(t)), x1 = sx / s;
+  const fx = x1 * Math.cos(rz) + y1 * Math.sin(rz), fy = -x1 * Math.sin(rz) + y1 * Math.cos(rz);
+  return { x: (fx + W / 2) / W * 100, y: (fy + H / 2) / H * 100 };
+}
+peekScene24 = (prev => function (i){
+  const h = prev(i); if (!pk3dOn24) return h;
+  const gain = '<div class="pk24gain"></div>';
+  let body = h.replace('<div class="pk24gain"></div>', "").replace(/<div class="pk24tip">[^<]*<\/div>/, "");
+  body = body.replace('<div class="pk24fx"></div>', `<div class="pk24fx"></div>${pk3dWalls24()}<div class="flr3"></div>`);
+  return `<div class="pk3d" style="--rz:${pk3dRz24}deg;--tl:${pk3dTl24}deg">${body}${gain}<div class="pk3dhint">なぞって回す・子はドラッグで仕事を変える</div></div>`;
+})(peekScene24);
+// 見出しに 2D/3D の切りかえ
+peekModal24 = (prev => function (i){ let h = prev(i); try { h = h.replace('<button class="rsx" data-a="peek24x">', `<button class="mini pk3dt" data-a="pk3dt">${pk3dOn24 ? "2Dで見る" : "3Dで見る"}</button><button class="rsx" data-a="peek24x">`); } catch (e) {} return h; })(peekModal24);
+document.addEventListener("click", ev => { const b = ev.target.closest('[data-a="pk3dt"]'); if (!b) return; ev.stopPropagation(); pk3dOn24 = !pk3dOn24; try { localStorage.setItem("pk3d24", pk3dOn24 ? "1" : "0"); } catch (e) {} if (peek24 != null) peekOpen24(peek24); }, true);
+// 開いたら壁の表示をあわせる
+peekOpen24 = (prev => function (i){ prev(i); try { pk3dSync24(document.querySelector("#peek24 .pk3d")); } catch (e) {} })(peekOpen24);
+{ const _r = render; render = function (){ const v = _r.apply(this, arguments); try { pk3dSync24(document.querySelector("#peek24 .pk3d")); } catch (e) {} return v; }; }
+// なぞって回す（子をつまんだときは回さない）
+document.addEventListener("pointerdown", ev => {
+  const box = ev.target.closest && ev.target.closest("#peek24 .pk3d"); if (!box || ev.target.closest(".pk24m")) return;
+  const x0 = ev.clientX, y0 = ev.clientY, r0 = pk3dRz24, t0 = pk3dTl24; box.setPointerCapture && box.setPointerCapture(ev.pointerId); ev.preventDefault();
+  const mv = e => { pk3dRz24 = r0 + (e.clientX - x0) * 0.45; pk3dTl24 = Math.max(32, Math.min(70, t0 - (e.clientY - y0) * 0.25)); pk3dSync24(box); };
+  const up = () => { box.removeEventListener("pointermove", mv); box.removeEventListener("pointerup", up); box.removeEventListener("pointercancel", up); };
+  box.addEventListener("pointermove", mv); box.addEventListener("pointerup", up); box.addEventListener("pointercancel", up);
+}, true);
 
 // ================= 夜の戦いを見やすく：主の間の決戦・打たれた光・終わりの「間」 =================
 // 主の間で戦っているあいだは、1手をゆっくり（×1で750ms）。決戦が一瞬で終わらないように
