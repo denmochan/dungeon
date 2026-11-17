@@ -902,7 +902,7 @@ body:has(.stage) .modal{display:none!important}
 .pk24box{width:100%;max-width:520px;max-height:92vh;overflow-y:auto;background:#1a120d;border:1px solid #6a4a2a;border-bottom:0;border-radius:14px 14px 0 0;padding:10px 12px calc(env(safe-area-inset-bottom,0px) + 14px);animation:pk24in .22s ease-out}
 @keyframes pk24in{from{transform:translateY(40px);opacity:0}}
 .pk24head{display:flex;align-items:center;gap:8px;margin-bottom:8px}.pk24head b{font-size:16px;color:#ffe2a8}.pk24head .sp{flex:1}
-.pk24scene{position:relative;height:250px;border-radius:10px;overflow:hidden;background:var(--fl) 0 0/40px 40px repeat;image-rendering:pixelated;box-shadow:inset 0 0 40px #000c,inset 0 0 0 2px #0008}
+.pk24scene{position:relative;height:290px;border-radius:10px;overflow:hidden;background:var(--fl) 0 0/40px 40px repeat;image-rendering:pixelated;box-shadow:inset 0 0 40px #000c,inset 0 0 0 2px #0008}
 .pk24wall{position:absolute;left:0;right:0;top:0;height:46px;background:var(--wl) 0 0/40px 46px repeat-x;box-shadow:0 6px 10px #0009}
 .pk24corr{position:absolute;left:50%;top:0;transform:translateX(-50%);height:46px;min-width:70px;padding:0 8px;display:flex;align-items:center;gap:6px;background:#0007;border-left:2px solid #0009;border-right:2px solid #0009;z-index:3}
 .pk24trap{position:relative;width:40px}.pk24trap img{width:100%;image-rendering:pixelated;display:block}.pk24trap i{position:absolute;right:-4px;top:-6px;font-style:normal;font-size:11px;color:#ffd76a;text-shadow:0 0 2px #000}
@@ -913,8 +913,8 @@ body:has(.stage) .modal{display:none!important}
 .pk24m{position:absolute;width:62px;transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;z-index:4}
 .pk24m img.sp{width:62px;height:62px}.pk24m b{font-size:11px;color:#fff;background:#0009;border-radius:6px;padding:0 5px;margin-top:-4px;white-space:nowrap}
 .pk24m::before{content:"";position:absolute;left:22%;right:22%;top:54px;height:8px;border-radius:50%;background:#0007;z-index:-1}
-.pk24m.rest{filter:saturate(.5) brightness(.85)}.pk24m.bump img{animation:pk24bump .3s}
-@keyframes pk24bump{50%{transform:translateY(-4px)}}
+.pk24m.rest{filter:saturate(.5) brightness(.85)}
+@keyframes pk24bump{50%{margin-top:-4px}}
 .pk24empty{position:absolute;left:50%;top:62%;transform:translate(-50%,-50%);color:#b9a68c;font-size:13px}
 .pk24fx{position:absolute;inset:0;pointer-events:none;z-index:5}
 .pk24pop{position:absolute;transform:translateX(-50%);font-size:14px;font-weight:700;color:#ffe9a8;text-shadow:0 1px 2px #000,0 0 4px #000;animation:pk24pop 1.5s ease-out forwards;white-space:nowrap}
@@ -950,6 +950,22 @@ body:has(.stage) .modal{display:none!important}
 .cdepth24{position:relative;height:26px;margin:-2px 0;display:flex;align-items:center;justify-content:center;background:linear-gradient(#0000,#000c 40%,#000c 60%,#0000);z-index:2}
 .cdepth24 span{font-size:12px;color:#e8cf9c;background:#1a120c;border:1px solid #5a4028;border-radius:10px;padding:1px 10px;letter-spacing:.05em}
 .main-area.ntfull19>.dw>div:first-child>.cavestack{margin-top:auto;margin-bottom:auto}
+/* ---- のぞく：動きとドラッグ ---- */
+.pk24m{touch-action:none;cursor:grab}.pk24m.drag24{z-index:20;cursor:grabbing;filter:drop-shadow(0 6px 6px #000c) brightness(1.15)}
+.pk24m.left img.sp.an{transform:translateY(-10.42%) scale(-1.3333,1.3333)}.pk24m.left img.sp:not(.an){transform:scaleX(-1)}
+.pk24fac.tgt24 img{filter:drop-shadow(0 0 8px #ffd76a) brightness(1.2)}.pk24fac.tgt24 small{background:#6a4a10}
+.pk24fac.hit24 img{animation:hit24 .25s}@keyframes hit24{30%{transform:translateX(-2px);filter:brightness(1.5)}70%{transform:translateX(2px)}}
+.pk24fac.wob24 img{transform-origin:50% 100%;animation:wob24 .5s ease-out}@keyframes wob24{20%{transform:rotate(-9deg)}50%{transform:rotate(6deg)}80%{transform:rotate(-2deg)}}
+.pk24chip{position:absolute;width:4px;height:4px;background:#b8a890;box-shadow:0 0 0 1px #3a2a1a;animation:chip24 .7s ease-out forwards}
+@keyframes chip24{to{transform:translate(var(--dx),calc(var(--dy) * -1 + 30px));opacity:0}}
+.pk24gem{position:absolute;font-size:16px;transform:translate(-50%,-50%);transition:left 1s cubic-bezier(.3,-.4,.7,1),top 1s cubic-bezier(.3,-.6,.7,1);filter:drop-shadow(0 0 4px #7ef)}
+.pk24gain{position:absolute;left:4%;top:4%;z-index:6;font-size:13px;font-weight:700;color:#bff;text-shadow:0 1px 2px #000;pointer-events:none}.pk24gain.bump{animation:pk24bump .3s}
+.pk24hit{position:absolute;font-size:18px;transform:translate(-50%,-50%);animation:hitp24 .5s ease-out forwards}@keyframes hitp24{0%{transform:translate(-50%,-50%) scale(.4)}40%{transform:translate(-50%,-50%) scale(1.3)}100%{opacity:0}}
+.pk24arrow{position:absolute;font-size:16px;color:#ffe2a8;transform:translate(-50%,-50%);transition:left .55s linear,top .55s linear;text-shadow:0 0 3px #000}
+.pk24steam{position:absolute;width:10px;height:10px;border-radius:50%;background:#fff6;filter:blur(2px);animation:steam24 1.6s ease-out forwards}@keyframes steam24{to{transform:translateY(-40px) scale(2.2);opacity:0}}
+.pk24spark{position:absolute;color:#ffd76a;font-size:12px;animation:hitp24 .5s ease-out forwards}
+.pk24zz{position:absolute;font-size:13px;font-weight:700;color:#cfe3ff;animation:zz24 1.8s ease-out forwards}@keyframes zz24{to{transform:translate(12px,-28px) scale(1.5);opacity:0}}
+.pk24tip{position:absolute;left:0;right:0;bottom:2px;text-align:center;font-size:11px;color:#e8d6b0aa;z-index:5;pointer-events:none}
 </style>
 </head>
 <body>
@@ -7125,7 +7141,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.164（11/17 18:00）";
+const VER20 = "No.165（11/17 18:09）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -8299,26 +8315,36 @@ function peekMon24(m, i){
   else out = "⚔ 夜、一番前で戦う";
   return { job, role, out, bar, rest };
 }
+// 施設の絵の位置（％）と、そのまわりの立ち位置
+function pkLayout24(i){
+  const R = S.path[i], F = facsOf12(R), n = Math.max(1, F.length), fac = {};
+  F.forEach((f, k) => { const cx = (k + 0.5) / n * 100; fac[f] = { cx, spots: [[cx - 13, 64], [cx + 13, 64], [cx - 7, 80], [cx + 7, 80]] }; });
+  return { F, n, fac };
+}
 function peekScene24(i){
-  const R = S.path[i], th = themeOf7(S, i), T = CAVE8[th] || CAVE8.soil, res = residents5(S, i), F = facsOf12(R), n = Math.max(1, F.length);
+  const R = S.path[i], th = themeOf7(S, i), T = CAVE8[th] || CAVE8.soil, res = residents5(S, i), L = pkLayout24(i);
   const floor = (T.hallV && T.hallV[0]) || T.hall, wall = (T.faceV && T.faceV[0]) || T.face;
-  let h = `<div class="pk24scene" style="--fl:url(${floor});--wl:url(${wall})"><div class="pk24wall"></div>`;
-  // 手前の通路と罠
+  let h = `<div class="pk24scene" data-room="${i}" style="--fl:url(${floor});--wl:url(${wall})"><div class="pk24wall"></div>`;
   const TR = trapsOf24(R);
   h += `<div class="pk24corr">${TR.length ? TR.map(t => `<div class="pk24trap lv${t.lv}"><img src="${TRAP24IMG[t.k].src}">${t.lv ? `<i>${"★".repeat(t.lv)}</i>` : ""}</div>`).join("") : `<span class="pk24none">通路（罠なし）</span>`}</div>`;
-  // 施設
-  F.forEach((f, k) => { const x = (k + 0.5) / n * 100, P = typeof PROP16 !== "undefined" && PROP16[f];
-    h += `<div class="pk24fac" style="left:${x}%">${P ? `<img src="${P}" style="width:${PROP16D[f][0] * 2.1}px">` : `<span class="pk24fi">${FAC9[f].icon}</span>`}<small>${FAC9[f].icon}${FAC9[f].name}${flv16(R, f) > 1 ? " " + "★".repeat(flv16(R, f)) : ""}</small></div>`; });
+  L.F.forEach(f => { const P = typeof PROP16 !== "undefined" && PROP16[f];
+    h += `<div class="pk24fac" data-fac="${f}" style="left:${L.fac[f].cx}%">${P ? `<img src="${P}" style="width:${PROP16D[f][0] * 2.1}px">` : `<span class="pk24fi">${FAC9[f].icon}</span>`}<small>${FAC9[f].icon}${FAC9[f].name}${flv16(R, f) > 1 ? " " + "★".repeat(flv16(R, f)) : ""}</small></div>`; });
   if (R.kind === "lord") h += `<div class="pk24fac" style="left:50%"><img src="${ROOMIMG.throne.src}" style="width:90px"></div>`;
-  // 住んでいる子：仕事の施設のそばに並ぶ
-  const cnt = {}, nofac = res.filter(m => F.indexOf(peekMon24(m, i).job) < 0).length;
-  res.forEach(m => { const p = peekMon24(m, i), k = F.indexOf(p.job), c = cnt[p.job] = (cnt[p.job] || 0) + 1;
-    if (k < 0) { const x = (c - 0.5) / Math.max(1, nofac) * 84 + 8; h += `<div class="pk24m ${p.rest ? "an-sleep rest" : PKJOB24[""].an}" data-id="${m.id}" data-job="" style="left:${x}%;top:${c % 2 ? 94 : 82}%">${simg23(m, m.evos, "sp")}<b>${esc(m.nick)}</b></div>`; return; }
-    const cx = (k + 0.5) / n * 100, dx = ((c - 1) % 3 - 1) * (n >= 3 ? 10 : 15) + (c > 3 ? 6 : 0), y = c > 3 ? 74 : 94;
+  // 立ち位置：同じ施設の子は施設のまわりの4か所に、構えの子は床の好きな場所（ドラッグで決めた所）に。重ならないように割りふる
+  const used = {}, taken = [];
+  const free = (x, y) => !taken.some(([a, b]) => Math.abs(a - x) < 14 && Math.abs(b - y) < 14);
+  res.forEach(m => { const p = peekMon24(m, i); let x, y;
+    const sp = L.fac[p.job] && L.fac[p.job].spots;
+    if (sp) { const u = used[p.job] = (used[p.job] || 0); const s0 = sp.find((q, k) => k >= u && free(q[0], q[1])) || sp[u % 4]; used[p.job]++; [x, y] = s0; }
+    else if (m.pk24 && m.pk24.r === i) { x = m.pk24.x; y = m.pk24.y; }
+    else { const cand = [[20, 94], [80, 94], [50, 96], [35, 86], [65, 86], [10, 84], [90, 84]]; [x, y] = cand.find(q => free(q[0], q[1])) || [50, 92]; }
+    for (let t = 0; t < 6 && !free(x, y); t++) x += (x < 50 ? 9 : -9);
+    taken.push([x, y]);
     const an = p.rest ? "an-sleep" : (PKJOB24[p.job] || PKJOB24[""]).an;
-    h += `<div class="pk24m ${an}${p.rest ? " rest" : ""}" data-id="${m.id}" data-job="${p.job}" style="left:${Math.max(9, Math.min(91, cx + dx))}%;top:${y}%">${simg23(m, m.evos, "sp")}<b>${esc(m.nick)}</b></div>`; });
+    h += `<div class="pk24m ${an}${p.rest ? " rest" : ""}" data-id="${m.id}" data-job="${p.rest ? "rest" : p.job}" data-x="${x}" data-y="${y}" style="left:${Math.max(7, Math.min(93, x))}%;top:${y}%">${simg23(m, m.evos, "sp")}<b>${esc(m.nick)}</b></div>`; });
   if (!res.length && R.kind !== "lord") h += `<div class="pk24empty">だれも住んでいない</div>`;
-  return h + `<div class="pk24fx"></div></div>`;
+  if (res.length) h += `<div class="pk24tip">子をドラッグ：施設の上で離すとその仕事に／床で離すとそこで構える</div>`;
+  return h + `<div class="pk24fx"></div><div class="pk24gain"></div></div>`;
 }
 function peekModal24(i){
   const R = S.path[i]; if (!R) return "";
@@ -8341,18 +8367,73 @@ function peekModal24(i){
 function peekOpen24(i){
   peek24 = i; let el = document.getElementById("peek24");
   if (!el) { el = document.createElement("div"); el.id = "peek24"; document.body.appendChild(el);
-    el.addEventListener("click", ev => { if (ev.target === el) peekClose24(); }); }
+    el.addEventListener("click", ev => { if (ev.target === el) peekClose24(); });
+    pkDragInit24(el); }
   el.innerHTML = `<div class="pk24box">${peekModal24(i)}</div>`; el.classList.add("on");
-  clearInterval(peekT24); peekT24 = setInterval(peekLife24, 900);
+  clearInterval(peekT24); peekT24 = setInterval(peekLife24, 120); pkAct24 = {};
 }
 function peekClose24(){ peek24 = null; clearInterval(peekT24); const el = document.getElementById("peek24"); if (el) { el.classList.remove("on"); el.innerHTML = ""; } }
-// ぽつぽつ出る「⛏」「+💎」など（見ていて楽しいように）
+// ---------- 動き：仕事ごとに本当に働いて見える ----------
+let pkAct24 = {}, pkGain24 = 0;
+const pkFx24 = (sc, cls, txt, x, y, ms = 1200, style = "") => { const fx = sc.querySelector(".pk24fx"); if (!fx) return null; const d = document.createElement("span"); d.className = cls; if (txt) d.textContent = txt; d.style.cssText = `left:${x}%;top:${y}%;${style}`; fx.appendChild(d); setTimeout(() => d.remove(), ms); return d; };
+const pkMove24 = (e, x, y, ms) => { e.style.transition = `left ${ms}ms linear,top ${ms}ms linear`; e.classList.toggle("left", x < parseFloat(e.style.left)); e.style.left = x + "%"; e.style.top = y + "%"; };
 function peekLife24(){
   const el = document.getElementById("peek24"); if (!el || peek24 == null || !S) return peekClose24();
-  const fx = el.querySelector(".pk24fx"), ms = [...el.querySelectorAll(".pk24m:not(.rest)")]; if (!fx || !ms.length) return;
-  const m = ms[Math.floor(Math.random() * ms.length)], J = PKJOB24[m.dataset.job] || PKJOB24[""], t = J.say[Math.floor(Math.random() * J.say.length)];
-  const d = document.createElement("span"); d.className = "pk24pop"; d.textContent = t; d.style.left = m.style.left; d.style.top = `calc(${m.style.top} - 22%)`; fx.appendChild(d); setTimeout(() => d.remove(), 1500);
-  if (m.dataset.job === "mine" || m.dataset.job === "train") { m.classList.remove("bump"); void m.offsetWidth; m.classList.add("bump"); }
+  const sc = el.querySelector(".pk24scene"); if (!sc || sc.dataset.drag) return;
+  const now = Date.now();
+  sc.querySelectorAll(".pk24m").forEach(e => {
+    const id = e.dataset.id, job = e.dataset.job, A = pkAct24[id] = pkAct24[id] || { next: now + Math.random() * 900, ph: 0, x: +e.dataset.x, y: +e.dataset.y };
+    if (now < A.next) return;
+    const facEl = sc.querySelector(`.pk24fac[data-fac="${job}"]`), fx0 = facEl ? parseFloat(facEl.style.left) : 50;
+    const say = (t, cls = "pk24pop") => pkFx24(sc, cls, t, parseFloat(e.style.left), parseFloat(e.style.top) - 30, 1500);
+    if (job === "rest") { A.next = now + 1600; pkFx24(sc, "pk24zz", "z", parseFloat(e.style.left) + 4, parseFloat(e.style.top) - 24, 1800); return; }
+    if (job === "mine") {   // 岩へ近づいて、つるはしを振る→かけらが飛ぶ→3回に1回、魔石が出て箱へ飛ぶ
+      if (A.ph === 0) { pkMove24(e, fx0 + (A.x < fx0 ? -12 : 12), 60, 500); e.classList.remove("an-work"); A.ph = 1; A.next = now + 520; return; }
+      e.classList.add("an-work"); e.classList.toggle("left", A.x > fx0);
+      if (facEl) { facEl.classList.remove("hit24"); void facEl.offsetWidth; facEl.classList.add("hit24"); }
+      for (let k = 0; k < 3; k++) pkFx24(sc, "pk24chip", "", fx0 + (Math.random() * 10 - 5), 44, 700, `--dx:${(Math.random() * 2 - 1) * 40}px;--dy:${-20 - Math.random() * 30}px`);
+      A.sw = (A.sw || 0) + 1;
+      if (A.sw % 3 === 0) { const g = pkFx24(sc, "pk24gem", "💎", fx0, 42, 1100); if (g) requestAnimationFrame(() => { g.style.left = "6%"; g.style.top = "8%"; }); setTimeout(() => pkCount24(sc), 900); }
+      A.ph = A.sw % 6 === 0 ? 0 : 1; A.next = now + 700 + Math.random() * 300; return; }
+    if (job === "train") {   // かかしへ踏みこんで打つ→かかしが揺れる→「+経験」
+      const tx = fx0 + (A.x < fx0 ? -9 : 9);
+      if (A.ph === 0) { pkMove24(e, tx, 62, 220); e.classList.add("an-fight"); e.classList.toggle("left", A.x > fx0); A.ph = 1; A.next = now + 300; return; }
+      if (facEl) { facEl.classList.remove("wob24"); void facEl.offsetWidth; facEl.classList.add("wob24"); }
+      pkFx24(sc, "pk24hit", "💥", fx0 + (A.x < fx0 ? -3 : 3), 40, 500);
+      if (Math.random() < 0.35) say("+経験");
+      pkMove24(e, A.x, A.y, 380); A.ph = 0; A.next = now + 700 + Math.random() * 500; return; }
+    if (job === "watch") { e.classList.toggle("left"); if (Math.random() < 0.3) say("👀"); A.next = now + 1400 + Math.random() * 900; return; }
+    if (job === "snipe") {   // 壁の的へ矢を放つ
+      const ar = pkFx24(sc, "pk24arrow", "➶", parseFloat(e.style.left), parseFloat(e.style.top) - 18, 700);
+      if (ar) requestAnimationFrame(() => { ar.style.left = (A.x < 50 ? 92 : 8) + "%"; ar.style.top = "24%"; });
+      e.classList.add("an-work"); A.next = now + 1500 + Math.random() * 800; return; }
+    if (job === "cook") { for (let k = 0; k < 2; k++) pkFx24(sc, "pk24steam", "", fx0 + (k ? 3 : -3), 40, 1600); if (Math.random() < 0.3) say("🍖"); A.next = now + 900; return; }
+    if (job === "trapw") { pkFx24(sc, "pk24spark", "✦", parseFloat(e.style.left) + 6, parseFloat(e.style.top) - 10, 500); if (Math.random() < 0.25) say("🔧"); A.next = now + 650; return; }
+    if (job === "nest") { if (Math.random() < 0.4) say("💕"); A.next = now + 1200; return; }
+    if (job === "teach") { if (Math.random() < 0.5) say("そこだ！"); A.next = now + 1800; return; }
+    // 構え：床を見まわって、ときどき素振り
+    if (Math.random() < 0.5) { const nx = Math.max(8, Math.min(92, A.x + (Math.random() * 24 - 12))), ny = Math.max(80, Math.min(96, A.y + (Math.random() * 8 - 4))); e.classList.remove("an-fight"); pkMove24(e, nx, ny, 900); A.next = now + 1500 + Math.random() * 1500; }
+    else { e.classList.add("an-fight"); setTimeout(() => e.classList.remove("an-fight"), 700); A.next = now + 1800; }
+  });
+}
+function pkCount24(sc){ const g = sc.querySelector(".pk24gain"); if (!g) return; pkGain24++; g.textContent = `💎 +${pkGain24}`; g.classList.remove("bump"); void g.offsetWidth; g.classList.add("bump"); }
+// ---------- ドラッグで置き場所・仕事を決める ----------
+function pkDragInit24(root){
+  let D = null;
+  root.addEventListener("pointerdown", ev => { const e = ev.target.closest(".pk24m"); if (!e || e.classList.contains("rest")) return; const sc = e.closest(".pk24scene"); if (!sc) return;
+    D = { e, sc, id: +e.dataset.id, x0: ev.clientX, y0: ev.clientY, moved: false, r: sc.getBoundingClientRect() }; e.setPointerCapture(ev.pointerId); ev.preventDefault(); });
+  root.addEventListener("pointermove", ev => { if (!D) return; const dx = ev.clientX - D.x0, dy = ev.clientY - D.y0; if (!D.moved && Math.hypot(dx, dy) < 6) return;
+    D.moved = true; D.sc.dataset.drag = 1; D.e.classList.add("drag24"); D.e.style.transition = "none";
+    const x = (ev.clientX - D.r.left) / D.r.width * 100, y = (ev.clientY - D.r.top + 40) / D.r.height * 100; D.e.style.left = Math.max(5, Math.min(95, x)) + "%"; D.e.style.top = Math.max(30, Math.min(99, y)) + "%";
+    D.sc.querySelectorAll(".pk24fac").forEach(f => f.classList.toggle("tgt24", Math.abs(parseFloat(f.style.left) - x) < 14 && y < 72)); });
+  const end = ev => { if (!D) return; const { e, sc, id, moved } = D; D = null; delete sc.dataset.drag; e.classList.remove("drag24");
+    const m = S.mons.find(o => o.id === id); if (!m) return;
+    if (!moved) { const p = peekMon24(m, peek24); pkFx24(sc, "pk24pop", `${m.nick}：${p.role}　${p.out}`, parseFloat(e.style.left), parseFloat(e.style.top) - 32, 2200); return; }
+    const x = parseFloat(e.style.left), y = parseFloat(e.style.top), tgt = sc.querySelector(".pk24fac.tgt24"); sc.querySelectorAll(".tgt24").forEach(f => f.classList.remove("tgt24"));
+    if (tgt && tgt.dataset.fac) { const k = tgt.dataset.fac; if (typeof ROLEI18 !== "undefined" && ROLEI18[k]) setRole20(m, k); else toast("その施設では働けない"); }
+    else { m.pk24 = { r: peek24, x: Math.round(x), y: Math.round(Math.max(76, y)) }; if (jobOf12(S, m)) setRole20(m, "fight"); else toast(`${m.nick}：ここで構える`); }
+    CV.sig = ""; save(); render(); };
+  root.addEventListener("pointerup", end); root.addEventListener("pointercancel", end);
 }
 // 開きかた：部屋のシートの🔍、または選んでいる部屋をもう一度タップ
 roomSheet = (prev => function (i){ let h = prev(i); try { h = h.replace('<button class="rsx" data-a="rsclose">', `<button class="mini pk24btn" data-a="peek24" data-v="${i}">🔍 のぞく</button><button class="rsx" data-a="rsclose">`); } catch (e) {} return h; })(roomSheet);
