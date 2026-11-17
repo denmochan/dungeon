@@ -1859,7 +1859,7 @@ KIT24.noble = () => ({ common: COMMON24, body: ROOM_PARTS24.handTxt + addBody24(
   float mo=sRBox(h-vec3(0.0,-0.17,0.37),vec3(0.1,0.012,0.03),0.005);if(mo*HS<r.x)r=vec2(mo*HS,14.0);
   if(VAR.x>0.5){vec2 hq=h.xz-vec2(0.0,-0.03);float ht=max(length(hq)-0.29,abs(h.y-0.56)-0.3)-0.02;ht=min(ht,max(length(hq)-0.5,abs(h.y-0.27)-0.025)-0.01);if(ht*HS<r.x)r=vec2(ht*HS,13.0);
    float bd=max(abs(length(hq)-0.3)-0.02,abs(h.y-0.36)-0.06);if(bd*HS<r.x)r=vec2(bd*HS,15.0);}}
- {float yy=clamp((0.55-tp.y)/1.15,0.0,1.0);float rb=length(tp.xz*vec2(1.0,1.05))-mix(0.34,0.5,yy);rb=abs(rb)-0.03;rb=max(rb,max(tp.y-0.56,-0.6-tp.y));
+ {float yy=clamp((0.55-tp.y)/1.15,0.0,1.0);float rb=length(tp.xz*vec2(1.0,1.05))-mix(0.35,0.54,yy);rb=abs(rb)-0.03;rb=max(rb,max(tp.y-0.56,-0.6-tp.y));
   rb=max(rb,-sRBox(tp-vec3(0.0,0.0,0.62),vec3(0.06+0.16*yy,1.2,0.3),0.02));
   if(rb<r.x)r=vec2(rb,9.0);
   float sh=sEll(tp-vec3(0.0,0.08,0.06),vec3(0.36,0.5,0.34));if(sh<r.x)r=vec2(sh,13.0);
@@ -1874,11 +1874,11 @@ KIT24.noble = () => ({ common: COMMON24, body: ROOM_PARTS24.handTxt + addBody24(
    float mem=max(abs(w.z)-0.02,sh);if(mem<r.x)r=vec2(mem,13.0);}
   for(int k=0;k<4;k++){float fk=float(k);vec3 c=J[1]+vec3(sin(tm*1.6+fk*1.57)*0.75,0.5+0.1*sin(tm*3.0+fk),cos(tm*1.6+fk*1.57)*0.6);float dr=length(p-c)-0.05;if(dr<r.x)r=vec2(dr,15.0);}}
 `).replace("vec2 body(vec3 p){", "vec2 bodyR(vec3 p){") + `
-vec2 body(vec3 p){vec3 o=vec3(J[0].x,0.0,J[0].z);vec3 q=p-o;q=vec3(q.x*1.18,q.y/1.3,q.z*1.18)+o;vec2 r=bodyR(q);r.x*=0.72;return r;}
+vec2 body(vec3 p){vec3 o=vec3(J[0].x,0.0,J[0].z);vec3 q=p-o;q=vec3(q.x*1.07,q.y/1.2,q.z*1.07)+o;vec2 r=bodyR(q);r.x*=0.85;return r;}
 `, col: `
 vec4 charCol(vec3 p,vec3 n,float m){vec3 c;float sp=0.1;vec3 lp=p-J[0];
- vec3 h5=vec3(J[0].x+(J[5].x-J[0].x)/1.18,J[5].y*1.3,J[0].z+(J[5].z-J[0].z)/1.18),h8=vec3(J[0].x+(J[8].x-J[0].x)/1.18,J[8].y*1.3,J[0].z+(J[8].z-J[0].z)/1.18);
- if(m<1.5&&(min(length(p-h5),length(p-h8))<0.3&&p.y<J[2].y*1.3-0.3||p.y<J[0].y*1.3+0.15)){c=lin(vec3(0.2,0.18,0.22))*(0.85+0.2*fbm(p*14.0));sp=0.3;}
+ vec3 h5=vec3(J[0].x+(J[5].x-J[0].x)/1.07,J[5].y*1.2,J[0].z+(J[5].z-J[0].z)/1.07),h8=vec3(J[0].x+(J[8].x-J[0].x)/1.07,J[8].y*1.2,J[0].z+(J[8].z-J[0].z)/1.07);
+ if(m<1.5&&(min(length(p-h5),length(p-h8))<0.3&&p.y<J[2].y*1.2-0.3||p.y<J[0].y*1.2+0.15)){c=lin(vec3(0.2,0.18,0.22))*(0.85+0.2*fbm(p*14.0));sp=0.3;}
  else if(m<1.5){c=lin(skin)*(0.88+0.15*fbm(p*12.0));c*=0.82+0.25*smoothstep(-0.3,0.6,n.y);}
  else if(m<2.5){c=lin(vec3(0.97,0.95,0.9));}
  else if(m<5.5){c=lin(vec3(0.15,0.13,0.17))*(0.8+0.3*fbm(p*12.0));}
