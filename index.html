@@ -7182,7 +7182,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.171（11/17 22:40）";
+const VER20 = "No.172（11/17 22:44）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -9727,11 +9727,13 @@ async function trainDraw24(cv, CH, tm, cam, idm = 0){
 // ================= 3Dの洞窟：部屋の種類（訓練所・採掘場・寝床）×いろんな種族の子 =================
 // 1つのシェーダーに「部屋」と「子5体」を入れる。子ごとに種族の式（KIT24）を名前を変えて並べる
 const SLOTS24 = ["", "B", "C", "D", "E"];
-const FACEIDX24 = { goblin: 0, slime: 1, bat: 2, ghost: 3, imp: 4 };   // 顔の絵（横に4つ並べた1枚）の何番目か
-const SPCOL24 = { imp: [[0.76, 0.27, 0.2], [0.42, 0.1, 0.14]], kobold: [[0.62, 0.47, 0.3], [0.42, 0.35, 0.52]], ghost: [[0.88, 0.91, 0.96], [0.7, 0.75, 0.82]], goblin: [[0.570, 0.627, 0.240], [0.45, 0.29, 0.16]], skeleton: [[0.86, 0.82, 0.70], [0.50, 0.15, 0.12]], slime: [[0.20, 0.47, 0.23], [0.3, 0.6, 0.3]],
+const FACEIDX24 = { goblin: 0, slime: 1, bat: 2, ghost: 3, imp: 4, myconid: 5, orc: 6 };   // 顔の絵（横に4つ並べた1枚）の何番目か
+const SPCOL24 = { orc: [[0.30, 0.42, 0.21], [0.42, 0.27, 0.15]], myconid: [[0.93, 0.87, 0.72], [0.78, 0.2, 0.15]], wolf: [[0.5, 0.52, 0.56], [0.3, 0.3, 0.33]], spider: [[0.32, 0.22, 0.28], [0.75, 0.12, 0.12]], imp: [[0.76, 0.27, 0.2], [0.42, 0.1, 0.14]], kobold: [[0.62, 0.47, 0.3], [0.42, 0.35, 0.52]], ghost: [[0.88, 0.91, 0.96], [0.7, 0.75, 0.82]], goblin: [[0.570, 0.627, 0.240], [0.45, 0.29, 0.16]], skeleton: [[0.86, 0.82, 0.70], [0.50, 0.15, 0.12]], slime: [[0.20, 0.47, 0.23], [0.3, 0.6, 0.3]],
   bat: [[0.47, 0.34, 0.64], [0.66, 0.38, 0.55]], rat: [[0.62, 0.58, 0.50], [0.88, 0.58, 0.58]] };
+// 種族ごとの大きさ
+const SPSCL24 = { orc: 1.25, myconid: 0.95 };
 // 体の当たりの球（中心y・半径）
-const SPBOUND24 = { imp: [0.9, 1.6], kobold: [0.9, 1.6], ghost: [0.9, 1.25], goblin: [0.9, 1.55], skeleton: [0.9, 1.55], slime: [0.4, 0.95], bat: [1.0, 1.35], rat: [0.3, 1.15] };
+const SPBOUND24 = { orc: [0.9, 1.6], myconid: [0.6, 0.9], wolf: [0.6, 1.25], spider: [0.45, 1.3], imp: [0.9, 1.6], kobold: [0.9, 1.6], ghost: [0.9, 1.25], goblin: [0.9, 1.55], skeleton: [0.9, 1.55], slime: [0.4, 0.95], bat: [1.0, 1.35], rat: [0.3, 1.15] };
 
 // ---------- 種族ごとの式 ----------
 const KIT24 = {};
@@ -9771,6 +9773,71 @@ vec4 charCol(vec3 p,vec3 n,float m){vec3 b=HR*(p-J[0]);vec3 c=lin(skin)*(0.85+0.
  vec3 hn=HR*n;float fz=smoothstep(0.1,0.35,hn.z);vec2 fu=vec2(b.x/0.8+0.5,0.5-(b.y-0.02)/0.85);
  if(fz>0.0&&fu.x>0.0&&fu.x<1.0&&fu.y>0.0&&fu.y<1.0){vec4 tx=texture2D(face,vec2((fu.x+FIDX)/8.0,fu.y));c=mix(c,lin(tx.rgb),tx.a*fz);}
  c+=lin(vec3(0.5,0.6,0.75))*0.25;return vec4(c,0.3);}
+` });
+
+KIT24.orc = () => ({ common: COMMON24, body: ROOM_PARTS24.handTxt + addBody24(ROOM_PARTS24.bodyTxt.replace("sHead(", "sHeadNE("), `
+ {vec3 h=HR*(p-J[2]);vec3 e=vec3(abs(h.x),h.y,h.z);float tk=sTap(e,vec3(0.14,-0.22,0.28),vec3(0.17,-0.06,0.36),0.045,0.012);if(tk<r.x)r=vec2(tk,2.0);
+  float er=sTap(e,vec3(0.36,0.06,-0.02),vec3(0.5,0.14,-0.08),0.07,0.015);if(er<r.x)r=vec2(er,1.0);
+  float kn=sEll(h-vec3(0.0,0.44,-0.05),vec3(0.09,0.08,0.09));if(kn<r.x)r=vec2(kn,4.0);}
+`), col: GOBCOL24() });
+KIT24.myconid = () => ({ body: `
+vec2 body(vec3 p){
+ vec3 b=HR*(p-J[0]);
+ float st=sEll(b-vec3(0.0,0.36,0.0),vec3(0.26,0.34,0.24));
+ st=smin(st,sTap(b,vec3(-0.12,0.1,0.0),vec3(-0.15,0.0,0.06),0.08,0.07),0.05);st=smin(st,sTap(b,vec3(0.12,0.1,0.0),vec3(0.15,0.0,0.06),0.08,0.07),0.05);
+ st=smin(st,sTap(b,vec3(-0.22,0.38,0.0),J[2]-J[0],0.06,0.05),0.05);st=smin(st,sTap(b,vec3(0.22,0.38,0.0),J[3]-J[0],0.06,0.05),0.05);
+ vec2 r=vec2(st,1.0);
+ vec3 c=b-vec3(0.0,0.78,0.0);float cap=sEll(c,vec3(0.55,0.36,0.52));cap=max(cap,-(c.y+0.06));cap=smin(cap,sEll(c-vec3(0,-0.04,0),vec3(0.56,0.06,0.53)),0.04);
+ if(cap<r.x)r=vec2(cap,3.0);
+ return r;}
+`, col: `
+vec4 charCol(vec3 p,vec3 n,float m){vec3 b=HR*(p-J[0]);vec3 c;float sp=0.08;
+ if(m<1.5){c=lin(skin)*(0.82+0.25*fbm(b*10.0));vec3 hn=HR*n;float fz=smoothstep(0.1,0.35,hn.z);vec2 fu=vec2(b.x/0.5+0.5,0.5-(b.y-0.38)/0.5);
+  if(fz>0.0&&fu.x>0.0&&fu.x<1.0&&fu.y>0.0&&fu.y<1.0){vec4 tx=texture2D(face,vec2((fu.x+FIDX)/8.0,fu.y));c=mix(c,lin(tx.rgb),tx.a*fz);}}
+ else {vec3 cc=b-vec3(0.0,0.78,0.0);c=lin(cloth)*(0.8+0.3*fbm(b*7.0));float sp2=step(0.62,vnoise(cc*7.0+3.0))*step(-0.0,cc.y);c=mix(c,lin(vec3(0.95,0.9,0.82)),sp2*0.9);
+  if(cc.y<-0.03)c=lin(skin)*0.75*(0.8+0.3*step(0.5,fract(atan(cc.x,cc.z)*5.0)));sp=0.15;}
+ return vec4(c,sp);}
+` });
+KIT24.wolf = () => ({ body: `
+vec2 body(vec3 p){
+ float d=sEll(p-J[0],vec3(0.27,0.27,0.55));d=smin(d,sEll(p-J[0]-vec3(0.0,0.05,0.3),vec3(0.29,0.31,0.3)),0.12);
+ vec3 h=HR*(p-J[1]);
+ float hd=smin(sEll(h,vec3(0.2,0.19,0.22)),sTap(h,vec3(0,-0.04,0.08),vec3(0,-0.08,0.42),0.13,0.06),0.06);
+ d=smin(d,sTap(p,J[0]+vec3(0.0,0.08,0.38),J[1],0.17,0.14),0.08);d=smin(d,hd,0.08);
+ for(int i=0;i<4;i++){vec3 f=J[5+i];vec3 top=vec3(f.x*0.85,J[0].y-0.05,J[0].z+(i<2?0.38:-0.35));vec3 kn=mix(top,f,0.5)+vec3(0.0,0.0,i<2?0.04:-0.08);
+  d=smin(d,min(sTap(p,top,kn,0.09,0.06),sTap(p,kn,f+vec3(0,0.04,0),0.06,0.045)),0.05);}
+ vec2 r=vec2(d,1.0);
+ vec3 e=vec3(abs(h.x),h.y,h.z);
+ float ea=sTap(e,vec3(0.11,0.15,-0.04),vec3(0.16,0.38,-0.1),0.075,0.01);if(ea<r.x)r=vec2(ea,1.0);
+ float tl=min(sTap(p,J[2],J[3],0.09,0.1),sTap(p,J[3],J[4],0.1,0.04));if(tl<r.x)r=vec2(tl,1.0);
+ float ns=length(h-vec3(0,-0.07,0.46))-0.045;if(ns<r.x)r=vec2(ns,3.0);
+ float ey=length(e-vec3(0.1,0.04,0.16))-0.035;if(ey<r.x)r=vec2(ey,6.0);
+ return r;}
+`, col: `
+vec4 charCol(vec3 p,vec3 n,float m){vec3 c;float sp=0.05;
+ if(m<1.5){vec3 lp=p-J[0];c=lin(skin)*(0.7+0.4*fbm(vec3(lp.x*16.0,lp.y*16.0,lp.z*5.0)));c=mix(c,lin(skin*1.25),smoothstep(-0.05,-0.2,lp.y)*0.6);float st=step(0.6,fract(lp.z*4.5))*smoothstep(0.12,0.24,lp.y)*step(abs(lp.x),0.18);c*=1.0-0.35*st;}
+ else if(m<3.5){c=lin(vec3(0.1,0.08,0.08));}
+ else if(m<6.5){c=lin(vec3(1.0,0.85,0.2))*2.0;sp=0.6;}
+ else c=lin(vec3(0.42,0.36,0.30));
+ return vec4(c,sp);}
+` });
+KIT24.spider = () => ({ body: `
+vec2 body(vec3 p){
+ float d=sEll(p-J[0],vec3(0.42,0.36,0.46));
+ d=smin(d,sEll(p-J[1],vec3(0.25,0.2,0.24)),0.08);
+ vec2 r=vec2(d,1.0);
+ for(int i=0;i<8;i++){float sx=i<4?-1.0:1.0;float k=float(i<4?i:i-4);float ph=J[2].x+k*1.57+(sx>0.0?0.8:0.0);
+  vec3 base=J[1]+vec3(sx*0.17,0.02,0.15-k*0.1);vec3 foot=vec3(sx*(0.75+0.08*sin(k*1.3)),0.02+max(0.0,sin(ph))*0.12,0.55-k*0.4+cos(ph)*0.08);
+  vec3 knee=mix(base,foot,0.45)+vec3(sx*0.05,0.42,0.0);float lg=min(sTap(p,base,knee,0.055,0.04),sTap(p,knee,foot,0.04,0.018));if(lg<r.x)r=vec2(lg,1.0);}
+ vec3 e=p-J[1];e.x=abs(e.x);float ey=min(length(e-vec3(0.07,0.06,0.21))-0.04,length(e-vec3(0.13,0.1,0.17))-0.03);if(ey<r.x)r=vec2(ey,6.0);
+ float fg=sTap(e,vec3(0.06,-0.08,0.2),vec3(0.05,-0.2,0.24),0.03,0.008);if(fg<r.x)r=vec2(fg,2.0);
+ return r;}
+`, col: `
+vec4 charCol(vec3 p,vec3 n,float m){vec3 c;float sp=0.25;
+ if(m<1.5){vec3 lp=p-J[0];c=lin(skin)*(0.75+0.35*fbm(p*9.0));if(length(lp-vec3(0.0,0.35,0.0))<0.2){vec2 q=lp.xz;float hg=step(abs(q.x),0.03+abs(q.y)*0.6)*step(abs(q.y),0.13);c=mix(c,lin(cloth),hg);}}
+ else if(m<2.5){c=lin(vec3(0.9,0.85,0.8));}
+ else c=lin(vec3(1.0,0.15,0.1))*2.2;
+ return vec4(c,sp);}
 ` });
 KIT24.skeleton = () => ({ body: `
 vec2 body(vec3 p){
@@ -9882,8 +9949,18 @@ vec4 charCol(vec3 p,vec3 n,float m){vec3 c;float sp=0.06;
 
 // ---------- 種族ごとの動き（関節の置き方） ----------
 function rigSp24(sp, mode, t){
-  if (sp === "goblin" || sp === "skeleton" || sp === "imp" || sp === "kobold") return rig24(mode, t);
+  if (sp === "goblin" || sp === "skeleton" || sp === "imp" || sp === "kobold" || sp === "orc") return rig24(mode, t);
   const J = Array.from({ length: 40 }, () => [0, -9, 0]), ph = t * Math.PI * 2; let HR = rotX(0);
+  if (sp === "myconid") { const sl = mode === "sleep", sw = Math.sin(ph / 1.9);
+    J[0] = [0, sl ? -0.08 : Math.abs(Math.sin(ph / 0.95)) * 0.04, 0]; J[2] = [-0.34, 0.25 + sw * 0.06, 0.08]; J[3] = [0.34, 0.25 - sw * 0.06, 0.08]; HR = m3mul(rotZ(sw * (sl ? 0.03 : 0.08)), rotX(sl ? 0.2 : 0)); return { J, HR, TR: rotX(0), tool: 0, deb: [] }; }
+  if (sp === "wolf") { const sl = mode === "sleep", s = Math.sin(ph / (sl ? 3.2 : 1.1)), wag = Math.sin(ph * 1.6);
+    if (sl) { J[0] = [0, 0.3 + s * 0.01, 0]; J[1] = [0.15, 0.22, 0.6]; HR = m3mul(rotY(-0.4), rotX(0.3)); J[2] = [0, 0.3, -0.5]; J[3] = [-0.35, 0.15, -0.75]; J[4] = [-0.55, 0.1, -0.35];
+      J[5] = [-0.18, 0.06, 0.62]; J[6] = [0.12, 0.06, 0.66]; J[7] = [-0.25, 0.06, -0.15]; J[8] = [0.25, 0.06, -0.2]; }
+    else { J[0] = [0, 0.66 + s * 0.012, 0]; J[1] = [Math.sin(ph / 2.3) * 0.05, 0.86 + s * 0.02, 0.66]; HR = m3mul(rotY(Math.sin(ph / 2.3) * 0.35), rotX(-0.1)); J[2] = [0, 0.74, -0.52]; J[3] = [wag * 0.12, 0.62, -0.9]; J[4] = [wag * 0.28, 0.42, -1.2];
+      J[5] = [-0.17, 0.04, 0.42]; J[6] = [0.17, 0.04, 0.42]; J[7] = [-0.18, 0.04, -0.38]; J[8] = [0.18, 0.04, -0.38]; }
+    return { J, HR, TR: rotX(0), tool: 0, deb: [] }; }
+  if (sp === "spider") { const sl = mode === "sleep", s = Math.sin(ph / 1.4);
+    J[0] = [0, (sl ? 0.32 : 0.55) + s * 0.02, -0.35]; J[1] = [0, (sl ? 0.25 : 0.45) + s * 0.015, 0.2]; J[2] = [sl ? 0 : t * 1.5, 0, 0]; return { J, HR, TR: rotX(0), tool: 0, deb: [] }; }
   if (sp === "ghost") { const sl = mode === "sleep", bob = Math.sin(ph / 1.6) * 0.08, sw = Math.sin(ph / 2.3);
     J[0] = sl ? [0, 0.5, 0] : [0, 0.95 + bob, 0]; J[1] = [sw * 0.25, sl ? 0.15 : 0.35 + bob * 0.5, -0.3]; J[2] = [-0.55, (sl ? 0.35 : 0.85) + Math.sin(ph / 0.9) * 0.08, 0.1]; J[3] = [0.55, (sl ? 0.35 : 0.85) - Math.sin(ph / 0.9) * 0.08, 0.1];
     HR = m3mul(rotY(sw * 0.2), rotZ(sw * 0.08)); return { J, HR, TR: rotX(0), tool: 0, deb: [] }; }
@@ -9923,7 +10000,7 @@ FACE24.bat = { rows: [
   "................................", "................................", "................................", "................................"],
   pal: { K: [30, 10, 30], R: [235, 50, 50] } };
 function faceAtlas24(gl){ const cv = document.createElement("canvas"); cv.width = 256; cv.height = 32; const x = cv.getContext("2d"), d = x.createImageData(256, 32);
-  ["goblin", "slime", "bat", "ghost", "imp"].forEach((sp, i) => { const F = FACE24[sp]; F.rows.forEach((r, y) => [...r].forEach((ch, k) => { const c = F.pal[ch]; if (!c) return; const j = (y * 256 + i * 32 + k) * 4; d.data[j] = c[0]; d.data[j + 1] = c[1]; d.data[j + 2] = c[2]; d.data[j + 3] = 255; })); });
+  ["goblin", "slime", "bat", "ghost", "imp", "myconid", "orc"].forEach((sp, i) => { const F = FACE24[sp]; F.rows.forEach((r, y) => [...r].forEach((ch, k) => { const c = F.pal[ch]; if (!c) return; const j = (y * 256 + i * 32 + k) * 4; d.data[j] = c[0]; d.data[j + 1] = c[1]; d.data[j + 2] = c[2]; d.data[j + 3] = 255; })); });
   x.putImageData(d, 0, 0); const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, cv);
   [gl.TEXTURE_MIN_FILTER, gl.TEXTURE_MAG_FILTER].forEach(k => gl.texParameteri(gl.TEXTURE_2D, k, gl.NEAREST)); [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T].forEach(k => gl.texParameteri(gl.TEXTURE_2D, k, gl.CLAMP_TO_EDGE)); return t; }
 
@@ -9982,7 +10059,7 @@ function caveFS24(room, sps){
   const sfx = (s, k) => { const S = SLOTS24[k]; let o = s.replace(/\bskin\b/g, `SKIN[${k}]`).replace(/\bcloth\b/g, `CLOTH[${k}]`).replace(/\bFIDX\b/g, `FI[${k}]`);
     if (!k) return o; return o.replace(/\bJ\[/g, "J" + S + "[").replace(/\bHR\b/g, "HR" + S).replace(/\bTR\b/g, "TR" + S).replace(/\btool\b/g, "tool" + S).replace(/\bdeb\[/g, "deb" + S + "[")
       .replace(/vec2 body\(/g, "vec2 body" + S + "(").replace(/\bsHand\(/g, "sHand" + S + "(").replace(/vec4 charCol\(/g, "vec4 charCol" + S + "("); };
-  let uni = `uniform float CS;uniform vec3 OC[${N}];uniform float RC[${N}];uniform float LIE[${N}];uniform vec3 SKIN[${N}];uniform vec3 CLOTH[${N}];uniform float FI[${N}];uniform float tm;uniform float idm;\n`;
+  let uni = `uniform float CS;uniform float SCL[${N}];uniform vec3 OC[${N}];uniform float RC[${N}];uniform float LIE[${N}];uniform vec3 SKIN[${N}];uniform vec3 CLOTH[${N}];uniform float FI[${N}];uniform float tm;uniform float idm;\n`;
   for (let k = 1; k < N; k++) { const S = SLOTS24[k]; uni += `uniform vec3 J${S}[40];uniform mat3 HR${S};uniform mat3 TR${S};uniform vec4 deb${S}[6];uniform float tool${S};\n`; }
   let bodies = "", mats = ""; const commons = new Set();
   for (let k = 0; k < N; k++) { const K = KIT24[sps[k]](); if (K.common) commons.add(K.common); bodies += sfx(K.body, k); mats += sfx(K.col, k); }
@@ -9998,11 +10075,11 @@ function caveFS24(room, sps){
   rep("float v=smoothstep(0.68,0.72,fbm(p*5.0+9.0));c=mix(c,lin(vec3(0.35,0.75,0.95)),v*0.8);emi=v*0.4;sp=0.3;", "sp=0.1;");
   // 子
   let scene = "vec3 scene(vec3 p){\n vec2 r=room(p);vec3 o=vec3(r,0.0);vec3 q;float bb;\n";
-  for (let k = 0; k < N; k++) { const B = SPBOUND24[sps[k]]; scene += ` q=toC(p,OC[${k}],RC[${k}])/CS;if(LIE[${k}]>0.5)q=vec3(0.45-q.y,q.x,q.z);bb=(length(q-vec3(0,${B[0].toFixed(2)},0))-${B[1].toFixed(2)})*CS;if(bb<0.3){vec2 b=body${SLOTS24[k]}(q);b.x*=CS;if(b.x<o.x)o=vec3(b,${k + 1}.0);}else if(bb<o.x)o=vec3(bb,0.0,-1.0);\n`; }
+  for (let k = 0; k < N; k++) { const B = SPBOUND24[sps[k]]; scene += ` q=toC(p,OC[${k}],RC[${k}])/(CS*SCL[${k}]);if(LIE[${k}]>0.5)q=vec3(0.45-q.y,q.x,q.z);bb=(length(q-vec3(0,${B[0].toFixed(2)},0))-${B[1].toFixed(2)})*CS*SCL[${k}];if(bb<0.3){vec2 b=body${SLOTS24[k]}(q);b.x*=CS*SCL[${k}];if(b.x<o.x)o=vec3(b,${k + 1}.0);}else if(bb<o.x)o=vec3(bb,0.0,-1.0);\n`; }
   scene += " return o;}\n";
   sc = sc.slice(0, sc.indexOf("vec3 scene(vec3 p){")) + scene + sc.slice(sc.indexOf("float mapd(vec3 p)"));
   let shade = "  if(ob>0.5){vec4 cc;vec3 q;vec3 nl;\n";
-  for (let k = 0; k < N; k++) shade += `   ${k ? "else " : ""}if(ob<${k + 1}.5){q=toC(p,OC[${k}],RC[${k}])/CS;nl=frC(n,RC[${k}]);if(LIE[${k}]>0.5){q=vec3(0.45-q.y,q.x,q.z);nl=vec3(-nl.y,nl.x,nl.z);}cc=charCol${SLOTS24[k]}(q,nl,m);}\n`;
+  for (let k = 0; k < N; k++) shade += `   ${k ? "else " : ""}if(ob<${k + 1}.5){q=toC(p,OC[${k}],RC[${k}])/(CS*SCL[${k}]);nl=frC(n,RC[${k}]);if(LIE[${k}]>0.5){q=vec3(0.45-q.y,q.x,q.z);nl=vec3(-nl.y,nl.x,nl.z);}cc=charCol${SLOTS24[k]}(q,nl,m);}\n`;
   shade += "   c=cc.rgb;sp=cc.a;}\n";
   const a0 = sc.indexOf("  if(ob>0.5){float rr="), a1 = sc.indexOf("\n", a0) + 1; sc = sc.slice(0, a0) + shade + sc.slice(a1);
   sc = sc.replace("vec3 lin(vec3 c){return pow(c,vec3(2.2));}", "vec3 lin(vec3 c){return pow(c,vec3(2.2));}" + mats);
@@ -10046,7 +10123,7 @@ async function caveDraw24(cv, room, CH, tm, cam, idm = 0){
     const f = new Float32Array(24); (R.deb || []).forEach((d, i) => f.set(d, i * 4)); gl.uniform4fv(U("deb" + s2), f); });
   gl.uniform3fv(U("OC"), new Float32Array(CH.flatMap(c => c.o))); gl.uniform1fv(U("RC"), new Float32Array(CH.map(c => c.r))); gl.uniform1fv(U("LIE"), new Float32Array(CH.map(c => c.lie ? 1 : 0)));
   gl.uniform3fv(U("SKIN"), new Float32Array(CH.flatMap(c => SPCOL24[c.sp][0]))); gl.uniform3fv(U("CLOTH"), new Float32Array(CH.flatMap(c => SPCOL24[c.sp][1]))); gl.uniform1fv(U("FI"), new Float32Array(CH.map(c => FACEIDX24[c.sp] ?? -1)));
-  gl.uniform1f(U("tm"), tm); gl.uniform1f(U("idm"), idm); gl.uniform1f(U("CS"), 1.0); gl.uniform1f(U("hasFace"), 2);
+  gl.uniform1f(U("tm"), tm); gl.uniform1f(U("idm"), idm); gl.uniform1f(U("CS"), 1.0); gl.uniform1fv(U("SCL"), new Float32Array(CH.map(c => SPSCL24[c.sp] || 1))); gl.uniform1f(U("hasFace"), 2);
   gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, S.tex); gl.uniform1i(U("face"), 0);
   gl.drawArrays(gl.TRIANGLES, 0, 3);
 }
@@ -10080,6 +10157,26 @@ FACE24.imp = { rows: [
   "................................", "................................", "................................", "................................",
   "................................", "................................", "................................", "................................"],
   pal: { K: [40, 8, 10], Y: [255, 230, 90], O: [255, 140, 30], W: [245, 240, 225] } };
+FACE24.myconid = { rows: [
+  "................................", "................................", "................................", "................................",
+  "................................", "................................", "................................", "................................",
+  "................................", "................................", "................................", ".........K..........K...........",
+  "........K.K........K.K..........", ".......K...K......K...K.........", "................................", "................................",
+  "..............KKK...............", "...............K................", "................................", "................................",
+  "................................", "................................", "................................", "................................",
+  "................................", "................................", "................................", "................................",
+  "................................", "................................", "................................", "................................"],
+  pal: { K: [60, 40, 30] } };
+FACE24.orc = { rows: [
+  "................................", "................................", "................................", "................................",
+  "................................", "................................", "................................", "................................",
+  "................................", "................................", "................................", "......KKKK..........KKKK........",
+  ".......KKKK........KKKK.........", ".......KRRK........KRRK.........", "........KK..........KK..........", "................................",
+  "................................", "................................", "................................", ".......KKKKKKKKKKKKKKKKKK.......",
+  ".......KWKWKKWKWKKWKWKWK........", ".......KDDDDDDDDDDDDDDDDK.......", ".......KKWKWKKWKKWKWKKWKK.......", "........KKKKKKKKKKKKKKKK........",
+  "................................", "................................", "................................", "................................",
+  "................................", "................................", "................................", "................................"],
+  pal: { K: [20, 25, 12], R: [230, 40, 30], W: [235, 230, 205], D: [70, 20, 18] } };
 
 // ================= のぞく画面を3Dに：部屋を斜め上から見る箱にして、ドット絵を立て看板のように置く（指で回せる） =================
 // ライブラリは使わず、CSSの3D変形だけで描く（iPhoneでも軽い）
@@ -10200,7 +10297,7 @@ function Cave3D24(cv, info, opt = {}){
       const f = new Float32Array(24); (R.deb || []).forEach((d, i) => f.set(d, i * 4)); gl.uniform4fv(U("deb" + s2), f); });
     gl.uniform3fv(U("OC"), new Float32Array(CH.flatMap(c => c.o))); gl.uniform1fv(U("RC"), new Float32Array(CH.map(c => c.r))); gl.uniform1fv(U("LIE"), new Float32Array(CH.map(c => c.lie ? 1 : 0)));
     gl.uniform3fv(U("SKIN"), new Float32Array(CH.flatMap(c => SPCOL24[c.sp][0]))); gl.uniform3fv(U("CLOTH"), new Float32Array(CH.flatMap(c => SPCOL24[c.sp][1]))); gl.uniform1fv(U("FI"), new Float32Array(CH.map(c => FACEIDX24[c.sp] ?? -1)));
-    gl.uniform1f(U("tm"), tm); gl.uniform1f(U("CS"), 1.0); gl.uniform1f(U("idm"), 0); gl.uniform1f(U("hasFace"), 2);
+    gl.uniform1f(U("tm"), tm); gl.uniform1f(U("CS"), 1.0); gl.uniform1fv(U("SCL"), new Float32Array(CH.map(c => SPSCL24[c.sp] || 1))); gl.uniform1f(U("idm"), 0); gl.uniform1f(U("hasFace"), 2);
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, faceT); gl.uniform1i(U("face"), 0);
     gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, bgCT); gl.uniform1i(U("bgC"), 1);
     gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, bgDT); gl.uniform1i(U("bgD"), 2); }
@@ -10236,11 +10333,11 @@ function Cave3D24(cv, info, opt = {}){
 }
 // ---------- ゲームの部屋 → 3Dの配役 ----------
 // 3Dにできる種族（それ以外はまだ）
-const SP3D24 = { goblin: 1, skeleton: 1, slime: 1, bat: 1, rat: 1, imp: 1, kobold: 1, ghost: 1 };
+const SP3D24 = { goblin: 1, skeleton: 1, slime: 1, bat: 1, rat: 1, imp: 1, kobold: 1, ghost: 1, orc: 1, myconid: 1, wolf: 1, spider: 1 };
 // list: [{sp, job, rest, nick}]。部屋の種類と立ち位置を決める
 function castGame24(facs, list){
   const room = facs.includes("train") ? "train" : facs.includes("mine") ? "mine" : facs.includes("bed") ? "sleep" : "train";
-  const biped = sp => sp === "goblin" || sp === "skeleton" || sp === "imp" || sp === "kobold";
+  const biped = sp => sp === "goblin" || sp === "skeleton" || sp === "imp" || sp === "kobold" || sp === "orc";
   const spots = {
     train: { train: [[-5.4, -0.1, 0.15, "slash"], [-1.15, 0.0, 0.8, "slash"], [1.05, 0.12, -0.8, "slash"], [5.9, -2.6, -0.3, "lift"]],
       mine: [], bed: [] },
