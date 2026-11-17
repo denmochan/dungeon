@@ -945,6 +945,11 @@ body:has(.stage) .modal{display:none!important}
 .cent.lordhit24 .cfl{animation:lh24 .45s}
 @keyframes lh24{0%{filter:brightness(2) drop-shadow(0 0 6px #ff2020)}30%{transform:translateX(-4px)}60%{transform:translateX(4px)}100%{filter:none;transform:none}}
 .cpop.lordd24{color:#ffd76a!important;font-size:20px!important;text-shadow:0 0 4px #000,0 0 8px #c00!important}
+/* ---- 層を縦につなげる ---- */
+.cavestack{display:flex;flex-direction:column;width:100%}
+.cdepth24{position:relative;height:26px;margin:-2px 0;display:flex;align-items:center;justify-content:center;background:linear-gradient(#0000,#000c 40%,#000c 60%,#0000);z-index:2}
+.cdepth24 span{font-size:12px;color:#e8cf9c;background:#1a120c;border:1px solid #5a4028;border-radius:10px;padding:1px 10px;letter-spacing:.05em}
+.main-area.ntfull19>.dw>div:first-child>.cavestack{margin-top:auto;margin-bottom:auto}
 </style>
 </head>
 <body>
@@ -5131,12 +5136,15 @@ function caveMount(){
   if (caveFloor === -1 && N) caveFloor = 0;
   if (caveFloor === -1) { host.innerHTML = caveShell(); surfaceMount(host); return; }
   if (N && caveFollow) { const lead = caveLeader(); if (lead) caveFloor = lead.f; }
-  if (!CV.el) { CV.el = document.createElement("div"); CV.el.className = "cave"; }
+  // 層はタブで切りかえず、縦につなげて並べる（下へなぞるほど深い）
+  if (!CV.el) { CV.el = document.createElement("div"); CV.el.className = "cavestack"; }
   host.innerHTML = caveShell(); host.appendChild(CV.el);
-  const M = CV.maps[caveFloor];
-  if (CV.lastF !== caveFloor || CV.el.dataset.sig !== CV.sig) { CV.el.innerHTML = caveStatic(M); CV.el.style.aspectRatio = `${CW} / ${M.H}`; CV.lastF = caveFloor; CV.el.dataset.sig = CV.sig; CV.ents = {}; }
+  if (CV.el.dataset.sig !== CV.sig || !CV.els || CV.els.length !== CV.maps.length) {
+    CV.el.innerHTML = CV.maps.map((M, k) => (k ? `<div class="cdepth24"><span>▼ B${M.f + 1}　${THEME7[M.theme].name}</span></div>` : "") + `<div class="cave" data-f="${M.f}" style="aspect-ratio:${CW} / ${M.H}">${caveStatic(M)}</div>`).join("");
+    CV.els = [...CV.el.querySelectorAll(".cave")]; CV.el.dataset.sig = CV.sig; CV.ents = {}; CV.lastF = -2; }
   CV.el.querySelectorAll(".cname").forEach(e => { const i = +e.parentNode.dataset.room; if (S.path[i] && S.path[i].kind === "dead") e.textContent = "🌀"; else if (S.path[i] && S.path[i].kind !== "lord") e.textContent = roomTitle(S, i) + (known10(S, i) ? " 🗺" : ""); });
-  CV.el.classList.toggle("raidnight", !!(N && !N.scout && N.time !== "day")); CV.el.classList.toggle("raidday", !!(N && (N.scout || N.time === "day")));
+  CV.els.forEach(e => { e.classList.toggle("raidnight", !!(N && !N.scout && N.time !== "day")); e.classList.toggle("raidday", !!(N && (N.scout || N.time === "day"))); });
+  CV.lastF = caveFloor;
   caveMarks();
   caveUpdate();
 }
@@ -5158,17 +5166,20 @@ function caveLeader(){
   N.heroes.forEach(h => { const v = CV.heroes[h.id]; if (v && h.st === "in" && (!best || h.pos > best.pos)) best = { pos: h.pos, f: v.f, y: v.y }; });
   return best;
 }
-function cEnt(key, html, cls){
-  let e = CV.ents[key];
-  if (!e) { e = document.createElement("div"); e.innerHTML = html; CV.el.querySelector(".cents").appendChild(e); CV.ents[key] = e; }
+const flEl = f => CV.els && CV.els[f];
+const flL = f => { const e = flEl(f); return e && e.querySelector(".cents"); };
+function cEnt(key, html, cls, f){
+  let e = CV.ents[key]; const L = flL(f);
+  if (!e) { e = document.createElement("div"); e.innerHTML = html; CV.ents[key] = e; }
+  if (L && e.parentNode !== L) L.appendChild(e);   // 層をまたいだら、その層へ移す
   e.className = "cent " + cls; return e;
 }
 function caveUpdate(){
-  if (!CV.el || !CV.maps.length || caveFloor < 0) return;
-  const M = CV.maps[caveFloor], seen = new Set();
+  if (!CV.el || !CV.els || !CV.maps.length || caveFloor < 0) return;
+  const seen = new Set();
   const put = (key, html, cls, at, hp) => {
-    if (!at || at.f !== caveFloor) return null; seen.add(key);
-    const e = cEnt(key, html, cls); e.style.left = ((at.x + 0.5) / CW * 100) + "%"; e.style.top = ((at.y + 1) / M.H * 100) + "%"; e.style.zIndex = 10 + Math.round(at.y * 2);
+    if (!at || !CV.maps[at.f]) return null; seen.add(key); const M = CV.maps[at.f];
+    const e = cEnt(key, html, cls, at.f); e.style.left = ((at.x + 0.5) / CW * 100) + "%"; e.style.top = ((at.y + 1) / M.H * 100) + "%"; e.style.zIndex = 10 + Math.round(at.y * 2);
     const b = e.querySelector(".chp i"); if (b && hp != null) b.style.width = Math.max(0, hp * 100) + "%";
     return e;
   };
@@ -5223,18 +5234,18 @@ function cavePops(){
   if (!N || !N.pops || !CV.el) return;
   const list = N.pops.splice(0);
   list.slice(-14).forEach(p => {
-    if (p.k === "drop") { const e = CV.ents["h" + p.id], L = CV.el.querySelector(".cents"); if (e && L) { const d = document.createElement("div"); d.className = "cpop drop19"; d.style.setProperty("--ic", IRAR19[p.it.ri][1]); d.textContent = ITEM19[p.it.k].icon + " " + p.it.name + "！"; d.style.left = e.style.left; d.style.top = `calc(${e.style.top} - 14%)`; L.appendChild(d); setTimeout(() => d.remove(), 1800); sfx16(p.it.ri >= 2 ? "hatch" : "coin"); } return; }
+    if (p.k === "drop") { const e = CV.ents["h" + p.id], L = e && e.parentNode; if (e && L) { const d = document.createElement("div"); d.className = "cpop drop19"; d.style.setProperty("--ic", IRAR19[p.it.ri][1]); d.textContent = ITEM19[p.it.k].icon + " " + p.it.name + "！"; d.style.left = e.style.left; d.style.top = `calc(${e.style.top} - 14%)`; L.appendChild(d); setTimeout(() => d.remove(), 1800); sfx16(p.it.ri >= 2 ? "hatch" : "coin"); } return; }
     if (p.k === "fever") { if (typeof fever19 === "function") fever19(); return; }
-    if (p.k === "t") { const o = hallOf(p.room); if (!o || o.M.f !== caveFloor) return;
+    if (p.k === "t") { const o = hallOf(p.room); if (!o) return;
       // 部屋の大きな文字は、ひとつずつ順番に（同じ場所に重ねない）
       // 夜の部屋の知らせ（陣形・待ち伏せ…）は、画面下の1行に出す。洞窟の中は戦いの数字だけ
       if (N && view === "night") { N.tline21 = { text: (typeof roomTitle === "function" ? roomTitle(S, p.room) + "：" : "") + p.text, at: Date.now(), cls: p.cls || "" }; const el = document.querySelector(".nlog21"); if (el) { el.textContent = N.tline21.text; el.className = "nlog21 t"; } return; }
       CV.tq = CV.tq || {}; const now = Date.now(), at = Math.max(now, CV.tq[p.room] || 0); CV.tq[p.room] = at + 750;
-      setTimeout(() => cPop(caveFloor, (o.h.x0 + o.h.x1) / 2, o.h.y0 + 0.6, p.text, "big rt21 " + (p.cls || ""), 1000), at - now); return; }
+      setTimeout(() => cPop(o.M.f, (o.h.x0 + o.h.x1) / 2, o.h.y0 + 0.6, p.text, "big rt21 " + (p.cls || ""), 1000), at - now); return; }
     const e = CV.ents[(p.k === "h" ? "h" : "n") + p.id]; if (!e) return;
-    const L = CV.el.querySelector(".cents"); if (!L) return;
+    const L = e.parentNode; if (!L) return; const FE = L.parentNode;
     const d = document.createElement("div");
-    if (p.kill || p.big) { CV.el.classList.remove("shake"); void CV.el.offsetWidth; CV.el.classList.add("shake"); }
+    if (p.kill || p.big) { FE.classList.remove("shake"); void FE.offsetWidth; FE.classList.add("shake"); }
     sfx16(p.kill ? "kill" : p.down ? "down" : p.big ? "big" : "hit"); if (p.shot) sfx16("shot");
     if (p.shot) { const fe = CV.ents["n" + p.shot.from]; if (fe) { const sh = document.createElement("div"); sh.className = "cshot " + p.shot.kind; sh.style.left = fe.style.left; sh.style.top = `calc(${fe.style.top} - 3%)`; L.appendChild(sh); requestAnimationFrame(() => requestAnimationFrame(() => { sh.style.left = e.style.left; sh.style.top = `calc(${e.style.top} - 3%)`; })); setTimeout(() => sh.remove(), 420); } }
     // 同じ相手への小さいダメージは、出ている数字に足して1つにまとめる（数字が縦に積み上がらない）
@@ -5242,8 +5253,8 @@ function cavePops(){
     // 部屋ごとの「ダメージ表示」：部屋の上の左（勇者が受けた）と右（魔物が受けた）に固定して数字を足していく
     if (!p.kill && !p.down) { try {
       const pos = p.k === "h" ? (N.heroes.find(x => x.id === p.id) || {}).pos : (S.mons.find(x => x.id === p.id) || {}).home, o2 = pos != null && hallOf(pos);
-      if (o2 && o2.M.f === caveFloor) { CV.tk = CV.tk || {}; const tk = (p.k === "h" ? "h" : "n") + pos; let t = CV.tk[tk];
-        if (!t || !t.el.isConnected || Date.now() - t.at > 1500) { const el = document.createElement("div"); el.className = "tick21 " + (p.k === "h" ? "toh" : "tom"); L.appendChild(el);
+      if (o2) { CV.tk = CV.tk || {}; const tk = (p.k === "h" ? "h" : "n") + pos; let t = CV.tk[tk];
+        if (!t || !t.el.isConnected || Date.now() - t.at > 1500) { const el = document.createElement("div"); el.className = "tick21 " + (p.k === "h" ? "toh" : "tom"); (flL(o2.M.f) || L).appendChild(el);
           const x = p.k === "h" ? o2.h.x0 + 1.2 : o2.h.x1 - 1.2; el.style.left = ((x + 0.5) / CW * 100) + "%"; el.style.top = ((o2.h.y0 + 1.1) / o2.M.H * 100) + "%"; t = CV.tk[tk] = { el, sum: 0, at: 0, big: false }; }
         t.sum += p.d; t.at = Date.now(); t.big = t.big || p.big || p.crit; t.el.innerHTML = `<small>${p.k === "h" ? "勇者へ" : "魔物へ"}</small>${t.sum}${t.big ? "!" : ""}`; t.el.classList.remove("bump"); void t.el.offsetWidth; t.el.classList.add("bump");
         clearTimeout(t.tm); t.tm = setTimeout(() => { t.el.classList.add("out"); setTimeout(() => t.el.remove(), 400); }, 1400);
@@ -5287,10 +5298,10 @@ function cGo(w, tx, ty, now, speed = 520){
 }
 // 洞窟の中にふわっと出る文字（💎＋、💤、ダメージなど）
 function cPop(f, x, y, text, cls = "", ms = 1100){
-  if (!CV.el || f !== caveFloor) return; const M = CV.maps[caveFloor]; if (!M) return;
+  if (!CV.el || !CV.els) return; const M = CV.maps[f]; if (!M) return;
   const d = document.createElement("div"); d.className = "cpop " + cls; d.textContent = text;
   // 文字が重ならないように：近くに出ている文字があれば、上へずらす。多すぎるときは小さい文字を出さない
-  const now = Date.now(); CV.pops = (CV.pops || []).filter(q => q.until > now);
+  const now = Date.now(); CV.pops = (CV.pops || []).filter(q => q.until > now && q.f === f);
   const minor = /hitp|frac|tink|eye|zz/.test(cls) || text.length <= 3;
   if (CV.pops.some(q => q.t === text && Math.abs(q.x - x) < 2)) return;   // 同じ文字が近くに出ていたら出さない
   if (minor && CV.pops.length >= 6) return;
@@ -5299,16 +5310,16 @@ function cPop(f, x, y, text, cls = "", ms = 1100){
   const gap = /big/.test(cls) ? 1.0 : 0.6; if (/rt21/.test(cls)) CV.pops = CV.pops.filter(q => !q.rt);
   for (let k = 0; k < 4 && CV.pops.some(q => Math.abs(q.x - (x + jx)) < (q.w + wide) / 2 && Math.abs(q.y - yy) < gap); k++) yy -= gap;
   if (CV.pops.some(q => Math.abs(q.x - (x + jx)) < (q.w + wide) / 2 && Math.abs(q.y - yy) < gap)) { if (minor) return; }
-  CV.pops.push({ x: x + jx, y: yy, w: wide, t: text, rt: /rt21/.test(cls), until: now + Math.min(ms, 1200) });
+  CV.pops.push({ f, x: x + jx, y: yy, w: wide, t: text, rt: /rt21/.test(cls), until: now + Math.min(ms, 1200) });
   d.style.left = ((x + 0.5 + jx) / CW * 100) + "%"; d.style.top = (yy / M.H * 100) + "%";
-  const L = CV.el.querySelector(".cents"); if (!L) return; L.appendChild(d); setTimeout(() => d.remove(), ms);
+  const L = flL(f); if (!L) return; L.appendChild(d); setTimeout(() => d.remove(), ms);
 }
 // 魔物のひとりごと：いまの状況（襲撃まで何日か・仕事・因縁の勇者）をぽつりと言う
 let talkAt = 0;
 function caveTalk(now){
   if (now < talkAt || caveFloor < 0) return; talkAt = now + 5000 + Math.random() * 4000;
   const cand = [];
-  S.path.forEach((r, i) => { if (r.kind !== "den") return; const o = hallOf(i); if (!o || o.M.f !== caveFloor) return; residents5(S, i).forEach(m => { const w = CV.wander && CV.wander[m.id]; if (w && now >= w.until) cand.push({ m, r, w, F: o.M.f }); }); });
+  S.path.forEach((r, i) => { if (r.kind !== "den") return; const o = hallOf(i); if (!o) return; residents5(S, i).forEach(m => { const w = CV.wander && CV.wander[m.id]; if (w && now >= w.until) cand.push({ m, r, w, F: o.M.f }); }); });
   if (!cand.length) return; const c = cand[Math.floor(Math.random() * cand.length)], dr = daysToRaid9(S);
   const L = [];
   if (S.hungry) L.push("腹へった…", "ごはん、まだ？", "力が出ない…");
@@ -5385,16 +5396,19 @@ setInterval(() => {
     moved = true;
   });
   if (moved) {
-    if (caveFollow) { const lead = caveLeader(); if (lead && lead.f !== caveFloor) { caveFloor = lead.f; render(); return; } }
+    if (caveFollow) { const lead = caveLeader(); if (lead && lead.f !== caveFloor) caveFloor = lead.f; }
     caveUpdate(); caveScroll();
   }
 }, 150);
 function caveScroll(){
   if (caveFloor < 0) return;
   if (!caveFollow || !N) return; const lead = caveLeader(), dw = $("dw"); if (!lead || !dw || !CV.el) return;
-  const M = CV.maps[caveFloor], y = CV.el.offsetTop + (lead.y + 0.5) / M.H * CV.el.clientHeight, want = y - dw.clientHeight * 0.45;
+  const M = CV.maps[lead.f], FE = flEl(lead.f); if (!M || !FE) return;
+  const y = CV.el.offsetTop + FE.offsetTop + (lead.y + 0.5) / M.H * FE.clientHeight, want = y - dw.clientHeight * 0.45;
   if (Math.abs(dw.scrollTop - want) > 30) dw.scrollTop = want;
 }
+// 層の見出しへ（タブの代わりのジャンプ）
+function caveScrollTo(f){ const dw = $("dw"), FE = flEl(f); if (!dw || !FE || !CV.el) return; const want = CV.el.offsetTop + FE.offsetTop - (f ? 30 : 0); if (Math.abs(dw.scrollTop - want) > 40) dw.scrollTo({ top: want, behavior: "smooth" }); }
 
 // ================= 地上の村：勇者たちが準備しているところ（主からは見張り穴ごしに見える） =================
 const SW = 13, SH = 16;
@@ -7111,7 +7125,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.163（11/17 17:54）";
+const VER20 = "No.164（11/17 18:00）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7962,7 +7976,7 @@ document.addEventListener("click", ev => { const b = ev.target.closest('[data-a=
 { const _er = endRaid9; endRaid9 = function (S, N) { const d0 = S.dp; const out = _er.apply(this, arguments);
   try { if (!N.scout) { const g = S.dp - d0; if (g > 0) { const k = gainK23(d0), keep = Math.round(g * k); S.dp = d0 + keep; S.gain23 = { n: S.raidNo, v: keep }; if (out) { out.dp = Math.round((out.dp || 0) * k); } } } } catch (e) {} return out; }; }   // 襲撃で入る💎（深さ・ボーナス込み）を6割に。ため込むほど減る
 // ---------- 22) 夜のカメラ：いちばん奥まで来た勇者の階を映す（B2・主の間へ降りたら追いかける） ----------
-{ const _r = render; render = function () { try { if (N && caveFollow && typeof floorOf === "function") { const hs = N.heroes.filter(h => h.st === "in"); if (hs.length) { const p = Math.max(...hs.map(h => h.pos || 0)), f = floorOf(S, Math.min(p, S.path.length - 1)); if (f != null && f >= 0 && caveFloor !== f) { caveFloor = f; CV.sig = ""; } } } } catch (e) {} return _r.apply(this, arguments); }; }
+{ const _r = render; render = function () { try { if (N && caveFollow && typeof floorOf === "function") { const hs = N.heroes.filter(h => h.st === "in"); if (hs.length) { const p = Math.max(...hs.map(h => h.pos || 0)), f = floorOf(S, Math.min(p, S.path.length - 1)); if (f != null && f >= 0 && caveFloor !== f) { caveFloor = f; } } } } catch (e) {} return _r.apply(this, arguments); }; }
 
 // 危ない夜は「何をすれば下がるか」を、準備ごとに試して見せる
 let adv23 = { key: "", h: "" };
@@ -7980,7 +7994,7 @@ function advice23(v) {
 // ---------- 23) 主の間に勇者が入ったら、速さを×1にもどして見せる（いちばんの見せ場を見のがさない）。ボスの夜も×1から ----------
 { const _r = render; render = function () { try { if (N && !N.scout) { const li = S.path.findIndex(r => r.kind === "lord");
   if (!N.boss23 && N.heroes.some(h => h.boss)) { N.boss23 = 1; speed = 1; }
-  if (!N.lordSlow23 && li >= 0 && N.heroes.some(h => h.st === "in" && h.pos === li)) { N.lordSlow23 = 1; speed = 1; caveFloor = floorOf(S, li); CV.sig = ""; setTimeout(() => { try { banner19("<small>⚠ 主の間</small><i>勇者が主の間に入った！</i>", "wipe", 1600); } catch (e) {} }, 0); } } } catch (e) {} return _r.apply(this, arguments); }; }
+  if (!N.lordSlow23 && li >= 0 && N.heroes.some(h => h.st === "in" && h.pos === li)) { N.lordSlow23 = 1; speed = 1; caveFloor = floorOf(S, li); setTimeout(() => { try { banner19("<small>⚠ 主の間</small><i>勇者が主の間に入った！</i>", "wipe", 1600); } catch (e) {} }, 0); } } } catch (e) {} return _r.apply(this, arguments); }; }
 // ---------- 24) 色違いは、どの画面でも色違いの色で（店・MVP・配合・進化…）。ビルドで simg23(m, m.evos…) をこれに置きかえる ----------
 function simg23(m, f, cls = "sp", style = "") { const sp = m && m.sp; return img(sp, f, cls, m && m.shiny19 ? `${style};filter:hue-rotate(150deg) saturate(1.5) brightness(1.08)` : style); }
 
@@ -8364,21 +8378,28 @@ tick = function () { clearTimeout(timer); if (!N) return;
 // 主の間の様子を見張る（画面だけ）
 caveUpdate = (prev => function (){
   prev.apply(this, arguments);
-  try { if (!N || N.scout || !CV.el) { if (CV.el) CV.el.classList.remove("lordfight24"); return; }
+  try { const LF = CV.els && CV.els[floorOf(S, lordIdx(S))]; if (!N || N.scout || !LF) { (CV.els || []).forEach(e => e.classList.remove("lordfight24")); return; }
     const li = lordIdx(S), inLord = N.heroes.some(h => h.st === "in" && h.pos === li), near = N.heroes.some(h => h.st === "in" && h.cor === li);
     if ((inLord || near) && !N.lordFight24) { N.lordFight24 = 1; speed = 1; caveFollow = true; try { banner19("<small>⚔ 決戦</small><i>勇者が主の間へ向かっている！</i>", "wipe", 1500); } catch (e) {} }
-    CV.el.classList.toggle("lordfight24", inLord);
+    LF.classList.toggle("lordfight24", inLord);
     const le = CV.ents.lordn; if (!le) return;
     le.classList.toggle("lordbig24", inLord);
     const hp = N.lord.hp; if (N.lordHp24 != null && hp < N.lordHp24 - 0.5) {
       const d = Math.round(N.lordHp24 - hp); le.classList.remove("lordhit24"); void le.offsetWidth; le.classList.add("lordhit24");
-      CV.el.classList.remove("shake"); void CV.el.offsetWidth; CV.el.classList.add("shake");
+      LF.classList.remove("shake"); void LF.offsetWidth; LF.classList.add("shake");
       const o = hallOf(li); if (o) cPop(o.M.f, o.h.x0 + 3, o.h.y0 + 0.4, `👑 -${d}`, "big lordd24", 1100);
       try { sfx16("down"); } catch (e) {}
     }
     N.lordHp24 = hp;
   } catch (e) {}
 })(caveUpdate);
+
+// 層のボタンは「その層へなぞって移動」（タブで画面を切りかえない）
+document.addEventListener("click", ev => { const b = ev.target.closest('[data-a="cfl"]'); if (!b) return; const f = +b.dataset.v; if (f < 0) return; setTimeout(() => { try { caveScrollTo(f); } catch (e) {} }, 30); }, true);
+// なぞって見えている層を、上のボタンの「いまここ」にする
+document.addEventListener("scroll", ev => { try { if (!ev.target || ev.target.id !== "dw" || !CV.els || N) return; const dw = ev.target, mid = dw.scrollTop + dw.clientHeight * 0.35; let cur = 0;
+  CV.els.forEach((e, k) => { if (CV.el.offsetTop + e.offsetTop <= mid) cur = k; });
+  document.querySelectorAll('.ctabs [data-a="cfl"]').forEach(b => b.classList.toggle("on", +b.dataset.v === cur)); } catch (e) {} }, true);
 
 </script>
 </body>
