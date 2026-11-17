@@ -7182,7 +7182,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.173（11/17 22:46）";
+const VER20 = "No.174（11/17 22:50）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -9728,14 +9728,15 @@ async function trainDraw24(cv, CH, tm, cam, idm = 0){
 // 1つのシェーダーに「部屋」と「子5体」を入れる。子ごとに種族の式（KIT24）を名前を変えて並べる
 const SLOTS24 = ["", "B", "C", "D", "E"];
 const FACEIDX24 = { goblin: 0, slime: 1, bat: 2, ghost: 3, imp: 4, myconid: 5, orc: 6 };   // 顔の絵（横に4つ並べた1枚）の何番目か
-const SPCOL24 = { orc: [[0.30, 0.42, 0.21], [0.42, 0.27, 0.15]], myconid: [[0.93, 0.87, 0.72], [0.78, 0.2, 0.15]], wolf: [[0.5, 0.52, 0.56], [0.3, 0.3, 0.33]], spider: [[0.32, 0.22, 0.28], [0.75, 0.12, 0.12]], imp: [[0.76, 0.27, 0.2], [0.42, 0.1, 0.14]], kobold: [[0.62, 0.47, 0.3], [0.42, 0.35, 0.52]], ghost: [[0.88, 0.91, 0.96], [0.7, 0.75, 0.82]], goblin: [[0.570, 0.627, 0.240], [0.45, 0.29, 0.16]], skeleton: [[0.86, 0.82, 0.70], [0.50, 0.15, 0.12]], slime: [[0.20, 0.47, 0.23], [0.3, 0.6, 0.3]],
+const SPCOL24 = { mimic: [[0.55, 0.36, 0.18], [0.85, 0.3, 0.35]], eye: [[0.92, 0.9, 0.86], [0.75, 0.2, 0.15]], golem: [[0.55, 0.52, 0.47], [0.35, 0.75, 1.0]], orc: [[0.30, 0.42, 0.21], [0.42, 0.27, 0.15]], myconid: [[0.93, 0.87, 0.72], [0.78, 0.2, 0.15]], wolf: [[0.5, 0.52, 0.56], [0.3, 0.3, 0.33]], spider: [[0.32, 0.22, 0.28], [0.75, 0.12, 0.12]], imp: [[0.76, 0.27, 0.2], [0.42, 0.1, 0.14]], kobold: [[0.62, 0.47, 0.3], [0.42, 0.35, 0.52]], ghost: [[0.88, 0.91, 0.96], [0.7, 0.75, 0.82]], goblin: [[0.570, 0.627, 0.240], [0.45, 0.29, 0.16]], skeleton: [[0.86, 0.82, 0.70], [0.50, 0.15, 0.12]], slime: [[0.20, 0.47, 0.23], [0.3, 0.6, 0.3]],
   bat: [[0.47, 0.34, 0.64], [0.66, 0.38, 0.55]], rat: [[0.62, 0.58, 0.50], [0.88, 0.58, 0.58]] };
 // 似た種族は同じ式を使い、色だけ変える
-const KITOF24 = { webgoblin: "goblin", sapper: "goblin", shaman: "goblin", ghoul: "goblin", goldkobold: "kobold", emberskel: "skeleton", bonewarden: "skeleton",
+const KITOF24 = { gargoyle: "imp", ifrit: "imp", underlord: "imp", lich: "skeleton", vaultkeeper: "mimic", hauntchest: "mimic", stoneeye: "eye", fortgolem: "golem", webgoblin: "goblin", sapper: "goblin", shaman: "goblin", ghoul: "goblin", goldkobold: "kobold", emberskel: "skeleton", bonewarden: "skeleton",
   rotslime: "slime", lavaslime: "slime", ghostslime: "slime", gemeater: "slime", eyebat: "bat", firebat: "bat", nightspider: "spider", eyespider: "spider", stonespider: "spider",
   nightwolf: "wolf", jackal: "wolf", sporerat: "rat", ratking: "rat", minerorc: "orc", berserker: "orc", ogremage: "orc", bogtroll: "orc", wraitheye: "ghost", sporewraith: "ghost", fungus: "myconid" };
 const kitOf24 = sp => KITOF24[sp] || sp;
-const SPCOLX24 = { webgoblin: [[0.57, 0.627, 0.24], [0.47, 0.35, 0.41]], sapper: [[0.5, 0.58, 0.26], [0.3, 0.3, 0.3]], shaman: [[0.6, 0.66, 0.28], [0.6, 0.45, 0.15]], ghoul: [[0.4, 0.45, 0.3], [0.35, 0.28, 0.35]],
+const SPCOLX24 = { gargoyle: [[0.5, 0.5, 0.52], [0.36, 0.36, 0.4]], ifrit: [[0.95, 0.5, 0.15], [0.9, 0.3, 0.08]], underlord: [[0.42, 0.2, 0.42], [0.2, 0.1, 0.25]], lich: [[0.78, 0.78, 0.72], [0.38, 0.2, 0.5]],
+  vaultkeeper: [[0.7, 0.6, 0.3], [0.85, 0.3, 0.35]], hauntchest: [[0.4, 0.42, 0.5], [0.4, 0.8, 0.7]], stoneeye: [[0.6, 0.6, 0.58], [0.85, 0.3, 0.2]], fortgolem: [[0.5, 0.48, 0.45], [0.3, 0.7, 1.0]], webgoblin: [[0.57, 0.627, 0.24], [0.47, 0.35, 0.41]], sapper: [[0.5, 0.58, 0.26], [0.3, 0.3, 0.3]], shaman: [[0.6, 0.66, 0.28], [0.6, 0.45, 0.15]], ghoul: [[0.4, 0.45, 0.3], [0.35, 0.28, 0.35]],
   goldkobold: [[0.78, 0.58, 0.22], [0.45, 0.29, 0.16]], emberskel: [[0.9, 0.72, 0.52], [0.85, 0.4, 0.1]], bonewarden: [[0.8, 0.82, 0.75], [0.35, 0.45, 0.42]],
   rotslime: [[0.52, 0.55, 0.24], [0.4, 0.4, 0.2]], lavaslime: [[0.86, 0.38, 0.08], [0.9, 0.6, 0.1]], ghostslime: [[0.45, 0.72, 0.66], [0.5, 0.8, 0.7]], gemeater: [[0.35, 0.6, 0.62], [0.4, 0.7, 0.7]],
   eyebat: [[0.7, 0.2, 0.28], [0.5, 0.15, 0.2]], firebat: [[0.85, 0.6, 0.15], [0.85, 0.35, 0.1]], nightspider: [[0.33, 0.22, 0.44], [0.6, 0.4, 0.9]], eyespider: [[0.45, 0.08, 0.12], [1.0, 0.35, 0.2]], stonespider: [[0.42, 0.42, 0.4], [0.95, 0.3, 0.2]],
@@ -9744,10 +9745,10 @@ const SPCOLX24 = { webgoblin: [[0.57, 0.627, 0.24], [0.47, 0.35, 0.41]], sapper:
   wraitheye: [[0.55, 0.78, 0.72], [0.4, 0.6, 0.55]], sporewraith: [[0.66, 0.52, 0.7], [0.6, 0.66, 0.6]], fungus: [[0.93, 0.87, 0.72], [0.75, 0.38, 0.12]] };
 const spCol24 = sp => SPCOLX24[sp] || SPCOL24[kitOf24(sp)];
 // 種族ごとの大きさ
-const SPSCL24 = { orc: 1.25, myconid: 0.95, ogremage: 1.35, bogtroll: 1.35, berserker: 1.3, ratking: 1.2 };
+const SPSCL24 = { golem: 1.3, fortgolem: 1.45, orc: 1.25, myconid: 0.95, ogremage: 1.35, bogtroll: 1.35, berserker: 1.3, ratking: 1.2 };
 const spScl24 = sp => SPSCL24[sp] || SPSCL24[kitOf24(sp)] || 1;
 // 体の当たりの球（中心y・半径）
-const SPBOUND24 = { orc: [0.9, 1.6], myconid: [0.6, 0.9], wolf: [0.6, 1.25], spider: [0.45, 1.3], imp: [0.9, 1.6], kobold: [0.9, 1.6], ghost: [0.9, 1.25], goblin: [0.9, 1.55], skeleton: [0.9, 1.55], slime: [0.4, 0.95], bat: [1.0, 1.35], rat: [0.3, 1.15] };
+const SPBOUND24 = { mimic: [0.4, 0.9], eye: [1.0, 1.1], golem: [0.95, 1.7], orc: [0.9, 1.6], myconid: [0.6, 0.9], wolf: [0.6, 1.25], spider: [0.45, 1.3], imp: [0.9, 1.6], kobold: [0.9, 1.6], ghost: [0.9, 1.25], goblin: [0.9, 1.55], skeleton: [0.9, 1.55], slime: [0.4, 0.95], bat: [1.0, 1.35], rat: [0.3, 1.15] };
 
 // ---------- 種族ごとの式 ----------
 const KIT24 = {};
@@ -9851,6 +9852,64 @@ vec4 charCol(vec3 p,vec3 n,float m){vec3 c;float sp=0.25;
  if(m<1.5){vec3 lp=p-J[0];c=lin(skin)*(0.75+0.35*fbm(p*9.0));if(length(lp-vec3(0.0,0.35,0.0))<0.2){vec2 q=lp.xz;float hg=step(abs(q.x),0.03+abs(q.y)*0.6)*step(abs(q.y),0.13);c=mix(c,lin(cloth),hg);}}
  else if(m<2.5){c=lin(vec3(0.9,0.85,0.8));}
  else c=lin(vec3(1.0,0.15,0.1))*2.2;
+ return vec4(c,sp);}
+` });
+
+KIT24.mimic = () => ({ body: `
+vec2 body(vec3 p){
+ vec3 b=HR*(p-J[0]);
+ float bx=sRBox(b-vec3(0.0,0.24,0.0),vec3(0.5,0.24,0.36),0.04);bx=max(bx,-sRBox(b-vec3(0.0,0.42,0.0),vec3(0.44,0.2,0.3),0.03));
+ vec2 r=vec2(bx,4.0);
+ float a=J[1].x;vec3 l=b-vec3(0.0,0.48,-0.36);float ca=cos(a),sa=-sin(a);l=vec3(l.x,ca*l.y+sa*l.z,-sa*l.y+ca*l.z);
+ float ld=sRBox(l-vec3(0.0,0.1,0.36),vec3(0.5,0.1,0.36),0.05);ld=max(ld,-sRBox(l-vec3(0.0,0.0,0.36),vec3(0.44,0.07,0.3),0.03));if(ld<r.x)r=vec2(ld,4.0);
+ float bd=min(sRBox(b-vec3(0.0,0.24,0.0),vec3(0.52,0.26,0.05),0.0),sRBox(l-vec3(0.0,0.1,0.36),vec3(0.52,0.12,0.05),0.0));bd=max(bd,-sRBox(b-vec3(0.0,0.45,0.0),vec3(0.45,0.25,0.3),0.0));if(bd<r.x)r=vec2(bd,5.0);
+ for(int i=0;i<6;i++){float x=-0.38+float(i)*0.152;float t1=sTap(b,vec3(x,0.46,0.3),vec3(x,0.36,0.3),0.04,0.005);float t2=sTap(l,vec3(x,0.02,0.66),vec3(x,0.12,0.66),0.04,0.005);float t=min(t1,t2);if(t<r.x)r=vec2(t,2.0);}
+ float tg=sTap(b,vec3(0.0,0.4,-0.1),vec3(0.05*sin(tm*3.0),0.52+0.1*sin(tm*2.0),0.42),0.1,0.06);if(tg<r.x)r=vec2(tg,3.0);
+ vec3 e=vec3(abs(b.x),b.y,b.z);float ey=length(e-vec3(0.16,0.43,-0.12))-0.06;if(ey<r.x)r=vec2(ey,6.0);
+ return r;}
+`, col: `
+vec4 charCol(vec3 p,vec3 n,float m){vec3 c;float sp=0.1;
+ if(m<2.5){c=lin(vec3(0.95,0.93,0.86));sp=0.3;}
+ else if(m<3.5){c=lin(cloth)*(0.8+0.3*fbm(p*12.0));sp=0.5;}
+ else if(m<4.5){c=lin(skin)*(0.7+0.35*fbm(p*vec3(20.0,4.0,20.0)));float pl=step(0.45,abs(fract(p.y*5.0)-0.5));c*=1.0-0.35*pl;}
+ else if(m<5.5){c=lin(vec3(0.75,0.6,0.25))*(0.8+0.3*fbm(p*20.0));sp=0.6;}
+ else c=lin(vec3(1.0,0.85,0.2))*2.5;
+ return vec4(c,sp);}
+` });
+KIT24.eye = () => ({ body: `
+vec2 body(vec3 p){
+ vec3 b=HR*(p-J[0]);
+ float d=length(b)-0.42;vec2 r=vec2(d,1.0);
+ for(int i=0;i<5;i++){float a=float(i)*1.2566;vec3 o=J[0]+vec3(cos(a)*0.2,-0.3,sin(a)*0.2);vec3 tip=o+vec3(cos(a)*0.25+0.1*sin(tm*2.0+float(i)),-0.55,sin(a)*0.25+0.1*cos(tm*1.7+float(i)));
+  float t=sTap(p,o,tip,0.07,0.015);if(t<r.x)r=vec2(smin(t,r.x,0.06),3.0);}
+ return r;}
+`, col: `
+vec4 charCol(vec3 p,vec3 n,float m){vec3 b=HR*(p-J[0]);vec3 c;float sp=0.6;
+ if(m<1.5){c=lin(skin)*(0.85+0.15*fbm(b*8.0));float rr=length(b.xy);if(b.z>0.0){if(rr<0.2)c=lin(cloth)*(0.7+0.5*fbm(b*20.0));if(rr<0.09)c=lin(vec3(0.02));if(length(b.xy-vec2(-0.05,0.06))<0.035)c=vec3(1.5);
+   else if(rr>0.2&&step(0.75,fbm(vec3(b.xy*12.0,1.0)))>0.5)c=mix(c,lin(vec3(0.8,0.2,0.2)),0.6);}}
+ else {c=lin(skin*vec3(0.75,0.6,0.62))*(0.8+0.3*fbm(p*10.0));sp=0.3;}
+ return vec4(c,sp);}
+` });
+KIT24.golem = () => ({ body: `
+vec2 body(vec3 p){
+ vec3 tp=TR*(p-J[0]);vec3 h=HR*(p-J[2]);
+ float d=sRBox(tp-vec3(0.0,0.32,0.02),vec3(0.36,0.3,0.24),0.08);
+ d=min(d,sRBox(h-vec3(0.0,-0.02,0.02),vec3(0.2,0.18,0.18),0.06));
+ d=min(d,min(sRBox(tp-vec3(-0.42,0.52,0.0),vec3(0.16,0.14,0.15),0.05),sRBox(tp-vec3(0.42,0.52,0.0),vec3(0.16,0.14,0.15),0.05)));
+ d=min(d,min(sTap(p,J[3],J[4],0.13,0.11),sTap(p,J[4],J[5],0.11,0.12)));d=min(d,min(sTap(p,J[6],J[7],0.13,0.11),sTap(p,J[7],J[8],0.11,0.12)));
+ d=min(d,min(length(p-J[5])-0.17,length(p-J[8])-0.17));
+ d=min(d,min(sTap(p,J[9],J[10],0.14,0.12),sTap(p,J[10],J[11],0.12,0.13)));d=min(d,min(sTap(p,J[12],J[13],0.14,0.12),sTap(p,J[13],J[14],0.12,0.13)));
+ d=min(d,min(sRBox(p-vec3(J[11].x,0.07,J[11].z+0.05),vec3(0.14,0.07,0.18),0.03),sRBox(p-vec3(J[14].x,0.07,J[14].z+0.05),vec3(0.14,0.07,0.18),0.03)));
+ d+=(vnoise(p*9.0)-0.5)*0.025;
+ vec2 r=vec2(d,1.0);
+ vec3 e=vec3(abs(h.x),h.y,h.z);float ey=length(e-vec3(0.08,0.02,0.19))-0.04;if(ey<r.x)r=vec2(ey,6.0);
+ return r;}
+`, col: `
+vec4 charCol(vec3 p,vec3 n,float m){vec3 c;float sp=0.05;
+ if(m<1.5){vec3 tp=TR*(p-J[0]);c=lin(skin)*(0.6+0.55*fbm(p*5.0));float cr=smoothstep(0.47,0.5,vnoise(p*6.0))*(1.0-smoothstep(0.5,0.53,vnoise(p*6.0)));c*=1.0-cr*0.7;
+  c=mix(c,lin(vec3(0.25,0.4,0.15)),smoothstep(0.6,0.75,fbm(p*3.0+5.0))*step(0.3,n.y)*0.7);
+  float rn=step(abs(tp.x),0.05)*step(abs(tp.y-0.35),0.15)*step(0.2,tp.z)+step(abs(tp.y-0.35),0.04)*step(abs(tp.x),0.14)*step(0.2,tp.z);if(rn>0.0)c=lin(cloth)*2.0;}
+ else c=lin(cloth)*2.5;
  return vec4(c,sp);}
 ` });
 KIT24.skeleton = () => ({ body: `
@@ -9964,8 +10023,10 @@ vec4 charCol(vec3 p,vec3 n,float m){vec3 c;float sp=0.06;
 // ---------- 種族ごとの動き（関節の置き方） ----------
 function rigSp24(sp0, mode, t){
   const sp = kitOf24(sp0);
-  if (sp === "goblin" || sp === "skeleton" || sp === "imp" || sp === "kobold" || sp === "orc") return rig24(mode, t);
+  if (sp === "goblin" || sp === "skeleton" || sp === "imp" || sp === "kobold" || sp === "orc" || sp === "golem") return rig24(mode, t);
   const J = Array.from({ length: 40 }, () => [0, -9, 0]), ph = t * Math.PI * 2; let HR = rotX(0);
+  if (sp === "mimic") { const sl = mode === "sleep", ch = Math.max(0, Math.sin(ph / 0.8)); J[0] = [0, 0, 0]; J[1] = [sl ? 0 : 0.15 + ch * 0.75, 0, 0]; HR = rotY(Math.sin(ph / 3) * 0.1); return { J, HR, TR: rotX(0), tool: 0, deb: [] }; }
+  if (sp === "eye") { const sl = mode === "sleep", bob = Math.sin(ph / 1.7) * 0.08; J[0] = [0, sl ? 0.5 : 1.05 + bob, 0]; HR = m3mul(rotY(Math.sin(ph / 2.6) * 0.5), rotX(Math.sin(ph / 3.3) * 0.2 - 0.15)); return { J, HR, TR: rotX(0), tool: 0, deb: [] }; }
   if (sp === "myconid") { const sl = mode === "sleep", sw = Math.sin(ph / 1.9);
     J[0] = [0, sl ? -0.08 : Math.abs(Math.sin(ph / 0.95)) * 0.04, 0]; J[2] = [-0.34, 0.25 + sw * 0.06, 0.08]; J[3] = [0.34, 0.25 - sw * 0.06, 0.08]; HR = m3mul(rotZ(sw * (sl ? 0.03 : 0.08)), rotX(sl ? 0.2 : 0)); return { J, HR, TR: rotX(0), tool: 0, deb: [] }; }
   if (sp === "wolf") { const sl = mode === "sleep", s = Math.sin(ph / (sl ? 3.2 : 1.1)), wag = Math.sin(ph * 1.6);
@@ -10348,11 +10409,11 @@ function Cave3D24(cv, info, opt = {}){
 }
 // ---------- ゲームの部屋 → 3Dの配役 ----------
 // 3Dにできる種族（それ以外はまだ）
-const SP3D24 = { goblin: 1, skeleton: 1, slime: 1, bat: 1, rat: 1, imp: 1, kobold: 1, ghost: 1, orc: 1, myconid: 1, wolf: 1, spider: 1 };
+const SP3D24 = { goblin: 1, skeleton: 1, slime: 1, bat: 1, rat: 1, imp: 1, kobold: 1, ghost: 1, orc: 1, myconid: 1, wolf: 1, spider: 1, mimic: 1, eye: 1, golem: 1 };
 // list: [{sp, job, rest, nick}]。部屋の種類と立ち位置を決める
 function castGame24(facs, list){
   const room = facs.includes("train") ? "train" : facs.includes("mine") ? "mine" : facs.includes("bed") ? "sleep" : "train";
-  const biped = sp0 => { const sp = kitOf24(sp0); return sp === "goblin" || sp === "skeleton" || sp === "imp" || sp === "kobold" || sp === "orc"; };
+  const biped = sp0 => { const sp = kitOf24(sp0); return sp === "goblin" || sp === "skeleton" || sp === "imp" || sp === "kobold" || sp === "orc" || sp === "golem"; };
   const spots = {
     train: { train: [[-5.4, -0.1, 0.15, "slash"], [-1.15, 0.0, 0.8, "slash"], [1.05, 0.12, -0.8, "slash"], [5.9, -2.6, -0.3, "lift"]],
       mine: [], bed: [] },
