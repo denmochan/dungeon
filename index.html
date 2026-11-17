@@ -926,6 +926,14 @@ body:has(.stage) .modal{display:none!important}
 .pk24bar{display:block;height:4px;background:#0008;border-radius:2px;margin-top:3px;overflow:hidden}.pk24bar i{display:block;height:100%;background:#7ec8ff}
 .pk24btn{margin-left:auto;font-size:12px;padding:4px 10px}
 .pk24prop{border:1px solid #6a4a2a;border-radius:8px;padding:6px 8px;margin-top:4px}
+/* ---- 内装と生活感 ---- */
+.path24{position:absolute;z-index:1;pointer-events:none;background:linear-gradient(90deg,transparent,#00000026 25%,#0000003a 50%,#00000026 75%,transparent);border-radius:40%;filter:blur(1px)}
+.tlight24{position:absolute;transform:translate(-50%,-45%);aspect-ratio:1;border-radius:50%;pointer-events:none;z-index:1;background:radial-gradient(circle,#ffb04a40 0%,#ff9a3020 35%,transparent 70%);mix-blend-mode:screen;animation:tl24 2.6s ease-in-out infinite alternate}
+@keyframes tl24{0%{opacity:.75}40%{opacity:1}70%{opacity:.85}100%{opacity:.95}}
+.cave.raidnight .tlight24{background:radial-gradient(circle,#ff7a3048 0%,#ff5a2020 35%,transparent 70%)}
+.cdec2.z24{z-index:3;filter:drop-shadow(0 2px 1px #0008)}
+.cave:not(.town)::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:30;opacity:.35;background-image:radial-gradient(1px 1px at 20% 30%,#ffe2a8,transparent),radial-gradient(1px 1px at 70% 60%,#ffe2a8,transparent),radial-gradient(1px 1px at 45% 80%,#ffd08a,transparent),radial-gradient(1px 1px at 85% 15%,#ffe2a8,transparent),radial-gradient(1px 1px at 10% 70%,#ffd08a,transparent);background-size:180px 220px;animation:dust24 18s linear infinite}
+@keyframes dust24{from{background-position:0 0,0 0,0 0,0 0,0 0}to{background-position:30px -220px,-20px -220px,10px -220px,-30px -220px,20px -220px}}
 </style>
 </head>
 <body>
@@ -7092,7 +7100,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.161（11/17 17:41）";
+const VER20 = "No.162（11/17 17:45）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -8182,6 +8190,52 @@ stepNight5 = (prev => function (S, N){
     const rr = N.rnd || Math.random; if (rr() < 0.35 * ((h.sk && h.sk.disarm) || 0)) { say5(N, h.name, "罠を外したぜ", 0); return; }
     const pw = trapPow10(S, N, 0); if (pw > 0) hurtHero5(S, N, h, Math.round(pw * (0.85 + rr() * 0.3)), null); }); } catch (e) {}
   return r; })(stepNight5);
+
+// ================= 部屋の内装と生活感：施設のまわりの道具・すり減った通り道・床の小物・たいまつの灯り =================
+const ZONE24 = {   // 施設ごとの「まわりに置かれる物」 [DECO18 / PROPIMG のキー]
+  mine:  ["sack_of_ore", "crate_stack", "rubble"],
+  bed:   ["p:straw", "rug_purple", "candles"],
+  train: ["weapon_rack_small", "barrel", "signpost"],
+  teach: ["signpost", "candles", "crate"],
+  watch: ["crate", "barrel", "lantern_hanging"],
+  snipe: ["crate", "weapon_rack_small", "barrel"],
+  trapw: ["crate_stack", "cage", "rubble"],
+  cook:  ["barrel", "p:pot", "sack_of_ore"],
+  nest:  ["moss_patch", "mushrooms_small", "p:moss"],
+  altar: ["candles", "rug_red", "candles"],
+  grave: ["coffin", "skull_pile", "candles"],
+};
+const hv24 = (a, b) => (((a + 7) * 2654435761 ^ (b + 3) * 40503) >>> 0);
+caveStatic = (prev => function (M){
+  let h = prev(M), add = "";
+  try {
+    const dk = (k, x, y, sc = 1, extra = "") => { if (k.startsWith("p:")) { const P = PROPIMG[k.slice(2)]; return P ? `<img class="cprop cdec2 z24${extra}" src="${P.src}" style="${cPct(M, x, y)};width:${0.95 * sc / CW * 100}%">` : ""; }
+      const D = DECO18[k]; return D ? `<img class="cprop cdec2 z24${extra}" src="${D.src}" style="${cPct(M, x, y)};width:${D.w / 22 * sc / CW * 100}%">` : ""; };
+    Object.entries(M.halls).forEach(([i, r]) => { i = +i; const R = S.path[i]; if (!R || r.dead || (R.kind !== "den" && R.kind !== "lord")) return;
+      const w = r.x1 - r.x0 + 1, ht = r.y1 - r.y0 + 1;
+      // すり減った通り道：入ってきた所から次の部屋へ（本道の部屋だけ）
+      if (!r.side) add += `<span class="path24" style="left:${(SPX + 0.5 - 0.7) / CW * 100}%;top:${r.y0 / M.H * 100}%;width:${1.4 / CW * 100}%;height:${ht / M.H * 100}%"></span>`;
+      // たいまつの灯り（部屋の上の両すみ）
+      if (w >= 5) [r.x0 + 0.2, r.x1 - 0.2].forEach(x => { add += `<span class="tlight24" style="${cPct(M, x, r.y0 + 0.2)};width:${4.2 / CW * 100}%"></span>`; });
+      if (R.kind !== "den") return;
+      // 施設のまわりの道具（区画ごとに2つ。部屋の下の段に置く）
+      const F = R.facs || [];
+      F.forEach((f, si) => { const Z = ZONE24[f]; if (!Z) return; const sub = subHall12(r, si), hv = hv24(i, si);
+        const spots = [[sub.x0 + 0.35, r.y1 - 0.05], [sub.x1 - 0.35, r.y1 - 0.05], [sub.x1 - 0.2, r.y0 + 2.2]];
+        const a = hv % 3, b = (a + 1 + (hv >>> 3) % 2) % 3;
+        [[Z[a], spots[(hv >>> 5) % 2]], [Z[b], spots[2]]].forEach(([k, [x, y]], n) => { if (k === "lantern_hanging") { add += dk(k, x, r.y0 - 0.1); return; } add += dk(k, Math.max(r.x0 + 0.3, Math.min(r.x1 - 0.3, x)), y, n ? 0.85 : 1); }); });
+      // 空いている区画にも暮らしの物（休憩所・物置・骨の山…）
+      const EMPTY24 = [["barrel", "crate"], ["p:straw", "bone_pile"], ["rug_red", "candles"], ["crate_stack", "barrel"], ["moss_patch", "p:pot"], ["skull_pile", "rubble"]];
+      for (let si = F.length; si < (r.ns || 3); si++) { const sub = subHall12(r, si), q = hv24(i * 7 + si, 11), E = EMPTY24[q % EMPTY24.length], mid0 = (sub.x0 + sub.x1) / 2, mid = Math.abs(mid0 - SPX) < 1.6 ? SPX + ((q >>> 6) % 2 ? 2.2 : -2.2) : mid0;   // 通り道はふさがない
+        add += dk(E[0], mid + ((q >>> 4) % 2 ? 0.6 : -0.6), r.y1 - 0.1) + dk(E[1], mid + ((q >>> 4) % 2 ? -0.5 : 0.5), r.y1 - 0.25, 0.85); }
+      // 床の小物（小石・ひび・骨）を少し
+      const ds = DECOSET9[(S.floors[floorOf(S, i)] || {}).theme] || DECOSET9.soil;
+      for (let k = 0; k < Math.min(5, 2 + Math.floor(w * ht / 12)); k++) { const q = hv24(i * 13 + k, k), x = r.x0 + 0.6 + (q % 1000) / 1000 * (w - 1.2), y = r.y0 + 1.4 + ((q >>> 10) % 1000) / 1000 * (ht - 1.6);
+        if (Math.abs(x - SPX - 0.5) < 0.9) continue; add += `<img class="cdeco" src="${DECO9[ds[q % ds.length]]}" style="${cPct(M, x, y - 0.5)};width:${0.55 / CW * 100}%">`; }
+    });
+  } catch (e) { console.error(e); }
+  return h.replace('</div><div class="cents"></div>', add + '</div><div class="cents"></div>');
+})(caveStatic);
 
 // ================= 部屋を「のぞく」：大きな絵で、誰が何をしていて何が増えているか・罠の中身 =================
 let peek24 = null, peekT24 = null;
