@@ -7238,7 +7238,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.222（11/19 01:46）";
+const VER20 = "No.223（11/19 07:57）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -10842,7 +10842,7 @@ const HAI25 = (() => {
     { id: "gateW", name: "主の間の入口（左の壁）", g: "none", txt: GATE25(-18.2, 0, 2), light: "LIGHT(-16.8,2.4,0.0,1.0,0.6,0.3,2.2)", foot: [[-17.6, 0, 1.8]] },
     { id: "orebig", name: "大きな鉱脈（奥の壁）", g: "none", txt: VEINBIG25(8.6, -10.6, 3.6), light: "LIGHT(8.0,2.0,-8.0,0.35,0.7,1.0,2.2)", foot: [[8.6, -9.6, 3.2]], vein: [[6.4, -10.6], [8.6, -10.6], [10.8, -10.4]] },
     { id: "seam", name: "壁の鉱石の層", g: "none", txt: SEAMX25(), light: "LIGHT(6.0,2.2,-8.6,0.35,0.7,1.0,2.4)", foot: [[6.0, -9.6, 3.6]], vein: [[3.4, -10.6], [6.0, -10.6], [8.6, -10.6]] },
-    { id: "orerock", name: "結晶の鉱脈（2Dと同じ形）", g: "none", txt: OREROCK25(8.0, -9.9), light: "LIGHT(7.4,3.6,-6.8,0.75,0.6,1.0,3.0)", foot: [[8.0, -8.4, 4.0]], vein: [[5.4, -7.6], [8.0, -7.2], [10.6, -7.6]] },
+    { id: "orerock", name: "結晶の鉱脈（2Dと同じ形）", g: "none", txt: OREROCK25(8.0, -9.9), light: "LIGHT(7.4,3.6,-6.8,0.75,0.6,1.0,3.0)", foot: [[8.0, -8.4, 4.0]], spots: [[3.7, -8.6], [12.3, -8.6], [4.3, -7.0], [11.7, -7.0], [2.9, -7.6], [13.1, -7.6]], rockAt: [8.0, -8.6] },
     { id: "dummy", name: "わら人形", shell: 1, foot: [[-2.05 * 6.34, 0.55 * 5.76, 0.8]] },
     { id: "rack", name: "武器立て", shell: 1, foot: [[-1.35 * 6.34, -1.65 * 5.76, 0.8]] },
     { id: "torch", name: "壁の松明", shell: 1, foot: [] },
@@ -10872,6 +10872,7 @@ const HAI25 = (() => {
     const free = (x, z, r) => inCave(x, z) && F.every(([fx, fz, fr]) => Math.hypot(x - fx, z - fz) > fr + r * 0.8) && taken.every(([tx, tz, tr]) => Math.hypot(x - tx, z - tz) > (tr + r) * 0.9);
     const ores = []; MODS.forEach(m => { if (on[m.id] && m.ore) { const [dx, dz] = off(m); m.ore.forEach(([x, z]) => ores.push([x + dx, z + dz])); } });
     const veins = []; MODS.forEach(m => { if (on[m.id] && m.vein) m.vein.forEach(v => veins.push(v)); }); let vi = 0;
+    const spots = []; MODS.forEach(m => { if (on[m.id] && m.spots) m.spots.forEach(s => spots.push([s[0], s[1], m.rockAt])); }); let si = 0;   // 鉱脈の岩の左右（横から叩く場所）
     const beds = []; MODS.forEach(m => { if (on[m.id] && m.beds) { const [dx, dz] = off(m); m.beds.forEach(([x, z]) => beds.push([x + dx, z + dz])); } });
     let oi = 0, bi = 0, k = 0, ti = 0;
     // 大きい子から置く
@@ -10879,7 +10880,8 @@ const HAI25 = (() => {
     all.sort((a, b) => footR(b) - footR(a));
     all.forEach(e => { const c = { sp: e.sp, evo: e.evo, mode: "idle", t: (k++) * 0.37, r: 0, lie: false }; const r = footR(c); const bip = BIP(e.sp);
       let pos = null;
-      if (e.act === "mine" && bip && veins.length && vi < veins.length * 2) { const v = veins[vi % veins.length], side = vi >= veins.length ? -1 : 1; vi++;
+      if (e.act === "mine" && bip && spots.length && si < spots.length) { const s = spots[si++]; c.mode = "mine"; c.look = [s[2][0], s[1]]; c.r = Math.atan2(s[2][0] - s[0], 0); pos = [s[0], s[1]]; }
+      else if (e.act === "mine" && bip && veins.length && vi < veins.length * 2) { const v = veins[vi % veins.length], side = vi >= veins.length ? -1 : 1; vi++;
         const a = Math.atan2(-v[0], 0.3 - v[1]), nx = Math.sin(a), nz = Math.cos(a), d = 1.25 + r * 0.6, px = v[0] + nx * d + nz * side * 0.75, pz = v[1] + nz * d - nx * side * 0.75;
         c.mode = "mine"; c.r = Math.atan2(v[0] - px, v[1] - pz); c.look = v; pos = [px, pz]; }
       else if (e.act === "mine" && bip && ores.length && oi < ores.length * 2) { const o = ores[oi % ores.length], side = oi >= ores.length ? -1 : 1; oi++;
