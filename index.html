@@ -7236,7 +7236,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.219（11/19 00:35）";
+const VER20 = "No.220（11/19 01:08）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -10988,7 +10988,7 @@ function roomKind25(i){ const R = S.path[i] || {}; if (i === lordIdx(S)) return 
   return F.includes("train") ? "train" : F.includes("mine") ? "mine" : F.includes("bed") ? "bed" : R.fac === "mine" ? "mine" : R.fac === "bed" ? "bed" : R.fac === "train" ? "train" : F.includes("nest") || R.fac === "nest" ? "nest" : F.includes("watch") || R.fac === "watch" ? "watch" : F.includes("gate") || R.fac === "gate" ? "entry" : "plain"; }
 // 配った洞窟の絵（bg25/部屋の種類_c.png・_d.png）があれば、それを読み込む
 function setRoom25(i){ const C = B3.C; C.setRoom(B3.roomKey); const k = roomKind25(i); if (!BGSHIP25[k]) return; C.putBgImages(`bg25/${k}_c.webp?v=${BGSHIP25[k]}`, `bg25/${k}_d.webp?v=${BGSHIP25[k]}`, C.st.bgKey); }
-const BGSHIP25 = { train: "fd282ce3", mine: "b26380fc", bed: "3f1c9fef", lord: "41ce104d", plain: "43787f10", nest: "92cc858e", watch: "a7d8de73", entry: "a8a68ce5", train_mine: "61fb52f7", train_bed: "8fba5ad9", train_nest: "d84b8dc8", train_watch: "42cc71e7", mine_bed: "1d4c664a", mine_nest: "58647db1", mine_watch: "afdfbc99", bed_nest: "3d83bc11", bed_watch: "994ec677", nest_watch: "4e4b4c24", lordday: "41ce104d" };
+const BGSHIP25 = { train: "988bb005", mine: "d8d7960a", bed: "2e371731", lord: "41ce104d", plain: "86e68c06", nest: "d981244e", watch: "6686d08e", entry: "9104082d", train_mine: "5f6b2658", train_bed: "5947d83e", train_nest: "9a822aa0", train_watch: "86f491d9", mine_bed: "f2e3502e", mine_nest: "33b093bb", mine_watch: "aea5bff4", bed_nest: "b9f7e0d2", bed_watch: "170508f1", nest_watch: "c182a20f", lordday: "41ce104d" };
 function roomKey25(i){ const on = {}; ROOMSET25[roomKind25(i)].forEach(k => on[k] = true); return HAI25.room(on); }
 // ---- 3Dのキャラの種類 ----
 const heroSp25 = h => (typeof heroId === "function" ? String(heroId(h)).replace(/\d+$/, "") : h.job) || "warrior";
