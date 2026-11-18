@@ -1035,7 +1035,7 @@ body:has(.stage) .modal{display:none!important}
 .d3card canvas{position:absolute;inset:0;width:100%;height:100%;display:block;image-rendering:pixelated}
 .d3card .cname{position:absolute;top:8px;left:8px;transform:none;z-index:2;white-space:nowrap}
 .d3stack .chall.sel{outline:2px solid var(--gold);outline-offset:-2px}
-.d3tun{height:52px;margin:-20px 0;position:relative;z-index:1;display:flex;justify-content:center;pointer-events:none}.d3tun canvas{width:144px;height:52px;image-rendering:auto;filter:drop-shadow(0 2px 3px rgba(0,0,0,.6))}
+.d3tun{position:relative;z-index:1;height:0;padding-bottom:calc(14% + 14px);margin:-3% 0 -11%;pointer-events:none}.d3tun canvas{position:absolute;top:0;left:50%;transform:translateX(-50%);width:144px;height:100%;image-rendering:auto;filter:drop-shadow(0 2px 3px rgba(0,0,0,.6))}
 .d3floor{margin:10px 0 6px;text-align:center;color:#e5b85a;font-size:12px;font-weight:700;letter-spacing:.1em}
 </style>
 </head>
@@ -7212,7 +7212,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.204（11/18 18:56）";
+const VER20 = "No.205（11/18 19:00）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -11060,29 +11060,44 @@ cPop = (prev => function (f, x, y, text, cls = "", ms = 1100){
         L.push({ a: best, u: 0.15 + 0.7 * Math.max(0, Math.min(1, (x - o.x0) / Math.max(1, o.x1 - o.x0))), v: 0.5, text, cls, talk, lift, t0, ms: Math.min(talk ? 2.6 : 1.4, ms / 1000) }); } } } } catch (e) {}
   return prev.apply(this, arguments); })(cPop);
 // ---- 部屋と部屋をつなぐトンネル（小さな絵を毎コマ描く。たいまつがゆらぐ） ----
-function dtun25(cv, seed, now){ const g = cv.getContext("2d"), W = cv.width, H = cv.height; let s = seed * 9301 + 49297; const R = () => (s = (s * 9301 + 49297) % 233280) / 233280;
+function dtun25(cv, seed, now){ const Wc = cv.parentNode.clientWidth || 370, Hc = Math.round(cv.clientHeight || 70); if (cv.height !== Hc) { cv.height = Hc; if (D3.tunB) delete D3.tunB[seed]; }
+  const g = cv.getContext("2d"), W = cv.width, H = cv.height; let s = seed * 9301 + 49297; const R = () => (s = (s * 9301 + 49297) % 233280) / 233280;
   const B = D3.tunB || (D3.tunB = {}); let base = B[seed];
   if (!base) { base = B[seed] = document.createElement("canvas"); base.width = W; base.height = H; const b = base.getContext("2d"), P = (x, y, c) => { b.fillStyle = c; b.fillRect(x, y, 1, 1); };
-    const cx = y => W / 2 + Math.sin(y / H * Math.PI * 1.2 + seed) * 6.5, hw = y => 10 + Math.sin(y * 0.35 + seed) * 1.2;
-    const wob = Array.from({ length: H }, () => R()); for (let k = 0; k < 3; k++) for (let y = 1; y < H - 1; y++) wob[y] = (wob[y - 1] + wob[y] + wob[y + 1]) / 3; const rw = y => 20 + Math.sin(y / H * Math.PI) * 22 + (wob[y] - 0.5) * 16 + (R() - 0.5) * 2;
-    // 岩のかたまり
-    for (let y = 0; y < H; y++) { const c = cx(y), w = rw(y); for (let x = Math.floor(c - w); x <= Math.ceil(c + w); x++) { const e = Math.abs(x - c) / w, al = e < 0.65 ? 1 : Math.max(0, (1 - e) / 0.35), st = 0.5 + 0.5 * Math.sin(y * 0.55 + x * 0.08 + Math.sin(x * 0.2) * 1.5), n = R() * 0.35 + st * 0.65;
-        const v = 22 + n * 22 - e * 8; P(x, y, `rgba(${(v * 1.25) | 0},${v | 0},${(v * 0.78) | 0},${al.toFixed(2)})`); if (R() < 0.04 && e < 0.8) P(x, y, `rgba(90,74,58,${al.toFixed(2)})`); } }
-    for (let k = 0; k < 40; k++) { const y = Math.floor(R() * H), c = cx(y), sd = R() < 0.5 ? -1 : 1, x = Math.round(c + sd * (hw(y) + 3 + R() * 12)); P(x, y, "#4e3f30"); P(x + 1, y, "#3c3026"); P(x, y + 1, "#120d0a"); P(x + 1, y + 1, "#120d0a"); }
-    // 通路（上と下は明るく、まん中は暗い）・石の段
-    for (let y = 0; y < H; y++) { const c = cx(y), w = hw(y), lit = Math.abs(y / (H - 1) - 0.5) * 2;
-      for (let x = Math.floor(c - w); x <= Math.ceil(c + w); x++) { const e = Math.abs(x - c) / w; const v = 0.35 + 0.65 * lit; const r0 = 60 + 50 * v - 25 * e, g0 = 44 + 36 * v - 18 * e, b0 = 30 + 22 * v - 12 * e; P(x, y, `rgb(${r0 | 0},${g0 | 0},${b0 | 0})`); }
-      if (y % 5 === 1) for (let x = Math.floor(c - w) + 1; x < Math.ceil(c + w); x++) P(x, y, `rgba(150,120,85,${0.18 + 0.3 * lit})`);
-      if (y % 5 === 2) for (let x = Math.floor(c - w) + 1; x < Math.ceil(c + w); x++) P(x, y, "rgba(10,7,5,0.35)");
+    const yT = 4, yG = H - 4, xT = W / 2, xG = W / 2 + 0.014 * Wc;   // 上の部屋の床の穴／下の部屋の門の上
+    const tt = y => Math.max(0, Math.min(1, (y - yT) / (yG - yT)));
+    const cx = y => xT + (xG - xT) * tt(y) + Math.sin(tt(y) * Math.PI) * Math.sin(seed * 1.7) * 7, hw = y => 9.5 + Math.sin(y * 0.35 + seed) * 1.0;
+    const wob = Array.from({ length: H }, () => R()); for (let k = 0; k < 3; k++) for (let y = 1; y < H - 1; y++) wob[y] = (wob[y - 1] + wob[y] + wob[y + 1]) / 3;
+    const rw = y => 18 + Math.sin(tt(y) * Math.PI) * 22 + (wob[y] - 0.5) * 14;
+    // 岩（はしは透かして、部屋の絵になじませる）
+    for (let y = yT - 6; y < yG + 3; y++) { const c = cx(y), w = rw(y), ev = y < yT ? (yT - y) / 6 : y > yG - 4 ? (y - yG + 4) / 7 : 0;
+      for (let x = Math.floor(c - w); x <= Math.ceil(c + w); x++) { const e = Math.abs(x - c) / w, al = (e < 0.65 ? 1 : Math.max(0, (1 - e) / 0.35)) * Math.max(0, 1 - ev), st = 0.5 + 0.5 * Math.sin(y * 0.55 + x * 0.08 + Math.sin(x * 0.2) * 1.5), n = R() * 0.35 + st * 0.65;
+        if (al <= 0) continue; const v = 22 + n * 22 - e * 8; P(x, y, `rgba(${(v * 1.25) | 0},${v | 0},${(v * 0.78) | 0},${al.toFixed(2)})`); if (R() < 0.04 && e < 0.8) P(x, y, `rgba(90,74,58,${al.toFixed(2)})`); } }
+    for (let k = 0; k < 36; k++) { const y = yT + Math.floor(R() * (yG - yT)), c = cx(y), sd = R() < 0.5 ? -1 : 1, x = Math.round(c + sd * (hw(y) + 3 + R() * 12)); P(x, y, "#4e3f30"); P(x + 1, y, "#3c3026"); P(x, y + 1, "#120d0a"); P(x + 1, y + 1, "#120d0a"); }
+    // 通路（入口と出口は明るく、まん中は暗い）・石の段
+    for (let y = yT; y < yG; y++) { const c = cx(y), w = hw(y), lit = Math.abs(tt(y) - 0.5) * 2;
+      for (let x = Math.floor(c - w); x <= Math.ceil(c + w); x++) { const e = Math.abs(x - c) / w; const v = 0.3 + 0.7 * lit * lit; const r0 = 58 + 56 * v - 25 * e, g0 = 42 + 40 * v - 18 * e, b0 = 28 + 24 * v - 12 * e; P(x, y, `rgb(${r0 | 0},${g0 | 0},${b0 | 0})`); }
+      if ((y - yT) % 5 === 1) for (let x = Math.floor(c - w) + 1; x < Math.ceil(c + w); x++) P(x, y, `rgba(160,128,90,${0.15 + 0.3 * lit})`);
+      if ((y - yT) % 5 === 2) for (let x = Math.floor(c - w) + 1; x < Math.ceil(c + w); x++) P(x, y, "rgba(10,7,5,0.35)");
       P(Math.floor(c - w) - 1, y, "#0e0b08"); P(Math.ceil(c + w) + 1, y, "#0e0b08"); }
-    // 小石
-    for (let k = 0; k < 16; k++) { const y = 2 + Math.floor(R() * (H - 4)), c = cx(y), x = Math.round(c + (R() < 0.5 ? -1 : 1) * (hw(y) - 1)); P(x, y, "#7a6650"); P(x, y + 1, "#2a2018"); }
-    // 木の枠（柱2本と、上のはり）
-    [Math.round(H * 0.3), Math.round(H * 0.72)].forEach(y => { const c = cx(y), w = hw(y) + 1.5, L = Math.floor(c - w), Rr = Math.ceil(c + w);
+    for (let k = 0; k < 14; k++) { const y = yT + 3 + Math.floor(R() * (yG - yT - 6)), c = cx(y), x = Math.round(c + (R() < 0.5 ? -1 : 1) * (hw(y) - 1)); P(x, y, "#7a6650"); P(x, y + 1, "#2a2018"); }
+    // 上の入口：床のふちに開いた穴と、ふちの石
+    { const c = cx(yT), w = hw(yT) + 3; for (let x = Math.floor(c - w); x <= Math.ceil(c + w); x++) { const e = (x - c) / w, dy = Math.round(Math.sqrt(Math.max(0, 1 - e * e)) * 3); for (let d = 0; d <= dy; d++) P(x, yT - d, d === dy ? (x % 3 ? "#6e5c48" : "#4a3c30") : "#0b0806"); P(x, yT - dy - 1, "rgba(0,0,0,0.45)"); } }
+    // 木の枠
+    [0.34, 0.66].forEach(f => { const y = Math.round(yT + (yG - yT) * f), c = cx(y), w = hw(y) + 1.5, L = Math.floor(c - w), Rr = Math.ceil(c + w);
       for (let x = L - 1; x <= Rr + 1; x++) { P(x, y - 2, "#b07a44"); P(x, y - 1, "#8a5a32"); P(x, y, "#6b4526"); P(x, y + 1, "#4a2f18"); P(x, y + 2, "rgba(10,6,3,0.6)"); if ((x + seed) % 7 === 0) P(x, y, "#5a3a20"); }
       for (let d = -2; d <= 8; d++) { [L - 1, L, Rr, Rr + 1].forEach((xx, j) => P(xx, y + d, d < -1 ? "#b07a44" : j === 0 || j === 3 ? "#5a3a20" : "#8a5a32")); P(L - 2, y + d, "#21160c"); P(Rr + 2, y + d, "#21160c"); }
-      P(L, y + 9, "#140d07"); P(Rr, y + 9, "#140d07"); P(L - 1, y + 9, "#140d07"); P(Rr + 1, y + 9, "#140d07"); });
-    base.ty = Math.round(H * 0.5); base.tx = Math.round(cx(base.ty) + hw(base.ty) + 4); base.ts = R() < 0.5; if (base.ts) base.tx = Math.round(cx(base.ty) - hw(base.ty) - 4); }
+      [L - 1, L, Rr, Rr + 1].forEach(xx => P(xx, y + 9, "#140d07")); });
+    // 下の出口：石を組んだアーチ（その下に部屋の門が来る）
+    { const c = cx(yG), r = hw(yG) + 6; for (let y = Math.round(yG - r * 0.55); y <= yG; y++) for (let x = Math.round(c - r + 2); x <= Math.round(c + r - 2); x++) { const ex = (x - c) / (r - 2), ey = (yG - y) / (r * 0.55 - 1); if (ex * ex + ey * ey < 1) P(x, y, `rgba(8,6,4,${(0.85 - 0.5 * (1 - ey)).toFixed(2)})`); }
+      for (let a = 0; a <= 12; a++) { const t = Math.PI - a / 12 * Math.PI, x0 = c + Math.cos(t) * r, y0 = yG - Math.sin(t) * r * 0.55;
+        const col = a % 2 ? "#4e4034" : "#3e3329"; for (let dx = -2; dx <= 2; dx++) for (let dy = -2; dy <= 1; dy++) P(Math.round(x0 + dx), Math.round(y0 + dy), dy === -2 ? "#6a5848" : dy === 1 ? "#1a140f" : dx === 2 ? "#2a2119" : col);
+        P(Math.round(x0 + 3), Math.round(y0), "#1a140f"); }
+      P(Math.round(c) - 1, Math.round(yG - r * 0.55) - 3, "#7a6650"); P(Math.round(c), Math.round(yG - r * 0.55) - 3, "#8a765e"); P(Math.round(c) + 1, Math.round(yG - r * 0.55) - 3, "#7a6650");
+      for (let k = -1; k <= 1; k += 2) for (let dy = 0; dy < 5; dy++) for (let dx = 0; dx < 3; dx++) P(Math.round(c + k * r) + dx - 1, yG + dy, dy === 4 ? "rgba(20,15,10,0.5)" : dx === 1 ? "#5a4a3a" : "#4a3c30"); }
+    // 出口の向こうからの部屋の灯り
+    { const c = cx(yG), q = b.createRadialGradient(c, yG + 2, 1, c, yG + 2, 16); q.addColorStop(0, "rgba(255,180,100,0.28)"); q.addColorStop(1, "rgba(255,170,90,0)"); b.globalCompositeOperation = "lighter"; b.fillStyle = q; b.fillRect(0, 0, W, H); b.globalCompositeOperation = "source-over"; }
+    base.ty = Math.round(yT + (yG - yT) * 0.5); base.ts = R() < 0.5; base.tx = Math.round(cx(base.ty) + (base.ts ? -1 : 1) * (hw(base.ty) + 4)); }
   g.clearRect(0, 0, W, H); g.drawImage(base, 0, 0);
   // たいまつ（壁にかけて、ゆらぐ灯り）
   const fk = 0.75 + 0.25 * Math.sin(now * 11 + seed) * Math.sin(now * 6.7 + seed * 2), x = base.tx, y = base.ty;
