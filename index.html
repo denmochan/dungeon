@@ -7212,7 +7212,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.201（11/18 17:50）";
+const VER20 = "No.202（11/18 18:23）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -9747,12 +9747,14 @@ void main(){vec2 vp=crop+gl_FragCoord.xy/zoom;vec4 c=texture2D(bgC,vp/vres);floa
  gl_FragColor=vec4(c.rgb*dk,c.a);}`;
 // 25：仮の絵（地図用の3D絵の帯）を、足もとの奥行き1つで重ねる
 const STR_FS25 = `precision highp float;uniform sampler2D stx;uniform sampler2D bgD;uniform vec2 vres;uniform vec2 crop;uniform float zoom;uniform vec4 rect;uniform vec2 tsz;uniform float fr;uniform float d0;uniform float sid;
-uniform float sk;uniform float mir;uniform float al;uniform float fl;uniform vec3 tint;
+uniform float sk;uniform float mir;uniform float al;uniform float fl;uniform vec3 tint;uniform sampler2D bgC;uniform vec2 fuv;
 void main(){vec2 vp=crop+gl_FragCoord.xy/zoom;vec2 l=floor((vp-rect.xy)/sk);if(l.x<0.0||l.y<0.0||l.x>=rect.z||l.y>=rect.w)discard;if(mir>0.5)l.x=rect.z-1.0-l.x;
  vec4 s=texture2D(stx,vec2((fr*rect.z+l.x+0.5)/tsz.x,1.0-(l.y+0.5)/tsz.y));if(s.a<0.5)discard;
  vec4 dd=texture2D(bgD,vp/vres);float bgT=(dd.r+dd.g/255.0)*120.0;if(d0>bgT+0.4)discard;
  vec2 q=mod(floor(vp),4.0);float th=(mod(q.x*2.0+q.y*3.0,4.0)*4.0+mod(q.x+q.y*2.0,4.0)+0.5)/16.0;if(al<th)discard;
- gl_FragColor=vec4(mix(s.rgb*tint*0.78,vec3(1.0,0.97,0.9),fl),sid/20.0);}`;
+ vec3 fc=vec3(0.0);for(int i=0;i<5;i++){vec2 o=i==0?vec2(0.0):i==1?vec2(-6.0,0.0):i==2?vec2(6.0,0.0):i==3?vec2(0.0,5.0):vec2(0.0,-3.0);fc+=texture2D(bgC,(fuv+o)/vres).rgb;}
+ float lum=dot(fc/5.0,vec3(0.3,0.59,0.11));float br=clamp(0.3+lum*2.2,0.42,1.05);vec3 sc=s.rgb*tint*0.78;sc=br<1.0?mix(vec3(0.063,0.035,0.02),sc,br):mix(sc,vec3(1.0,0.75,0.43),(br-1.0)*2.0);
+ gl_FragColor=vec4(mix(sc,vec3(1.0,0.97,0.9),fl),sid/20.0);}`;
 // 子の絵（先に焼いた1コマ）を、奥行きを比べながら重ねる
 const SPR_VS24 = `attribute vec2 a;uniform vec4 R;varying vec2 vq;void main(){vec2 q=a*0.5+0.5;vq=q;gl_Position=vec4(R.xy+q*R.zw,0.0,1.0);}`;
 const SPR_FS24 = `precision highp float;uniform sampler2D atl;uniform sampler2D bgD;uniform vec2 vres;uniform vec2 crop;uniform float zoom;uniform vec4 rect;uniform vec2 slot;uniform vec2 asz;uniform float tA;uniform float tR;uniform float sid;
@@ -9922,7 +9924,7 @@ function Cave3D24(cv, info, opt = {}){
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, o.t); gl.uniform1i(PT.U("stx"), 0); gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, bgDT); gl.uniform1i(PT.U("bgD"), 1);
     gl.uniform4f(PT.U("R"), (x0 - cropX) * z / vW * 2 - 1, (y0 - cropY) * z / vH * 2 - 1, w * k * z / vW * 2, h * k * z / vH * 2); gl.uniform4f(PT.U("rect"), x0, y0, w, h); gl.uniform2f(PT.U("tsz"), o.W, o.H);
     gl.uniform1f(PT.U("fr"), fr); gl.uniform1f(PT.U("d0"), fp[2]); gl.uniform1f(PT.U("sid"), 10 + Math.min(9, n)); gl.uniform1f(PT.U("sk"), k); gl.uniform1f(PT.U("mir"), a.face < 0 ? 1 : 0);
-    gl.uniform1f(PT.U("al"), a.al ?? 1); gl.uniform1f(PT.U("fl"), a.fl || 0); const tn = a.tint || [1, 1, 1]; gl.uniform3f(PT.U("tint"), tn[0], tn[1], tn[2]); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, bgCT); gl.uniform1i(PT.U("bgC"), 2); gl.uniform2f(PT.U("fuv"), fp[0], fp[1] + 8); gl.activeTexture(gl.TEXTURE0); gl.uniform1f(PT.U("al"), a.al ?? 1); gl.uniform1f(PT.U("fl"), a.fl || 0); const tn = a.tint || [1, 1, 1]; gl.uniform3f(PT.U("tint"), tn[0], tn[1], tn[2]); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     useQ(PS, quad4); gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, atT); gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, bgDT); }
   // 画面上の位置（canvasのCSS座標）
   function toScreen(p){ const q = proj(p), z = st.zoom, cropX = st.cx - vW / z / 2, cropY = st.cy - vH / z / 2, r = cv.getBoundingClientRect();
@@ -10602,6 +10604,25 @@ const GATE25 = (x0, z0, side) => { const x = (+x0).toFixed(2), z = (+z0).toFixed
   fr=min(fr,sTap(q,vec3(-2.05,2.85,0.0),vec3(2.05,2.85,0.0),0.19,0.19));fr=min(fr,sTap(q,vec3(-1.75,2.3,0.05),vec3(-1.1,2.85,0.05),0.07,0.07));fr=min(fr,sTap(q,vec3(1.75,2.3,0.05),vec3(1.1,2.85,0.05),0.07,0.07));
   if(fr<r.x)r=vec2(fr,12.0);
   float st=1e3;for(int i=0;i<7;i++){float a=float(i)/6.0*3.1416;st=min(st,sEll(q-vec3(cos(a)*2.35,max(0.0,sin(a))*3.25,-0.15),vec3(0.42,0.38,0.32)));}st+=(vnoise(q*7.0)-0.5)*0.05;if(st<r.x)r=vec2(st,10.0);}`; };
+// 巣：わらの輪とたまご（s=大きさ、n=たまごの数）
+const NEST25 = (x, z, s, n) => { const X = (+x).toFixed(2), Z = (+z).toFixed(2), S = (+s).toFixed(2);
+  return ` {vec3 q=(p-vec3(${X},0.0,${Z}))/${S};float ns=length(vec2(length(q.xz*vec2(1.0,1.2))-0.95,q.y-0.22))-0.32+(vnoise(q*13.0)-0.5)*0.09;if(ns*${S}<r.x)r=vec2(ns*${S},13.0);
+  float bt=sEll(q-vec3(0.0,0.12,0.0),vec3(0.85,0.12,0.72))+(vnoise(q*11.0)-0.5)*0.04;if(bt*${S}<r.x)r=vec2(bt*${S},14.0);
+  for(int i=0;i<3;i++){if(i>=${n})break;vec3 c=i==0?vec3(-0.32,0.48,-0.14):i==1?vec3(0.34,0.46,0.02):vec3(0.0,0.44,0.4);vec3 e=q-c;e.xy=mat2(0.96,0.28,-0.28,0.96)*e.xy;float eg=sEll(e,vec3(0.3,0.4,0.3));if(eg*${S}<r.x)r=vec2(eg*${S},15.0);}}`; };
+// 見張り：壁に立てかけたはしごと、上の足場
+const LADDER25 = (x, z) => { const X = (+x).toFixed(2), Z = (+z).toFixed(2);
+  return ` {vec3 q=(p-vec3(${X},0.0,${Z}))/1.35;vec3 A=vec3(0.0,0.0,0.0),B=vec3(0.0,4.4,-1.5);float ld=1e3;
+  for(int s=0;s<2;s++){float sx=s==0?-0.42:0.42;ld=min(ld,sTap(q,A+vec3(sx,0.0,0.0),B+vec3(sx,0.0,0.0),0.065,0.06));}
+  for(int i=1;i<10;i++){float t=float(i)/10.0;vec3 c=mix(A,B,t);ld=min(ld,sTap(q,c-vec3(0.42,0.0,0.0),c+vec3(0.42,0.0,0.0),0.04,0.04));}ld*=1.35;if(ld<r.x)r=vec2(ld,12.0);
+  float pf=sRBox(q-vec3(0.0,4.35,-2.1),vec3(1.3,0.07,0.75),0.02)*1.35;if(pf<r.x)r=vec2(pf,22.0);
+  float po=min(sTap(q,vec3(-1.15,0.0,-2.65),vec3(-1.15,4.3,-2.65),0.08,0.08),sTap(q,vec3(1.15,0.0,-2.65),vec3(1.15,4.3,-2.65),0.08,0.08));po=min(po,sTap(q,vec3(-1.15,0.0,-1.45),vec3(-1.15,4.3,-1.45),0.08,0.08));po=min(po,sTap(q,vec3(1.15,0.0,-1.45),vec3(1.15,4.3,-1.45),0.08,0.08));
+  po=min(po,sTap(q,vec3(-1.25,4.75,-1.4),vec3(1.25,4.75,-1.4),0.04,0.04));po=min(po,sTap(q,vec3(-1.25,4.42,-1.4),vec3(-1.25,4.75,-1.4),0.04,0.04));po=min(po,sTap(q,vec3(1.25,4.42,-1.4),vec3(1.25,4.75,-1.4),0.04,0.04));po*=1.35;if(po<r.x)r=vec2(po,12.0);
+  float lt=sRBox(q-vec3(0.85,4.62,-1.95),vec3(0.13,0.18,0.13),0.03);if(lt*1.35<r.x)r=vec2(lt*1.35,18.0);float gl=sEll(q-vec3(0.85,4.62,-1.95),vec3(0.09,0.13,0.09));if(gl*1.35<r.x)r=vec2(gl*1.35,17.0);}`; };
+// 入口のとげバリケード（丸太に、とがった杭を×に組む）
+const BARR25 = (x, z) => { const X = (+x).toFixed(2), Z = (+z).toFixed(2);
+  return ` {vec3 q=(p-vec3(${X},0.0,${Z}))/1.6;float bl=sTap(q,vec3(-1.9,0.5,0.0),vec3(1.9,0.5,0.0),0.13,0.13);
+  for(int i=0;i<5;i++){float x0=-1.6+float(i)*0.8;bl=min(bl,sTap(q,vec3(x0,0.0,-0.75),vec3(x0,1.15,0.75),0.075,0.008));bl=min(bl,sTap(q,vec3(x0,0.0,0.75),vec3(x0,1.15,-0.75),0.075,0.008));}
+  bl+=(vnoise(q*9.0)-0.5)*0.02;bl*=1.6;if(bl<r.x)r=vec2(bl,12.0);}`; };
 const HAI25 = (() => {
   const L = r => ROOMS24[r].props.split("\n");
   const T = L("train"), M = L("mine"), S = L("sleep");
@@ -10622,6 +10643,9 @@ const HAI25 = (() => {
     { id: "crate", name: "木箱とランタン", g: "crate", txt: "CRATES", light: "LANTERNL", foot: [[-1.8, -4.2, 0.8], [-3.2, 3.55, 0.6]] },
     { id: "gate", name: "入口の門（奥の壁）", g: "none", txt: GATE25(0, -9.4, 0), light: "LIGHT(0.0,2.4,-8.4,1.0,0.6,0.3,2.2)", foot: [[0, -9.2, 1.8]] },
     { id: "gate2", name: "出口の門（右の壁）", g: "none", txt: GATE25(18.4, 0, 1), light: "LIGHT(17.2,2.4,0.0,1.0,0.6,0.3,2.0)", foot: [[18.0, 0, 1.6]] },
+    { id: "nest", name: "巣（たまご）", g: "none", txt: NEST25(0, -2.0, 1.9, 3) + NEST25(-7.0, 1.6, 1.25, 2) + NEST25(6.8, 1.0, 1.25, 3) + NEST25(-3.6, 4.6, 1.0, 1), light: "LIGHT(0.0,1.8,-2.0,1.0,0.72,0.42,4.0)", foot: [[0, -2.0, 2.6], [-7.0, 1.6, 1.8], [6.8, 1.0, 1.8], [-3.6, 4.6, 1.4]] },
+    { id: "ladder", name: "見張りのはしごと足場", g: "none", txt: LADDER25(6.2, -5.6), light: "LIGHT(6.2,5.4,-7.4,0.75,0.85,1.0,3.4)", foot: [[6.2, -5.8, 1.3], [6.2, -7.6, 1.8]] },
+    { id: "barr", name: "とげのバリケード", g: "none", txt: BARR25(-4.4, -5.0) + BARR25(4.4, -5.0) + BARR25(-10.6, -3.4) + BARR25(10.6, -3.4), foot: [-7.2, -4.4, -1.6, 1.6, 4.4, 7.2, -13.4, -10.6, -7.8, 7.8, 10.6, 13.4].map((x, k) => [x, k < 6 ? -5.0 : -3.4, 1.2]) },
     { id: "dummy", name: "わら人形", shell: 1, foot: [[-2.05 * 6.34, 0.55 * 5.76, 0.8]] },
     { id: "rack", name: "武器立て", shell: 1, foot: [[-1.35 * 6.34, -1.65 * 5.76, 0.8]] },
     { id: "torch", name: "壁の松明", shell: 1, foot: [] },
@@ -10757,13 +10781,16 @@ const ROOMSET25 = {
   mine: ["ore", "rail", "pebble", "pick", "lamp", "torch", "stal", "gate", "gate2"],
   bed: ["bed", "pot", "torch", "stal", "gate", "gate2"],
   lord: ["pit1", "crate", "torch", "stal", "gate"],
+  nest: ["nest", "crate", "torch", "stal", "gate", "gate2"],
+  watch: ["ladder", "crate", "pick", "torch", "stal", "gate", "gate2"],
+  entry: ["barr", "crate", "lamp", "rack", "torch", "stal", "gate", "gate2"],
   plain: ["crate", "torch", "stal", "gate", "gate2"] };
 function roomKind25(i){ const R = S.path[i] || {}; if (i === lordIdx(S)) return "lord";
   let F = []; try { F = pkLayout24(i).F || []; } catch (e) {}
-  return F.includes("train") ? "train" : F.includes("mine") ? "mine" : F.includes("bed") ? "bed" : R.fac === "mine" ? "mine" : R.fac === "bed" ? "bed" : R.fac === "train" ? "train" : "plain"; }
+  return F.includes("train") ? "train" : F.includes("mine") ? "mine" : F.includes("bed") ? "bed" : R.fac === "mine" ? "mine" : R.fac === "bed" ? "bed" : R.fac === "train" ? "train" : F.includes("nest") || R.fac === "nest" ? "nest" : F.includes("watch") || R.fac === "watch" ? "watch" : F.includes("gate") || R.fac === "gate" ? "entry" : "plain"; }
 // 配った洞窟の絵（bg25/部屋の種類_c.png・_d.png）があれば、それを読み込む
 function setRoom25(i){ const C = B3.C; C.setRoom(B3.roomKey); const k = roomKind25(i); if (!BGSHIP25[k]) return; C.putBgImages(`bg25/${k}_c.png?v=${BGSHIP25[k]}`, `bg25/${k}_d.png?v=${BGSHIP25[k]}`, C.st.bgKey); }
-const BGSHIP25 = { train: "4e495756", mine: "d06c22c6", bed: "7f91ab7a", lord: "2bf9c582", plain: "914e3189" };
+const BGSHIP25 = { train: "4e495756", mine: "d06c22c6", bed: "7f91ab7a", lord: "2bf9c582", plain: "914e3189", nest: "688057ca", watch: "937a3e49", entry: "4a506cf5" };
 function roomKey25(i){ const on = {}; ROOMSET25[roomKind25(i)].forEach(k => on[k] = true); return HAI25.room(on); }
 // ---- 3Dのキャラの種類 ----
 const heroSp25 = h => (typeof heroId === "function" ? String(heroId(h)).replace(/\d+$/, "") : h.job) || "warrior";
@@ -11004,8 +11031,33 @@ function dcard25(card, i, now, dt){
     else if (br > 1.01) { tg.globalCompositeOperation = "source-atop"; tg.fillStyle = `rgba(255,190,110,${((br - 1) * 2).toFixed(2)})`; tg.fillRect(0, 0, 128, 128); }
     g.translate(fx, fy); if (a.face < 0) g.scale(-1, 1); g.drawImage(T, 0, 0, 128, 128, -s / 2, -(o.foot + 1) * k, s, s); g.restore();
     // 頭の上のしるし
-    let ic = ""; if (a.m) { if (restLeft7(S, a.m)) ic = "💤"; else if (S.hungry) ic = "😫"; }
-    if (ic) { const hy = fy - (o.foot - 20) * k; g.font = `${Math.round(12 * dpr)}px system-ui`; g.textAlign = "center"; g.fillText(ic, fx, hy); } }); }
+    a.sx = fx; a.sy = fy - (o.foot - 14) * k;
+    let ic = ""; if (a.m) { if (restLeft7(S, a.m)) ic = "💤"; else if (S.hungry) ic = "😫"; else { try { const j = jobOf12(S, a.m); ic = j && typeof ROLEI18 !== "undefined" && ROLEI18[j] ? ROLEI18[j][0] : MOOD_FACE(moodOf(S, a.m)); } catch (e) {} } }
+    if (ic) { g.save(); g.globalAlpha = 0.9; g.font = `${Math.round(10 * dpr)}px system-ui`; g.textAlign = "center"; g.fillText(ic, fx, a.sy); g.restore(); } });
+  dpops25(g, i, R, now, dpr, W, H); }
+// ---- 頭の上にふわっと出る文字（2Dの cPop を3Dの部屋へ回す） ----
+D3.pops = {};
+function dpops25(g, i, R, now, dpr, W, H){ const L = D3.pops[i]; if (!L || !L.length) return;
+  D3.pops[i] = L.filter(p => now - p.t0 < p.ms);
+  D3.pops[i].forEach(p => { const q = (now - p.t0) / p.ms, al = q < 0.12 ? q / 0.12 : q > 0.72 ? (1 - q) / 0.28 : 1;
+    let x, y; if (p.a && p.a.sx != null && R.acts.includes(p.a)) { x = p.a.sx; y = p.a.sy - 12 * dpr; } else { x = p.u * W; y = p.v * H; }
+    y -= (p.talk ? 4 : 16) * dpr * q + (p.lift || 0) * 15 * dpr; g.save(); g.globalAlpha = Math.max(0, al); g.textAlign = "center"; g.textBaseline = "middle";
+    if (p.talk) { g.font = `bold ${Math.round(10.5 * dpr)}px system-ui`; const tw = g.measureText(p.text).width + 12 * dpr, th = 18 * dpr; x = Math.max(tw / 2 + 2, Math.min(W - tw / 2 - 2, x)); y = Math.max(th / 2 + 2, y - 6 * dpr);
+      g.fillStyle = "rgba(255,250,238,0.95)"; g.strokeStyle = "rgba(40,24,12,0.9)"; g.lineWidth = 1.5 * dpr; g.beginPath(); if (g.roundRect) g.roundRect(x - tw / 2, y - th / 2, tw, th, 7 * dpr); else g.rect(x - tw / 2, y - th / 2, tw, th); g.fill(); g.stroke();
+      g.beginPath(); g.moveTo(x - 4 * dpr, y + th / 2 - 1); g.lineTo(x, y + th / 2 + 5 * dpr); g.lineTo(x + 4 * dpr, y + th / 2 - 1); g.fill(); g.fillStyle = "#2a1a0e"; g.fillText(p.text, x, y + 0.5 * dpr); }
+    else { g.font = `900 ${Math.round(13 * dpr)}px system-ui`; g.lineWidth = 3 * dpr; g.strokeStyle = "rgba(20,10,4,0.85)"; g.strokeText(p.text, x, y);
+      g.fillStyle = /gem/.test(p.cls) ? "#8ff0ff" : /hitp/.test(p.cls) ? "#ffd27a" : /love/.test(p.cls) ? "#ff9ad0" : "#fff"; g.fillText(p.text, x, y); }
+    g.restore(); }); }
+cPop = (prev => function (f, x, y, text, cls = "", ms = 1100){
+  try { if (day3dOn25 && !N && view === "day" && document.querySelector(".d3stack")) {
+    let ri = -1; S.path.forEach((r, i) => { if (ri >= 0) return; const o = hallOf(i); if (!o || o.M.f !== f) return; const h = o.h; if (x >= h.x0 - 0.6 && x <= h.x1 + 0.6 && y >= h.y0 - 2.2 && y <= h.y1 + 0.6) ri = i; });
+    if (ri >= 0 && D3.act[ri]) { const R = D3.act[ri], o = hallOf(ri).h; let best = null, bd = 1.9;
+      R.acts.forEach(a => { if (!a.m) return; const w = CV.wander && CV.wander[a.m.id]; if (!w) return; const d = Math.hypot(w.x - x, w.y - (y + 1.1)); if (d < bd) { bd = d; best = a; } });
+      const L = D3.pops[ri] || (D3.pops[ri] = []), t0 = performance.now() / 1000, talk = /talk/.test(cls);
+      if (!L.some(p => p.text === text && p.a === best && t0 - p.t0 < 0.8) && L.length < 5) {
+        const lift = best ? L.filter(p => p.a === best && t0 - p.t0 < p.ms).length : 0;
+        L.push({ a: best, u: 0.15 + 0.7 * Math.max(0, Math.min(1, (x - o.x0) / Math.max(1, o.x1 - o.x0))), v: 0.5, text, cls, talk, lift, t0, ms: Math.min(talk ? 2.6 : 1.4, ms / 1000) }); } } } } catch (e) {}
+  return prev.apply(this, arguments); })(cPop);
 // ---- 並べる ----
 function dstack25(){
   const host = document.getElementById("cavehost"); if (!host || !CV.el || caveFloor < 0) return;
