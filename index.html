@@ -1030,12 +1030,12 @@ body:has(.stage) .modal{display:none!important}
 .d3t{flex:0 0 auto;font-size:12px;padding:3px 8px;margin-right:4px;border-radius:8px}
 .d3t.on{background:#7a4a22;border-color:#c98a4a}
 /* 25：昼の3D（部屋を縦に並べる） */
-.d3stack{display:flex;flex-direction:column;padding:4px 6px 10px;background:#120d0b}
-.d3stack .chall.d3card{position:relative;left:auto;top:auto;width:100%;aspect-ratio:600/294;border-radius:10px;overflow:hidden;box-shadow:0 0 0 1px #3a2c22,0 4px 10px #000a}
+.d3stack{display:flex;flex-direction:column;padding:0 0 10px;background:#120d0b}
+.d3stack .chall.d3card{position:relative;left:auto;top:auto;width:100%;aspect-ratio:2/1;border-radius:0;overflow:hidden}
 .d3card canvas{position:absolute;inset:0;width:100%;height:100%;display:block;image-rendering:pixelated}
 .d3card .cname{position:absolute;top:6px;left:50%;transform:translateX(-50%);z-index:2;white-space:nowrap}
 .d3stack .chall.sel{outline:2px solid var(--gold);outline-offset:-2px}
-.d3tun{height:22px;display:flex;justify-content:center}.d3tun span{width:34px;height:100%;background:linear-gradient(90deg,#2a1f18,#0b0807 30%,#0b0807 70%,#2a1f18);border-left:3px solid #5a3e26;border-right:3px solid #5a3e26}
+.d3tun{height:16px;display:flex;justify-content:center;background:linear-gradient(#1a1310,#0e0a08)}.d3tun span{width:40px;height:100%;background:linear-gradient(90deg,#3a2a1e,#0b0807 25%,#0b0807 75%,#3a2a1e);border-left:3px solid #5a3e26;border-right:3px solid #5a3e26}
 .d3floor{margin:10px 0 6px;text-align:center;color:#e5b85a;font-size:12px;font-weight:700;letter-spacing:.1em}
 </style>
 </head>
@@ -7212,7 +7212,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.195（11/18 14:07）";
+const VER20 = "No.196（11/18 14:10）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -10892,11 +10892,15 @@ function prebake25(){
 // 部屋を押す＝選ぶ、もう一度＝のぞく、は今まで通り（部屋の札に .chall と data-room を付けているので、今の操作がそのまま効く）
 let day3dOn25 = (() => { try { return localStorage.getItem("day3d25") !== "0"; } catch (e) { return true; } })();
 const D3 = { img: {}, spr: {}, raf: 0, act: {} };
-const DCROP25 = [40, 110, 1000, 490], DVR25 = [1080, 708];
+const DCROP25 = [150, 150, 780, 390], DVR25 = [1080, 708];
 function dproj25(x, y, z){ const c = CAMP24, v = V3.s([x, y, z], c.e), rt = c.M.slice(0, 3), up = c.M.slice(3, 6), fw = c.M.slice(6, 9), zz = V3.d(v, fw);
   const ix = V3.d(v, rt) / zz * c.fl * DVR25[1] + DVR25[0] / 2, iy = DVR25[1] - (V3.d(v, up) / zz * c.fl * DVR25[1] + DVR25[1] / 2);
   return [(ix - DCROP25[0]) / DCROP25[2], (iy - DCROP25[1]) / DCROP25[3], c.fl * DVR25[1] / zz / DCROP25[2], zz]; }
-const dimg25 = src => D3.img[src] || (D3.img[src] = (() => { const im = new Image(); im.onload = () => { im.ok = 1; }; im.src = src; return im; })());
+const dimg25 = src => D3.img[src] || (D3.img[src] = (() => { const im = new Image(); im.onload = () => { im.ok = 1; try { const c = document.createElement("canvas"); c.width = im.width; c.height = im.height; const g = c.getContext("2d"); g.drawImage(im, 0, 0); im.px = g.getImageData(0, 0, im.width, im.height).data; } catch (e) {} }; im.src = src; return im; })());
+// 足もとの床の明るさ（0〜1）。まわり5×5点の平均
+function dlum25(im, u, v){ if (!im.px) return 0.5; let s = 0, n = 0; const W = im.width, H = im.height;
+  for (let dy = -4; dy <= 4; dy += 2) for (let dx = -4; dx <= 4; dx += 2) { const x = Math.max(0, Math.min(W - 1, Math.round(u * W) + dx)), y = Math.max(0, Math.min(H - 1, Math.round(v * H) + dy)), i = (y * W + x) * 4; s += im.px[i] * 0.3 + im.px[i + 1] * 0.59 + im.px[i + 2] * 0.11; n++; }
+  return s / n / 255; }
 const dbip25 = sp => ["goblin", "skeleton", "imp", "kobold", "orc", "golem", "human", "demon", "gobx", "lich", "noble"].includes(kitOf24(sp));
 function dspr25(sp, evo){ const k = sp + ":" + evo; if (D3.spr[k] !== undefined) return D3.spr[k]; const L = typeof CHR3D24 !== "undefined" && CHR3D24[sp]; if (!L) return D3.spr[k] = null;
   const im = new Image(); const o = { im, ok: false, ppu: (PPU25[k] || PPU25[sp + ":0"] || [36])[0], bip: dbip25(sp), foot: 122 };
@@ -10912,7 +10916,8 @@ function droom25(i){ const kind = roomKind25(i), on = {}; ROOMSET25[kind].forEac
   const list = all.map(m => ({ sp: m.sp, evo: m.evos || 0, n: 1, act: job(m) }));
   const cast = HAI25.place(on, list, 11 + i * 17);
   const order = all.map((m, k) => ({ m, a: list[k] })).sort((a, b) => HAI25.footR({ sp: b.m.sp, evo: b.m.evos || 0 }) - HAI25.footR({ sp: a.m.sp, evo: a.m.evos || 0 }));
-  const acts = []; cast.forEach((c, k) => { const o = order[k]; if (!o) return; acts.push({ m: o.m, sp: o.m.sp, evo: o.m.evos || 0, x: c.o[0], z: c.o[2], hx: c.o[0], hz: c.o[2], tx: c.o[0], tz: c.o[2], mode: c.mode, face: Math.random() < 0.5 ? 1 : -1, next: 0, ph: Math.random() * 3 }); });
+  const fit = (x, z, r) => { for (let n = 0; n < 30; n++) { const p = dproj25(x, 0, z), pw = r * p[2]; if (p[0] - pw > 0.04 && p[0] + pw < 0.96 && p[1] > 0.32 && p[1] < 0.95) break; x *= 0.92; z = z * 0.9 + 0.3; } return [x, z]; };
+  const acts = []; cast.forEach((c, k) => { const o = order[k]; if (!o) return; const [fx0, fz0] = fit(c.o[0], c.o[2], HAI25.footR({ sp: o.m.sp, evo: o.m.evos || 0 })); c.o[0] = fx0; c.o[2] = fz0; acts.push({ m: o.m, sp: o.m.sp, evo: o.m.evos || 0, x: c.o[0], z: c.o[2], hx: c.o[0], hz: c.o[2], tx: c.o[0], tz: c.o[2], mode: c.mode, face: Math.random() < 0.5 ? 1 : -1, next: 0, ph: Math.random() * 3 }); });
   if (S.path[i].kind === "lord") acts.push({ lord: true, sp: "lord", evo: typeof lordTier === "function" ? lordTier() : 0, x: 0, z: -3.5, hx: 0, hz: -3.5, tx: 0, tz: -3.5, mode: "idle", face: 1, next: 1e12, ph: 0 });
   return D3.act[i] = { sig, kind, acts }; }
 // ---- 1部屋を描く ----
@@ -10921,7 +10926,7 @@ function dcard25(card, i, now, dt){
   const cv = card.querySelector("canvas"), r = cv.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1), W = Math.round(r.width * dpr), H = Math.round(r.height * dpr);
   if (!W) return; if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
   const g = cv.getContext("2d"); g.imageSmoothingEnabled = false;
-  const R = droom25(i), bg = dimg25(`bg25/${R.kind}_full.png?v=1`); if (bg.ok) g.drawImage(bg, 0, 0, W, H); else { g.fillStyle = "#1a1412"; g.fillRect(0, 0, W, H); }
+  const R = droom25(i), bg = dimg25(`bg25/${R.kind}_full.png?v=2`); if (bg.ok) g.drawImage(bg, 0, 0, W, H); else { g.fillStyle = "#1a1412"; g.fillRect(0, 0, W, H); }
   // 動き：ときどき近くへ歩く（働いている子・寝ている子はその場）
   R.acts.forEach(a => { if (a.mode === "idle" && !a.lord && now > a.next) { a.next = now + 2.5 + Math.random() * 4; const ang = Math.random() * 6.28, d = Math.random() * 2.2; a.tx = a.hx + Math.cos(ang) * d; a.tz = a.hz + Math.sin(ang) * d * 0.6; }
     const dx = a.tx - a.x, dz = a.tz - a.z, L = Math.hypot(dx, dz); a.walking = L > 0.08; if (a.walking) { const s = Math.min(L, 1.6 * dt); a.x += dx / L * s; a.z += dz / L * s; if (Math.abs(dx) > 0.05) a.face = dx > 0 ? 1 : -1; } });
@@ -10929,8 +10934,13 @@ function dcard25(card, i, now, dt){
     const p = dproj25(a.x, 0, a.z), fx = p[0] * W, fy = p[1] * H, k = p[2] * W / o.ppu, s = 128 * k;
     const st = a.mode === "sleep" ? "sleep" : a.walking ? (o.bip ? "walk" : "hop") : (a.mode === "mine" || a.mode === "train" || a.mode === "slash" || a.mode === "lift") && o.bip ? "atk" : "idle";
     const F = DFR25[st], fr = F[0] + Math.floor(((now + a.ph) / F[2] * F[1]) % F[1]);
-    g.save(); g.fillStyle = "rgba(0,0,0,0.25)"; g.beginPath(); g.ellipse(fx, fy, Math.max(3, 11 * k), Math.max(2, 4.5 * k), 0, 0, 7); g.fill();
-    g.translate(fx, fy); if (a.face < 0) g.scale(-1, 1); g.drawImage(o.im, fr * 128, 0, 128, 128, -s / 2, -(o.foot + 1) * k, s, s); g.restore();
+    const lum = dlum25(bg, p[0], p[1] - 0.04), br = Math.max(0.42, Math.min(1.05, 0.3 + lum * 2.2));
+    g.save(); g.fillStyle = "rgba(0,0,0,0.3)"; g.beginPath(); g.ellipse(fx, fy, Math.max(3, 11 * k), Math.max(2, 4.5 * k), 0, 0, 7); g.fill();
+    const T = D3.tmp || (D3.tmp = document.createElement("canvas")); if (T.width !== 128) { T.width = 128; T.height = 128; } const tg = T.getContext("2d");
+    tg.globalCompositeOperation = "source-over"; tg.clearRect(0, 0, 128, 128); tg.drawImage(o.im, fr * 128, 0, 128, 128, 0, 0, 128, 128);
+    if (br < 0.99) { tg.globalCompositeOperation = "source-atop"; tg.fillStyle = `rgba(16,9,5,${(1 - br).toFixed(2)})`; tg.fillRect(0, 0, 128, 128); }
+    else if (br > 1.01) { tg.globalCompositeOperation = "source-atop"; tg.fillStyle = `rgba(255,190,110,${((br - 1) * 2).toFixed(2)})`; tg.fillRect(0, 0, 128, 128); }
+    g.translate(fx, fy); if (a.face < 0) g.scale(-1, 1); g.drawImage(T, 0, 0, 128, 128, -s / 2, -(o.foot + 1) * k, s, s); g.restore();
     // 頭の上のしるし
     let ic = ""; if (a.m) { if (restLeft7(S, a.m)) ic = "💤"; else if (S.hungry) ic = "😫"; }
     if (ic) { const hy = fy - (o.foot - 20) * k; g.font = `${Math.round(12 * dpr)}px system-ui`; g.textAlign = "center"; g.fillText(ic, fx, hy); } }); }
