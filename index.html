@@ -7215,7 +7215,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.211（11/18 21:26）";
+const VER20 = "No.212（11/18 21:35）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -10882,14 +10882,15 @@ function focus25(){ if (B3.pin != null) return B3.pin; const L = lordIdx(S);
 function targets25(i){ const L = lordIdx(S), sp = B3.spots[i] || (B3.spots[i] = homeSpots25(i));
   const want = {};
   // 魔物
-  N.mons.forEach(m => { const id = "m" + m.ref.id; if (m.pos !== i && !(B3.A[id] && B3.A[id].dying)) return; const s = sp[id] || [((m.ref.id * 37) % 11 - 5) * 2.2, 1 + ((m.ref.id * 13) % 5)]; want[id] = { x: s[0], z: s[1], key: m.sp + ":" + ((m.ref && m.ref.evos) || 0), hp: m.hp / m.max, down: m.down, name: m.ref.nick || "" }; });
-  if (i === L) want.lord = { x: 0, z: 3.0, key: "lord:0", hp: N.lord.hp / N.lord.max, down: N.lord.down, name: "主" };
+  const gone = B3.gone || (B3.gone = new Set());
+  N.mons.forEach(m => { const id = "m" + m.ref.id; if (!m.down) gone.delete(id); if (gone.has(id) || (m.down && !B3.A[id])) return; if (m.pos !== i && !(B3.A[id] && B3.A[id].dying)) return; const s = sp[id] || [((m.ref.id * 37) % 11 - 5) * 2.2, 1 + ((m.ref.id * 13) % 5)]; want[id] = { x: s[0], z: s[1], key: m.sp + ":" + ((m.ref && m.ref.evos) || 0), hp: m.hp / m.max, down: m.down, name: m.ref.nick || "" }; });
+  if (i === L && !gone.has("lord") && !(N.lord.down && !B3.A.lord)) want.lord = { x: 0, z: 3.0, key: "lord:0", hp: N.lord.hp / N.lord.max, down: N.lord.down, name: "主" };
   // 勇者
   const foes = Object.entries(want).filter(([k, v]) => !v.down);
   let n = 0;
   N.heroes.forEach(h => { const id = "h" + h.id; if (h.st === "wait") return; const key = heroSp25(h) + ":" + heroEvo25(h);
     const here = h.pos === i && h.walk == null, comeIn = h.walk != null && h.cor === i && !h.flee, goOut = h.walk != null && h.cor === i + 1 && h.pos === i;
-    if (h.st === "dead" && !(B3.A[id] && B3.A[id].dying)) { if (h.pos !== i) return; }
+    if (gone.has(id)) return; if (h.st === "dead" && !B3.A[id]) return;   // 倒れた勇者は、もう一度入ってこない
     if (!(here || comeIn || goOut || (B3.A[id] && B3.A[id].dying)) || h.st === "escaped") return;
     let x, z, enter = false, leave = false;
     if (comeIn) { const tot = Math.max(1, (typeof corr10 === "function" ? corr10(S, i) : 2)), pr = 1 - Math.max(0, h.walk) / tot; const lr = false; x = tun25()[0] + (lr ? pr * 3.2 : (h.id % 3 - 1) * 0.9 * pr); z = tun25()[1] + (lr ? (h.id % 3 - 1) * 0.9 * pr : pr * 3.2); enter = true; }
@@ -10939,7 +10940,7 @@ function frame25(tm){
     // 死ぬ・消える
     if (a.dying && now > a.dying) { a.al -= dt * 1.4; a.sink = (a.sink || 0) + dt * 0.6; }
     else if (!vis || (a.w.leave && Math.hypot(a.x - a.tx, a.z - a.tz) < 0.6)) a.al -= dt * 2; else a.al = Math.min(1, a.al + dt * 2.5);
-    if (a.al <= 0 && (a.dying || !vis || a.w.leave)) { delete B3.A[a.id]; return; }
+    if (a.al <= 0 && (a.dying || !vis || a.w.leave)) { if (a.dying) (B3.gone || (B3.gone = new Set())).add(a.id); delete B3.A[a.id]; return; }
     // 歩く
     const dx = a.tx - a.x, dz = a.tz - a.z, dist = Math.hypot(dx, dz), spd = (a.id[0] === "h" ? 4.2 : 3.2) * (B3.size[a.key] || 1) ** 0.3;
     const busy = a.anim === "atk" && now - a.at < a.dur || a.anim === "hurt" && now - a.at < a.dur;
