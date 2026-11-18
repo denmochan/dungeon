@@ -1040,6 +1040,8 @@ body:has(.stage) .modal{display:none!important}
 
 .d3card .d3bg{position:absolute;inset:0;width:100%;height:100%;display:block;image-rendering:pixelated;pointer-events:none}
 .d3card .d3edge{position:absolute;inset:0;background:linear-gradient(#100e0c,rgba(16,14,12,0) 7%,rgba(16,14,12,0) 90%,#100e0c);pointer-events:none}
+
+.pk24btn{display:none!important}
 </style>
 </head>
 <body>
@@ -7215,7 +7217,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.212（11/18 21:35）";
+const VER20 = "No.213（11/18 21:40）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -11108,7 +11110,7 @@ function dcard25(card, i, now, dt){
     g.translate(fx, fy); if (a.face < 0) g.scale(-1, 1); g.drawImage(T, 0, 0, 128, 128, -s / 2, -(o.foot + 1) * k, s, s); g.restore();
     // 頭の上のしるし
     a.sx = fx; a.sy = fy - (o.foot - 14) * k;
-    let ic = ""; if (a.m) { if (restLeft7(S, a.m)) ic = "💤"; else if (S.hungry) ic = "😫"; else { try { const j = jobOf12(S, a.m); ic = j && typeof ROLEI18 !== "undefined" && ROLEI18[j] ? ROLEI18[j][0] : MOOD_FACE(moodOf(S, a.m)); } catch (e) {} } }
+    let ic = ""; if (a.m) { if (restLeft7(S, a.m)) ic = "💤"; else if (S.hungry) ic = "😫"; }   // 仕事のアイコン（💎など）は、床に宝石が散らばって見えるので出さない
     if (ic) { g.save(); g.globalAlpha = 0.9; g.font = `${Math.round(10 * dpr)}px system-ui`; g.textAlign = "center"; g.fillText(ic, fx, a.sy); g.restore(); } });
   dpops25(g, i, R, now, dpr, W, H); }
 // ---- 頭の上にふわっと出る文字（2Dの cPop を3Dの部屋へ回す） ----
@@ -11215,6 +11217,9 @@ caveMarks = (prev => function (){ const v = prev.apply(this, arguments); try { d
 // 切りかえボタン
 caveShell = (prev => function (){ let h = prev.apply(this, arguments); if (N) return h; try { h = h.replace('<div class="ctabs">', `<button class="d3t${day3dOn25 ? " on" : ""}" data-a="day3dt">${day3dOn25 ? "3D" : "2D"}</button><div class="ctabs">`); } catch (e) {} return h; })(caveShell);
 document.addEventListener("click", ev => { const b = ev.target.closest('[data-a="day3dt"]'); if (!b) return; ev.stopPropagation(); day3dOn25 = !day3dOn25; try { localStorage.setItem("day3d25", day3dOn25 ? "1" : "0"); } catch (e) {} render(); }, true);
+
+// のぞく機能は、昼の画面が3Dになったので使わない（ボタンを消し、部屋を2回押しても開かない）
+peekOpen24 = function (){};
 
 </script>
 </body>
