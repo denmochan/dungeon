@@ -1020,7 +1020,7 @@ body:has(.stage) .modal{display:none!important}
 .b3t{display:flex;justify-content:flex-end;margin:0 0 4px}
 .b3t .mini.on{background:#7a4a22}
 
-#dw.b3on #cavehost{visibility:hidden}
+#dw.b3on #cavehost{visibility:hidden}#dw.b3on #cavehost .cavestack,#dw.b3on #cavehost .d3stack{display:none}
 
 /* 25：昼の3D */
 .cave .c3bg,.cave .c3sp{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;image-rendering:pixelated}
@@ -7217,7 +7217,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.216（11/18 23:15）";
+const VER20 = "No.217（11/18 23:20）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -9747,6 +9747,13 @@ ${shade}
   return s.slice(0, a) + main;
 }
 
+// パレットの置きかえ表（32×32×32）：1画素ごとに200色を探すのをやめ、表を1回引くだけにする（スマホで重いので）
+let PALLUT25 = null;
+function palLut25(){ if (PALLUT25) return PALLUT25; const n = PAL24.length / 3, d = new Uint8Array(1024 * 32 * 4);
+  for (let g = 0; g < 32; g++) for (let b = 0; b < 32; b++) for (let r = 0; r < 32; r++) { const R = r * 255 / 31, G = g * 255 / 31, B = b * 255 / 31; let bi = 0, bd = 1e18;
+    for (let i = 0; i < n; i++) { const dr = R - PAL24[i * 3], dg = G - PAL24[i * 3 + 1], db = B - PAL24[i * 3 + 2], dd = dr * dr * 0.3 + dg * dg * 0.59 + db * db * 0.11; if (dd < bd) { bd = dd; bi = i; } }
+    const o = (g * 1024 + b * 32 + r) * 4; d[o] = PAL24[bi * 3]; d[o + 1] = PAL24[bi * 3 + 1]; d[o + 2] = PAL24[bi * 3 + 2]; d[o + 3] = 255; }
+  return PALLUT25 = d; }
 const POST_FS24 = `precision highp float;uniform sampler2D src;uniform sampler2D pal;uniform float npal;uniform vec2 sz;uniform float tm;
 float idAt(vec2 p){return floor(texture2D(src,p/sz).a*20.0+0.5);}
 bool fg(float i){return i>4.5&&i<5.5||i>9.5;}
@@ -9756,7 +9763,7 @@ void main(){vec2 p=gl_FragCoord.xy;vec4 s=texture2D(src,p/sz);float id=floor(s.a
  bool ol=false;if(id>0.5&&id<2.5){ol=fg(idAt(p+vec2(1,0)))||fg(idAt(p-vec2(1,0)))||fg(idAt(p+vec2(0,1)))||fg(idAt(p-vec2(0,1)));}
  if(id>4.5&&id<5.5){float a=idAt(p+vec2(1,0)),b=idAt(p-vec2(1,0)),e=idAt(p+vec2(0,1)),f=idAt(p-vec2(0,1));ol=a>9.5||b>9.5||e>9.5||f>9.5;}
  if(ol){gl_FragColor=vec4(26.0/255.0,18.0/255.0,16.0/255.0,1.0);return;}
- vec3 best=c;float bd=1e9;for(int i=0;i<256;i++){if(float(i)>=npal)break;vec3 q=texture2D(pal,vec2((float(i)+0.5)/256.0,0.5)).rgb;vec3 d=(c-q)*255.0;float dd=d.r*d.r*0.3+d.g*d.g*0.59+d.b*d.b*0.11;if(dd<bd){bd=dd;best=q;}}
+ vec3 q=floor(clamp(c,0.0,1.0)*31.0+0.5);vec3 best=texture2D(pal,vec2((q.b*32.0+q.r+0.5)/1024.0,(q.g+0.5)/32.0)).rgb;   // 色の置きかえ表（前もって計算）を1回引くだけ
  gl_FragColor=vec4(best,1.0);}`;
 
 
@@ -9811,7 +9818,7 @@ function Cave3D24(cv, info, opt = {}){
   let S = null, ROOM = "train", CH = [], vT, vF, vW = 0, vH = 0, jobs = [], inst = [];
   const st = { scale: 1, zoom: 1, cx: 540 * VK, cy: 354 * VK, bake: 0, bakeN: 16, t0: performance.now(), frames: [], alive: true, compileMs: 0, bakeMs: 0, ready: false };
   const PROGS = {}, P = prog(SDF_VS, POST_FS24), PB = prog(SDF_VS, BGCOPY_FS24), PS = prog(SPR_VS24, SPR_FS24), PT = prog(SPR_VS24, STR_FS25), faceT = faceAtlas24(gl);
-  let palT; { const d = new Uint8Array(256 * 4); for (let i = 0; i < PAL24.length / 3; i++) { d[i * 4] = PAL24[i * 3]; d[i * 4 + 1] = PAL24[i * 3 + 1]; d[i * 4 + 2] = PAL24[i * 3 + 2]; d[i * 4 + 3] = 255; } palT = tex(256, 1, d); }
+  const palT = tex(1024, 32, palLut25());
   const bgCT = tex(VRES[0], VRES[1]), bgDT = tex(VRES[0], VRES[1]), bgCF = fbo(bgCT), bgDF = fbo(bgDT), atT = tex(ASZ, ASZ), atF = fbo(atT);
   const camv = CAMP24, rt = camv.M.slice(0, 3), up = camv.M.slice(3, 6), fw = camv.M.slice(6, 9);
   const proj = p => { const v = V3.s(p, camv.e), z = V3.d(v, fw); return [V3.d(v, rt) / z * camv.fl * VRES[1] + VRES[0] / 2, V3.d(v, up) / z * camv.fl * VRES[1] + VRES[1] / 2, z]; };
@@ -9979,7 +9986,8 @@ function Cave3D24(cv, info, opt = {}){
     if (opt.bgOnly) { if (!S) return; if (!st.ready) { prep(opt.budget || 8); if (st.ready && opt.onDone) opt.onDone(); } return; }
     if (!S || !cv.isConnected) { if (!cv.isConnected) destroy(); return; } resize(); if (!vW) return;
     if (!st.ready) { prep(opt.budget || 30); if (!st.ready && !(opt.actors && st.bake >= st.bakeN * 2 && st.pend <= 0)) { say(`洞窟を描いています… ${Math.round((st.bake + st.jobsDone + (st.ajDone || 0)) / (st.bakeN * 2 + jobs.length + ajobs.length) * 100)}%`); return; } say(""); }
-    if (st.hold) return; if (opt.actors) ACT = opt.actors((now - st.t0) / 1000) || []; drawAt((now - st.t0) / 1000);
+    if (st.hold) return; if (now - (st.lastDraw || 0) < 31) return; st.lastDraw = now;   // 1秒に30回まで描く（120Hzのスマホで無駄に重くしない）
+    if (opt.actors) ACT = opt.actors((now - st.t0) / 1000) || []; drawAt((now - st.t0) / 1000);
     st.frames.push(now); while (st.frames.length && now - st.frames[0] > 2000) st.frames.shift();
     if (!st.lastInfo || now - st.lastInfo > 500) { st.lastInfo = now; st.fps = st.frames.length > 1 ? (st.frames.length - 1) / ((st.frames[st.frames.length - 1] - st.frames[0]) / 1000) : 0;
       if (opt.onInfo) opt.onInfo(st, vW, vH, st.zoom / minZoom()); } }
