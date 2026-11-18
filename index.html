@@ -7238,7 +7238,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.221（11/19 01:35）";
+const VER20 = "No.222（11/19 01:46）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7929,7 +7929,7 @@ const heat23 = S => S.heat23 || 0;
 { const _sr = startRaid9; startRaid9 = function (S, rnd) { const N = _sr.apply(this, arguments);
   try { const k = heat23(S) * (N && N.heroes && N.heroes.some(h => h.boss) && S.day < CONTRACT_LEN9 ? 0.6 : 1); if (N && !N.scout && k > 0) { N.heroes.forEach(h => { h.max = Math.round(h.max * (1 + k)); h.hp = h.max; h.atk = Math.round(h.atk * (1 + k * 0.7)); }); N.heat23 = k; } } catch (e) {}
   // 26：回を重ねるほど勇者を少しずつ強く（テストで30日・10回の襲撃が考えなしで全勝できたため）
-  try { if (N && !N.scout) { const rn = Math.max(0, (S.raidNo || 0) - 1), bm = 1 + 0.035 * rn, ba = 1 + 0.025 * rn; N.heroes.forEach(h => { h.max = Math.round(h.max * bm); h.hp = h.max; h.atk = Math.round(h.atk * ba); }); } } catch (e) {}
+  try { if (N && !N.scout && S.day < CONTRACT_LEN9) { const rn = Math.max(0, (S.raidNo || 0) - 1), bm = 1 + 0.035 * rn, ba = 1 + 0.025 * rn; N.heroes.forEach(h => { h.max = Math.round(h.max * bm); h.hp = h.max; h.atk = Math.round(h.atk * ba); }); } } catch (e) {}
   return N; }; }
 { const _er = endRaid9; endRaid9 = function (S, N) {
   try { if (!N.scout) {
@@ -8238,6 +8238,9 @@ mixConfirm = (prev => function (){ let h = prev(); try {
 } catch (e) { return h; } })(mixConfirm);
 // 26：主が倒れた夜は、そのあとの「進化した！」を見せない（すぐ全部消えるのに喜ばせない）
 nextStage = (prev => function (){ try { const lost = (S && S.lord && S.lord.hp <= 0) || (typeof lastRep !== "undefined" && lastRep && (lastRep.lordDown || (lastRep.raid && lastRep.raid.win === false))) || queue.some(q => /rebirth|over|lose/.test(q.k || "")); if (lost) queue = queue.filter(q => q.k !== "evo"); } catch (e) {} return prev.apply(this, arguments); })(nextStage);
+
+// 26：最後の夜（いちばんの大軍）は、4日前から予告する（前の日だけでは手が打てないため）
+{ const _rb2 = raidBox; raidBox = function () { let h = _rb2(); try { const left = CONTRACT_LEN9 - S.day; if (!N && left >= 1 && left <= 4) h = `<div class="box bad" style="font-size:12px">⚠ あと${left}日で<b>最後の夜</b>：いちばんの大軍が来る。部屋を増やす・強い子を育てる・主を鍛えるなら今のうち</div>` + (h || ""); } catch (e) {} return h; }; }
 
 // ================= 罠（種類×置き場所）：罠番の魔物に一任。魔物が提案し、こちらは💎を出して「作らせる」だけ =================
 // 罠は部屋の手前の通路に置く（通路が長いほどマスが多い。最大3）。部屋オブジェクトに R.trap24 = [{k, lv}] で持つ
