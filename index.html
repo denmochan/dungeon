@@ -1061,6 +1061,7 @@ body:has(.stage) .modal{display:none!important}
 button:active,.chall:active{transform:scale(.96);filter:brightness(1.25);transition:transform .05s}
 .stage.result{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 90px)!important}
 .b3tabs{flex-wrap:nowrap;padding-right:4px}.b3tabs button{max-width:30vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.toast{top:calc(env(safe-area-inset-top,0px) + 112px)!important}
 </style>
 </head>
 <body>
@@ -2127,7 +2128,7 @@ function drawSprite(id, form = 0, dark = false) {
   return SPR_CACHE[k] = cv.toDataURL();
 }
 
-</script><script src="art-c257b793ea.js"></script><script>
+</script><script src="art-34c80c4282.js"></script><script>
 /* 家具と痕跡のドット絵 */
 const PROPIMG = {"bones": {"src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAAMCAYAAABvEu28AAAAsklEQVR4XmNkwAOkxAT+I0s/e/WBEZ96rABkyKNbh+B4xbyW/+gGEwQwQ9BpfIYx4TP1xJFNYGkYTRYgxTUgAA88mP+RAxRXYGNTCzYIJAFzvoWNH9gwZDEYAMkhexWmFsNFyIaB2MeOHIIbUlTRg9MQsEHIzsTlCvTARnY1yBCQD8CxBlKILY3AXATzEgjAxGCWoujFlfhA4rC0g0sNzO8YsQYDIQEODGs2HMCbdJBjGACOSrKVpLq+VwAAAABJRU5ErkJggg==", "w": 18, "h": 12}, "curtain": {"src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAAQCAYAAAD0xERiAAAAwklEQVR4XmPk4RL4P2dKFQMlICWnjeHLtw+MLCBDDh27xrBo2QayzIuLCoDrYwSxQK4TEpAACwrwSTCICckwnLiwhYFYMZCrQHqZyHIODkA7w0BeRAfEitHWmx8+vcBwGbFitHUZpQAlNokNbGzqMLxJbPhgU4c3zCwMfBjefYBECEjzq3dPwGJqCiZgcWQxUA7CaRhIIwhgMxAmh24JyEB4mCG7Agaw5U9QvoUB5HwMyp/gDAoCMKciA5ACYsRhGR0AHndwHUMz4+0AAAAASUVORK5CYII=", "w": 19, "h": 16}, "dummy": {"src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAARCAYAAADtyJ2fAAAAvklEQVR4XmNkwAKkhDj+Iws/e/eDEV0ZhgBI07QMG7i6Ww/eMEzYcQNDMxM2G0Ega8YRXFJggFMjsq3YAIZTQQDk3AIPDTAbmzNBgAU9IEAAZhvIfzCD0AOLET0wkAFMIzoAuQKsEV0C2UaQInQAih6s0QHyn9iFX2D1rwzYsPqTBVuIqSmIMDAoMOB0Kt7oIATIjg6cCYAQIFsjSuBgixrkBICcS+B+BGly0BDB68IDN97ANaNoJOQvEIDZCgBLGla51Ww/2AAAAABJRU5ErkJggg==", "w": 14, "h": 17}, "hoard": {"src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAAKCAYAAAC5Sw6hAAAA1UlEQVR4XmNgwAPkxDj+gzA+NQQByID/Hxb8f3EggSjDmLCZCDLk4a0ZDC8vHIBLE3IZhkEgDadWRcAN+NEAYYIMxmcYikHohoAAB9QgkOtAFuAyDG4QzBBxAwewASsn9cFdBXMhSA6XYWCDkF0CM8DBzogh4sMEuGEHDp2Dhxk2w5jQXQIyAARAGlcIFMANCs8rQjEU3TAWmCaIhyCgqW8fQ12RE4pGZPlDZz4wMDCcQ4lwRpjXQHRXjhpUEQPDlhOvwAphYjC+j4UYWBzGf/TqB9gMAAunanpxvO23AAAAAElFTkSuQmCC", "w": 18, "h": 10}, "ice": {"src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAAMCAYAAACEJVa/AAAAwElEQVR4XmNgwAH4pFT+gzAueYIApPnFr///Vzz4QZRBTOgmggy49eA2w4FnP8FSMdO2gMVg6rC5EMUQdAMOXXiAYgdMftaxKygGww3BZcCFUyfABiHLgwzXSaiBG4ThHRCAuQBmAAjAvIjuOhAAGwKzBQbsDBTATAMzC7yRAHMNiktggYnNJfgA3BBCBoDk0Q2/sqCF4dOzO4xgQ0CMNCsdrJaBFGIDMAPgYQIDuAwCRSk+L4JNQgbEJnWQ62H6AJE9hGVyDrcOAAAAAElFTkSuQmCC", "w": 17, "h": 12}, "m_bat": {"src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAGCAYAAADDl76dAAAAQElEQVR4XmPMSkn4z0BtoKWi8H/HhgX/QTSy2bjEQQAmh00fGLx4cAGrS0Ea8cmRbCA+ywjJ4QS4XIgNMFE7PgDB3DOzDDcTOAAAAABJRU5ErkJggg==", "w": 20, "h": 6}, "m_ghost": {"src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABcAAAAFCAYAAACuNHcwAAAAXElEQVR4XmNkQAInXnyYBuJaSAhkIYvDAEwelxp0/YwghTDBQxcegDXaGSigGIAuj0sNsn6QAxmxaUTWDAMwjcgA5ggQQJaHiaO4HB2g+wQbwKUG7HJywpbYOAAASC0/PP00mWMAAAAASUVORK5CYII=", "w": 23, "h": 5}, "m_goblin": {"src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAICAYAAADwdn+XAAAAmUlEQVR4XmNgwAFklPj+gzAuebwApHHFmnVgjGwIUYbCNMMUwwwBi5fZYbiKBeQUmC1P7n1ihDmtp2sBUa5nAWneUmfEcKHrFUON0pP/IENKyhJQ/A4SQw8PGJ8JZo1BmRiYCZKI01Ni6AkxYIDRVQEGKAaC1MBcCHYysukgTXpqfAyXbn3CoBdduge2BKa5pCwBYgC6IaQAANCiUXZy+t3wAAAAAElFTkSuQmCC", "w": 16, "h": 8}, "m_mimic": {"src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAAGCAYAAAAlvnXZAAAAaUlEQVR4XmNkYGBgkBPj+A+iQeDRqx+MMDY6wKkOJPH/w4L/Lw4k/F/RpPcfWSGIDcMwy2BqkdWBAbpidA3IhoPUoluG1ekwW0BeQ/cCLjkUAPMeum3IroPJgbyG4S0YQA4HbIEL0wijASN4XOIeeLr4AAAAAElFTkSuQmCC", "w": 17, "h": 6}, "m_myconid": {"src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAGCAYAAADHYm6gAAAAoUlEQVR4XmNkgAIZAZ7/MPaTD18YYWxcgJB6sAEgRRu8TBhkDDQYnly4wRCw7QyK4eiGIKs/sOEIQ8m1BxiOYUJWxBKWAjYcbAnUBzD5CxcOoIjfefAG7Ai8XgJpBuE7Z5bA2chBhCyHLA5Tj64WxGcChSd6mCLziQlv5OA8UxUD9iULTBBEnzt3Aa4IZiAsSJDlYC5EFxMoSmEwcckASwMAjjJtlrjmTY8AAAAASUVORK5CYII=", "w": 22, "h": 6}, "m_orc": {"src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAAICAYAAAAm06XyAAAAhUlEQVR4XmNgQAJSfBz/QRhZjCgA0vTizgEwJtYARnSbz53bARYyMvJAsfTZpx8oakEAQwBma5+OEoOBmQFY0YVTFxiKrtyDGwBSAzKMCZufYBpBmkAAZAhIDBYmDlpSYDbYZphtINOQbUYGMJuR1YI5IJNA4MC1ZyhOQ9aMzc9gQG4UAQDWE0aGJqPtTAAAAABJRU5ErkJggg==", "w": 15, "h": 8}, "m_rat": {"src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAHCAYAAAA8sqwkAAAAdUlEQVR4XmNggAIONpb/VloK/0F0lIsBmIbxYWpAgBFEgCSNVGQYnrz6gCwHBq8+fWEIstNhWHfoCsOPX38YGfEpRgYyYgIM5+48YWACCSpICWCYjAuANTx4hukUdAAzlKAfQADmHJAf4AbBQgcWMughBlMIAFXKNV5Tq7oRAAAAAElFTkSuQmCC", "w": 12, "h": 7}, "m_salamander": {"src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAAKCAYAAAC5Sw6hAAAAyklEQVR4XmNgQANcbCz/5UQE/oNoZCmYOLp6GGBBVyzCx8MgIyYAFn7z6QtYI0zsyasPYAO//frDiG4gXACkANkQEABpBAGYwTCxN5++MKAbxgSSxGUIyABkQ7CB/w8awK5mxGbIMrM/DFGnEL4GuQzdQJAYssvALkIGRwukGOSt5MCGwQDMEJhXsQEWkF9hgQrSYD3hGVjdMjNU5eiuQg8nvIGNDtC9AwP/Z1n9R4lGWHghxxS6d7DFGFYAMgw5UeJKoA8SZFASJwAOS3FpmJhGUwAAAABJRU5ErkJggg==", "w": 18, "h": 10}, "m_skeleton": {"src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAFCAYAAABFA8wzAAAAaklEQVR4XmNkgAIpMYH/IOazVx8YYWLoAKaGkDqwwke3DoExiI2OQQbA1CDTMHFki+CuAQmeOLIJq+MsbPzA4sjyIDGQb2D6YHwWmC0gxTCNyABmCEizhY0f2FUwL+N0BMyL2JyHTw6blwG7sU1n7FkY1gAAAABJRU5ErkJggg==", "w": 20, "h": 5}, "m_slime": {"src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAGCAYAAADHYm6gAAAAjElEQVR4XmNkQAI8UiL/kfnEgC/P3jBiUwcWhBloV2AHV2OjJwZnH7n0CkPvoQmH4GLYDGcEGQozEGaYg5YJXNOBa2fAbJjh2CzEZgnYYKUALQYZBRGwAcgaYQDZxSB5mMUgS9F9A7IE5AOUoABZAAIwS7CBJw/eYKiBid3bcA0eLCgBT07kIQPksAYAJME/BzoYscgAAAAASUVORK5CYII=", "w": 22, "h": 6}, "m_spider": {"src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAARCAYAAAA7bUf6AAAAmklEQVR4XmN88eTOKgZKAciQFUvmwA1CZoMAOh9dDOwImEuINQhZHdwXyN5BVwCSQ8ZYDQAB9DCBKcTnMnQ9TNjCFF9gg+QkZFTCUPTh8g7IJehewWk4toBFjgGYt/C5DiOK0aMQ5iK8SQlXwMIMw+sCGCAUJkQlZlyJjSgXILsEX5ogCqB7hyQXoIcJtoxGNEDPxWQBspyPBgAdQ9Be/F6VnwAAAABJRU5ErkJggg==", "w": 17, "h": 17}, "m_wolf": {"src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAAFCAYAAACn39dKAAAAjUlEQVR4XmNgQAJ8fEL/QRgkBKNhbGzi6IAJJgBSHBAQxlBUVAZmw2gYe9q0WXA1yJYiA0aYzSCDlJQUGFRUVBju3LnDcO/eAzh/1649WOX6+roYPn16BzYDBJhAtpiZ2WA42c3NBS6GbAnIMhAfZBlIH3JwwF0G0gmSlJKSYnj27BleesOGVXCLkF0GAOQtS1qXTmAhAAAAAElFTkSuQmCC", "w": 19, "h": 5}, "moss": {"src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAKCAYAAAC9vt6cAAAA30lEQVR4XmNgwAIERAT+R12o+A+iQRibGhhgQZaEKfbak8GQp2/BwLAHIrvNZQbYkA9vPjCiGwYXAGmWKrNiMHDTg6sBGTLp4gkw/8KuSwzPuo5hGMIEkkTWDFIIAyDNMD7IYJAF6F6Ce8HgDAPDBYZLCNpND6wZJg4CIPYzND+wgEz0crICCwe8kmB4wPACxTC4+KMX6N4HA7AXHjyCmAtSpCAnAbcNBpDFYV6GyYENQDcEBmCGwQwHAZhrYQAcCyBvaKkogMUU5KSwOhVmybU7D1BiAiUacepEA8jpAQBJ/GRZ+znRPgAAAABJRU5ErkJggg==", "w": 16, "h": 10}, "pot": {"src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAANCAYAAAB2HjRBAAAAx0lEQVR4XmNgQAIXLtz4D+Mis0EAnY8VYDOAbI34bGUESQoICMCdSwz48OEDWB8TSGNUVAZYT9WBAIYdDyag0MhiIABSC7OMEab51q1rDGfOHCJosYmJHYOamhbDsmUzEM6GCeIDMAtgzmaBKX727BGKPpDpMADSBALoauCaYZJSUnJgNkwDLsNBABxqsBCXklLA6+xnzx7AnQwCaDY/YAAZAFKEDLCJgQATsqIbDlwMV9sgIqBAgQUMSAwkhxeAog1bgsElDgDJxXnLuL2qVQAAAABJRU5ErkJggg==", "w": 15, "h": 13}, "straw": {"src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAICAYAAAD5nd/tAAAA1ElEQVR4XmNkQANacjz/0cWwgWuPvjBiE4cLwgya1+TCoGDgwPDgwgGGQ6duMdiZqYH5i2bNgrNBckl1e8DmoRvMBBIEGQYyaN+mFrAhIA0gQy7cegfWBDIsLi2NYdKSE3CLQGpBetB9xAgzDGQQSBPIMJBGEDBQEwIbmhdjARZD5iOrB7kW5lKwC2FeAwGYRmQAkkfnwyxHlwMbCHIFzKt9PRVgvSBXgTSBXAUKR3RxUDDA9CIDcKSAvG2gxgP3JkwhyDBC7Au3vqBEDEYskwrQYxkANXGMwNEClnoAAAAASUVORK5CYII=", "w": 20, "h": 8}, "torch": {"src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAVCAYAAAByrA+0AAAA7UlEQVR4XmNgwAKkhAT+YxMHASZ0CZDic3ZcKJqQDUDRAFMsniAGNwfdAAwbwIodChhgtoBoZANYYEbBTIIB8QVtDE8PTABzXy54BRfHsAFkOhwgs6EAUwPUVKIAyFkvAqT+/99g8P//hwVgGsRHDiVGZJNgEiCPwoDRoW9g5rN3H8Bq4RpAivtmzcPpkqK0JLAmeCiBwKZNm8C0n58fXCNMDAawOslBQ4DBQEGA4cKDDwwHbnxAcRJKKMHciQ6QxTGDlQAYDhowgtXBJwDD2we2bICHFEryBilGjjRkcGDLhv+g4EVJGoSCFKQBABxlY5YhSQONAAAAAElFTkSuQmCC", "w": 12, "h": 21}, "water": {"src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAPCAYAAADtc08vAAAA6klEQVR4XmNkwAJERAT+YxN/8+YDI7o4hgBI85IkPWz6GWLmXcIwBKsBIN1pax6gGDIrRAHMR3cFCzar3GQ4GDasOoAiBRLb9eQHhnIUA2B+N1CQYIjj6UNRfElBgmHXkwdgNciugHsBJFFmo8Cgp8aH1f8wcOnWJ4auIw/gXmECSSBrtiiYhNcAkAUgi2CuBRsAAyDNJybk4TUAHaAYQIxmkBeQAYoB5AC4ARcevMAwHR3AbAephQFwNIKiZRcDKPlCJLDFBLJmUHqARSVGQkI2HRngEkdJyrCoAaU6bACWErEmJGRASm4EANk+ZEW8rBSGAAAAAElFTkSuQmCC", "w": 16, "h": 15}};
 
@@ -6113,7 +6114,8 @@ document.addEventListener("click", ev => {
     case "dex": DX = null; modal = dexModal; break;
     case "dexsp": DX = d.v; modal = dexModal; break;
     case "spd": speed = +d.v; try { localStorage.setItem("chika-spd", String(speed)); } catch (e) {} break;
-    case "skip": clearTimeout(timer); while (!N.done) stepNight5(S, N); endRaid(); return;
+    case "skip": if ((N.t || 0) < 3 || Date.now() - (N.st25 || 0) < 1500) break;   // 始まってすぐの「最後まで」は効かない（迎え撃つの2回押し対策）
+      clearTimeout(timer); while (!N.done) stepNight5(S, N); endRaid(); return;
     case "next": if (modal !== rebirthModal && modal !== contractModal) modal = null; if (queue.length) { nextStage(); return; } break;
     case "close": modal = null; DX = null; break;
     case "bgm19": BGMON19 = !BGMON19; try { localStorage.setItem("chika-bgm", BGMON19 ? "1" : "0"); } catch (e) {} break;
@@ -7236,7 +7238,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.220（11/19 01:08）";
+const VER20 = "No.221（11/19 01:35）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7927,13 +7929,13 @@ const heat23 = S => S.heat23 || 0;
 { const _sr = startRaid9; startRaid9 = function (S, rnd) { const N = _sr.apply(this, arguments);
   try { const k = heat23(S) * (N && N.heroes && N.heroes.some(h => h.boss) && S.day < CONTRACT_LEN9 ? 0.6 : 1); if (N && !N.scout && k > 0) { N.heroes.forEach(h => { h.max = Math.round(h.max * (1 + k)); h.hp = h.max; h.atk = Math.round(h.atk * (1 + k * 0.7)); }); N.heat23 = k; } } catch (e) {}
   // 26：回を重ねるほど勇者を少しずつ強く（テストで30日・10回の襲撃が考えなしで全勝できたため）
-  try { if (N && !N.scout) { const rn = S.raidNo || 0, bm = 1 + 0.05 * rn, ba = 1 + 0.035 * rn; N.heroes.forEach(h => { h.max = Math.round(h.max * bm); h.hp = h.max; h.atk = Math.round(h.atk * ba); }); } } catch (e) {}
+  try { if (N && !N.scout) { const rn = Math.max(0, (S.raidNo || 0) - 1), bm = 1 + 0.035 * rn, ba = 1 + 0.025 * rn; N.heroes.forEach(h => { h.max = Math.round(h.max * bm); h.hp = h.max; h.atk = Math.round(h.atk * ba); }); } } catch (e) {}
   return N; }; }
 { const _er = endRaid9; endRaid9 = function (S, N) {
   try { if (!N.scout) {
     const dens = S.path.map((r, i) => r.kind === "den" ? i : -1).filter(i => i >= 0), li = S.path.findIndex(r => r.kind === "lord");
     const deep = Math.max(0, ...N.heroes.map(h => h.maxPos || 0)), esc = N.heroes.filter(h => h.st === "escaped").length, hurt = N.lord && N.lord.hp < (N.lord.max || 0);
-    let d = 0; if (N.lord && N.lord.down) d = -0.3; else if (hurt || N.lastStand23) d = -0.2; else { const fl = S.dlv23 && S.dlv23.day === S.day ? S.dlv23.lv : 0; d = [0.32, 0.16, 0.05, 0][fl] || 0; }   /* 主が無傷なら毎回すこし強く（逃げられても）。崖はボス4割・ぎりぎり生存・危ない度で和らげる */   // 押されている夜は熱を上げない（見えないまま溜まって最後に崖、をなくす）
+    let d = 0; if (N.lord && N.lord.down) d = -0.3; else if (hurt || N.lastStand23) d = -0.2; else { const fl = S.dlv23 && S.dlv23.day === S.day ? S.dlv23.lv : 0; d = [0.28, 0.14, 0.04, 0][fl] || 0; }   /* 主が無傷なら毎回すこし強く（逃げられても）。崖はボス4割・ぎりぎり生存・危ない度で和らげる */   // 押されている夜は熱を上げない（見えないまま溜まって最後に崖、をなくす）
     S.heat23 = Math.max(0, Math.min(3, heat23(S) + d)); N.heatD23 = d; } } catch (e) {}
   return _er.apply(this, arguments); }; }
 // ---------- 6) 店の値段はレア度で変わる（SSRとNが同じ値段だった）。DPの使いみちにもなる ----------
@@ -8234,6 +8236,8 @@ mixConfirm = (prev => function (){ let h = prev(); try {
     ${weak ? `<br>⚠ 親の${esc(best.nick)}より弱くなる。進化と倒した数は引きつがない` : `<br><small>進化と倒した数は引きつがない</small>`}</div>`;
   const at = h.indexOf('<div class="hint">'); return at >= 0 ? h.slice(0, at) + row + h.slice(at) : h + row;
 } catch (e) { return h; } })(mixConfirm);
+// 26：主が倒れた夜は、そのあとの「進化した！」を見せない（すぐ全部消えるのに喜ばせない）
+nextStage = (prev => function (){ try { const lost = (S && S.lord && S.lord.hp <= 0) || (typeof lastRep !== "undefined" && lastRep && (lastRep.lordDown || (lastRep.raid && lastRep.raid.win === false))) || queue.some(q => /rebirth|over|lose/.test(q.k || "")); if (lost) queue = queue.filter(q => q.k !== "evo"); } catch (e) {} return prev.apply(this, arguments); })(nextStage);
 
 // ================= 罠（種類×置き場所）：罠番の魔物に一任。魔物が提案し、こちらは💎を出して「作らせる」だけ =================
 // 罠は部屋の手前の通路に置く（通路が長いほどマスが多い。最大3）。部屋オブジェクトに R.trap24 = [{k, lv}] で持つ
@@ -9814,7 +9818,7 @@ void main(){vec2 vp=crop+gl_FragCoord.xy/zoom;vec2 l=floor((vp-rect.xy)/sk);if(l
  vec4 dd=texture2D(bgD,vp/vres);float bgT=(dd.r+dd.g/255.0)*120.0;if(d0>bgT+0.4)discard;
  vec2 q=mod(floor(vp),4.0);float th=(mod(q.x*2.0+q.y*3.0,4.0)*4.0+mod(q.x+q.y*2.0,4.0)+0.5)/16.0;if(al<th)discard;
  vec3 fc=vec3(0.0);for(int i=0;i<5;i++){vec2 o=i==0?vec2(0.0):i==1?vec2(-6.0,0.0):i==2?vec2(6.0,0.0):i==3?vec2(0.0,5.0):vec2(0.0,-3.0);fc+=texture2D(bgC,(fuv+o)/vres).rgb;}
- float lum=dot(fc/5.0,vec3(0.3,0.59,0.11));float br=clamp(0.3+lum*2.2,0.42,1.05);vec3 sc=s.rgb*tint*0.78;sc=br<1.0?mix(vec3(0.063,0.035,0.02),sc,br):mix(sc,vec3(1.0,0.75,0.43),(br-1.0)*2.0);
+ float lum=dot(fc/5.0,vec3(0.3,0.59,0.11));float br=clamp(0.3+lum*2.2,0.58,1.05);vec3 sc=s.rgb*tint*0.78;sc=br<1.0?mix(vec3(0.063,0.035,0.02),sc,br):mix(sc,vec3(1.0,0.75,0.43),(br-1.0)*2.0);
  gl_FragColor=vec4(mix(sc,vec3(1.0,0.97,0.9),fl),sid/20.0);}`;
 // 子の絵（先に焼いた1コマ）を、奥行きを比べながら重ねる
 const SPR_VS24 = `attribute vec2 a;uniform vec4 R;varying vec2 vq;void main(){vec2 q=a*0.5+0.5;vq=q;gl_Position=vec4(R.xy+q*R.zw,0.0,1.0);}`;
@@ -9985,7 +9989,7 @@ function Cave3D24(cv, info, opt = {}){
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, o.t); gl.uniform1i(PT.U("stx"), 0); gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, bgDT); gl.uniform1i(PT.U("bgD"), 1);
     gl.uniform4f(PT.U("R"), (x0 - cropX) * z / vW * 2 - 1, (y0 - cropY) * z / vH * 2 - 1, w * k * z / vW * 2, h * k * z / vH * 2); gl.uniform4f(PT.U("rect"), x0, y0, w, h); gl.uniform2f(PT.U("tsz"), o.W, o.H);
     gl.uniform1f(PT.U("fr"), fr); gl.uniform1f(PT.U("d0"), fp[2]); gl.uniform1f(PT.U("sid"), 10 + Math.min(9, n)); gl.uniform1f(PT.U("sk"), k); gl.uniform1f(PT.U("mir"), a.face < 0 ? 1 : 0);
-    gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, bgCT); gl.uniform1i(PT.U("bgC"), 2); gl.uniform2f(PT.U("fuv"), fp[0], fp[1] + 8); gl.activeTexture(gl.TEXTURE0); gl.uniform1f(PT.U("al"), a.al ?? 1); gl.uniform1f(PT.U("fl"), a.fl || 0); const tn = a.tint || [1, 1, 1]; gl.uniform3f(PT.U("tint"), tn[0], tn[1], tn[2]); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, bgCT); gl.uniform1i(PT.U("bgC"), 2); gl.uniform2f(PT.U("fuv"), fp[0], fp[1] - 6); gl.activeTexture(gl.TEXTURE0); gl.uniform1f(PT.U("al"), a.al ?? 1); gl.uniform1f(PT.U("fl"), a.fl || 0); const tn = a.tint || [1, 1, 1]; gl.uniform3f(PT.U("tint"), tn[0], tn[1], tn[2]); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     useQ(PS, quad4); gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, atT); gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, bgDT); }
   // 画面上の位置（canvasのCSS座標）
   function toScreen(p){ const q = proj(p), z = st.zoom, cropX = st.cx - vW / z / 2, cropY = st.cy - vH / z / 2, r = cv.getBoundingClientRect();
@@ -10678,7 +10682,9 @@ KIT24.skeleton = (K0 => () => { const K = K0(); return { ...K, col: evoCol25(K.c
 KIT24.goblin = (K0 => () => { const K = K0(); return { ...K, col: evoCol25(K.col), body: addBody24(K.body, `
  if(VAR.w>0.5&&VAR.w<1.5){vec3 hh=HR*(p-J[2]);float hd=max(sEll(hh-vec3(0.0,0.1,-0.06),vec3(0.46,0.44,0.46)),-sEll(hh-vec3(0.0,0.02,0.22),vec3(0.36,0.34,0.4)));hd=max(hd,-0.14-hh.y);if(hd<r.x)r=vec2(hd,10.0);
    vec3 tq=TR*(p-J[0]);float qv=sTap(tq,vec3(0.14,0.1,-0.28),vec3(-0.1,0.62,-0.32),0.09,0.08);if(qv<r.x)r=vec2(qv,10.0);
-   float ar=1e3;for(int i=0;i<3;i++){float fi=float(i);vec3 a0=vec3(-0.1+fi*0.05,0.62,-0.32+fi*0.03);ar=min(ar,sTap(tq,a0,a0+vec3(-0.06,0.2,-0.02),0.03,0.02));}if(ar<r.x)r=vec2(ar,12.0);}
+   float ar=1e3;for(int i=0;i<3;i++){float fi=float(i);vec3 a0=vec3(-0.1+fi*0.05,0.62,-0.32+fi*0.03);ar=min(ar,sTap(tq,a0,a0+vec3(-0.06,0.2,-0.02),0.03,0.02));}if(ar<r.x)r=vec2(ar,12.0);
+   vec3 bq=TR*(p-J[5]);float bw=max(max(abs(length(bq.xy-vec2(-0.42,0.08))-0.6)-0.05,abs(bq.z-0.18)-0.05),-0.14-bq.x);if(bw<r.x)r=vec2(bw,8.0);
+   float bs=sTap(bq,vec3(-0.14,0.65,0.18),vec3(-0.14,-0.49,0.18),0.014,0.014);if(bs<r.x)r=vec2(bs,12.0);}
  if(VAR.w>1.5){${EVOHELM25("float hn=min(sTap(vec3(abs(hh.x),hh.y,hh.z),vec3(0.3,0.28,0.0),vec3(0.52,0.62,-0.05),0.07,0.015),1e3);if(hn<r.x)r=vec2(hn,12.0);")}
    vec3 tq=TR*(p-J[0]);float cp=sRBox(tq-vec3(0.0,0.25,-0.26),vec3(0.3,0.36,0.025),0.02);if(cp<r.x)r=vec2(cp,11.0);}
 `) }; })(KIT24.goblin);
@@ -10686,6 +10692,7 @@ KIT24.goblin = (K0 => () => { const K = K0(); return { ...K, col: evoCol25(K.col
 
 // 進化で色を変える（2Dの進化の絵の色に合わせる）：[肌, 服] を段階ごとに
 const EVOCOL25 = {
+  slime: [null, [[0.46, 0.56, 0.16], [0.6, 0.7, 0.2]], [[0.16, 0.3, 0.22], [0.4, 0.2, 0.5]]],
   ghost: [null, [[0.78, 0.93, 0.82], [0.6, 0.8, 0.7]], [[0.3, 0.26, 0.42], [0.2, 0.16, 0.3]]],
   myconid: [null, [[0.93, 0.87, 0.72], [0.55, 0.3, 0.72]], [[0.9, 0.82, 0.68], [0.72, 0.12, 0.16]]],
   spider: [null, [[0.36, 0.2, 0.2], [0.95, 0.5, 0.15]], [[0.3, 0.18, 0.3], [0.95, 0.8, 0.3]]],
@@ -10997,7 +11004,7 @@ function kinds25(){ const K = {}, add = (sp, evo) => { const key = sp + ":" + ev
   N.mons.forEach(m => add(m.sp, (m.ref && m.ref.evos) || 0)); N.heroes.forEach(h => add(heroSp25(h), heroEvo25(h))); add("lord", 0);
   return Object.values(K); }
 // ---- 部屋の中の立ち位置 ----
-const TUN25 = [0, -8.8], EXIT25 = [18.6, 0];
+const TUN25 = [0, -8.0], EXIT25 = [18.6, 0];
 const tun25 = () => TUN25;
 function homeSpots25(i){ const ms = N.mons.filter(m => m.home === i); const on = {}; ROOMSET25[roomKind25(i)].forEach(k => on[k] = true);
   const cast = HAI25.place(on, ms.map(m => ({ sp: m.sp, evo: (m.ref && m.ref.evos) || 0, n: 1, act: "idle", id: m.ref.id })), 7 + i * 13);
@@ -11124,7 +11131,7 @@ function overlay25(now){ const ov = B3.ov, r = ov.getBoundingClientRect(), dpr =
   B3.pops = B3.pops.filter(p => now - p.at < 1.1);
   B3.pops.forEach(p => { if (now < p.at) return; const a = B3.A[p.who]; if (!a && !p.pos) return; if (!p.pos) p.pos = [a.x, a.z, a.key]; const s = head({ id: p.who, x: p.pos[0], z: p.pos[1], key: p.pos[2], w: {} });
     if (p.lane == null) { const live = B3.pops.filter(q => q !== p && q.lane != null && now - q.at < 0.8 && Math.abs((q.sx ?? 0) - s[0]) < 40); let L = 0; while (live.some(q => q.lane === L)) L++; p.lane = L; p.sx = s[0]; }
-    const k = (now - p.at) / 1.1, y = s[1] - 22 - k * 22 - p.lane * 16 - (p.banner ? 6 : 0); g.globalAlpha = Math.min(1, (1 - k) * 2);
+    const lab = a && a.labY != null ? a.labY - 12 : s[1] - 22, k = (now - p.at) / 1.1, y = Math.min(s[1] - 22, lab) - k * 22 - p.lane * 16 - (p.banner ? 6 : 0); g.globalAlpha = Math.min(1, (1 - k) * 2);
     g.font = `900 ${p.big ? 17 : 13}px system-ui,sans-serif`; g.lineWidth = 4; g.strokeStyle = "rgba(20,8,6,0.9)"; g.strokeText(p.txt, s[0], y); g.fillStyle = p.col; g.fillText(p.txt, s[0], y); g.globalAlpha = 1; }); }
 // ---- 部屋の切りかえボタン ----
 function roomTabs25(){ const t = document.querySelector("#b3d25 .b3tabs"); if (!t || !N) return; const L = lordIdx(S);
@@ -11369,6 +11376,10 @@ peekOpen24 = function (){};
 // チュートリアル：3D表示中は 2Dの「.cave」が隠れているので、代わりに3Dの部屋の並びを指す
 tutEls = (prev => function (st){ const a = prev(st); if (a.length || !st || !st.sel || !/\.cave\b/.test(st.sel)) return a;
   const s = st.sel.replace(/\.cave\b/g, ".d3stack .d3card"); const b = [...document.querySelectorAll(s)].filter(e => e.getClientRects().length); return b.length ? b.slice(0, 1) : [...document.querySelectorAll(".d3stack")]; })(tutEls);
+
+// 画面が切りかわった直後（夜→昼など）の0.5秒は、ボタンを押しても効かない（前の画面のつもりの押し間違いを防ぐ）
+{ let lv = null, lt = 0; const _r = render; render = function (){ const v = _r.apply(this, arguments); try { const k = view + "|" + !!N + "|" + (modal ? 1 : 0); if (k !== lv) { lv = k; lt = Date.now(); } } catch (e) {} return v; };
+  document.addEventListener("click", ev => { if (Date.now() - lt < 450 && ev.target.closest && ev.target.closest("button,[data-a]") && !ev.target.closest(".tutov")) { ev.stopPropagation(); ev.preventDefault(); } }, true); }
 
 </script>
 </body>
