@@ -7212,7 +7212,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.208（11/18 20:43）";
+const VER20 = "No.209（11/18 21:11）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -10603,7 +10603,7 @@ SPCOLX24.lord = [[0.74, 0.7, 0.84], [0.78, 0.12, 0.16]]; SPCOL24.lordk = SPCOLX2
 // 施設：今の3部屋の家具を1つずつ切り出し、広い洞窟の中で重ならない位置へずらして置く
 
 // 入口と出口の門（戦闘で勇者が出入りする）。奥の壁と右の壁
-const GATE25 = (x0, z0, side) => { const x = (+x0).toFixed(2), z = (+z0).toFixed(2), q = side ? `vec3(p.z-(${z}),p.y,-(p.x-(${x})))` : `vec3(p.x-(${x}),p.y,p.z-(${z}))`;
+const GATE25 = (x0, z0, side) => { const x = (+x0).toFixed(2), z = (+z0).toFixed(2), q = side === 2 ? `vec3(-(p.z-(${z})),p.y,p.x-(${x}))` : side ? `vec3(p.z-(${z}),p.y,-(p.x-(${x})))` : `vec3(p.x-(${x}),p.y,p.z-(${z}))`;
   return ` {vec3 q=${q};float vd=sRBox(q-vec3(0.0,1.35,-0.45),vec3(1.55,1.35,0.4),0.05);if(vd<r.x)r=vec2(vd,26.0);
   float fr=min(sTap(q,vec3(-1.75,0.0,0.0),vec3(-1.75,2.85,0.0),0.17,0.15),sTap(q,vec3(1.75,0.0,0.0),vec3(1.75,2.85,0.0),0.17,0.15));
   fr=min(fr,sTap(q,vec3(-2.05,2.85,0.0),vec3(2.05,2.85,0.0),0.19,0.19));fr=min(fr,sTap(q,vec3(-1.75,2.3,0.05),vec3(-1.1,2.85,0.05),0.07,0.07));fr=min(fr,sTap(q,vec3(1.75,2.3,0.05),vec3(1.1,2.85,0.05),0.07,0.07));
@@ -10638,24 +10638,40 @@ const WATCH25 = () => ` {vec3 q=p-vec3(11.0,0.0,3.6);float tb=sRBox(q-vec3(0.0,0
  {vec3 q=p-vec3(13.0,0.0,2.4);float tp=1e3;for(int i=0;i<3;i++){float a=float(i)*2.094+0.3;tp=min(tp,sTap(q,vec3(cos(a)*0.5,0.0,sin(a)*0.5),vec3(0.0,1.3,0.0),0.035,0.03));}if(tp<r.x)r=vec2(tp,12.0);
   float sg=sTap(q,vec3(-0.12,1.32,0.42),vec3(0.16,1.52,-0.5),0.1,0.065);if(sg<r.x)r=vec2(sg,18.0);float rg=sTap(q,vec3(-0.1,1.33,0.36),vec3(-0.08,1.345,0.3),0.115,0.115);if(rg<r.x)r=vec2(rg,22.0);}`;
 // 主の間：石の壇・玉座・赤いじゅうたん・紫の火の台・旗・どくろ
-const THRONE25 = () => ` {vec3 q=(p-vec3(0.0,0.0,-6.3))/1.4;vec2 rr=vec2(1e3,0.0);
-  float ds=sRBox(q-vec3(0.0,0.12,0.0),vec3(4.2,0.12,1.9),0.04);ds=min(ds,sRBox(q-vec3(0.0,0.34,-0.35),vec3(3.3,0.12,1.45),0.04));ds=min(ds,sRBox(q-vec3(0.0,0.56,-0.7),vec3(2.4,0.12,1.05),0.04));if(ds<rr.x)rr=vec2(ds,30.0);
-  vec3 t=q-vec3(0.0,0.68,-1.1);float th=sRBox(t-vec3(0.0,0.35,0.0),vec3(0.75,0.12,0.6),0.04);th=min(th,sRBox(t-vec3(0.0,1.45,-0.5),vec3(0.8,1.25,0.12),0.05));
+// 主の間の中身（元の向き：壇は奥 z=-6.3、玉座は手前 +z を向く）
+const DAIS25 = `  float ds=sRBox(q-vec3(0.0,0.12,0.0),vec3(4.2,0.12,1.9),0.04);ds=min(ds,sRBox(q-vec3(0.0,0.34,-0.35),vec3(3.3,0.12,1.45),0.04));ds=min(ds,sRBox(q-vec3(0.0,0.56,-0.7),vec3(2.4,0.12,1.05),0.04));if(ds<rr.x)rr=vec2(ds,30.0);`;
+const CHAIR25 = `  vec3 t=q-vec3(0.0,0.68,-1.1);float th=sRBox(t-vec3(0.0,0.35,0.0),vec3(0.75,0.12,0.6),0.04);th=min(th,sRBox(t-vec3(0.0,1.45,-0.5),vec3(0.8,1.25,0.12),0.05));
   th=min(th,sRBox(vec3(abs(t.x),t.y,t.z)-vec3(0.78,0.75,0.0),vec3(0.1,0.3,0.55),0.04));th=min(th,sRBox(t-vec3(0.0,0.12,0.0),vec3(0.7,0.12,0.55),0.03));if(th<rr.x)rr=vec2(th,30.0);
   float cu=sRBox(t-vec3(0.0,0.5,0.05),vec3(0.62,0.06,0.5),0.05);cu=min(cu,sRBox(t-vec3(0.0,1.45,-0.36),vec3(0.62,1.05,0.04),0.04));if(cu<rr.x)rr=vec2(cu,27.0);
   float gd=sTap(vec3(abs(t.x),t.y,t.z),vec3(0.82,0.08,-0.5),vec3(0.82,2.75,-0.5),0.06,0.06);gd=min(gd,sTap(t,vec3(-0.85,2.72,-0.5),vec3(0.85,2.72,-0.5),0.07,0.07));if(gd<rr.x)rr=vec2(gd,28.0);
   float sk=1e3;for(int i=0;i<5;i++){float a=(float(i)-2.0)*0.38;sk=min(sk,sTap(t,vec3(sin(a)*0.75,2.75,-0.5),vec3(sin(a)*1.25,2.75+cos(a)*(i==2?1.1:0.8),-0.55),0.08,0.01));}if(sk<rr.x)rr=vec2(sk,15.0);
-  float gm=sEll(t-vec3(0.0,2.45,-0.36),vec3(0.16,0.2,0.06));if(gm<rr.x)rr=vec2(gm,29.0);rr.x*=1.4;if(rr.x<r.x)r=rr;}
- {vec3 q=p-vec3(0.0,0.0,0.0);float cp=sRBox(q-vec3(0.0,0.05,1.2),vec3(1.15,0.04,4.8),0.01);if(cp<r.x)r=vec2(cp,27.0);
-  float cb=max(abs(abs(q.x)-1.0)-0.06,max(abs(q.z-1.2)-4.8,abs(q.y-0.09)-0.012));if(cb<r.x)r=vec2(cb,28.0);}
+  float gm=sEll(t-vec3(0.0,2.45,-0.36),vec3(0.16,0.2,0.06));if(gm<rr.x)rr=vec2(gm,29.0);`;
+const CARPET25 = (c, h) => ` {vec3 q=p;float cp=sRBox(q-vec3(0.0,0.05,${c}),vec3(1.15,0.04,${h}),0.01);if(cp<r.x)r=vec2(cp,27.0);
+  float cb=max(abs(abs(q.x)-1.0)-0.06,max(abs(q.z-(${c}))-(${h}),abs(q.y-0.09)-0.012));if(cb<r.x)r=vec2(cb,28.0);}`;
+const HALL25 = `
  {for(int i=0;i<6;i++){float sx=mod(float(i),2.0)<0.5?-3.0:3.0;float zz=i<2?-3.4:i<4?0.6:4.4;vec3 q=p-vec3(sx,0.0,zz);
   float st=sTap(q,vec3(0.0,0.0,0.0),vec3(0.0,1.25,0.0),0.16,0.09);st=min(st,sRBox(q-vec3(0.0,0.05,0.0),vec3(0.32,0.05,0.32),0.02));if(st<r.x)r=vec2(st,30.0);
   float bw=max(abs(length(q-vec3(0,1.42,0))-0.34)-0.04,q.y-1.4);if(bw<r.x)r=vec2(bw,28.0);
   float fl=sTap(q,vec3(0.0,1.42,0.0),vec3(0.06*sin(tm*9.0+float(i)),1.42+0.85+0.08*sin(tm*13.0+float(i)*2.0),0.0),0.3,0.0);if(fl<r.x)r=vec2(fl,29.0);}}
- {for(int i=0;i<2;i++){vec3 q=p-vec3(i==0?-3.9:3.9,0.0,-8.55);float bn=sRBox(q-vec3(0.0,3.2,0.0),vec3(0.7,1.6,0.04),0.02);bn=max(bn,-(q.y-1.6-0.6*abs(q.x)+0.05));if(bn<r.x)r=vec2(bn,27.0);
-  float rd=sTap(q,vec3(-0.85,4.85,0.05),vec3(0.85,4.85,0.05),0.05,0.05);float em=sEll(q-vec3(0.0,3.6,0.05),vec3(0.3,0.36,0.03));if(rd<r.x)r=vec2(rd,28.0);if(em<r.x)r=vec2(em,28.0);}}
  {for(int i=0;i<7;i++){float fi=float(i);vec3 c=vec3((i<4?-7.0:7.0)+sin(fi*2.3)*0.6,0.18+(mod(fi,3.0)<0.5?0.25:0.0),-5.2+cos(fi*1.7)*0.7);vec3 q=p-c;
   float sk=sEll(q,vec3(0.2,0.18,0.22));sk=max(sk,-sEll(q-vec3(0.08,0.02,0.16),vec3(0.06,0.06,0.08)));sk=max(sk,-sEll(q-vec3(-0.08,0.02,0.16),vec3(0.06,0.06,0.08)));if(sk<r.x)r=vec2(sk,20.0);}}`;
+const BANNER25 = ` {for(int i=0;i<2;i++){vec3 q=p-vec3(i==0?-3.9:3.9,0.0,-8.55);float bn=sRBox(q-vec3(0.0,3.2,0.0),vec3(0.7,1.6,0.04),0.02);bn=max(bn,-(q.y-1.6-0.6*abs(q.x)+0.05));if(bn<r.x)r=vec2(bn,27.0);
+  float rd=sTap(q,vec3(-0.85,4.85,0.05),vec3(0.85,4.85,0.05),0.05,0.05);float em=sEll(q-vec3(0.0,3.6,0.05),vec3(0.3,0.36,0.03));if(rd<r.x)r=vec2(rd,28.0);if(em<r.x)r=vec2(em,28.0);}}`;
+const THRONE_B25 = ` {vec3 q=(p-vec3(0.0,0.0,-6.3))/1.4;vec2 rr=vec2(1e3,0.0);
+${DAIS25}
+${CHAIR25}
+  rr.x*=1.4;if(rr.x<r.x)r=rr;}
+${CARPET25("5.5", "9.1")}
+${HALL25}`;
+const THRONE_D25 = ` {vec3 q=(p-vec3(0.0,0.0,-6.3))/1.4;vec2 rr=vec2(1e3,0.0);
+${DAIS25}
+  rr.x*=1.4;if(rr.x<r.x)r=rr;}
+${CARPET25("2.4", "6.0")}
+${HALL25}`;
+const THRONE25 = mode => ` {vec3 P1=p;p=${mode === "D" ? "vec3(-p.x,p.y,-p.z)" : "vec3(p.z,p.y,-(p.x-6.0))"};
+${mode === "D" ? THRONE_D25 : THRONE_B25}
+ p=P1;}
+${BANNER25}`;
 const HAI25 = (() => {
   const L = r => ROOMS24[r].props.split("\n");
   const T = L("train"), M = L("mine"), S = L("sleep");
@@ -10680,9 +10696,11 @@ const HAI25 = (() => {
     { id: "ladder", name: "見張りのはしごと足場", g: "none", txt: LADDER25(13.4, 5.0, 1), light: "LIGHT(15.4,5.2,5.0,0.75,0.85,1.0,3.4)", foot: [[13.6, 5.0, 1.4], [15.6, 5.0, 1.8]] },
     { id: "watch2", name: "地図の机とたる・遠めがね", g: "none", txt: WATCH25(), light: "LIGHT(11.0,1.4,3.2,1.0,0.7,0.35,2.6)", foot: [[11.0, 3.6, 1.4], [9.7, 4.6, 0.5], [10.9, 7.3, 1.0], [13.0, 2.4, 0.7]] },
     { id: "barr", name: "とげのバリケード", g: "none", txt: BARR25(-4.4, -5.0) + BARR25(4.4, -5.0) + BARR25(-10.6, -3.4) + BARR25(10.6, -3.4), foot: [-7.2, -4.4, -1.6, 1.6, 4.4, 7.2, -13.4, -10.6, -7.8, 7.8, 10.6, 13.4].map((x, k) => [x, k < 6 ? -5.0 : -3.4, 1.2]) },
-    { id: "throne", name: "玉座と壇・じゅうたん", g: "none", txt: THRONE25(), light: "LIGHT(-3.0,2.1,-3.4,0.7,0.3,1.0,2.6) LIGHT(3.0,2.1,-3.4,0.7,0.3,1.0,2.6) LIGHT(-3.0,2.1,4.4,0.7,0.3,1.0,2.2) LIGHT(3.0,2.1,4.4,0.7,0.3,1.0,2.2) LIGHT(0.0,4.2,-6.0,0.75,0.35,1.0,3.0) LIGHT(0.0,2.0,1.5,1.0,0.55,0.3,2.0)",
-      foot: [[0, -6.3, 5.8], [-3, -3.4, 0.6], [3, -3.4, 0.6], [-3, 0.6, 0.6], [3, 0.6, 0.6], [-3, 4.4, 0.6], [3, 4.4, 0.6], [-7.0, -5.2, 0.9], [7.0, -5.2, 0.9]] },
-    { id: "gateL", name: "主の間の入口（左奥）", g: "none", txt: GATE25(-10.5, -7.9, 0), light: "LIGHT(-10.5,2.4,-6.9,1.0,0.6,0.3,2.0)", foot: [[-10.5, -7.7, 1.8]] },
+    { id: "throneB", name: "玉座の間（戦い・横向き）", g: "none", txt: THRONE25("B"), light: "LIGHT(9.4,2.1,-3.0,0.7,0.3,1.0,2.6) LIGHT(9.4,2.1,3.0,0.7,0.3,1.0,2.6) LIGHT(1.6,2.1,-3.0,0.7,0.3,1.0,2.2) LIGHT(1.6,2.1,3.0,0.7,0.3,1.0,2.2) LIGHT(12.0,4.2,0.0,0.75,0.35,1.0,3.0) LIGHT(4.5,2.0,0.0,1.0,0.55,0.3,2.0)",
+      foot: [[12.3, 0, 5.8], [9.4, -3, 0.6], [9.4, 3, 0.6], [5.4, -3, 0.6], [5.4, 3, 0.6], [1.6, -3, 0.6], [1.6, 3, 0.6], [11.2, -7.0, 0.9], [11.2, 7.0, 0.9]] },
+    { id: "throneD", name: "玉座の間（昼・手前の壇）", g: "none", txt: THRONE25("D"), light: "LIGHT(-3.0,2.1,3.4,0.7,0.3,1.0,2.6) LIGHT(3.0,2.1,3.4,0.7,0.3,1.0,2.6) LIGHT(-3.0,2.1,-0.6,0.7,0.3,1.0,2.2) LIGHT(3.0,2.1,-0.6,0.7,0.3,1.0,2.2) LIGHT(-3.0,2.1,-4.4,0.7,0.3,1.0,2.0) LIGHT(3.0,2.1,-4.4,0.7,0.3,1.0,2.0) LIGHT(0.0,3.0,6.0,0.75,0.35,1.0,2.6)",
+      foot: [[0, 6.3, 5.8]] },
+    { id: "gateW", name: "主の間の入口（左の壁）", g: "none", txt: GATE25(-18.2, 0, 2), light: "LIGHT(-16.8,2.4,0.0,1.0,0.6,0.3,2.2)", foot: [[-17.6, 0, 1.8]] },
     { id: "dummy", name: "わら人形", shell: 1, foot: [[-2.05 * 6.34, 0.55 * 5.76, 0.8]] },
     { id: "rack", name: "武器立て", shell: 1, foot: [[-1.35 * 6.34, -1.65 * 5.76, 0.8]] },
     { id: "torch", name: "壁の松明", shell: 1, foot: [] },
@@ -10817,7 +10835,8 @@ const ROOMSET25 = {
   train: ["stake", "rocks", "ring", "pit1", "dummy", "rack", "torch", "stal", "gate", "gate2"],
   mine: ["ore", "rail", "pebble", "pick", "lamp", "torch", "stal", "gate", "gate2"],
   bed: ["bed", "pot", "torch", "stal", "gate", "gate2"],
-  lord: ["throne", "gateL", "torch"],
+  lord: ["throneB", "gateW", "torch"],
+  lordday: ["throneD", "gate", "torch"],
   nest: ["nest", "crate", "torch", "stal", "gate", "gate2"],
   watch: ["ladder", "watch2", "crate", "torch", "stal", "gate", "gate2"],
   entry: ["barr", "crate", "lamp", "rack", "torch", "stal", "gate", "gate2"],
@@ -10831,7 +10850,7 @@ function roomKind25(i){ const R = S.path[i] || {}; if (i === lordIdx(S)) return 
   return F.includes("train") ? "train" : F.includes("mine") ? "mine" : F.includes("bed") ? "bed" : R.fac === "mine" ? "mine" : R.fac === "bed" ? "bed" : R.fac === "train" ? "train" : F.includes("nest") || R.fac === "nest" ? "nest" : F.includes("watch") || R.fac === "watch" ? "watch" : F.includes("gate") || R.fac === "gate" ? "entry" : "plain"; }
 // 配った洞窟の絵（bg25/部屋の種類_c.png・_d.png）があれば、それを読み込む
 function setRoom25(i){ const C = B3.C; C.setRoom(B3.roomKey); const k = roomKind25(i); if (!BGSHIP25[k]) return; C.putBgImages(`bg25/${k}_c.png?v=${BGSHIP25[k]}`, `bg25/${k}_d.png?v=${BGSHIP25[k]}`, C.st.bgKey); }
-const BGSHIP25 = { train: "fd282ce3", mine: "f6c4e409", bed: "3f1c9fef", lord: "4ab9625f", plain: "43787f10", nest: "92cc858e", watch: "a7d8de73", entry: "a8a68ce5", train_mine: "52dcb95c", train_bed: "8fba5ad9", train_nest: "d84b8dc8", train_watch: "42cc71e7", mine_bed: "680cf510", mine_nest: "11aafbdb", mine_watch: "22b99272", bed_nest: "3d83bc11", bed_watch: "994ec677", nest_watch: "4e4b4c24" };
+const BGSHIP25 = { train: "fd282ce3", mine: "f6c4e409", bed: "3f1c9fef", lord: "747617d1", plain: "43787f10", nest: "92cc858e", watch: "a7d8de73", entry: "a8a68ce5", train_mine: "52dcb95c", train_bed: "8fba5ad9", train_nest: "d84b8dc8", train_watch: "42cc71e7", mine_bed: "680cf510", mine_nest: "11aafbdb", mine_watch: "22b99272", bed_nest: "3d83bc11", bed_watch: "994ec677", nest_watch: "4e4b4c24", lordday: "41ce104d" };
 function roomKey25(i){ const on = {}; ROOMSET25[roomKind25(i)].forEach(k => on[k] = true); return HAI25.room(on); }
 // ---- 3Dのキャラの種類 ----
 const heroSp25 = h => (typeof heroId === "function" ? String(heroId(h)).replace(/\d+$/, "") : h.job) || "warrior";
@@ -10841,7 +10860,7 @@ function kinds25(){ const K = {}, add = (sp, evo) => { const key = sp + ":" + ev
   return Object.values(K); }
 // ---- 部屋の中の立ち位置 ----
 const TUN25 = [0, -9.9], EXIT25 = [18.6, 0];
-const tun25 = () => (B3 && B3.room === lordIdx(S) ? [-10.5, -8.4] : TUN25);
+const tun25 = () => (B3 && B3.room === lordIdx(S) ? [-17.4, 0] : TUN25);
 function homeSpots25(i){ const ms = N.mons.filter(m => m.home === i); const on = {}; ROOMSET25[roomKind25(i)].forEach(k => on[k] = true);
   const cast = HAI25.place(on, ms.map(m => ({ sp: m.sp, evo: (m.ref && m.ref.evos) || 0, n: 1, act: "idle", id: m.ref.id })), 7 + i * 13);
   const out = {}; const left = ms.slice().sort((a, b) => HAI25.footR({ sp: b.sp, evo: (b.ref && b.ref.evos) || 0 }) - HAI25.footR({ sp: a.sp, evo: (a.ref && a.ref.evos) || 0 }));
@@ -10861,7 +10880,7 @@ function targets25(i){ const L = lordIdx(S), sp = B3.spots[i] || (B3.spots[i] = 
   const want = {};
   // 魔物
   N.mons.forEach(m => { const id = "m" + m.ref.id; if (m.pos !== i && !(B3.A[id] && B3.A[id].dying)) return; const s = sp[id] || [((m.ref.id * 37) % 11 - 5) * 2.2, 1 + ((m.ref.id * 13) % 5)]; want[id] = { x: s[0], z: s[1], key: m.sp + ":" + ((m.ref && m.ref.evos) || 0), hp: m.hp / m.max, down: m.down, name: m.ref.nick || "" }; });
-  if (i === L) want.lord = { x: 0, z: -3.0, key: "lord:0", hp: N.lord.hp / N.lord.max, down: N.lord.down, name: "主" };
+  if (i === L) want.lord = { x: 9.0, z: 0, key: "lord:0", hp: N.lord.hp / N.lord.max, down: N.lord.down, name: "主" };
   // 勇者
   const foes = Object.entries(want).filter(([k, v]) => !v.down);
   let n = 0;
@@ -10870,7 +10889,7 @@ function targets25(i){ const L = lordIdx(S), sp = B3.spots[i] || (B3.spots[i] = 
     if (h.st === "dead" && !(B3.A[id] && B3.A[id].dying)) { if (h.pos !== i) return; }
     if (!(here || comeIn || goOut || (B3.A[id] && B3.A[id].dying)) || h.st === "escaped") return;
     let x, z, enter = false, leave = false;
-    if (comeIn) { const tot = Math.max(1, (typeof corr10 === "function" ? corr10(S, i) : 2)), pr = 1 - Math.max(0, h.walk) / tot; x = tun25()[0] + (h.id % 3 - 1) * 0.9 * pr; z = tun25()[1] + pr * 3.2; enter = true; }
+    if (comeIn) { const tot = Math.max(1, (typeof corr10 === "function" ? corr10(S, i) : 2)), pr = 1 - Math.max(0, h.walk) / tot; const lr = i === lordIdx(S); x = tun25()[0] + (lr ? pr * 3.2 : (h.id % 3 - 1) * 0.9 * pr); z = tun25()[1] + (lr ? (h.id % 3 - 1) * 0.9 * pr : pr * 3.2); enter = true; }
     else if (goOut) { x = EXIT25[0]; z = EXIT25[1] + (h.id % 3 - 1) * 0.8; leave = true; }
     else { // 戦う相手の近くへ
       const tg = B3.tgt[id] && want[B3.tgt[id]] && !want[B3.tgt[id]].down ? want[B3.tgt[id]] : foes.length ? foes[(h.id) % foes.length][1] : null;
@@ -11037,6 +11056,10 @@ function dspr25(sp, evo){ const k = sp + ":" + evo; if (D3.spr[k] !== undefined)
   const im = new Image(); const o = { im, ok: false, ppu: (PPU25[k] || PPU25[sp + ":0"] || [36])[0], bip: dbip25(sp), foot: 122 };
   im.onload = () => { try { const c = document.createElement("canvas"); c.width = c.height = 128; const g = c.getContext("2d"); g.drawImage(im, 0, 0); const d = g.getImageData(0, 0, 128, 128).data; let b = 0; for (let y = 0; y < 128; y++) for (let x = 0; x < 128; x++) if (d[(y * 128 + x) * 4 + 3] > 128) b = y; o.foot = b; } catch (e) {} o.ok = true; };
   im.src = L[Math.min(L.length - 1, evo)] || L[0]; return D3.spr[k] = o; }
+// 主の後ろ姿（昼の主の間で、奥の入口をにらんで立つ）
+function dback25(evo){ const k = "back:" + evo; if (D3.spr[k] !== undefined) return D3.spr[k]; const im = new Image(), o = D3.spr[k] = { im, ok: false, ppu: (PPU25["lord:" + evo] || [17])[0], bip: true, foot: 122 };
+  im.onload = () => { try { const c = document.createElement("canvas"); c.width = c.height = 128; const g = c.getContext("2d"); g.drawImage(im, 0, 0); const d = g.getImageData(0, 0, 128, 128).data; let b = 0; for (let y = 0; y < 128; y++) for (let x = 0; x < 128; x++) if (d[(y * 128 + x) * 4 + 3] > 128) b = y; o.foot = b; } catch (e) {} o.ok = true; };
+  im.src = `bg25/lordback_${Math.min(2, evo || 0)}.png?v=1`; return o; }
 // ---- 部屋の中の子：立ち位置と動き ----
 function droom25(i){ const kind = roomKind25(i), on = {}; ROOMSET25[kind].forEach(k => on[k] = true);
   const res = S.path[i].kind === "lord" ? [] : residents5(S, i);
@@ -11049,21 +11072,22 @@ function droom25(i){ const kind = roomKind25(i), on = {}; ROOMSET25[kind].forEac
   const order = all.map((m, k) => ({ m, a: list[k] })).sort((a, b) => HAI25.footR({ sp: b.m.sp, evo: b.m.evos || 0 }) - HAI25.footR({ sp: a.m.sp, evo: a.m.evos || 0 }));
   const fit = (x, z, r) => { for (let n = 0; n < 30; n++) { const p = dproj25(x, 0, z), pw = r * p[2]; if (p[0] - pw > 0.1 && p[0] + pw < 0.9 && p[1] > 0.3 && p[1] < 0.84) break; x *= 0.92; z = z * 0.9 + 0.3; } return [x, z]; };
   const acts = []; cast.forEach((c, k) => { const o = order[k]; if (!o) return; const [fx0, fz0] = fit(c.o[0], c.o[2], HAI25.footR({ sp: o.m.sp, evo: o.m.evos || 0 })); c.o[0] = fx0; c.o[2] = fz0; acts.push({ m: o.m, sp: o.m.sp, evo: o.m.evos || 0, x: c.o[0], z: c.o[2], hx: c.o[0], hz: c.o[2], tx: c.o[0], tz: c.o[2], mode: c.mode, face: Math.random() < 0.5 ? 1 : -1, next: 0, ph: Math.random() * 3 }); });
-  if (S.path[i].kind === "lord") acts.push({ lord: true, sp: "lord", evo: typeof lordTier === "function" ? lordTier() : 0, x: 0, z: -3.0, hx: 0, hz: -3.0, tx: 0, tz: -3.0, mode: "idle", face: 1, next: 1e12, ph: 0 });
+  if (S.path[i].kind === "lord") acts.push({ lord: true, back: true, sp: "lord", evo: typeof lordTier === "function" ? lordTier() : 0, x: 0, y: 0.95, z: 6.6, hx: 0, hz: 6.6, tx: 0, tz: 6.6, mode: "idle", face: 1, next: 1e12, ph: 0 });
   return D3.act[i] = { sig, kind, acts }; }
 // ---- 1部屋を描く ----
+const DAYK25 = 1.5;   // 昼の画面だけ、キャラを大きめに描く（遠くて見えにくいので）
 const DFR25 = { idle: [0, 4, 1.6], walk: [15, 2, 0.5], hop: [11, 4, 0.6], atk: [5, 4, 0.55], sleep: [4, 1, 1] };
 function dcard25(card, i, now, dt){
   const cv = card.querySelector("canvas"), r = cv.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1), W = Math.round(r.width * dpr), H = Math.round(r.height * dpr);
   if (!W) return; if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
   const g = cv.getContext("2d"); g.imageSmoothingEnabled = false;
-  const R = droom25(i), bg = dimg25(`bg25/${R.kind}_full.png?v=${BGSHIP25[R.kind] || 5}`); if (bg.ok) g.drawImage(bg, 0, 0, W, H); else { g.fillStyle = "#1a1412"; g.fillRect(0, 0, W, H); }
+  const R = droom25(i), bg = dimg25(`bg25/${R.kind === "lord" ? "lordday" : R.kind}_full.png?v=${BGSHIP25[R.kind === "lord" ? "lordday" : R.kind] || 5}`); if (bg.ok) g.drawImage(bg, 0, 0, W, H); else { g.fillStyle = "#1a1412"; g.fillRect(0, 0, W, H); }
   { const E = D3.edge && D3.edge.h === H ? D3.edge : (D3.edge = { h: H, t: (() => { const q = g.createLinearGradient(0, 0, 0, H); q.addColorStop(0, "rgba(16,14,12,1)"); q.addColorStop(0.07, "rgba(16,14,12,0)"); q.addColorStop(0.9, "rgba(16,14,12,0)"); q.addColorStop(1, "rgba(16,14,12,1)"); return q; })() }); g.fillStyle = E.t; g.fillRect(0, 0, W, H); }
   // 動き：ときどき近くへ歩く（働いている子・寝ている子はその場）
   R.acts.forEach(a => { if (a.mode === "idle" && !a.lord && now > a.next) { a.next = now + 2.5 + Math.random() * 4; const ang = Math.random() * 6.28, d = Math.random() * 2.2; a.tx = a.hx + Math.cos(ang) * d; a.tz = a.hz + Math.sin(ang) * d * 0.6; }
     const dx = a.tx - a.x, dz = a.tz - a.z, L = Math.hypot(dx, dz); a.walking = L > 0.08; if (a.walking) { const s = Math.min(L, 1.6 * dt); a.x += dx / L * s; a.z += dz / L * s; if (Math.abs(dx) > 0.05) a.face = dx > 0 ? 1 : -1; } });
-  R.acts.slice().sort((a, b) => a.z - b.z).forEach(a => { const o = dspr25(a.sp, a.evo); if (!o || !o.ok) return;
-    const p = dproj25(a.x, 0, a.z), fx = p[0] * W, fy = p[1] * H, k = p[2] * W / o.ppu, s = 128 * k;
+  R.acts.slice().sort((a, b) => a.z - b.z).forEach(a => { const o = a.back ? dback25(a.evo) : dspr25(a.sp, a.evo); if (!o || !o.ok) return;
+    const p = dproj25(a.x, a.y || 0, a.z), fx = p[0] * W, fy = p[1] * H, k = p[2] * W / o.ppu * DAYK25, s = 128 * k;
     const st = a.mode === "sleep" ? "sleep" : a.walking ? (o.bip ? "walk" : "hop") : (a.mode === "mine" || a.mode === "train" || a.mode === "slash" || a.mode === "lift") && o.bip ? "atk" : "idle";
     const F = DFR25[st], fr = F[0] + Math.floor(((now + a.ph) / F[2] * F[1]) % F[1]);
     const lum = dlum25(bg, p[0], p[1] - 0.04), br = Math.max(a.lord ? 0.8 : 0.42, Math.min(1.05, 0.3 + lum * 2.2));
@@ -11083,7 +11107,7 @@ D3.pops = {};
 function dpops25(g, i, R, now, dpr, W, H){ const L = D3.pops[i]; if (!L || !L.length) return;
   D3.pops[i] = L.filter(p => now - p.t0 < p.ms);
   // 先に置き場所を決める：吹き出しを先に、ほかの文字は重ならないところまで上へ（多すぎたら小さい文字は出さない）
-  const gp = R.kind === "lord" ? [-10.5, -7.9] : [0, -9.4], pg = dproj25(gp[0], 2.75, gp[1]);
+  const gp = [0, -9.4], pg = dproj25(gp[0], 2.75, gp[1]);
   const placed = [{ x0: 0, y0: 0, x1: 78 * dpr, y1: 30 * dpr }, { x0: pg[0] * W - 32 * dpr, y0: 0, x1: pg[0] * W + 32 * dpr, y1: pg[1] * H + 4 * dpr }], items = D3.pops[i].slice().sort((a, b) => (b.talk ? 1 : 0) - (a.talk ? 1 : 0) || a.t0 - b.t0);
   items.forEach(p => { if (p.hide) return; const q = (now - p.t0) / p.ms; p.al = q < 0.12 ? q / 0.12 : q > 0.72 ? (1 - q) / 0.28 : 1;
     let x, y; if (p.a && p.a.sx != null && R.acts.includes(p.a)) { x = p.a.sx; y = p.a.sy - 10 * dpr; } else { x = p.u * W; y = p.v * H; }
@@ -11117,7 +11141,7 @@ function dtun25(cv, seed, now){ const Wc = cv.parentNode.clientWidth || 370, Hc 
   const g = cv.getContext("2d"), W = cv.width, H = cv.height; let s = seed * 9301 + 49297; const R = () => (s = (s * 9301 + 49297) % 233280) / 233280;
   const B = D3.tunB || (D3.tunB = {}); let base = B[seed];
   if (!base) { base = B[seed] = document.createElement("canvas"); base.width = W; base.height = H; const b = base.getContext("2d"), P = (x, y, c) => { b.fillStyle = c; b.fillRect(x, y, 1, 1); };
-    const gp = (() => { try { return roomKind25(seed) === "lord" ? [-10.5, -7.9] : [0, -9.4]; } catch (e) { return [0, -9.4]; } })(), pg = dproj25(gp[0], 2.75, gp[1]);
+    const gp = (() => { try { return [0, -9.4]; } catch (e) { return [0, -9.4]; } })(), pg = dproj25(gp[0], 2.75, gp[1]);
     const yT = 4, yG = Math.round(H - 40 - 0.11 * Wc + pg[1] * Wc / 2) + 1, xG = pg[0] * W, xT = xG;   // 上の部屋の床の穴／下の部屋の門の上
     const tt = y => Math.max(0, Math.min(1, (y - yT) / (yG - yT)));
     const cx = y => xT + (xG - xT) * tt(y) + Math.sin(tt(y) * Math.PI) * Math.sin(seed * 1.7) * 7, hw = y => 9.5 + Math.sin(y * 0.35 + seed) * 1.0;
