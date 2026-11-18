@@ -7238,7 +7238,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.224（11/19 08:37）";
+const VER20 = "No.225（11/19 08:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -10821,7 +10821,7 @@ const DOJO25 = (x, z) => { const X = (+x).toFixed(2), Z = (+z).toFixed(2);
    float st=sEll(dq-vec3(0.0,1.1,0.0),vec3(0.3,0.42,0.26));st=min(st,sEll(dq-vec3(0.0,1.72,0.0),vec3(0.2,0.2,0.2)));st+=(vnoise(dq*14.0)-0.5)*0.03;if(st<rr.x)rr=vec2(st,13.0);
    float rp=max(abs(length(dq.xz)-0.31)-0.02,abs(dq.y-1.0)-0.03);if(rp<rr.x)rr=vec2(rp,14.0);}
   float rug=max(sEll(q-vec3(0.0,0.02,-2.7),vec3(0.95,0.04,0.6)),-q.y);if(rug<rr.x)rr=vec2(rug,27.0);
-  vec3 w=q-vec3(0.0,0.0,-4.5);float rk=min(sTap(w,vec3(-1.4,0.0,0.0),vec3(-1.4,1.7,0.0),0.08,0.07),sTap(w,vec3(1.4,0.0,0.0),vec3(1.4,1.7,0.0),0.08,0.07));
+  vec3 w=q-vec3(3.3,0.0,-3.4);float rk=min(sTap(w,vec3(-1.4,0.0,0.0),vec3(-1.4,1.7,0.0),0.08,0.07),sTap(w,vec3(1.4,0.0,0.0),vec3(1.4,1.7,0.0),0.08,0.07));
   rk=min(rk,sTap(w,vec3(-1.55,1.45,0.0),vec3(1.55,1.45,0.0),0.06,0.06));rk=min(rk,sTap(w,vec3(-1.55,0.5,0.05),vec3(1.55,0.5,0.05),0.05,0.05));if(rk<rr.x)rr=vec2(rk,12.0);
   float sw=1e3;for(int i=0;i<5;i++){float sx=-1.0+float(i)*0.5;sw=min(sw,sTap(w,vec3(sx,0.35,0.12),vec3(sx+0.05,1.75,0.1),0.045,0.02));}if(sw<rr.x)rr=vec2(sw,18.0);rr.x*=1.6;if(rr.x<r.x)r=rr;}`; };
 const HAI25 = (() => {
@@ -10832,7 +10832,7 @@ const HAI25 = (() => {
     { id: "stake", name: "木人（打ちこみ台）", g: "train", txt: T.slice(1, 4).join("\n"), foot: [[2.54, -4.43, 0.7]] },
     { id: "rocks", name: "岩の山", g: "train", txt: T[4], foot: [[6.8, -3.9, 1.0]] },
     { id: "ring", name: "訓練の円（石の輪）", g: "train", txt: T[5], foot: [] },
-    { id: "dojo", name: "訓練場（部屋の真ん中）", g: "none", txt: DOJO25(0, -0.5), light: "LIGHT(0.0,3.6,0.8,1.0,0.75,0.45,4.0)", foot: [[-3.9, -0.5, 0.7], [3.9, -0.5, 0.7], [0, 3.4, 0.7], [0, -7.7, 2.4]], ringAt: [0, -0.5] },
+    { id: "dojo", name: "訓練場（部屋の真ん中）", g: "none", txt: DOJO25(0, -0.5), light: "LIGHT(0.0,3.6,0.8,1.0,0.75,0.45,4.0)", foot: [[-3.9, -0.5, 0.7], [3.9, -0.5, 0.7], [0, 3.4, 0.7], [5.3, -5.9, 2.4]], ringAt: [0, -0.5] },
     { id: "pit1", name: "たき火（訓練所）", g: "train", txt: "FIREPIT(0.0,-2.45)", light: "LIGHT(0.0,0.75,-2.45,1.0,0.55,0.22,4.2)", foot: [[0, -2.45, 0.8]] },
     { id: "ore", name: "壁の鉱脈（3か所）", g: "none", txt: VEIN25(3.8, -10.6) + VEIN25(7.6, -10.6) + VEIN25(15.6, -7.6), foot: [[3.8, -9.8, 1.4], [7.6, -9.8, 1.4], [14.9, -7.0, 1.4]], vein: [[3.8, -10.6], [7.6, -10.6], [15.6, -7.6]] },
     { id: "rail", name: "線路とトロッコ", g: "mine", txt: M.slice(4, 9).join("\n"), foot: [[0, -0.4, 0.9], [0, -3.5, 0.6], [0, 1.5, 0.6]] },
@@ -10903,10 +10903,11 @@ const HAI25 = (() => {
         c.mode = "mine"; c.r = Math.atan2(v[0] - px, v[1] - pz); c.look = v; pos = [px, pz]; }
       else if (e.act === "mine" && bip && ores.length && oi < ores.length * 2) { const o = ores[oi % ores.length], side = oi >= ores.length ? -1 : 1; oi++;
         const rr = Math.atan2(-(o[0]), -(o[1] - 0.0)) * 0 + (side > 0 ? 0.6 : -2.5); const ps = placeMine24([o[0], 0, o[1]], rr); c.mode = "mine"; c.r = rr; pos = [ps[0], ps[2]]; }
-      else if (e.act === "train" && bip && ring && ti < 9) { const [cx, cz] = ring;
-        if (ti === 0) { const rx = cx, rz = cz - 4.3; ti++; if (free(rx, rz, r * 0.5)) { c.mode = "idle"; c.boss = true; boss = [rx, rz]; c.r = 0; pos = [rx, rz]; } }   // いちばん大きい子が師範：奥に立って皆を見る
-        else { const k2 = ti - 1, ang = [0.55, 2.6, 0.95, 2.2, 0.25, 2.9, 1.25, 1.9][k2] || 1.0, rr = 2.4 + (k2 % 3) * 0.45, rx = cx + Math.cos(ang) * rr, rz = cz + Math.sin(ang) * rr * 0.85 - 0.5; ti++;
-          if (free(rx, rz, r * 0.5)) { const L2 = boss || [cx, cz - 4.3]; c.mode = R() < 0.6 ? "slash" : "lift"; c.look = L2; c.r = Math.atan2(L2[0] - rx, L2[1] - rz); pos = [rx, rz]; } } }
+      else if (e.act === "train" && bip && ring && ti < 12) { const [cx, cz] = ring;
+        if (ti === 0) { const rx = cx, rz = cz - 4.3; ti++; if (free(rx, rz, r * 0.5)) { c.mode = "idle"; c.boss = true; c.look = [rx + 0.01, rz + 6]; boss = [rx, rz]; c.r = 0; pos = [rx, rz]; } }   // いちばん大きい子が師範：奥に立って皆を見る
+        else { ti++; let rx = 0, rz = 0, ok = false;
+          for (let s = 0; s < 24 && !ok; s++) { const ang = [0.55, 2.6, 0.95, 2.2, 0.25, 2.9, 1.25, 1.9][s % 8] + Math.floor(s / 8) * 0.18, rr = [2.2, 3.0, 3.8][Math.floor(s / 8)]; rx = cx + Math.cos(ang) * rr; rz = cz + Math.sin(ang) * rr * 0.85 - 0.5; ok = free(rx, rz, r * 0.45); }
+          if (ok) { const L2 = boss || [cx, cz - 4.3]; c.mode = R() < 0.6 ? "slash" : "lift"; c.look = L2; c.r = Math.atan2(L2[0] - rx, L2[1] - rz); pos = [rx, rz]; } } }
       if (!pos && e.act === "sleep" && bip && beds.length && bi < beds.length) { const b = beds[bi++]; c.mode = "sleep"; c.lie = true; c.r = 1.2; pos = [b[0] + 0.2, b[1]]; }
       if (!pos) { for (let tries = 0; tries < 400 && !pos; tries++) { const x = (R() * 2 - 1) * 17.5, z = -8.8 + R() * 18; if (free(x, z, r)) pos = [x, z]; } }
       if (!pos) return;
@@ -11022,7 +11023,7 @@ function roomKind25(i){ const R = S.path[i] || {}; if (i === lordIdx(S)) return 
   return F.includes("train") ? "train" : F.includes("mine") ? "mine" : F.includes("bed") ? "bed" : R.fac === "mine" ? "mine" : R.fac === "bed" ? "bed" : R.fac === "train" ? "train" : F.includes("nest") || R.fac === "nest" ? "nest" : F.includes("watch") || R.fac === "watch" ? "watch" : F.includes("gate") || R.fac === "gate" ? "entry" : "plain"; }
 // 配った洞窟の絵（bg25/部屋の種類_c.png・_d.png）があれば、それを読み込む
 function setRoom25(i){ const C = B3.C; C.setRoom(B3.roomKey); const k = roomKind25(i); if (!BGSHIP25[k]) return; C.putBgImages(`bg25/${k}_c.webp?v=${BGSHIP25[k]}`, `bg25/${k}_d.webp?v=${BGSHIP25[k]}`, C.st.bgKey); }
-const BGSHIP25 = { train: "4451dfe0", mine: "6ba1ef93", bed: "2e371731", lord: "41ce104d", plain: "86e68c06", nest: "d981244e", watch: "6686d08e", entry: "9104082d", train_mine: "e76bc1c5", train_bed: "f46dd35e", train_nest: "efd80d6f", train_watch: "b99d6313", mine_bed: "5321aec4", mine_nest: "fa30c361", mine_watch: "8aca37cb", bed_nest: "b9f7e0d2", bed_watch: "170508f1", nest_watch: "c182a20f", lordday: "41ce104d" };
+const BGSHIP25 = { train: "67281e1f", mine: "6ba1ef93", bed: "2e371731", lord: "41ce104d", plain: "86e68c06", nest: "d981244e", watch: "6686d08e", entry: "9104082d", train_mine: "5c556f8b", train_bed: "60feb1d8", train_nest: "d2e781a2", train_watch: "1790fb25", mine_bed: "5321aec4", mine_nest: "fa30c361", mine_watch: "8aca37cb", bed_nest: "b9f7e0d2", bed_watch: "170508f1", nest_watch: "c182a20f", lordday: "41ce104d" };
 function roomKey25(i){ const on = {}; ROOMSET25[roomKind25(i)].forEach(k => on[k] = true); return HAI25.room(on); }
 // ---- 3Dのキャラの種類 ----
 const heroSp25 = h => (typeof heroId === "function" ? String(heroId(h)).replace(/\d+$/, "") : h.job) || "warrior";
