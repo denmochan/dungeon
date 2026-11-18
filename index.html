@@ -1029,6 +1029,14 @@ body:has(.stage) .modal{display:none!important}
 .d3on .chall .cname{position:relative;z-index:2}
 .d3t{flex:0 0 auto;font-size:12px;padding:3px 8px;margin-right:4px;border-radius:8px}
 .d3t.on{background:#7a4a22;border-color:#c98a4a}
+/* 25：昼の3D（部屋を縦に並べる） */
+.d3stack{display:flex;flex-direction:column;padding:4px 6px 10px;background:#120d0b}
+.d3stack .chall.d3card{position:relative;left:auto;top:auto;width:100%;aspect-ratio:600/294;border-radius:10px;overflow:hidden;box-shadow:0 0 0 1px #3a2c22,0 4px 10px #000a}
+.d3card canvas{position:absolute;inset:0;width:100%;height:100%;display:block;image-rendering:pixelated}
+.d3card .cname{position:absolute;top:6px;left:50%;transform:translateX(-50%);z-index:2;white-space:nowrap}
+.d3stack .chall.sel{outline:2px solid var(--gold);outline-offset:-2px}
+.d3tun{height:22px;display:flex;justify-content:center}.d3tun span{width:34px;height:100%;background:linear-gradient(90deg,#2a1f18,#0b0807 30%,#0b0807 70%,#2a1f18);border-left:3px solid #5a3e26;border-right:3px solid #5a3e26}
+.d3floor{margin:10px 0 6px;text-align:center;color:#e5b85a;font-size:12px;font-weight:700;letter-spacing:.1em}
 </style>
 </head>
 <body>
@@ -7204,7 +7212,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.194（11/18 13:40）";
+const VER20 = "No.195（11/18 14:07）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -10880,78 +10888,76 @@ function prebake25(){
   if (!C) return; PRE25 = C; C.setRoom(rooms[0]); C.setKinds(kinds, bakeRoom25()); }
 { const _r = render; render = function (){ const v = _r.apply(this, arguments); try { if (view === "day" && !N) setTimeout(prebake25, 1500); else if (PRE25 && N) { PRE25.destroy(); PRE25 = null; } } catch (e) {} return v; }; }
 
-// ================= 25：昼のダンジョン画面を3Dにする =================
-// 今の画面（部屋の名前・押して開く・吹き出し・数字）はそのまま。部屋の床に3D洞窟の絵を敷き、魔物を3Dの絵で描く。
+// ================= 25：昼のダンジョン画面を3Dにする（部屋を3D洞窟の写真の形で縦に並べる） =================
+// 部屋を押す＝選ぶ、もう一度＝のぞく、は今まで通り（部屋の札に .chall と data-room を付けているので、今の操作がそのまま効く）
 let day3dOn25 = (() => { try { return localStorage.getItem("day3d25") !== "0"; } catch (e) { return true; } })();
-const D3 = { img: {}, spr: {}, raf: 0 };
-const DCROP25 = [150, 175, 780, 390], DVR25 = [1080, 708];
-// 洞窟の1点 → 切り抜いた絵の中の位置（0〜1）と、1ワールド単位あたりの絵の点の数
-function dproj25(x, z){ const c = CAMP24, v = V3.s([x, 0, z], c.e), rt = c.M.slice(0, 3), up = c.M.slice(3, 6), fw = c.M.slice(6, 9), zz = V3.d(v, fw);
+const D3 = { img: {}, spr: {}, raf: 0, act: {} };
+const DCROP25 = [40, 110, 1000, 490], DVR25 = [1080, 708];
+function dproj25(x, y, z){ const c = CAMP24, v = V3.s([x, y, z], c.e), rt = c.M.slice(0, 3), up = c.M.slice(3, 6), fw = c.M.slice(6, 9), zz = V3.d(v, fw);
   const ix = V3.d(v, rt) / zz * c.fl * DVR25[1] + DVR25[0] / 2, iy = DVR25[1] - (V3.d(v, up) / zz * c.fl * DVR25[1] + DVR25[1] / 2);
-  return [(ix - DCROP25[0]) / DCROP25[2], (iy - DCROP25[1]) / DCROP25[3], c.fl * DVR25[1] / zz]; }
-const dimg25 = src => D3.img[src] || (D3.img[src] = (() => { const im = new Image(); im.onload = () => { im.ok = 1; D3.dirty = 1; }; im.src = src; return im; })());
-const dsmall25 = (M, i) => { const r = M.halls[i]; return !r || r.dead || r.side || (r.x1 - r.x0) < 5; };
-// 部屋の中の位置（タイル）→ 3Dで見える位置（タイル）
-function dmap25(M, tx, ty){
-  for (const [i, r] of Object.entries(M.halls)) { if (dsmall25(M, i)) continue;
-    if (tx < r.x0 - 0.6 || tx > r.x1 + 1.6 || ty < r.y0 - 1.2 || ty > r.y1 + 1.4) continue;
-    const w = r.x1 - r.x0 + 1, h = r.y1 - r.y0 + 1, fx = Math.max(0.04, Math.min(0.96, (tx + 0.5 - r.x0) / w)), fy = Math.max(0.05, Math.min(0.98, (ty + 0.5 - r.y0) / h));
-    const p = dproj25((fx - 0.5) * 24, -6 + fy * 13); return { x: r.x0 + p[0] * w - 0.5, y: r.y0 + p[1] * h - 1, ppw: p[2] * w / DCROP25[2] }; }
-  return null; }
-// ---- 床の絵 ----
-function dbg25(f){ const el = CV.els && CV.els[f], M = CV.maps[f]; if (!el || !M) return;
-  let cv = el.querySelector(".c3bg"); if (!cv) { cv = document.createElement("canvas"); cv.className = "c3bg"; el.insertBefore(cv, el.querySelector(".clay")); }
-  const r = el.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1), W = Math.round(r.width * dpr), H = Math.round(r.height * dpr);
-  const sig = W + "x" + H + "|" + CV.sig + "|" + Object.keys(M.halls).map(i => roomKind25(+i)).join(",") + "|" + Object.values(D3.img).filter(x => x.ok).length;
-  if (cv.dataset.sig === sig) return; cv.dataset.sig = sig; cv.width = W; cv.height = H;
-  const g = cv.getContext("2d"); g.imageSmoothingEnabled = false; g.clearRect(0, 0, W, H);
-  Object.entries(M.halls).forEach(([i, h]) => { if (dsmall25(M, i)) return; const k = roomKind25(+i), im = dimg25(`bg25/${k}_day.png?v=2`); if (!im.ok) return;
-    const x = h.x0 / CW * W, y = h.y0 / M.H * H, w = (h.x1 - h.x0 + 1) / CW * W, hh = (h.y1 - h.y0 + 1) / M.H * H;
-    g.save(); g.beginPath(); const rr = 6 * dpr; g.moveTo(x + rr, y); g.arcTo(x + w, y, x + w, y + hh, rr); g.arcTo(x + w, y + hh, x, y + hh, rr); g.arcTo(x, y + hh, x, y, rr); g.arcTo(x, y, x + w, y, rr); g.clip();
-    g.drawImage(im, 0, 0, im.width, im.height, x, y, w, hh); g.restore(); }); }
-// ---- 魔物の絵 ----
-const DFR25 = { idle: [0, 4, 1.6], walk: [15, 2, 0.5], hop: [11, 4, 0.6], atk: [5, 4, 0.5], hurt: [9, 2, 0.4], sleep: [4, 1, 1] };
+  return [(ix - DCROP25[0]) / DCROP25[2], (iy - DCROP25[1]) / DCROP25[3], c.fl * DVR25[1] / zz / DCROP25[2], zz]; }
+const dimg25 = src => D3.img[src] || (D3.img[src] = (() => { const im = new Image(); im.onload = () => { im.ok = 1; }; im.src = src; return im; })());
 const dbip25 = sp => ["goblin", "skeleton", "imp", "kobold", "orc", "golem", "human", "demon", "gobx", "lich", "noble"].includes(kitOf24(sp));
 function dspr25(sp, evo){ const k = sp + ":" + evo; if (D3.spr[k] !== undefined) return D3.spr[k]; const L = typeof CHR3D24 !== "undefined" && CHR3D24[sp]; if (!L) return D3.spr[k] = null;
-  const im = new Image(); const o = { im, ok: false, ppu: (PPU25[k] || PPU25[sp + ":0"] || [36])[0], bip: dbip25(sp) };
-  im.onload = () => { try { const c = document.createElement("canvas"); c.width = c.height = 128; const g = c.getContext("2d"); g.drawImage(im, 0, 0); const d = g.getImageData(0, 0, 128, 128).data; let b = 0; for (let y = 0; y < 128; y++) for (let x = 0; x < 128; x++) if (d[(y * 128 + x) * 4 + 3] > 128) b = y; o.foot = b; } catch (e) { o.foot = 122; } o.ok = true; };
+  const im = new Image(); const o = { im, ok: false, ppu: (PPU25[k] || PPU25[sp + ":0"] || [36])[0], bip: dbip25(sp), foot: 122 };
+  im.onload = () => { try { const c = document.createElement("canvas"); c.width = c.height = 128; const g = c.getContext("2d"); g.drawImage(im, 0, 0); const d = g.getImageData(0, 0, 128, 128).data; let b = 0; for (let y = 0; y < 128; y++) for (let x = 0; x < 128; x++) if (d[(y * 128 + x) * 4 + 3] > 128) b = y; o.foot = b; } catch (e) {} o.ok = true; };
   im.src = L[Math.min(L.length - 1, evo)] || L[0]; return D3.spr[k] = o; }
-function dents25(){ // 位置を3Dの見え方に直す（caveUpdateのあと）
-  if (!day3dOn25 || N || !CV.ents) return;
-  Object.values(CV.ents).forEach(e => { const fl = e.closest(".cave"); if (!fl) return; const M = CV.maps[+fl.dataset.f]; if (!M) return;
-    const L = e.style.left, T = e.style.top; if (L === e._ml && T === e._mt) return;
-    const tx = parseFloat(L) / 100 * CW - 0.5, ty = parseFloat(T) / 100 * M.H - 1; const q = dmap25(M, tx, ty); if (!q) { e._ppw = null; return; }
-    e._ml = e.style.left = ((q.x + 0.5) / CW * 100) + "%"; e._mt = e.style.top = ((q.y + 1) / M.H * 100) + "%"; e._ppw = q.ppw / CW; }); }
-function ddraw25(now){
-  D3.raf = 0; if (!day3dOn25 || N || view !== "day" || !CV.els) return; D3.raf = requestAnimationFrame(ddraw25);
-  const vh = window.innerHeight;
-  CV.els.forEach((el, f) => { const r = el.getBoundingClientRect(); if (r.bottom < -50 || r.top > vh + 50 || !r.width) return;
-    if (D3.dirty) dbg25(f);
-    let cv = el.querySelector(".c3sp"); if (!cv) { cv = document.createElement("canvas"); cv.className = "c3sp"; el.insertBefore(cv, el.querySelector(".cents")); }
-    const dpr = Math.min(2, window.devicePixelRatio || 1), W = Math.round(r.width * dpr), H = Math.round(r.height * dpr); if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
-    const g = cv.getContext("2d"); g.imageSmoothingEnabled = false; g.clearRect(0, 0, W, H);
-    const L = []; el.querySelectorAll(".cent").forEach(e => { let m = null; e.querySelectorAll(".cfl *").forEach(x => { if (!m) m = [...x.classList].map(c => c.match(/^a-([a-z]+\d?)-(\d)$/)).find(Boolean); }); if (!m) return; const o = dspr25(m[1].replace(/\d+$/, ""), +m[2]); if (!o || !o.ok) return;
-      const b = e.getBoundingClientRect(), fx = (b.left + b.width / 2 - r.left) * dpr, fy = (b.top + b.height * 0.8 - r.top) * dpr;
-      L.push({ e, o, fx, fy }); });
-    L.sort((a, b) => a.fy - b.fy).forEach(({ e, o, fx, fy }) => {
-      const ppw = (e._ppw || 0.012) * r.width * dpr, k = ppw / o.ppu, s = 128 * k;
-      const cls = e.classList, st = cls.contains("an-sleep") || cls.contains("rest") ? "sleep" : cls.contains("walk") ? (o.bip ? "walk" : "hop") : cls.contains("an-fight") ? "atk" : "idle";
-      const R0 = DFR25[st], fr = R0[0] + Math.floor(((now / 1000 + (e._ph || (e._ph = Math.random() * 3))) / R0[2] * R0[1]) % R0[1]);
-      const flip = cls.contains("left") !== !!e.querySelector(".cfl.left");
-      g.save(); g.globalAlpha = cls.contains("rest") ? 0.8 : 1;
-      g.fillStyle = "rgba(0,0,0,0.22)"; g.beginPath(); g.ellipse(fx, fy, Math.max(3, 11 * k), Math.max(2, 4.5 * k), 0, 0, 7); g.fill();
-      g.translate(fx, fy); if (flip) g.scale(-1, 1);
-      g.drawImage(o.im, fr * 128, 0, 128, 128, -s / 2, -(o.foot + 1) * k, s, s); g.restore(); });
-  });
-  D3.dirty = 0; }
-// ---- つなぐ ----
-caveUpdate = (prev => function (){ const v = prev.apply(this, arguments); try { if (day3dOn25 && !N) { dents25(); if (!D3.raf) D3.raf = requestAnimationFrame(ddraw25); } } catch (e) { console.error(e); } return v; })(caveUpdate);
-caveMount = (prev => function (){ const v = prev.apply(this, arguments); try { const st = document.querySelector(".cavestack"); if (st) st.classList.toggle("d3on", day3dOn25 && !N); if (day3dOn25 && !N) { D3.dirty = 1; (CV.els || []).forEach((el, f) => dbg25(f)); if (!D3.raf) D3.raf = requestAnimationFrame(ddraw25); } } catch (e) { console.error(e); } return v; })(caveMount);
-window.addEventListener("resize", () => { D3.dirty = 1; });
-// 切りかえ（下のバーの「⚙」などからではなく、画面の右上に小さく置く）
+// ---- 部屋の中の子：立ち位置と動き ----
+function droom25(i){ const kind = roomKind25(i), on = {}; ROOMSET25[kind].forEach(k => on[k] = true);
+  const res = S.path[i].kind === "lord" ? [] : residents5(S, i);
+  const rest = S.mons.filter(m => restLeft7(S, m) && m.home === i && !res.includes(m));
+  const all = res.concat(rest), sig = kind + "|" + all.map(m => m.id + ":" + m.sp + ":" + (m.evos || 0)).join(",");
+  let R = D3.act[i]; if (R && R.sig === sig) return R;
+  const job = m => { if (restLeft7(S, m)) return "sleep"; let j = null; try { j = peekMon24(m, i).job; } catch (e) {} return j === "mine" ? "mine" : j === "train" ? "train" : j === "bed" ? "sleep" : "idle"; };
+  const list = all.map(m => ({ sp: m.sp, evo: m.evos || 0, n: 1, act: job(m) }));
+  const cast = HAI25.place(on, list, 11 + i * 17);
+  const order = all.map((m, k) => ({ m, a: list[k] })).sort((a, b) => HAI25.footR({ sp: b.m.sp, evo: b.m.evos || 0 }) - HAI25.footR({ sp: a.m.sp, evo: a.m.evos || 0 }));
+  const acts = []; cast.forEach((c, k) => { const o = order[k]; if (!o) return; acts.push({ m: o.m, sp: o.m.sp, evo: o.m.evos || 0, x: c.o[0], z: c.o[2], hx: c.o[0], hz: c.o[2], tx: c.o[0], tz: c.o[2], mode: c.mode, face: Math.random() < 0.5 ? 1 : -1, next: 0, ph: Math.random() * 3 }); });
+  if (S.path[i].kind === "lord") acts.push({ lord: true, sp: "lord", evo: typeof lordTier === "function" ? lordTier() : 0, x: 0, z: -3.5, hx: 0, hz: -3.5, tx: 0, tz: -3.5, mode: "idle", face: 1, next: 1e12, ph: 0 });
+  return D3.act[i] = { sig, kind, acts }; }
+// ---- 1部屋を描く ----
+const DFR25 = { idle: [0, 4, 1.6], walk: [15, 2, 0.5], hop: [11, 4, 0.6], atk: [5, 4, 0.55], sleep: [4, 1, 1] };
+function dcard25(card, i, now, dt){
+  const cv = card.querySelector("canvas"), r = cv.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1), W = Math.round(r.width * dpr), H = Math.round(r.height * dpr);
+  if (!W) return; if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+  const g = cv.getContext("2d"); g.imageSmoothingEnabled = false;
+  const R = droom25(i), bg = dimg25(`bg25/${R.kind}_full.png?v=1`); if (bg.ok) g.drawImage(bg, 0, 0, W, H); else { g.fillStyle = "#1a1412"; g.fillRect(0, 0, W, H); }
+  // 動き：ときどき近くへ歩く（働いている子・寝ている子はその場）
+  R.acts.forEach(a => { if (a.mode === "idle" && !a.lord && now > a.next) { a.next = now + 2.5 + Math.random() * 4; const ang = Math.random() * 6.28, d = Math.random() * 2.2; a.tx = a.hx + Math.cos(ang) * d; a.tz = a.hz + Math.sin(ang) * d * 0.6; }
+    const dx = a.tx - a.x, dz = a.tz - a.z, L = Math.hypot(dx, dz); a.walking = L > 0.08; if (a.walking) { const s = Math.min(L, 1.6 * dt); a.x += dx / L * s; a.z += dz / L * s; if (Math.abs(dx) > 0.05) a.face = dx > 0 ? 1 : -1; } });
+  R.acts.slice().sort((a, b) => a.z - b.z).forEach(a => { const o = dspr25(a.sp, a.evo); if (!o || !o.ok) return;
+    const p = dproj25(a.x, 0, a.z), fx = p[0] * W, fy = p[1] * H, k = p[2] * W / o.ppu, s = 128 * k;
+    const st = a.mode === "sleep" ? "sleep" : a.walking ? (o.bip ? "walk" : "hop") : (a.mode === "mine" || a.mode === "train" || a.mode === "slash" || a.mode === "lift") && o.bip ? "atk" : "idle";
+    const F = DFR25[st], fr = F[0] + Math.floor(((now + a.ph) / F[2] * F[1]) % F[1]);
+    g.save(); g.fillStyle = "rgba(0,0,0,0.25)"; g.beginPath(); g.ellipse(fx, fy, Math.max(3, 11 * k), Math.max(2, 4.5 * k), 0, 0, 7); g.fill();
+    g.translate(fx, fy); if (a.face < 0) g.scale(-1, 1); g.drawImage(o.im, fr * 128, 0, 128, 128, -s / 2, -(o.foot + 1) * k, s, s); g.restore();
+    // 頭の上のしるし
+    let ic = ""; if (a.m) { if (restLeft7(S, a.m)) ic = "💤"; else if (S.hungry) ic = "😫"; }
+    if (ic) { const hy = fy - (o.foot - 20) * k; g.font = `${Math.round(12 * dpr)}px system-ui`; g.textAlign = "center"; g.fillText(ic, fx, hy); } }); }
+// ---- 並べる ----
+function dstack25(){
+  const host = document.getElementById("cavehost"); if (!host || !CV.el || caveFloor < 0) return;
+  let st = host.querySelector(".d3stack"); if (!st) { st = document.createElement("div"); st.className = "d3stack"; host.appendChild(st); }
+  const L = lordIdx(S), sig = CV.sig + "|" + S.path.map((r, i) => r.kind + roomTitle(S, i)).join(",") + "|" + roomSel;
+  if (st.dataset.sig !== sig) { st.dataset.sig = sig; let h = "", lastF = -1;
+    S.path.forEach((r, i) => { if (r.kind === "dead") return; const f = r.f || 0;
+      if (f !== lastF) { if (lastF >= 0 || f > 0) h += `<div class="d3floor">▼ B${f + 1}　${THEME7[(S.floors[f] || {}).theme] ? THEME7[S.floors[f].theme].name : ""}</div>`; lastF = f; }
+      else h += `<div class="d3tun"><span></span></div>`;
+      const name = r.kind === "lord" ? "👑 主の間" : esc(roomTitle(S, i));
+      h += `<div class="chall d3card${roomSel === i ? " sel" : ""}" data-room="${i}"><canvas></canvas><span class="cname">${name}</span></div>`; });
+    st.innerHTML = h; }
+  CV.el.style.display = "none"; }
+function dloop25(t){ D3.raf = 0; if (!day3dOn25 || N || view !== "day") return; D3.raf = requestAnimationFrame(dloop25);
+  const now = t / 1000, dt = Math.min(0.1, now - (D3.last || now)); D3.last = now; const vh = window.innerHeight;
+  document.querySelectorAll(".d3stack .d3card").forEach(c => { const r = c.getBoundingClientRect(); if (r.bottom < -40 || r.top > vh + 40) return; try { dcard25(c, +c.dataset.room, now, dt); } catch (e) {} }); }
+caveMount = (prev => function (){ const v = prev.apply(this, arguments);
+  try { if (day3dOn25 && !N && caveFloor >= 0) { dstack25(); if (!D3.raf) D3.raf = requestAnimationFrame(dloop25); }
+    else { const st = document.querySelector(".d3stack"); if (st) st.remove(); if (CV.el) CV.el.style.display = ""; } } catch (e) { console.error(e); } return v; })(caveMount);
+// 部屋を選んだときの枠
+caveMarks = (prev => function (){ const v = prev.apply(this, arguments); try { document.querySelectorAll(".d3stack .d3card").forEach(e => e.classList.toggle("sel", roomSel === +e.dataset.room)); } catch (e) {} return v; })(caveMarks);
+// 切りかえボタン
 caveShell = (prev => function (){ let h = prev.apply(this, arguments); if (N) return h; try { h = h.replace('<div class="ctabs">', `<button class="d3t${day3dOn25 ? " on" : ""}" data-a="day3dt">${day3dOn25 ? "3D" : "2D"}</button><div class="ctabs">`); } catch (e) {} return h; })(caveShell);
-document.addEventListener("click", ev => { const b = ev.target.closest('[data-a="day3dt"]'); if (!b) return; ev.stopPropagation(); day3dOn25 = !day3dOn25; try { localStorage.setItem("day3d25", day3dOn25 ? "1" : "0"); } catch (e) {}
-  CV.ents && Object.values(CV.ents).forEach(e => { e._ml = e._mt = null; }); CV.lastF = -2; render(); }, true);
+document.addEventListener("click", ev => { const b = ev.target.closest('[data-a="day3dt"]'); if (!b) return; ev.stopPropagation(); day3dOn25 = !day3dOn25; try { localStorage.setItem("day3d25", day3dOn25 ? "1" : "0"); } catch (e) {} render(); }, true);
 
 </script>
 </body>
