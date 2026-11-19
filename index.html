@@ -7238,7 +7238,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.228（11/19 11:52）";
+const VER20 = "No.229（11/19 12:01）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -11242,6 +11242,49 @@ function dspr25(sp, evo){ const k = sp + ":" + evo; if (D3.spr[k] !== undefined)
   const im = new Image(); const o = { im, ok: false, ppu: (PPU25[k] || PPU25[sp + ":0"] || [36])[0], bip: dbip25(sp), foot: 122 };
   im.onload = () => { try { const c = document.createElement("canvas"); c.width = c.height = 128; const g = c.getContext("2d"); g.drawImage(im, 0, 0); const d = g.getImageData(0, 0, 128, 128).data; let b = 0; for (let y = 0; y < 128; y++) for (let x = 0; x < 128; x++) if (d[(y * 128 + x) * 4 + 3] > 128) b = y; o.foot = b; } catch (e) {} o.ok = true; };
   im.src = L[Math.min(L.length - 1, evo)] || L[0]; return D3.spr[k] = o; }
+// ---- 魔物の軽いAI：仲間とからむ（寄って話す・強い子についていく）＋仕事の流れ（鉱石を運ぶ・訓練の合間に休む） ----
+const TALK25 = [["今日も掘ったな", "腕がパンパンだ"], ["勇者、また来るかな", "来たら返り討ちだ"], ["腹へった…", "あとで鍋だな"], ["主さま、こわいよな", "しっ、聞こえるぞ"],
+  ["その傷どうした？", "訓練でな"], ["いい石出た？", "まあまあだな"], ["眠い…", "おれもだ"], ["新入りか？", "よろしくな"], ["昨日の勇者、強かったな", "次は負けねえ"], ["ここ、住みやすいな", "主さまのおかげだ"]];
+function dsay25(i, a, text, talk){ const L = D3.pops[i] || (D3.pops[i] = []); if (L.length >= 4) return; L.push({ a, u: 0.5, v: 0.5, text, cls: talk ? "talk" : "gem", talk, lift: 0, t0: performance.now() / 1000, ms: talk ? 2.4 : 1.2 }); }
+function dai25(R, i, now, dt, hitOb, crossOb){ const A = R.acts, P = R.pile || (R.pile = [0, 0]);
+  const inView = (x, z, r) => { const p = dproj25(x, 0, z), pw = r / 0.85 * p[2] * DAYK25; return p[0] - pw > 0.1 && p[0] + pw < 0.9 && p[1] > 0.36 && p[1] < 0.84; };
+  const ok = (a, x, z) => { const r = a.rr || 0.4; return inView(x, z, r) && !hitOb(x, z, r) && !crossOb(a.x, a.z, x, z, r); };
+  const go = (a, x, z) => { a.tx = x; a.tz = z; }, at = a => Math.hypot(a.tx - a.x, a.tz - a.z) < 0.12, faceTo = (a, b) => { a.face = b.x > a.x ? 1 : -1; };
+  const free = a => a.mode === "idle" && !a.lord && !a.boss && !a.task && !(a.busy > now);
+  A.forEach(a => { const r = a.rr || 0.4;
+    // 仕事：掘る子は何回か叩いたら、鉱石をかかえて岩の横の山へ運ぶ
+    if (a.mode === "mine" && a.rk && !a.task) { if (a.carryAt == null) a.carryAt = now + 5 + Math.random() * 6;
+      if (now > a.carryAt) { const sd = a.x < a.rk[0] ? -1 : 1; a.task = "carry"; a.side = sd; a.home2 = [a.x, a.z]; a.mode = "walkT"; go(a, a.rk[0] + sd * (a.rk[2] + 3.4), a.rk[1] + 4.6); a.tEnd = now + 12; } }
+    else if (a.task === "carry" && (at(a) || now > a.tEnd)) { P[a.side < 0 ? 0 : 1] = Math.min(9, P[a.side < 0 ? 0 : 1] + 1); { const q = dproj25(a.tx, 0, a.tz), L = D3.pops[i] || (D3.pops[i] = []); L.push({ a: null, u: q[0], v: q[1] - 0.1, text: "+💎", cls: "gem", talk: false, lift: 0, t0: performance.now() / 1000, ms: 1.2 }); } a.task = "back"; go(a, a.home2[0], a.home2[1]); a.tEnd = now + 12; }
+    else if (a.task === "back" && a.carryAt != null && (at(a) || now > a.tEnd)) { a.x = a.home2[0]; a.z = a.home2[1]; go(a, a.x, a.z); a.task = null; a.mode = "mine"; a.carryAt = now + 8 + Math.random() * 8; }
+    // 訓練：ときどき稽古場のふちへ下がって一息つき、また戻る（師範はその場）
+    else if ((a.mode === "slash" || a.mode === "lift") && a.look && !a.boss && !a.task) { if (a.restAt == null) a.restAt = now + 9 + Math.random() * 10;
+      if (now > a.restAt) { const dx = a.x - a.look[0], dz = a.z - (a.look[1] + 4.3), L = Math.hypot(dx, dz) || 1; let tx = a.x + dx / L * 2.4, tz = a.z + dz / L * 1.6;
+        if (inView(tx, tz, r) && !hitOb(tx, tz, r)) { a.task = "rest"; a.m0 = a.mode; a.home2 = [a.x, a.z]; a.mode = "walkT"; go(a, tx, tz); a.tEnd = now + 8; } else a.restAt = now + 6; } }
+    else if (a.task === "rest" && a.mode === "walkT" && (at(a) || now > a.tEnd)) { a.mode = "restS"; go(a, a.x, a.z); a.restEnd = now + 3.5 + Math.random() * 2; dsay25(i, a, Math.random() < 0.5 ? "ふう…" : "きつい…", true); }
+    else if (a.task === "rest" && a.mode === "restS" && now > a.restEnd) { a.mode = "walkT"; a.task = "back2"; go(a, a.home2[0], a.home2[1]); a.tEnd = now + 8; }
+    else if (a.task === "back2" && (at(a) || now > a.tEnd)) { a.x = a.home2[0]; a.z = a.home2[1]; go(a, a.x, a.z); a.task = null; a.mode = a.m0; a.face = a.look[0] > a.x ? 1 : -1; a.restAt = now + 12 + Math.random() * 10; }
+    // 仲間：ひまな子は、近くの子のところへ話しに行く／強い子についていく／ふらっと歩く
+    else if (free(a) && now > a.next) { a.next = now + 2.5 + Math.random() * 4; const roll = Math.random(), others = A.filter(b => b !== a && free(b) && Math.hypot(b.x - a.x, b.z - a.z) < 9);
+      if (roll < 0.3 && others.length) { const f = others.sort((p, q) => (q.sp === a.sp) - (p.sp === a.sp) || Math.hypot(p.x - a.x, p.z - a.z) - Math.hypot(q.x - a.x, q.z - a.z))[0], sd = a.x < f.x ? -1 : 1, tx = f.x + sd * (r + (f.rr || 0.4) + 0.5), tz = f.z;
+        if (ok(a, tx, tz)) { a.task = "visit"; a.peer = f; f.busy = now + 12; go(f, f.x, f.z); go(a, tx, tz); a.tEnd = now + 7; } }
+      else if (roll < 0.45 && others.length) { const L2 = others.filter(b => b.m && a.m && (b.m.lv || 1) > (a.m.lv || 1)).sort((p, q) => (q.m.lv || 1) - (p.m.lv || 1))[0]; if (L2) { a.task = "follow"; a.lead = L2; a.tEnd = now + 7; } }
+      if (!a.task) for (let n = 0; n < 8; n++) { const ang = Math.random() * 6.28, d = Math.random() * 2.2, tx = a.hx + Math.cos(ang) * d, tz = a.hz + Math.sin(ang) * d * 0.6; if (ok(a, tx, tz)) { go(a, tx, tz); break; } } }
+    else if (a.task === "visit" && (at(a) || now > a.tEnd)) { const f = a.peer; if (at(a) && f) { faceTo(a, f); faceTo(f, a); const T = TALK25[Math.floor(Math.random() * TALK25.length)]; dsay25(i, a, T[0], true); a.reply = [now + 1.3, T[1]]; a.task = "chat"; a.tEnd = now + 4.5; f.busy = now + 4.5; } else { a.task = null; if (f) f.busy = 0; } }
+    else if (a.task === "chat") { if (a.reply && now > a.reply[0]) { dsay25(i, a.peer, a.reply[1], true); a.reply = null; } if (now > a.tEnd) { a.task = null; a.next = now + 3 + Math.random() * 3; if (a.peer) { a.peer.busy = 0; a.peer.next = now + 2; } a.peer = null; } }
+    else if (a.task === "follow") { const L2 = a.lead; if (!L2 || now > a.tEnd) { a.task = null; a.lead = null; }
+      else { const tx = L2.x - (L2.face || 1) * ((L2.rr || 0.4) + r + 0.8), tz = L2.z + 0.3; if (inView(tx, tz, r) && !hitOb(tx, tz, r)) go(a, tx, tz); } }
+    // 動かす（岩・家具にぶつかりそうなら止まる）
+    const dx = a.tx - a.x, dz = a.tz - a.z, L = Math.hypot(dx, dz); a.walking = L > 0.08 && a.mode !== "mine";
+    if (a.walking) { const s = Math.min(L, (a.task === "carry" || a.task === "back" ? 1.3 : 1.6) * dt), nx = a.x + dx / L * s, nz = a.z + dz / L * s;
+      if (!a.lord && !a.task && hitOb(nx, nz, r) && !hitOb(a.x, a.z, r)) { a.tx = a.x; a.tz = a.z; a.walking = false; a.next = now + 0.3; }
+      else { a.x = nx; a.z = nz; if (Math.abs(dx) > 0.05) a.face = dx > 0 ? 1 : -1; } } });
+}
+// 運んだ鉱石の山（岩の左右）
+function dpile25(g, R, W, H){ const P = R.pile; if (!P) return; const m = R.acts.find(a => a.rk); if (!m) return; const rk = m.rk;
+  [0, 1].forEach(s => { const n = P[s]; if (!n) return; const sd = s ? 1 : -1, p = dproj25(rk[0] + sd * (rk[2] + 3.4) + sd * 1.0, 0, rk[1] + 4.4), x = p[0] * W, y = p[1] * H, u = Math.max(3, p[2] * W * 0.6);
+    for (let k = 0; k < n; k++) { const ox = ((k * 37) % 7 - 3) * u * 0.9, oy = -Math.floor(k / 3) * u * 0.8 + ((k * 13) % 3) * u * 0.3;
+      g.fillStyle = "#2a2018"; g.fillRect(x + ox - u, y + oy - u * 0.2, u * 2.2, u * 1.2); g.fillStyle = ["#9fe4ff", "#c9a8ff", "#8ef0b0"][k % 3]; g.beginPath(); g.moveTo(x + ox, y + oy - u * 1.6); g.lineTo(x + ox + u * 0.7, y + oy); g.lineTo(x + ox - u * 0.7, y + oy); g.fill(); } }); }
 // 掘るコマ（横向き4コマ）：つるはしの当たる点 hx,hy（絵の中の位置）つき
 function dmine25(sp, evo){ const k = "mine:" + sp + ":" + evo; if (D3.spr[k] !== undefined) return D3.spr[k]; const L = typeof CHRMINE25 !== "undefined" && CHRMINE25[sp]; const e = L && (L[evo] || L[0]); if (!e) return D3.spr[k] = null;
   const im = new Image(), o = D3.spr[k] = { im, ok: false, hx: e[1], hy: e[2] }; im.onload = () => { o.ok = true; }; im.src = e[0]; return o; }
@@ -11263,8 +11306,8 @@ function droom25(i){ const kind = roomKind25(i), on = {}; ROOMSET25[kind].forEac
   const inOb = (x, z, r) => OB.some(([ox, oz, or]) => Math.hypot(x - ox, z - oz) < or + r);
   const outOf = (x, z, r) => { for (let n = 0; n < 12; n++) { const o = OB.find(([ox, oz, or]) => Math.hypot(x - ox, z - oz) < or + r); if (!o) break; const dx = x - o[0], dz = z - o[1], L = Math.hypot(dx, dz) || 1, need = o[2] + r + 0.05; x = o[0] + dx / L * need; z = o[1] + dz / L * need; } return [x, z]; };
   const order = all.map((m, k) => ({ m, a: list[k] })).sort((a, b) => HAI25.footR({ sp: b.m.sp, evo: b.m.evos || 0 }) - HAI25.footR({ sp: a.m.sp, evo: a.m.evos || 0 }));
-  const fit = (x, z, r) => { for (let n = 0; n < 30; n++) { const p = dproj25(x, 0, z), pw = r * p[2] * DAYK25; if (p[0] - pw > 0.1 && p[0] + pw < 0.9 && p[1] > 0.3 && p[1] < 0.84) break; x *= 0.92; z = z * 0.9 + 0.3; } return [x, z]; };
-  const acts = []; cast.forEach((c, k) => { const o = order[k]; if (!o) return; const [fx0, fz0] = c.mode === "mine" || c.mode === "sleep" || c.look || c.boss ? [c.o[0], c.o[2]] : fit(c.o[0], c.o[2], HAI25.footR({ sp: o.m.sp, evo: o.m.evos || 0 })); /* 掘る子・寝る子は、岩や寝床のそばから動かさない */ const fixed = c.mode === "mine" || c.mode === "sleep" || c.look || c.boss, [fx1, fz1] = fixed ? [fx0, fz0] : outOf(fx0, fz0, rOf(o.m)); c.o[0] = fx1; c.o[2] = fz1; acts.push({ rr: rOf(o.m), m: o.m, sp: o.m.sp, evo: o.m.evos || 0, x: c.o[0], z: c.o[2], hx: c.o[0], hz: c.o[2], tx: c.o[0], tz: c.o[2], mode: c.mode, look: c.look, rk: c.rk, face: c.look ? (c.look[0] > c.o[0] ? 1 : -1) : Math.random() < 0.5 ? 1 : -1, next: 0, ph: Math.random() * 3 }); });
+  const fit = (x, z, r) => { for (let n = 0; n < 30; n++) { const p = dproj25(x, 0, z), pw = r * p[2] * DAYK25; if (p[0] - pw > 0.1 && p[0] + pw < 0.9 && p[1] > 0.36 && p[1] < 0.84) break; x *= 0.92; z = z * 0.9 + 0.3; } return [x, z]; };
+  const acts = []; cast.forEach((c, k) => { const o = order[k]; if (!o) return; const [fx0, fz0] = c.mode === "mine" || c.mode === "sleep" || c.look || c.boss ? [c.o[0], c.o[2]] : fit(c.o[0], c.o[2], HAI25.footR({ sp: o.m.sp, evo: o.m.evos || 0 })); /* 掘る子・寝る子は、岩や寝床のそばから動かさない */ const fixed = c.mode === "mine" || c.mode === "sleep" || c.look || c.boss, [fx1, fz1] = fixed ? [fx0, fz0] : outOf(fx0, fz0, rOf(o.m)); c.o[0] = fx1; c.o[2] = fz1; acts.push({ rr: rOf(o.m), boss: !!c.boss, m: o.m, sp: o.m.sp, evo: o.m.evos || 0, x: c.o[0], z: c.o[2], hx: c.o[0], hz: c.o[2], tx: c.o[0], tz: c.o[2], mode: c.mode, look: c.look, rk: c.rk, face: c.look ? (c.look[0] > c.o[0] ? 1 : -1) : Math.random() < 0.5 ? 1 : -1, next: 0, ph: Math.random() * 3 }); });
   if (S.path[i].kind === "lord") acts.push({ lord: true, back: true, sp: "lord", evo: typeof lordTier === "function" ? lordTier() : 0, x: 0, y: 0.95, z: 6.6, hx: 0, hz: 6.6, tx: 0, tz: 6.6, mode: "idle", face: 1, next: 1e12, ph: 0 });
   return D3.act[i] = { sig, kind, acts, OB }; }
 // ---- 1部屋を描く ----
@@ -11280,19 +11323,13 @@ function dcard25(card, i, now, dt){
   // 歩く先は、岩・家具の上と、それを横切る道を選ばない（8回ためして、だめならその場にいる）
   const OB = R.OB || [], hitOb = (x, z, r) => OB.some(([ox, oz, or]) => Math.hypot(x - ox, z - oz) < or + r);
   const crossOb = (x0, z0, x1, z1, r) => { for (let s = 1; s <= 6; s++) { const q = s / 6; if (hitOb(x0 + (x1 - x0) * q, z0 + (z1 - z0) * q, r)) return true; } return false; };
-  R.acts.forEach(a => { const r = a.rr || 0.4;
-    if (a.mode === "idle" && !a.lord && now > a.next) { a.next = now + 2.5 + Math.random() * 4;
-      for (let n = 0; n < 8; n++) { const ang = Math.random() * 6.28, d = Math.random() * 2.2, tx = a.hx + Math.cos(ang) * d, tz = a.hz + Math.sin(ang) * d * 0.6;
-        if (!hitOb(tx, tz, r) && !crossOb(a.x, a.z, tx, tz, r)) { a.tx = tx; a.tz = tz; break; } } }
-    const dx = a.tx - a.x, dz = a.tz - a.z, L = Math.hypot(dx, dz); a.walking = L > 0.08;
-    if (a.walking) { const s = Math.min(L, 1.6 * dt), nx = a.x + dx / L * s, nz = a.z + dz / L * s;
-      if (!a.lord && hitOb(nx, nz, r) && !hitOb(a.x, a.z, r)) { a.tx = a.x; a.tz = a.z; a.walking = false; a.next = now + 0.3; }
-      else { a.x = nx; a.z = nz; if (Math.abs(dx) > 0.05) a.face = dx > 0 ? 1 : -1; } } });
+  dai25(R, i, now, dt, hitOb, crossOb);
   // 前のコマと何も変わらなければ描きなおさない（スマホで重くならないように）
   { const fq = a => { const F = a.mode === "mine" ? [0, 4, 1.1] : DFR25[a.mode === "sleep" ? "sleep" : a.walking ? "walk" : "idle"]; return Math.floor(((now + a.ph) / F[2] * F[1]) % F[1]); };
-    const sig = W + "x" + H + "|" + R.acts.map(a => (a.x * 20 | 0) + "," + (a.z * 20 | 0) + "," + fq(a) + (a.walking ? "w" : "") + (a.face > 0 ? "r" : "l")).join(";") + "|" + ((D3.pops[i] || []).length ? now : 0) + "|" + (bg.px ? 1 : 0);
+    const sig = W + "x" + H + "|" + R.acts.map(a => (a.x * 20 | 0) + "," + (a.z * 20 | 0) + "," + fq(a) + (a.walking ? "w" : "") + (a.task || "") + a.mode + (a.face > 0 ? "r" : "l")).join(";") + "|" + ((D3.pops[i] || []).length ? now : 0) + "|" + (bg.px ? 1 : 0);
     if (card._sig === sig) return; card._sig = sig; }
   g.clearRect(0, 0, W, H);
+  dpile25(g, R, W, H);
   R.acts.slice().sort((a, b) => a.z - b.z).forEach(a => { const o = a.back ? dback25(a.evo) : dspr25(a.sp, a.evo); if (!o || !o.ok) return;
     const p = dproj25(a.x, a.y || 0, a.z), fx = p[0] * W, fy = p[1] * H, k = p[2] * W / o.ppu * DAYK25 * (a.lord ? 0.55 : 1), s = 128 * k;
     // 掘る子：横向きの「掘る」コマを使い、つるはしの先が岩のふちにちょうど当たる位置に立たせる
@@ -11316,6 +11353,7 @@ function dcard25(card, i, now, dt){
         g.fillStyle = j % 2 ? "#8a7a68" : (j === 2 ? "#c9a8ff" : "#9fe4ff"); g.fillRect(px, py, 1.6 * u, 1.6 * u); } g.restore(); }
     // 頭の上のしるし
     a.sx = MI ? fx2 : fx; a.sy = fy - (o.foot - 14) * k;
+    if (a.task === "carry") { const u = Math.max(2.5, k * 5.5), x = a.sx, y = fy - (o.foot - 30) * k; g.save(); g.fillStyle = "#9fe4ff"; g.strokeStyle = "#1a2a3a"; g.lineWidth = 1; g.beginPath(); g.moveTo(x, y - u * 3); g.lineTo(x + u * 1.6, y); g.lineTo(x, y + u * 1.4); g.lineTo(x - u * 1.6, y); g.closePath(); g.fill(); g.stroke(); g.restore(); }
     let ic = ""; if (a.m) { if (restLeft7(S, a.m)) ic = "💤"; else if (S.hungry) ic = "😫"; }   // 仕事のアイコン（💎など）は、床に宝石が散らばって見えるので出さない
     if (ic) { g.save(); g.globalAlpha = 0.9; g.font = `${Math.round(10 * dpr)}px system-ui`; g.textAlign = "center"; g.fillText(ic, fx, a.sy); g.restore(); } });
   dpops25(g, i, R, now, dpr, W, H); }
