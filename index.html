@@ -3945,7 +3945,7 @@ function mixList11(S) {
 // 施設：⛏採掘場・💤寝床・⚔️訓練台・👁見張り台・🌀横穴。脇道はなくした
 FAC9.alcove = { name: "横穴", icon: "🌀", job: "", text: "部屋のわきの行き止まり。地図のない勇者が迷い込んで時間を失う", unlock: 0 };
 FAC9.mine.name = "採掘場"; FAC9.train.name = "訓練台"; FAC9.watch.name = "見張り台";
-const FAC12 = ["mine", "bed", "train", "watch", "alcove"], FAC_SLOTS12 = 3, FAC_COST12 = 50, ROOM_CAP12 = 4;
+const FAC12 = ["mine", "bed", "train", "watch", "alcove"], FAC_SLOTS12 = 2, FAC_COST12 = 50, ROOM_CAP12 = 4;
 const WORK12 = ["mine", "bed", "train", "watch"];   // 働ける施設（横穴は働かない）
 const facsOf12 = r => (r && r.kind === "den" && r.facs) || [];
 const hasFac12 = (r, k) => facsOf12(r).includes(k);
@@ -4404,7 +4404,7 @@ function estLv17(S, fc) {
 // ================= proto18：部屋は少なく・大きく・育てる =================
 // 掘れる部屋は入口・主の間をふくめて10まで（1層に2部屋）
 // 部屋を「広げる」と、定員と施設の枠が増える（広さ1→2→3：定員4→6→8・施設3→4→5）
-const SZ18 = { cap: [0, 4, 6, 8], slots: [0, 3, 4, 5] }, EXPCOST18 = [0, 0, 250, 650];
+const SZ18 = { cap: [0, 4, 6, 8], slots: [0, 2, 2, 2] }, EXPCOST18 = [0, 0, 250, 650];
 const szOf18 = r => (r && r.kind === "den" && r.sz) || 1;
 const facSlots18 = r => SZ18.slots[szOf18(r)];
 const expCost18 = (S, r) => { const s = szOf18(r); return s >= 3 ? null : Math.round(EXPCOST18[s + 1] * (1 + 0.5 * (((S.contract && S.contract.lv) || 1) - 1))); };
@@ -6178,7 +6178,7 @@ document.addEventListener("click", ev => {
       // おまかせにしても、掘る子は減らさない（減るなら、もとの掘る子を掘るにもどす）
       const now = residents5(S, i).filter(m => jobOf12(S, m) === "mine").length; if (now < mine0.length) mine0.forEach(m => { m.job19 = "mine"; m.job19h = i; });
       toast("この部屋の役目をおまかせにした"); save(); } break;
-    case "roomexp": { const i = +d.v; if (expand18(S, i)) { sfx16("dig"); toast(`⛏ ${roomTitle(S, i)}を広げた！（定員${capOfSlot7(S, i)}・施設${facSlots18(S.path[i])}枠）`); CV.sig = ""; save(); } else toast("DPが足りない"); } break;
+    case "roomexp": { const i = +d.v; if (expand18(S, i)) { sfx16("dig"); toast(`⛏ ${roomTitle(S, i)}を広げた！（定員${capOfSlot7(S, i)}）`); CV.sig = ""; save(); } else toast("DPが足りない"); } break;
     case "openroomm": modal = null; roomSel = roomOpen = +d.v; caveFloor = floorOf(S, +d.v); if (typeof rtab20 !== "undefined") rtab20 = "mons"; break;
     case "openroom": modal = null; roomSel = roomOpen = +d.v; caveFloor = floorOf(S, +d.v); if (typeof rtab20 !== "undefined") rtab20 = "fac"; break;
     case "digtpl": digSel.tpl = d.v; break;
@@ -6494,7 +6494,7 @@ function gainText(m, i){
   const out = g.dp ? `💎+${g.dp}/日` : g.xp && job === "train" ? `⚔️+${g.xp}/日` : g.eye ? `👁+${g.eye}` : job === "bed" ? "💤" : "";
   return i === m.home ? `<button class="mini job" data-a="jobcyc" data-id="${m.id}">${m.job ? "" : "🪄"}${lab}</button> ${out}` : `${lab} ${out}`;
 }
-// 部屋の施設（3枠）
+// 部屋の施設（2枠。11/20：5つまでは軽すぎるので2つに）
 function facSlots12(i){
   const r = S.path[i]; if (!r || r.kind !== "den") return "";
   const F = facsOf12(r);
@@ -7024,7 +7024,7 @@ monCard = (prev => function (id) { let h = prev(id); const m = S.mons.find(o => 
 resultStage15 = (prev => function (r) { let h = prev(r); if (r.drops19 && r.drops19.length) h = h.replace('<button class="main big" data-a="stagenext"', `<div class="drops19"><div class="lab2">戦利品！</div>${r.drops19.map(itemTag19).join("")}<small class="hint">魔物の情報から持たせられる</small></div><button class="main big" data-a="stagenext"`); return h; })(resultStage15);
 // 掘った・広げた・施設を強くした：大きく見せる
 { const _d = digTpl13; digTpl13 = function (S, k, c) { const r = _d(S, k, c); if (r !== false && !window.__nolog19) setTimeout(() => { banner19(`<small>新しい部屋！</small><i>⛏ ${esc(roomTitle(S, r))}</i><small>部屋 ${S.path.length}/${MAX_PATH}</small>`, "wipe", 1500); const dw = document.getElementById("dw"); if (dw) { dw.classList.remove("shake"); void dw.offsetWidth; dw.classList.add("shake"); } try { [196, 262, 330, 392].forEach((f, i) => tone16(f, i * 0.08, 0.14, "square", 0.05)); } catch (e) {} }, 80); return r; }; }
-{ const _e = expand18; expand18 = function (S, i) { const r = _e(S, i); if (r) setTimeout(() => { banner19(`<small>部屋が広くなった！</small><i>📐 ${esc(roomTitle(S, i))}</i><small>定員${capOfSlot7(S, i)}・施設${facSlots18(S.path[i])}枠</small>`, "wipe", 1500); }, 80); return r; }; }
+{ const _e = expand18; expand18 = function (S, i) { const r = _e(S, i); if (r) setTimeout(() => { banner19(`<small>部屋が広くなった！</small><i>📐 ${esc(roomTitle(S, i))}</i><small>定員${capOfSlot7(S, i)}</small>`, "wipe", 1500); }, 80); return r; }; }
 { const _u = upgradeFac16; upgradeFac16 = function (S, i, k) { const r = _u(S, i, k); if (r) setTimeout(() => { banner19(`<small>強化！</small><i>Lv${flv16(S.path[i], k)}</i>`, "c4", 1100); sfx16("lvup"); }, 50); return r; }; }
 // チュートリアル：毎日のたのしみを1つだけ足す（最後のあいさつの前）
 TUT.splice(TUT.length - 1, 0, { sel: "#pn .mis19", t: "毎日<b>ミッション</b>が3つ出る。全部やると<b>次の朝の宝箱</b>が豪華に！ 勇者は<b>戦利品</b>を落とすし、まれに<b>✨色違い</b>の子も生まれるよ。", when: () => !modal && !stage });
@@ -7242,7 +7242,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.245（11/20 01:10）";
+const VER20 = "No.246（11/20 07:59）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
