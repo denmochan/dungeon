@@ -7242,7 +7242,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.244（11/20 00:28）";
+const VER20 = "No.245（11/20 01:10）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -9584,10 +9584,10 @@ const ROOMS24 = {
  CRATES`, lights: `LIGHT(-0.85,1.22,0.9,1.0,0.66,0.32,3.0) LANTERNL`, keepDummy: false },
  sleep: { props: `
  for(int i=0;i<5;i++){vec3 c=i==0?vec3(-4.6,0.0,-2.3):i==1?vec3(-1.9,0.0,-3.5):i==2?vec3(2.4,0.0,-3.4):i==3?vec3(4.9,0.0,-1.3):vec3(-5.0,0.0,1.6);vec3 q=p-c;
-  float b=sEll(q-vec3(0,0.04,0),vec3(1.05,0.2,0.75))+(vnoise(q*14.0)-0.5)*0.05;b=smin(b,abs(sEll(q-vec3(0,0.12,0),vec3(1.0,0.22,0.7)))-0.06+(vnoise(q*16.0)-0.5)*0.04,0.05);if(b<r.x)r=vec2(b,13.0);
-  float fu=sEll(q-vec3(0.35,0.17,0.15),vec3(0.42,0.06,0.36))+(vnoise(q*9.0)-0.5)*0.03;if(i!=4&&fu<r.x)r=vec2(fu,14.0);}
+  float fr=sRBox(q-vec3(0,0.1,0),vec3(1.02,0.1,0.7),0.04);if(fr<r.x)r=vec2(fr,12.0);float b=sRBox(q-vec3(0,0.25,0),vec3(0.96,0.09,0.64),0.08)+(vnoise(q*14.0)-0.5)*0.04;if(b<r.x)r=vec2(b,13.0);
+  float bl=sRBox(q-vec3(0.24,0.35,0.0),vec3(0.62,0.045,0.62),0.05)+(vnoise(q*5.0)-0.5)*0.02;if(i!=4&&bl<r.x)r=vec2(bl,27.0);float pl=sEll(q-vec3(-0.66,0.38,0.0),vec3(0.2,0.09,0.36));if(pl<r.x)r=vec2(pl,15.0);}
  FIREPIT(0.0,-0.9)
- {vec3 q=p-vec3(0.0,0.0,-0.9);float cl=abs(length(q-vec3(0,0.75,0))-0.34)-0.03;cl=max(cl,q.y-0.82);if(cl<r.x)r=vec2(cl,18.0);
+ {vec3 q=p-vec3(0.0,0.0,-0.9);float cl=abs(length(q-vec3(0,0.75,0))-0.34)-0.03;cl=max(cl,q.y-0.82);if(cl<r.x)r=vec2(cl,12.0);
   float sp=sEll(q-vec3(0,0.78,0),vec3(0.3,0.02,0.3));if(sp<r.x)r=vec2(sp,25.0);
   for(int i=0;i<3;i++){float a=float(i)*2.094+0.5;vec3 e=vec3(cos(a)*0.62,0.0,sin(a)*0.62);float lg=sTap(q,e,vec3(0,1.45,0),0.03,0.025);if(lg<r.x)r=vec2(lg,12.0);}
   float ch=sTap(q,vec3(0,1.45,0),vec3(0,1.1,0),0.012,0.012);if(ch<r.x)r=vec2(ch,18.0);}
@@ -11056,7 +11056,7 @@ function roomKind25(i){ const R = S.path[i] || {}; if (i === lordIdx(S)) return 
   return F.includes("train") ? "train" : F.includes("mine") ? "mine" : F.includes("bed") ? "bed" : R.fac === "mine" ? "mine" : R.fac === "bed" ? "bed" : R.fac === "train" ? "train" : F.includes("nest") || R.fac === "nest" ? "nest" : F.includes("watch") || R.fac === "watch" ? "watch" : F.includes("gate") || R.fac === "gate" ? "entry" : "plain"; }
 // 配った洞窟の絵（bg25/部屋の種類_c.png・_d.png）があれば、それを読み込む
 function setRoom25(i){ const C = B3.C; C.setRoom(B3.roomKey); const k = roomKind25(i); if (!BGSHIP25[k]) return; C.putBgImages(`bg25/${k}_c.webp?v=${BGSHIP25[k]}`, `bg25/${k}_d.webp?v=${BGSHIP25[k]}`, C.st.bgKey); }
-const BGSHIP25 = { train: "67281e1f", mine: "6ba1ef93", bed: "2e371731", lord: "41ce104d", plain: "86e68c06", nest: "d981244e", watch: "6686d08e", entry: "9104082d", train_mine: "e0cc1a5d", train_bed: "2691d985", train_nest: "ee1014d3", train_watch: "1790fb25", mine_bed: "40fb9983", mine_nest: "50610d30", mine_watch: "8aca37cb", bed_nest: "b08c05d9", bed_watch: "170508f1", nest_watch: "c182a20f", lordday: "41ce104d" };
+const BGSHIP25 = { train: "67281e1f", mine: "6ba1ef93", bed: "dbc8dea8", lord: "41ce104d", plain: "86e68c06", nest: "d981244e", watch: "6686d08e", entry: "9104082d", train_mine: "e0cc1a5d", train_bed: "765c447a", train_nest: "ee1014d3", train_watch: "1790fb25", mine_bed: "73ac2924", mine_nest: "50610d30", mine_watch: "8aca37cb", bed_nest: "ac80d15a", bed_watch: "611ab0b6", nest_watch: "c182a20f", lordday: "41ce104d" };
 function roomKey25(i){ const on = {}; ROOMSET25[roomKind25(i)].forEach(k => on[k] = true); return HAI25.room(on); }
 // ---- 3Dのキャラの種類 ----
 const heroSp25 = h => (typeof heroId === "function" ? String(heroId(h)).replace(/\d+$/, "") : h.job) || "warrior";
@@ -11534,7 +11534,7 @@ function droom25(i){ const kind = roomKind25(i), on = {}; ROOMSET25[kind].forEac
   return D3.act[i] = { sig, kind, acts, OB, beds: BEDS, nests: NESTS }; }
 // ---- 手前に立つ物（岩・柱・たいまつ・壁）のうしろに入った子を隠す ----
 // bg25/<部屋>_o.webp：半分の大きさ、明るさ＝カメラからの距離（255は床で、隠さない）
-const OCCV25 = {"bed":"5a9a85","bed_nest":"01864d","bed_watch":"0b8aa0","entry":"67a677","lord":"35ef8a","lordday":"35ef8a","mine":"9675f0","mine_bed":"9b52cb","mine_nest":"cdb4e9","mine_watch":"97d2d0","nest":"a52685","nest_watch":"71a7b0","plain":"6b014e","train":"40948d","train_bed":"9fcae4","train_mine":"389e61","train_nest":"6414ba","train_watch":"c8101e","watch":"431754"};
+const OCCV25 = {"bed":"4dd727","bed_nest":"7fff1b","bed_watch":"a8da6c","entry":"67a677","lord":"35ef8a","lordday":"35ef8a","mine":"9675f0","mine_bed":"672583","mine_nest":"cdb4e9","mine_watch":"97d2d0","nest":"a52685","nest_watch":"71a7b0","plain":"6b014e","train":"40948d","train_bed":"415619","train_mine":"389e61","train_nest":"6414ba","train_watch":"c8101e","watch":"431754"};
 function docc25(bk){ const k = "occ:" + bk; if (D3.img[k]) return D3.img[k]; const o = D3.img[k] = { ok: 0 }; if (!OCCV25[bk]) return o;
   const im = new Image(); im.onload = () => { try { const c = document.createElement("canvas"); c.width = im.width; c.height = im.height; const g = c.getContext("2d"); g.drawImage(im, 0, 0);
     const d = g.getImageData(0, 0, im.width, im.height).data, q = new Uint8Array(im.width * im.height); for (let j = 0; j < q.length; j++) q[j] = d[j * 4];
