@@ -7238,7 +7238,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.239（11/19 21:18）";
+const VER20 = "No.240（11/19 21:40）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -10917,7 +10917,7 @@ const HAI25 = (() => {
           for (let s = 0; s < 24 && !ok; s++) { const ang = [0.55, 2.6, 0.95, 2.2, 0.25, 2.9, 1.25, 1.9][s % 8] + Math.floor(s / 8) * 0.18, rr = [2.2, 3.0, 3.8][Math.floor(s / 8)]; rx = cx + Math.cos(ang) * rr; rz = cz + Math.sin(ang) * rr * 0.85 - 0.5; ok = free(rx, rz, r * 0.45); }
           if (ok) { const L2 = boss || [cx, cz - 4.3]; c.mode = R() < 0.6 ? "slash" : "lift"; c.look = L2; c.r = Math.atan2(L2[0] - rx, L2[1] - rz); pos = [rx, rz]; } } }
       if (!pos && e.act === "sleep" && bip && beds.length && bi < beds.length) { const b = beds[bi++]; c.mode = "sleep"; c.lie = true; c.r = 1.2; pos = [b[0] + 0.2, b[1]]; }
-      if (!pos) { for (let tries = 0; tries < 400 && !pos; tries++) { const x = (R() * 2 - 1) * 17.5, z = -8.8 + R() * 18; if (free(x, z, r)) pos = [x, z]; } }
+      if (!pos) { let bd = -1, nc = 0; for (let tries = 0; tries < 400 && nc < 14; tries++) { const x = (R() * 2 - 1) * (tries < 200 ? 14.5 : 17.5), z = -8.8 + R() * 18; if (!free(x, z, r)) continue; nc++; const d = taken.reduce((m, [tx, tz]) => Math.min(m, Math.hypot(x - tx, (z - tz) * 1.4)), 99); if (d > bd) { bd = d; pos = [x, z]; } } }   // 空いている所を何か所か試し、ほかの子からいちばん離れた所に置く（片側に寄らない）
       if (!pos) return;
       taken.push([pos[0], pos[1], r]);
       if (!c.lie && c.mode !== "mine" && !c.look) { c.r = Math.atan2(-pos[0], 6 - pos[1]) + (R() - 0.5) * 0.9;
@@ -11384,7 +11384,7 @@ function dai25(R, i, now, dt, hitOb, crossOb){ const A = R.acts, P = R.pile || (
     else if (a.task === "plan") { const st = a.plan[0];
       if (!st) { a.task = null; a.next = now + 2 + Math.random() * 3; }
       else if (at(a) || now > a.tEnd) { if (a.waitEnd == null) { a.waitEnd = now + (st.wait || 0); go(a, a.x, a.z); if (st.look) a.face = st.look[0] > a.x ? 1 : -1; if (st.say) dsay25(i, a, st.say, st.talk !== false); if (st.sit) a.mode = "restS"; }
-        else if (now > a.waitEnd) { a.waitEnd = null; if (a.mode === "restS") a.mode = "idle"; a.plan.shift(); const nx = a.plan[0]; if (nx) { go(a, nx.x, nx.z); a.tEnd = now + 9; } } } }
+        else if (now > a.waitEnd) { a.waitEnd = null; if (a.mode === "restS") a.mode = "idle"; a.plan.shift(); const nx = a.plan[0]; if (nx) { go(a, nx.x, nx.z); a.tEnd = now + Math.max(9, Math.hypot(nx.x - a.x, nx.z - a.z) / 1.0 + 3); } } } }
     else if (a.task === "visit" && (at(a) || now > a.tEnd)) { const f = a.peer; if (at(a) && f) { faceTo(a, f); faceTo(f, a); const T = TALK25[Math.floor(Math.random() * TALK25.length)]; dsay25(i, a, T[0], true); a.reply = [now + 1.3, T[1]]; a.task = "chat"; a.tEnd = now + 4.5; f.busy = now + 4.5; } else { a.task = null; if (f) f.busy = 0; } }
     else if (a.task === "chat") { if (a.reply && now > a.reply[0]) { dsay25(i, a.peer, a.reply[1], true); a.reply = null; } if (now > a.tEnd) { a.task = null; a.next = now + 3 + Math.random() * 3; if (a.peer) { a.peer.busy = 0; a.peer.next = now + 2; } a.peer = null; } }
     else if (a.task === "follow") { const L2 = a.lead; if (!L2 || now > a.tEnd) { a.task = null; a.lead = null; }
@@ -11403,9 +11403,9 @@ const CHEER25 = ["がんばれ", "いい音だ", "おれにもやらせろ", "�
 function dgoal25(R, i, a, now, ok, inView, hitOb){ const A = R.acts, r = a.rr || 0.4, lv = (a.m && a.m.lv) || 1;
   const others = A.filter(b => b !== a && b.mode === "idle" && !b.lord && !b.boss && !b.task && !(b.busy > now) && Math.hypot(b.x - a.x, b.z - a.z) < 10);
   const workers = A.filter(b => b !== a && (b.mode === "mine" || b.mode === "slash" || b.mode === "lift") && !b.task);
-  const guard = a.m && (a.m.job === "guard" || a.m.role === "guard"), W = [["patrol", guard ? 0.45 : 0.2], ["watch", workers.length ? 0.22 : 0], ["talk", others.length ? 0.25 : 0], ["follow", others.some(b => b.m && (b.m.lv || 1) > lv) ? 0.1 : 0], ["rest", 0.12], ["wander", 0.3]];
+  const guard = a.m && (a.m.job === "guard" || a.m.role === "guard"), W = [["patrol", guard ? 0.45 : 0.2], ["watch", workers.length ? 0.22 : 0], ["talk", others.length ? 0.25 : 0], ["follow", others.some(b => b.m && (b.m.lv || 1) > lv) ? 0.1 : 0], ["rest", 0.12], ["roam", 0.22], ["wander", 0.3]];
   let x = Math.random() * W.reduce((s, w) => s + w[1], 0), g = "wander"; for (const w of W) { if ((x -= w[1]) <= 0) { g = w[0]; break; } }
-  const plan = (P, icon) => { const Q = P.filter(s => inView(s.x, s.z, r) && !hitOb(s.x, s.z, r)); if (!Q.length) return false; a.task = "plan"; a.plan = Q; a.waitEnd = null; a.tx = Q[0].x; a.tz = Q[0].z; a.tEnd = now + 9; return true; };
+  const plan = (P, icon) => { const Q = P.filter(s => inView(s.x, s.z, r) && !hitOb(s.x, s.z, r)); if (!Q.length) return false; a.task = "plan"; a.plan = Q; a.waitEnd = null; a.tx = Q[0].x; a.tz = Q[0].z; a.tEnd = now + Math.max(9, Math.hypot(Q[0].x - a.x, Q[0].z - a.z) / 1.0 + 3); return true; };
   if (g === "patrol") { const sd = Math.random() < 0.5 ? -1 : 1; if (plan([{ x: (Math.random() - 0.5) * 2, z: -6.6, wait: 1.6, look: [0, -9], say: Math.random() < 0.4 ? "異常なし" : null },
       { x: sd * (8 + Math.random() * 5), z: -3 + Math.random() * 6, wait: 1.4, say: Math.random() < 0.3 ? "こっちもよし" : null }, { x: a.hx, z: a.hz, wait: 0.5 }], "👀")) return; }
   if (g === "watch") { const w = workers[Math.floor(Math.random() * workers.length)], sd = w.x > 0 ? 1 : -1, tx = w.x + sd * (2.2 + r), tz = w.z + 0.9;
@@ -11415,6 +11415,15 @@ function dgoal25(R, i, a, now, ok, inView, hitOb){ const A = R.acts, r = a.rr ||
   if (g === "follow") { const L2 = others.filter(b => b.m && (b.m.lv || 1) > lv).sort((p, q) => (q.m.lv || 1) - (p.m.lv || 1))[0]; if (L2) { a.task = "follow"; a.lead = L2; a.tEnd = now + 7; return; } }
   if (g === "rest") { const sd = a.x < 0 ? -1 : 1, tx = sd * (11 + Math.random() * 4), tz = a.z + (Math.random() - 0.5) * 2;
     if (plan([{ x: tx, z: tz, wait: 5 + Math.random() * 3, sit: true, say: Math.random() < 0.5 ? "ふう…" : "ひと休み" }, { x: a.hx, z: a.hz, wait: 0.3 }], "💤")) return; }
+  // 部屋の反対側など、遠くて空いている所へ歩いていき、そこを新しい居場所にする（岩をまたぐときは寄り道を1つ入れる）
+  if (g === "roam") { let best = null, bs = -1e9;
+    for (let n = 0; n < 24; n++) { const tx = (Math.random() * 2 - 1) * 14, tz = -6 + Math.random() * 13; if (!inView(tx, tz, r) || hitOb(tx, tz, r)) continue;
+      const far = Math.hypot(tx - a.x, tz - a.z); if (far < 5) continue;
+      const crowd = A.filter(b => b !== a && !b.lord && Math.hypot((b.hx ?? b.x) - tx, (b.hz ?? b.z) - tz) < 3.5).length;
+      let path = ok(a, tx, tz) ? [] : null;
+      for (let m = 0; m < 10 && !path; m++) { const wx = (a.x + tx) / 2 + (Math.random() - 0.5) * 10, wz = -6 + Math.random() * 13; if (ok(a, wx, wz) && ok({ x: wx, z: wz, rr: r }, tx, tz)) path = [{ x: wx, z: wz, wait: 0 }]; }
+      if (!path) continue; const side = A.reduce((t, b) => b === a || b.lord ? t : t + (((b.hx ?? b.x) < 0) === (tx < 0) ? 1 : -1), 0), sc = Math.min(far, 14) * 0.3 - crowd * 3 - side * 2 + Math.random(); if (sc > bs) { bs = sc; best = [tx, tz, path]; } }
+    if (best && plan([...best[2], { x: best[0], z: best[1], wait: 1 + Math.random() * 2 }], "")) { a.hx = best[0]; a.hz = best[1]; return; } }
   for (let n = 0; n < 8; n++) { const ang = Math.random() * 6.28, d = Math.random() * 2.2, tx = a.hx + Math.cos(ang) * d, tz = a.hz + Math.sin(ang) * d * 0.6; if (ok(a, tx, tz)) { a.tx = tx; a.tz = tz; break; } } }
 // 運んだ鉱石の山（岩の左右）
 function dpile25(g, R, W, H){ const P = R.pile; if (!P) return; const m = R.acts.find(a => a.rk); if (!m) return; const rk = m.rk;
