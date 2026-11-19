@@ -7238,7 +7238,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.233（11/19 16:55）";
+const VER20 = "No.234（11/19 18:30）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -11224,6 +11224,107 @@ function prebake25(){
 { const _r = render; render = function (){ try { if (N && !N.st25) N.st25 = Date.now(); } catch (e) {} return _r.apply(this, arguments); }; }
 document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="skip"]'); if (!b || !N) return; if (Date.now() - (N.st25 || 0) < 1500) { ev.stopPropagation(); ev.preventDefault(); } }, true);
 
+// ================= 3Dの子を、今のコマアニメと同じ並び（17コマ）の絵に焼く（開発用・ページ内で実行） =================
+// 0-3 待機 / 4 まばたき・寝る / 5-8 攻撃 / 9-10 被弾 / 11-14 跳ねる / 15-16 歩き
+(() => {
+  const FACESP = {};
+  const BIPED = { goblin: 1, skeleton: 1, imp: 1, kobold: 1, orc: 1, golem: 1, human: 1, demon: 1, gobx: 1, lich: 1, noble: 1, lordk: 1 };
+  // 勇者の色ちがい（1〜5）と段階（0〜2）
+  const HEROJOB = { warrior: 1, thief: 1, priest: 1, mage: 1, knight: 1, hunter: 1 };
+  const HERO_TINT = [[1, 1, 1], [0.75, 0.85, 1.15], [1.15, 0.8, 0.75], [0.8, 1.1, 0.8], [1.1, 1.0, 0.7], [0.9, 0.75, 1.1]];
+  const HAIR = [[0.45, 0.28, 0.15], [0.95, 0.8, 0.4], [0.15, 0.12, 0.1], [0.75, 0.3, 0.12], [0.6, 0.6, 0.62], [0.35, 0.2, 0.12]];
+  function look(key, evo){
+    const m = key.match(/^([a-z]+?)(\d?)$/), base = HEROJOB[m[1]] ? m[1] : key, vi = HEROJOB[m[1]] ? +(m[2] || 0) : 0;
+    let sp = base, col = spCol24(sp), vr = typeof varOf24 !== 'undefined' ? varOf24(sp, evo) : spVar24(sp), scl = spScl24(sp);
+    if (HEROJOB[base]) { const T = HERO_TINT[vi % 6]; col = [col[0], col[1].map((v, i) => Math.min(1, v * T[i]))]; vr = [vr[0].slice(), vr[1].slice()];
+      if (vr[0][0] === 4) vr[1] = HAIR[vi % 6];
+      if (base === "warrior" && evo >= 1) vr[0][0] = evo >= 2 ? 3 : 2;
+      if (base === "knight" && evo >= 2) col = [col[0], [0.9, 0.75, 0.3]]; }
+    scl *= (typeof EVOSCL25 !== 'undefined' ? EVOSCL25 : [1, 1.06, 1.12])[evo] || 1;
+    if (typeof EVOCOL25 !== 'undefined' && EVOCOL25[base] && EVOCOL25[base][evo]) col = EVOCOL25[base][evo];
+    return { sp: base, col, vr, scl, face: FACESP[base] };
+  }
+  const studio = s => { const i = s.indexOf("  float fog="), j = s.indexOf("\n", i);
+    s = s.slice(0, i) + "  if(STUDIO>0.5){float o2=ao(p,n);vec3 Ls=normalize(vec3(-0.45,0.85,0.55));float s2=shadow(p+n*0.005,Ls);vec3 Fl=normalize(vec3(0.75,0.25,0.6));"
+      + "col=c*(vec3(1.05,0.98,0.9)*1.15*clamp(dot(n,Ls),0.0,1.0)*s2+mix(vec3(0.14,0.12,0.13),vec3(0.36,0.36,0.42),n.y*0.5+0.5)*o2+vec3(0.3,0.3,0.36)*clamp(dot(n,Fl)*0.5+0.5,0.0,1.0)*o2*0.6)"
+      + "+vec3(0.5,0.45,0.4)*pow(1.0-clamp(dot(n,-rd),0.0,1.0),3.0)*0.35*o2+c*emi;}else{" + s.slice(i + 2, j) + "}" + s.slice(j);
+    s = s.replace("uniform float clr;", "uniform float clr;uniform float STUDIO;uniform vec3 LXZ;").replace("vec3 Ls=normalize(vec3(-0.45,0.85,0.55))", "vec3 Ls=normalize(vec3(-0.45*LXZ.x+0.55*LXZ.z,0.85,0.55*LXZ.x+0.45*LXZ.z))").replace("vec3 Fl=normalize(vec3(0.75,0.25,0.6))", "vec3 Fl=normalize(vec3(0.75*LXZ.x-0.6*LXZ.z,0.25,0.6*LXZ.x+0.75*LXZ.z))"); return s; };   // LXZ：光をカメラと一緒に回す（cos,0,sin）
+  const PROG = {};
+  function progFor(gl, kit){ if (PROG[kit]) return PROG[kit];
+    const sh = (ty, s) => { const o = gl.createShader(ty); gl.shaderSource(o, s); gl.compileShader(o); if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(o)); return o; };
+    const p = gl.createProgram(); gl.attachShader(p, sh(gl.VERTEX_SHADER, SDF_VS)); gl.attachShader(p, sh(gl.FRAGMENT_SHADER, studio(makeFS24("train", [{ sp: kit }], 1)))); gl.linkProgram(p);
+    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p)); return PROG[kit] = { p, U: n => gl.getUniformLocation(p, n) }; }
+  // 1コマの設定
+  function frames(kit, sp){
+    const bip = !!BIPED[kit], mage = /mage|priest|shaman|lich|ogremage|mindlord|lord/.test(sp), F = [];
+    for (let i = 0; i < 4; i++) F.push({ mode: "idle", t: i * 0.9 });
+    F.push({ mode: bip ? "sleep" : "idle", t: 0.3, dy: bip ? 0 : -0.03 });
+    if (bip) (mage ? [0.1, 0.3, 0.45, 0.62].map(t => ({ mode: "cast", t })) : [0.3, 0.5, 0.62, 0.78].map(t => ({ mode: "slash", t }))).forEach(f => F.push(f));
+    else [[0.1, 0.02], [0.28, 0.06], [0.42, 0.03], [0.16, 0]].forEach(([dz, dy], i) => F.push({ mode: "idle", t: 1 + i * 0.2, dz, dy }));
+    if (bip) [0.15, 0.3].forEach(t => F.push({ mode: "hurt", t })); else [[-0.12, 0.05], [-0.2, 0.02]].forEach(([dz, dy]) => F.push({ mode: "idle", t: 0.5, dz, dy }));
+    [0, 0.12, 0.22, 0.08].forEach((dy, i) => F.push({ mode: "idle", t: 2 + i * 0.15, dy }));
+    if (bip) [0.2, 0.6].forEach(t => F.push({ mode: "walk", t })); else [0.05, 0].forEach((dy, i) => F.push({ mode: "idle", t: 2.5 + i * 0.4, dy }));
+    return F; }
+  async function bakeStrip(gl, key, evo, S = 128, fsel, measure, mine, fit){
+    const L = look(key, evo), kit = kitOf24(L.sp), P = progFor(gl, kit), U = P.U, F = frames(kit, key);
+    const im = await spriteImg24(key, evo), pal = im ? sprPal24(im) : null;
+    const pitch = (window.__SPITCH ?? 0.62), d = 20, msc = Math.min(2.2, 1 + (L.scl - 1) * 0.6);
+    let ppu = 36 * msc / L.scl, lift = 0, fl, ty, tg, e, fw, rt, up;
+    const cam = () => { fl = ppu * d / S; ty = (58 - lift) / (ppu * Math.cos(pitch)) * (S / 128); tg = [0, ty, 0]; e = [0, ty + d * Math.sin(pitch), d * Math.cos(pitch)]; fw = V3.n(V3.s(tg, e)); rt = V3.n(V3.x(fw, [0, 1, 0])); up = V3.x(rt, fw); };
+    cam(); const __unused = 0, __u2 = 0;
+    const out = document.createElement("canvas"); out.width = S * (fsel ? fsel.length : 17); out.height = S; const ox = out.getContext("2d");
+    const buf = new Uint8Array(S * S * 4);
+    gl.useProgram(P.p); gl.viewport(0, 0, S, S);
+    if (!gl.__q) { gl.__q = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, gl.__q); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW); }
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.__q); { const al = gl.getAttribLocation(P.p, "a"); gl.enableVertexAttribArray(al); gl.vertexAttribPointer(al, 2, gl.FLOAT, false, 0, 0); }
+    // 掘るコマ用：横から（右を向いた 3/4）見るカメラ。つるはしの当たる点も、絵の中の位置として返す
+    const SIDE = 1.0, sideCam = () => { const dc = d * Math.cos(pitch), es = [tg[0] - Math.sin(SIDE) * dc, ty + d * Math.sin(pitch), Math.cos(SIDE) * dc], f2 = V3.n(V3.s(tg, es)), r2 = V3.n(V3.x(f2, [0, 1, 0])), u2 = V3.x(r2, f2); return { e: es, fw: f2, rt: r2, up: u2 }; };
+    const rotCam = A => { const dc = d * Math.cos(pitch), es = [tg[0] + Math.sin(A) * dc, ty + d * Math.sin(pitch), Math.cos(A) * dc], f2 = V3.n(V3.s(tg, es)), r2 = V3.n(V3.x(f2, [0, 1, 0])), u2 = V3.x(r2, f2); return { e: es, fw: f2, rt: r2, up: u2 }; };
+    let lastR = null, lastC = null;
+    const draw = fr => {
+      const R = rigSp24(L.sp, fr.mode, fr.t), o = [0, (fr.dy || 0), (fr.dz || 0)]; lastR = R;
+      const VA = typeof fr.view === "number" ? { [fr.view]: fr.view } : {}, C = fr.side ? sideCam() : VA[fr.view] !== undefined ? rotCam(VA[fr.view]) : fr.view === "back" ? rotCam(Math.PI) : fr.view === "side" ? rotCam(-Math.PI / 2) : (window.__STRIPBACK ? rotCam(Math.PI) : { e, fw, rt, up }); lastC = C;
+      const ang = fr.side ? -SIDE : VA[fr.view] !== undefined ? VA[fr.view] : (fr.view === "back" || window.__STRIPBACK) ? Math.PI : fr.view === "side" ? -Math.PI / 2 : 0; gl.uniform3f(U("LXZ"), Math.cos(ang), 0, Math.sin(ang));
+      gl.uniform2f(U("res"), S, S); gl.uniform3fv(U("cam"), C.e); gl.uniformMatrix3fv(U("camM"), false, new Float32Array([...C.rt, ...C.up, ...C.fw])); gl.uniform1f(U("fl"), fl);
+      gl.uniform1f(U("PASS"), 5); gl.uniform1f(U("STUDIO"), 1); gl.uniform2f(U("vres"), S, S); gl.uniform2f(U("crop"), 0, 0); gl.uniform1f(U("zoom"), 1); gl.uniform1f(U("tA"), d); gl.uniform1f(U("tR"), 6);
+      gl.uniform3fv(U("J"), new Float32Array(R.J.flat())); gl.uniformMatrix3fv(U("HR"), false, new Float32Array(R.HR)); gl.uniformMatrix3fv(U("TR"), false, new Float32Array(R.TR)); gl.uniform1f(U("tool"), R.tool);
+      const db = new Float32Array(24); (R.deb || []).forEach((q, i) => db.set(q, i * 4)); gl.uniform4fv(U("deb"), db);
+      gl.uniform3fv(U("OC"), new Float32Array(o)); gl.uniform1fv(U("RC"), new Float32Array([fr.rc ?? 0.45])); gl.uniform1fv(U("LIE"), new Float32Array([0]));
+      gl.uniform3fv(U("SKIN"), new Float32Array(L.col[0])); gl.uniform3fv(U("CLOTH"), new Float32Array(L.col[1])); gl.uniform1fv(U("FI"), new Float32Array([L.face ?? (FACEIDX24[kit] ?? -1)]));
+      gl.uniform1fv(U("SCL"), new Float32Array([L.scl])); gl.uniform4fv(U("VAR"), new Float32Array(L.vr[0])); gl.uniform3fv(U("ACC"), new Float32Array(L.vr[1]));
+      gl.uniform1f(U("tm"), fr.t); gl.uniform1f(U("CS"), 1); gl.uniform1f(U("idm"), 0); gl.uniform1f(U("hasFace"), 2);
+      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, gl.__facet || (gl.__facet = faceAtlas24(gl))); gl.uniform1i(U("face"), 0);
+      gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); gl.drawArrays(gl.TRIANGLES, 0, 3);
+      gl.readPixels(0, 0, S, S, gl.RGBA, gl.UNSIGNED_BYTE, buf);
+    };
+    // はみ出す大きい子は縮める（待機・攻撃のコマで測る）
+    if (fit) { ppu = fit.ppu; lift = fit.lift; cam(); } else for (let pass = 0; pass < 6; pass++) { let top = S, bot = 0, lft = S, rgt = 0, nb = 0;
+      [F[0], F[6], F[11]].forEach(fr => { draw(fr); for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) if (buf[((S - 1 - y) * S + x) * 4 + 3]) { top = Math.min(top, y); bot = Math.max(bot, y); lft = Math.min(lft, x); rgt = Math.max(rgt, x); if (y === S - 1) nb++; } });
+      if (bot <= top) break; const k = Math.min(1, (bot - 3) / Math.max(1, bot - top), (S / 2 - 3) / Math.max(1, S / 2 - lft, rgt - S / 2));
+      const edge = top <= 0 || lft <= 0 || rgt >= S - 1, low = nb > 12 && lift < 30; if (k >= 0.999 && !edge && !low) break; if (low) lift += 6; if (k < 0.999 || edge) ppu *= Math.min(k * 0.98, edge ? 0.85 : 1); cam(); }
+    if (measure) return { ppu, lift };
+    const MF = [0.2, 0.42, 0.6, 0.76].map(c => ({ mode: "mine", t: c * 1.35, side: 1 })); let hit = null;
+    const proj = (P, C) => { const v = V3.s(P, C.e), z = V3.d(v, C.fw); return [S / 2 + S * fl * V3.d(v, C.rt) / z, S / 2 - S * fl * V3.d(v, C.up) / z]; };
+    // 歩く18コマ：正面6・背中6・横6（足の運び0.8秒を6つに分ける）
+    const WF = Array.isArray(mine) ? mine : []; if (mine === "walk" || mine === "walk2") (mine === "walk2" ? (window.__WANG || [-Math.PI / 4, -Math.PI * 3 / 4]) : ["front", "back", "side"]).forEach(v => { for (let k = 0; k < 6; k++) WF.push({ mode: "walk", t: k / 6 * 0.8, view: v, rc: mine === "walk2" ? 0 : undefined }); });
+    const LST = WF.length ? WF : mine ? MF : (fsel ? fsel.map(i => F[i]) : F);
+    if (mine) ox.canvas.width = S * (WF.length ? WF.length : MF.length);
+    LST.forEach((fr, fi) => { draw(fr); if (mine === true && fi === 2 && lastR.strike) hit = proj(V3.m(lastR.strike, L.scl), lastC);
+      const id = ox.createImageData(S, S), a = id.data, al = new Uint8Array(S * S);
+      for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) { const si = ((S - 1 - y) * S + x) * 4, di = (y * S + x) * 4; if (buf[si + 3] === 0) continue; al[y * S + x] = 1;
+        const br = v => v * 1.08 + 34 * (v / 255) * (v / 255); let r = br(buf[si]), g = br(buf[si + 1]), b = br(buf[si + 2]);
+        if (pal) { let bi = 0, bd = 1e9; for (let j = 0; j < pal.length; j++) { const q = pal[j], dr = r - q[0], dg = g - q[1], db2 = b - q[2], dd = dr * dr * 0.3 + dg * dg * 0.59 + db2 * db2 * 0.11; if (dd < bd) { bd = dd; bi = j; } } [r, g, b] = pal[bi]; }
+        a[di] = r; a[di + 1] = g; a[di + 2] = b; a[di + 3] = 255; }
+      for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) { const q = y * S + x; if (al[q]) continue;
+        if ((x > 0 && al[q - 1]) || (x < S - 1 && al[q + 1]) || (y > 0 && al[q - S]) || (y < S - 1 && al[q + S])) { a[q * 4] = 26; a[q * 4 + 1] = 18; a[q * 4 + 2] = 16; a[q * 4 + 3] = 255; } }
+      ox.putImageData(id, fi * S, 0); });
+    if (Array.isArray(mine)) return out;
+    if (WF.length) return { url: out.toDataURL("image/png") };
+    if (mine) return { url: out.toDataURL("image/png"), hit: hit && hit.map(v => Math.round(v * 10) / 10) };
+    return out.toDataURL("image/png"); }
+  window.STRIP24 = { bakeStrip, look, frames, progFor };
+})();
+
 // ================= 25：昼のダンジョン画面を3Dにする（部屋を3D洞窟の写真の形で縦に並べる） =================
 // 部屋を押す＝選ぶ、もう一度＝のぞく、は今まで通り（部屋の札に .chall と data-room を付けているので、今の操作がそのまま効く）
 let day3dOn25 = (() => { try { return localStorage.getItem("day3d25") !== "0"; } catch (e) { return true; } })();
@@ -11338,10 +11439,42 @@ function droom25(i){ const kind = roomKind25(i), on = {}; ROOMSET25[kind].forEac
   const acts = []; cast.forEach((c, k) => { const o = order[k]; if (!o) return; const [fx0, fz0] = c.mode === "mine" || c.mode === "sleep" || c.look || c.boss ? [c.o[0], c.o[2]] : fit(c.o[0], c.o[2], HAI25.footR({ sp: o.m.sp, evo: o.m.evos || 0 })); /* 掘る子・寝る子は、岩や寝床のそばから動かさない */ const fixed = c.mode === "mine" || c.mode === "sleep" || c.look || c.boss, [fx1, fz1] = fixed ? [fx0, fz0] : outOf(fx0, fz0, rOf(o.m)); c.o[0] = fx1; c.o[2] = fz1; acts.push({ rr: rOf(o.m), boss: !!c.boss, m: o.m, sp: o.m.sp, evo: o.m.evos || 0, x: c.o[0], z: c.o[2], hx: c.o[0], hz: c.o[2], tx: c.o[0], tz: c.o[2], mode: c.mode, look: c.look, rk: c.rk, face: c.look ? (c.look[0] > c.o[0] ? 1 : -1) : Math.random() < 0.5 ? 1 : -1, next: 0, ph: Math.random() * 3 }); });
   if (S.path[i].kind === "lord") acts.push({ lord: true, back: true, sp: "lord", evo: typeof lordTier === "function" ? lordTier() : 0, x: 0, y: 0.95, z: 6.6, hx: 0, hz: 6.6, tx: 0, tz: 6.6, mode: "idle", face: 1, next: 1e12, ph: 0 });
   return D3.act[i] = { sig, kind, acts, OB }; }
+// ---- 手前に立つ物（岩・柱・たいまつ・壁）のうしろに入った子を隠す ----
+// bg25/<部屋>_o.webp：半分の大きさ、明るさ＝カメラからの距離（255は床で、隠さない）
+const OCCV25 = {"bed":"5a9a85","bed_nest":"8dc9b6","bed_watch":"0b8aa0","entry":"67a677","lord":"35ef8a","lordday":"35ef8a","mine":"9675f0","mine_bed":"9d9f8d","mine_nest":"994c25","mine_watch":"97d2d0","nest":"a52685","nest_watch":"71a7b0","plain":"6b014e","train":"40948d","train_bed":"c5eb3c","train_mine":"bba500","train_nest":"c810be","train_watch":"c8101e","watch":"431754"};
+function docc25(bk){ const k = "occ:" + bk; if (D3.img[k]) return D3.img[k]; const o = D3.img[k] = { ok: 0 }; if (!OCCV25[bk]) return o;
+  const im = new Image(); im.onload = () => { try { const c = document.createElement("canvas"); c.width = im.width; c.height = im.height; const g = c.getContext("2d"); g.drawImage(im, 0, 0);
+    const d = g.getImageData(0, 0, im.width, im.height).data, q = new Uint8Array(im.width * im.height); for (let j = 0; j < q.length; j++) q[j] = d[j * 4];
+    o.q = q; o.w = im.width; o.h = im.height; o.mc = new Map(); o.ok = 1; } catch (e) {} };
+  im.src = `bg25/${bk}_o.webp?v=${OCCV25[bk]}`; return o; }
+// 描いたばかりの子のうち、手前の物より奥にある所を消す（下の背景の絵が見える）
+function dhide25(g, O, W, H, x0, y0, x1, y1, P){ if (!O || !O.ok || window.__NOOCC) return;
+  const e = CAMP24.e, tf = Math.hypot(P[0] - e[0], P[1] - e[1], P[2] - e[2]) - 0.9, qf = Math.floor(tf / 110 * 254);
+  const a0 = Math.max(0, Math.floor(x0 / W * O.w)), a1 = Math.min(O.w, Math.ceil(x1 / W * O.w)), b0 = Math.max(0, Math.floor(y0 / H * O.h)), b1 = Math.min(O.h, Math.ceil(y1 / H * O.h));
+  if (a1 <= a0 || b1 <= b0) return;
+  const key = a0 + "," + b0 + "," + a1 + "," + b1 + "," + qf; let M = O.mc.get(key);
+  if (M === undefined) { const w = a1 - a0, h = b1 - b0; let id = null;
+    for (let y = b0; y < b1; y++) for (let x = a0; x < a1; x++) if (O.q[y * O.w + x] < qf) { if (!id) id = new ImageData(w, h); id.data[((y - b0) * w + (x - a0)) * 4 + 3] = 255; }
+    M = null; if (id) { M = document.createElement("canvas"); M.width = w; M.height = h; M.getContext("2d").putImageData(id, 0, 0); }
+    if (O.mc.size > 500) O.mc.clear(); O.mc.set(key, M); }
+  if (!M) return; g.save(); g.globalCompositeOperation = "destination-out"; g.imageSmoothingEnabled = false; g.drawImage(M, a0 / O.w * W, b0 / O.h * H, (a1 - a0) / O.w * W, (b1 - b0) / O.h * H); g.restore(); }
+// ---- 歩く子を、その場で3Dで描く（360度ビューアと同じゴブリン）。向き15度きざみ×足の運び6コマ、描いた絵は取っておく ----
+const DRT25 = { gl: null, fit: {}, fr: new Map(), q: [], busy: false, n: 0, bad: false, ms: [] };
+function drtGL25(){ if (DRT25.gl || DRT25.bad) return DRT25.gl; try { const c = document.createElement("canvas"); c.width = c.height = 128; const gl = c.getContext("webgl", { preserveDrawingBuffer: true, antialias: false }); if (!gl || !window.STRIP24) throw 0; DRT25.gl = gl; } catch (e) { DRT25.bad = true; } return DRT25.gl; }
+function drt25(sp, evo, ai, ph, want){ const k = sp + ":" + evo + ":" + ai + ":" + ph, F = DRT25.fr.get(k); if (F) { F.u = DRT25.n; return F; }
+  if (want && !DRT25.q.includes(k)) { DRT25.q.unshift(k); if (DRT25.q.length > 48) DRT25.q.length = 48; setTimeout(drtRun25, 0); } return null; }
+async function drtRun25(){ if (DRT25.busy || !DRT25.q.length || !drtGL25()) return; DRT25.busy = true; const t0 = performance.now();
+  try { while (DRT25.q.length && performance.now() - t0 < 10) { const k = DRT25.q.shift(); if (DRT25.fr.has(k)) continue; const [sp, evo, ai, ph] = k.split(":"), fk = sp + ":" + evo, t1 = performance.now();
+      if (!DRT25.fit[fk]) DRT25.fit[fk] = await STRIP24.bakeStrip(DRT25.gl, sp, +evo, 128, null, true);
+      const cv = await STRIP24.bakeStrip(DRT25.gl, sp, +evo, 128, null, false, [{ mode: "walk", t: (+ph) / 6 * 0.8, view: -(+ai) * Math.PI / 12, rc: 0 }], DRT25.fit[fk]);
+      cv.id = "rt:" + k; DRT25.fr.set(k, { im: cv, u: DRT25.n }); DRT25.ms.push(Math.round(performance.now() - t1)); if (DRT25.ms.length > 50) DRT25.ms.shift();
+      if (DRT25.fr.size > 700) [...DRT25.fr.entries()].sort((a, b) => a[1].u - b[1].u).slice(0, 200).forEach(([kk]) => DRT25.fr.delete(kk)); } }
+  catch (e) { console.warn("drt", e); DRT25.bad = true; }
+  DRT25.busy = false; if (DRT25.q.length) setTimeout(drtRun25, 30); }
 // ---- 1部屋を描く ----
 const DAYK25 = 1.8;   // 昼の画面だけ、キャラを大きめに描く（遠くて見えにくいので）
 const DFR25 = { idle: [0, 4, 1.6], walk: [15, 2, 0.5], hop: [11, 4, 0.6], atk: [5, 4, 0.55], sleep: [4, 1, 1] };
-function dcard25(card, i, now, dt){
+function dcard25(card, i, now, dt){ DRT25.n++;
   const cv = card.querySelector("canvas"), r = cv.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1), W = Math.round(r.width * dpr), H = Math.round(r.height * dpr);
   if (!W) return; if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
   const g = cv.getContext("2d"); g.imageSmoothingEnabled = false;
@@ -11357,7 +11490,7 @@ function dcard25(card, i, now, dt){
     const sig = W + "x" + H + "|" + R.acts.map(a => (a.x * 20 | 0) + "," + (a.z * 20 | 0) + "," + fq(a) + (a.walking ? "w" + Math.floor((a.dist || 0) * 6) : "") + (a.task || "") + a.mode + (a.face > 0 ? "r" : "l")).join(";") + "|" + ((D3.pops[i] || []).length ? now : 0) + "|" + (bg.px ? 1 : 0);
     if (card._sig === sig) return; card._sig = sig; }
   g.clearRect(0, 0, W, H);
-  dpile25(g, R, W, H);
+  dpile25(g, R, W, H); const OC = docc25(bk);
   R.acts.slice().sort((a, b) => a.z - b.z).forEach(a => { const o = a.back ? dback25(a.evo) : dspr25(a.sp, a.evo); if (!o || !o.ok) return;
     const p = dproj25(a.x, a.y || 0, a.z), fx = p[0] * W, fy = p[1] * H, k = p[2] * W / o.ppu * DAYK25 * (a.lord ? 0.55 : 1), s = 128 * k;
     // 掘る子：横向きの「掘る」コマを使い、つるはしの先が岩のふちにちょうど当たる位置に立たせる
@@ -11367,20 +11500,27 @@ function dcard25(card, i, now, dt){
       fx2 = T[0] * W - (M.hx - 64) * k * mdir; a.hitP = [fx2 + (M.hx - 64) * k * mdir, fy + (M.hy - o.foot - 1) * k]; } }
     const st = a.mode === "sleep" ? "sleep" : a.walking ? (o.bip ? "walk" : "hop") : (a.mode === "mine" || a.mode === "train" || a.mode === "slash" || a.mode === "lift") && o.bip ? "atk" : "idle";
     // 歩いている子：進む向き（手前・奥・横）の絵を使い、足の運びを進んだ距離に合わせる
-    let WK = null, wflip = null; if (!MI && a.walking && st === "walk") { const M2 = dwalk25(a.sp, a.evo); if (M2 && M2.ok) { WK = M2;
-      const ax = Math.abs(a.vx || 0), az = Math.abs(a.vz || 0); if (!a.wd || (a.wd === "side" ? az > ax * 1.3 : ax > az * 1.3)) a.wd = ax > az ? "side" : ((a.vz || 0) > 0 ? "front" : "back"); if (a.wd !== "side") a.wd = (a.vz || 0) > 0 ? "front" : "back";
-      wflip = a.wd === "side" ? (a.vx || 0) < 0 : false; } }
     const cyc = 1.04 * sclOf24({ sp: a.sp, evo: a.evo }) * DAYK25;   // 1歩きの距離（0.8秒で進む分）
-    const F = MI ? [0, 4, 1.1] : DFR25[st], fr = WK ? ({ front: 0, back: 6, side: 12 }[a.wd]) + Math.floor((a.dist || 0) / Math.max(0.4, cyc) * 6) % 6 : F[0] + Math.floor(((now + a.ph) / F[2] * F[1]) % F[1]); const SRC = MI ? MI.im : WK ? WK.im : o.im;
+    let WK = null, wflip = null, RT = null; const wph = Math.floor((a.dist || 0) / Math.max(0.4, cyc) * 6) % 6;
+    if (!MI && a.walking && !a.lord) { const ph = Math.atan2(a.vx || 0, a.vz || 0), q = Math.abs(ph) / (Math.PI / 12), sg = ph < 0;
+      /* 向き：0＝手前へ、6＝横、12＝奥へ（左向きは左右反転）。少しの揺れでは変えない */
+      if (typeof a.ai !== "number" || Math.abs(q - a.ai) > 0.7) a.ai = Math.round(q);
+      if (a.wsg === undefined || (sg !== a.wsg && a.ai > 0 && a.ai < 12)) a.wsg = sg; const flip = a.ai > 0 && a.ai < 12 && a.wsg;
+      if (!DRT25.bad) { RT = drt25(a.sp, a.evo, a.ai, wph, true);
+        for (let d = 1; !RT && d <= 3; d++) RT = drt25(a.sp, a.evo, a.ai - d, wph) || drt25(a.sp, a.evo, a.ai + d, wph);
+        if (RT) wflip = flip; }
+      else if (st === "walk") { const M2 = dwalk25(a.sp, a.evo); if (M2 && M2.ok) { WK = M2; a.wd = Math.min(4, Math.round(a.ai / 3)); wflip = a.wd > 0 && a.wd < 4 && a.wsg; if (WK.im.width < (a.wd + 1) * 6 * 128) WK = null; } } }
+    const F = MI ? [0, 4, 1.1] : DFR25[st], fr = RT ? 0 : WK ? a.wd * 6 + wph : F[0] + Math.floor(((now + a.ph) / F[2] * F[1]) % F[1]); const SRC = MI ? MI.im : RT ? RT.im : WK ? WK.im : o.im;
     const lum = dlum25(bg, p[0], p[1] - 0.04), br = Math.max(a.lord ? 0.8 : 0.42, Math.min(1.05, 0.3 + lum * 2.2));
     g.save(); { const sx = MI ? fx2 : fx, rx = Math.max(4, ((a.rr || 0.4) / 0.85) * p[2] * W * 1.1 * DAYK25), ry = rx * 0.38, sg = g.createRadialGradient(sx, fy, 0, sx, fy, rx); sg.addColorStop(0, "rgba(0,0,0,0.55)"); sg.addColorStop(0.6, "rgba(0,0,0,0.3)"); sg.addColorStop(1, "rgba(0,0,0,0)"); g.fillStyle = sg; g.beginPath(); g.ellipse(sx, fy + ry * 0.15, rx, ry, 0, 0, 7); g.fill(); }
     const lc = dcol25(bg, p[0], p[1] - 0.02), lm = Math.max(lc[0], lc[1], lc[2], 1), lt = lc.map(v => Math.round(v / lm * 6) / 6);   // 光の色（明るさをのぞいた色み）
-    const bq = Math.round(br * 20) / 20, tk = SRC.src + "|" + fr + "|" + bq + "|" + lt.join(","), TC = D3.tc || (D3.tc = new Map()); let T = TC.get(tk);
+    const bq = Math.round(br * 20) / 20, tk = (SRC.src || SRC.id) + "|" + fr + "|" + bq + "|" + lt.join(","), TC = D3.tc || (D3.tc = new Map()); let T = TC.get(tk);
     if (!T) { if (TC.size > 600) TC.clear(); T = document.createElement("canvas"); T.width = T.height = 128; const tg = T.getContext("2d"); tg.drawImage(SRC, fr * 128, 0, 128, 128, 0, 0, 128, 128);
       tg.globalCompositeOperation = "multiply"; tg.fillStyle = `rgba(${Math.round(lt[0] * 255)},${Math.round(lt[1] * 255)},${Math.round(lt[2] * 255)},0.45)`; tg.fillRect(0, 0, 128, 128); tg.globalCompositeOperation = "destination-in"; tg.drawImage(SRC, fr * 128, 0, 128, 128, 0, 0, 128, 128);
       if (bq < 0.99) { tg.globalCompositeOperation = "source-atop"; tg.fillStyle = `rgba(16,9,5,${(1 - bq).toFixed(2)})`; tg.fillRect(0, 0, 128, 128); }
       else if (bq > 1.01) { tg.globalCompositeOperation = "source-atop"; tg.fillStyle = `rgba(255,190,110,${((bq - 1) * 2).toFixed(2)})`; tg.fillRect(0, 0, 128, 128); } TC.set(tk, T); }
-    g.translate(MI ? fx2 : fx, fy); if (MI ? mdir < 0 : WK ? wflip : a.face < 0) g.scale(-1, 1); g.drawImage(T, 0, 0, 128, 128, -s / 2, -(o.foot + 1) * k, s, s); g.restore();
+    g.translate(MI ? fx2 : fx, fy); if (MI ? mdir < 0 : (WK || RT) ? wflip : a.face < 0) g.scale(-1, 1); g.drawImage(T, 0, 0, 128, 128, -s / 2, -(o.foot + 1) * k, s, s); g.restore();
+    if (!MI) { const sx = fx; dhide25(g, OC, W, H, sx - s / 2 - 2, fy - (o.foot + 1) * k - 2, sx + s / 2 + 2, fy + s * 0.12, [a.x, a.y || 0, a.z]); }
     // つるはしが当たったコマ：岩から石のかけらと結晶の光が飛ぶ
     if (MI && fr === 2 && a.hitP) { const ph = (((now + a.ph) / 1.1 * 4) % 1), [hx, hy] = a.hitP, u = Math.max(1, k * 1.6); g.save();
       g.globalAlpha = 1 - ph * 0.8; g.fillStyle = "rgba(255,245,200,0.9)"; g.beginPath(); g.arc(hx, hy, (2 + 5 * (1 - ph)) * u, 0, 7); g.fill();
@@ -11550,7 +11690,7 @@ tutEls = (prev => function (st){ const a = prev(st); if (a.length || !st || !st.
     [0, 0.12, 0.22, 0.08].forEach((dy, i) => F.push({ mode: "idle", t: 2 + i * 0.15, dy }));
     if (bip) [0.2, 0.6].forEach(t => F.push({ mode: "walk", t })); else [0.05, 0].forEach((dy, i) => F.push({ mode: "idle", t: 2.5 + i * 0.4, dy }));
     return F; }
-  async function bakeStrip(gl, key, evo, S = 128, fsel, measure, mine){
+  async function bakeStrip(gl, key, evo, S = 128, fsel, measure, mine, fit){
     const L = look(key, evo), kit = kitOf24(L.sp), P = progFor(gl, kit), U = P.U, F = frames(kit, key);
     const im = await spriteImg24(key, evo), pal = im ? sprPal24(im) : null;
     const pitch = (window.__SPITCH ?? 0.62), d = 20, msc = Math.min(2.2, 1 + (L.scl - 1) * 0.6);
@@ -11568,22 +11708,22 @@ tutEls = (prev => function (st){ const a = prev(st); if (a.length || !st || !st.
     let lastR = null, lastC = null;
     const draw = fr => {
       const R = rigSp24(L.sp, fr.mode, fr.t), o = [0, (fr.dy || 0), (fr.dz || 0)]; lastR = R;
-      const C = fr.side ? sideCam() : fr.view === "back" ? rotCam(Math.PI) : fr.view === "side" ? rotCam(-Math.PI / 2) : (window.__STRIPBACK ? rotCam(Math.PI) : { e, fw, rt, up }); lastC = C;
-      const ang = fr.side ? -SIDE : (fr.view === "back" || window.__STRIPBACK) ? Math.PI : fr.view === "side" ? -Math.PI / 2 : 0; gl.uniform3f(U("LXZ"), Math.cos(ang), 0, Math.sin(ang));
+      const VA = typeof fr.view === "number" ? { [fr.view]: fr.view } : {}, C = fr.side ? sideCam() : VA[fr.view] !== undefined ? rotCam(VA[fr.view]) : fr.view === "back" ? rotCam(Math.PI) : fr.view === "side" ? rotCam(-Math.PI / 2) : (window.__STRIPBACK ? rotCam(Math.PI) : { e, fw, rt, up }); lastC = C;
+      const ang = fr.side ? -SIDE : VA[fr.view] !== undefined ? VA[fr.view] : (fr.view === "back" || window.__STRIPBACK) ? Math.PI : fr.view === "side" ? -Math.PI / 2 : 0; gl.uniform3f(U("LXZ"), Math.cos(ang), 0, Math.sin(ang));
       gl.uniform2f(U("res"), S, S); gl.uniform3fv(U("cam"), C.e); gl.uniformMatrix3fv(U("camM"), false, new Float32Array([...C.rt, ...C.up, ...C.fw])); gl.uniform1f(U("fl"), fl);
       gl.uniform1f(U("PASS"), 5); gl.uniform1f(U("STUDIO"), 1); gl.uniform2f(U("vres"), S, S); gl.uniform2f(U("crop"), 0, 0); gl.uniform1f(U("zoom"), 1); gl.uniform1f(U("tA"), d); gl.uniform1f(U("tR"), 6);
       gl.uniform3fv(U("J"), new Float32Array(R.J.flat())); gl.uniformMatrix3fv(U("HR"), false, new Float32Array(R.HR)); gl.uniformMatrix3fv(U("TR"), false, new Float32Array(R.TR)); gl.uniform1f(U("tool"), R.tool);
       const db = new Float32Array(24); (R.deb || []).forEach((q, i) => db.set(q, i * 4)); gl.uniform4fv(U("deb"), db);
-      gl.uniform3fv(U("OC"), new Float32Array(o)); gl.uniform1fv(U("RC"), new Float32Array([0.45])); gl.uniform1fv(U("LIE"), new Float32Array([0]));
+      gl.uniform3fv(U("OC"), new Float32Array(o)); gl.uniform1fv(U("RC"), new Float32Array([fr.rc ?? 0.45])); gl.uniform1fv(U("LIE"), new Float32Array([0]));
       gl.uniform3fv(U("SKIN"), new Float32Array(L.col[0])); gl.uniform3fv(U("CLOTH"), new Float32Array(L.col[1])); gl.uniform1fv(U("FI"), new Float32Array([L.face ?? (FACEIDX24[kit] ?? -1)]));
       gl.uniform1fv(U("SCL"), new Float32Array([L.scl])); gl.uniform4fv(U("VAR"), new Float32Array(L.vr[0])); gl.uniform3fv(U("ACC"), new Float32Array(L.vr[1]));
       gl.uniform1f(U("tm"), fr.t); gl.uniform1f(U("CS"), 1); gl.uniform1f(U("idm"), 0); gl.uniform1f(U("hasFace"), 2);
-      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, window.__FACET || (window.__FACET = faceAtlas24(gl))); gl.uniform1i(U("face"), 0);
+      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, gl.__facet || (gl.__facet = faceAtlas24(gl))); gl.uniform1i(U("face"), 0);
       gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); gl.drawArrays(gl.TRIANGLES, 0, 3);
       gl.readPixels(0, 0, S, S, gl.RGBA, gl.UNSIGNED_BYTE, buf);
     };
     // はみ出す大きい子は縮める（待機・攻撃のコマで測る）
-    for (let pass = 0; pass < 6; pass++) { let top = S, bot = 0, lft = S, rgt = 0, nb = 0;
+    if (fit) { ppu = fit.ppu; lift = fit.lift; cam(); } else for (let pass = 0; pass < 6; pass++) { let top = S, bot = 0, lft = S, rgt = 0, nb = 0;
       [F[0], F[6], F[11]].forEach(fr => { draw(fr); for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) if (buf[((S - 1 - y) * S + x) * 4 + 3]) { top = Math.min(top, y); bot = Math.max(bot, y); lft = Math.min(lft, x); rgt = Math.max(rgt, x); if (y === S - 1) nb++; } });
       if (bot <= top) break; const k = Math.min(1, (bot - 3) / Math.max(1, bot - top), (S / 2 - 3) / Math.max(1, S / 2 - lft, rgt - S / 2));
       const edge = top <= 0 || lft <= 0 || rgt >= S - 1, low = nb > 12 && lift < 30; if (k >= 0.999 && !edge && !low) break; if (low) lift += 6; if (k < 0.999 || edge) ppu *= Math.min(k * 0.98, edge ? 0.85 : 1); cam(); }
@@ -11591,9 +11731,9 @@ tutEls = (prev => function (st){ const a = prev(st); if (a.length || !st || !st.
     const MF = [0.2, 0.42, 0.6, 0.76].map(c => ({ mode: "mine", t: c * 1.35, side: 1 })); let hit = null;
     const proj = (P, C) => { const v = V3.s(P, C.e), z = V3.d(v, C.fw); return [S / 2 + S * fl * V3.d(v, C.rt) / z, S / 2 - S * fl * V3.d(v, C.up) / z]; };
     // 歩く18コマ：正面6・背中6・横6（足の運び0.8秒を6つに分ける）
-    const WF = []; if (mine === "walk") ["front", "back", "side"].forEach(v => { for (let k = 0; k < 6; k++) WF.push({ mode: "walk", t: k / 6 * 0.8, view: v }); });
-    const LST = mine === "walk" ? WF : mine ? MF : (fsel ? fsel.map(i => F[i]) : F);
-    if (mine) ox.canvas.width = S * (mine === "walk" ? WF.length : MF.length);
+    const WF = Array.isArray(mine) ? mine : []; if (mine === "walk" || mine === "walk2") (mine === "walk2" ? (window.__WANG || [-Math.PI / 4, -Math.PI * 3 / 4]) : ["front", "back", "side"]).forEach(v => { for (let k = 0; k < 6; k++) WF.push({ mode: "walk", t: k / 6 * 0.8, view: v, rc: mine === "walk2" ? 0 : undefined }); });
+    const LST = WF.length ? WF : mine ? MF : (fsel ? fsel.map(i => F[i]) : F);
+    if (mine) ox.canvas.width = S * (WF.length ? WF.length : MF.length);
     LST.forEach((fr, fi) => { draw(fr); if (mine === true && fi === 2 && lastR.strike) hit = proj(V3.m(lastR.strike, L.scl), lastC);
       const id = ox.createImageData(S, S), a = id.data, al = new Uint8Array(S * S);
       for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) { const si = ((S - 1 - y) * S + x) * 4, di = (y * S + x) * 4; if (buf[si + 3] === 0) continue; al[y * S + x] = 1;
@@ -11603,7 +11743,8 @@ tutEls = (prev => function (st){ const a = prev(st); if (a.length || !st || !st.
       for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) { const q = y * S + x; if (al[q]) continue;
         if ((x > 0 && al[q - 1]) || (x < S - 1 && al[q + 1]) || (y > 0 && al[q - S]) || (y < S - 1 && al[q + S])) { a[q * 4] = 26; a[q * 4 + 1] = 18; a[q * 4 + 2] = 16; a[q * 4 + 3] = 255; } }
       ox.putImageData(id, fi * S, 0); });
-    if (mine === "walk") return { url: out.toDataURL("image/png") };
+    if (Array.isArray(mine)) return out;
+    if (WF.length) return { url: out.toDataURL("image/png") };
     if (mine) return { url: out.toDataURL("image/png"), hit: hit && hit.map(v => Math.round(v * 10) / 10) };
     return out.toDataURL("image/png"); }
   window.STRIP24 = { bakeStrip, look, frames, progFor };
