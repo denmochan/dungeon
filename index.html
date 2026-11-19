@@ -7238,7 +7238,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.226（11/19 09:39）";
+const VER20 = "No.227（11/19 11:37）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -10916,7 +10916,7 @@ const HAI25 = (() => {
         c.mode = e.act === "train" && bip ? (R() < 0.5 ? "slash" : "lift") : e.act === "walk" ? (bip ? "walk" : "idle") : e.act === "sleep" ? "sleep" : "idle"; }
       c.o = [pos[0], 0, pos[1]]; cast.push(c); });
     return cast; }
-  return { MODS, room, place, footR };
+  return { MODS, room, place, footR, foots };
 })();
 
 // ================= のぞく画面を「3Dの洞窟」で見る（お試し・最初は切ってある） =================
@@ -11258,11 +11258,15 @@ function droom25(i){ const kind = roomKind25(i), on = {}; ROOMSET25[kind].forEac
   const job = m => { if (restLeft7(S, m)) return "sleep"; let j = null; try { j = peekMon24(m, i).job; } catch (e) {} return j === "mine" ? "mine" : j === "train" ? "train" : j === "bed" ? "sleep" : "idle"; };
   const list = all.map(m => ({ sp: m.sp, evo: m.evos || 0, n: 1, act: job(m) }));
   const cast = HAI25.place(on, list, 11 + i * 17);
+  // 岩・家具・門のある場所（ここには立たない・ここを通らない）
+  const OB = HAI25.foots(on).filter(o => o[2] >= 0.5), rOf = m => HAI25.footR({ sp: m.sp, evo: m.evos || 0 }) * 0.85;
+  const inOb = (x, z, r) => OB.some(([ox, oz, or]) => Math.hypot(x - ox, z - oz) < or + r);
+  const outOf = (x, z, r) => { for (let n = 0; n < 12; n++) { const o = OB.find(([ox, oz, or]) => Math.hypot(x - ox, z - oz) < or + r); if (!o) break; const dx = x - o[0], dz = z - o[1], L = Math.hypot(dx, dz) || 1, need = o[2] + r + 0.05; x = o[0] + dx / L * need; z = o[1] + dz / L * need; } return [x, z]; };
   const order = all.map((m, k) => ({ m, a: list[k] })).sort((a, b) => HAI25.footR({ sp: b.m.sp, evo: b.m.evos || 0 }) - HAI25.footR({ sp: a.m.sp, evo: a.m.evos || 0 }));
   const fit = (x, z, r) => { for (let n = 0; n < 30; n++) { const p = dproj25(x, 0, z), pw = r * p[2] * DAYK25; if (p[0] - pw > 0.1 && p[0] + pw < 0.9 && p[1] > 0.3 && p[1] < 0.84) break; x *= 0.92; z = z * 0.9 + 0.3; } return [x, z]; };
-  const acts = []; cast.forEach((c, k) => { const o = order[k]; if (!o) return; const [fx0, fz0] = c.mode === "mine" || c.mode === "sleep" || c.look || c.boss ? [c.o[0], c.o[2]] : fit(c.o[0], c.o[2], HAI25.footR({ sp: o.m.sp, evo: o.m.evos || 0 })); /* 掘る子・寝る子は、岩や寝床のそばから動かさない */ c.o[0] = fx0; c.o[2] = fz0; acts.push({ m: o.m, sp: o.m.sp, evo: o.m.evos || 0, x: c.o[0], z: c.o[2], hx: c.o[0], hz: c.o[2], tx: c.o[0], tz: c.o[2], mode: c.mode, look: c.look, rk: c.rk, face: c.look ? (c.look[0] > c.o[0] ? 1 : -1) : Math.random() < 0.5 ? 1 : -1, next: 0, ph: Math.random() * 3 }); });
+  const acts = []; cast.forEach((c, k) => { const o = order[k]; if (!o) return; const [fx0, fz0] = c.mode === "mine" || c.mode === "sleep" || c.look || c.boss ? [c.o[0], c.o[2]] : fit(c.o[0], c.o[2], HAI25.footR({ sp: o.m.sp, evo: o.m.evos || 0 })); /* 掘る子・寝る子は、岩や寝床のそばから動かさない */ const fixed = c.mode === "mine" || c.mode === "sleep" || c.look || c.boss, [fx1, fz1] = fixed ? [fx0, fz0] : outOf(fx0, fz0, rOf(o.m)); c.o[0] = fx1; c.o[2] = fz1; acts.push({ rr: rOf(o.m), m: o.m, sp: o.m.sp, evo: o.m.evos || 0, x: c.o[0], z: c.o[2], hx: c.o[0], hz: c.o[2], tx: c.o[0], tz: c.o[2], mode: c.mode, look: c.look, rk: c.rk, face: c.look ? (c.look[0] > c.o[0] ? 1 : -1) : Math.random() < 0.5 ? 1 : -1, next: 0, ph: Math.random() * 3 }); });
   if (S.path[i].kind === "lord") acts.push({ lord: true, back: true, sp: "lord", evo: typeof lordTier === "function" ? lordTier() : 0, x: 0, y: 0.95, z: 6.6, hx: 0, hz: 6.6, tx: 0, tz: 6.6, mode: "idle", face: 1, next: 1e12, ph: 0 });
-  return D3.act[i] = { sig, kind, acts }; }
+  return D3.act[i] = { sig, kind, acts, OB }; }
 // ---- 1部屋を描く ----
 const DAYK25 = 1.8;   // 昼の画面だけ、キャラを大きめに描く（遠くて見えにくいので）
 const DFR25 = { idle: [0, 4, 1.6], walk: [15, 2, 0.5], hop: [11, 4, 0.6], atk: [5, 4, 0.55], sleep: [4, 1, 1] };
@@ -11273,8 +11277,17 @@ function dcard25(card, i, now, dt){
   const R = droom25(i), bk = R.kind === "lord" ? "lordday" : R.kind, src = `bg25/${bk}_full.webp?v=${BGSHIP25[bk] || 5}`, bg = dimg25(src);
   { const im = card.querySelector(".d3bg"); if (im && im.dataset.src !== src) { im.dataset.src = src; im.src = src; } }
   // 動き：ときどき近くへ歩く（働いている子・寝ている子はその場）
-  R.acts.forEach(a => { if (a.mode === "idle" && !a.lord && now > a.next) { a.next = now + 2.5 + Math.random() * 4; const ang = Math.random() * 6.28, d = Math.random() * 2.2; a.tx = a.hx + Math.cos(ang) * d; a.tz = a.hz + Math.sin(ang) * d * 0.6; }
-    const dx = a.tx - a.x, dz = a.tz - a.z, L = Math.hypot(dx, dz); a.walking = L > 0.08; if (a.walking) { const s = Math.min(L, 1.6 * dt); a.x += dx / L * s; a.z += dz / L * s; if (Math.abs(dx) > 0.05) a.face = dx > 0 ? 1 : -1; } });
+  // 歩く先は、岩・家具の上と、それを横切る道を選ばない（8回ためして、だめならその場にいる）
+  const OB = R.OB || [], hitOb = (x, z, r) => OB.some(([ox, oz, or]) => Math.hypot(x - ox, z - oz) < or + r);
+  const crossOb = (x0, z0, x1, z1, r) => { for (let s = 1; s <= 6; s++) { const q = s / 6; if (hitOb(x0 + (x1 - x0) * q, z0 + (z1 - z0) * q, r)) return true; } return false; };
+  R.acts.forEach(a => { const r = a.rr || 0.4;
+    if (a.mode === "idle" && !a.lord && now > a.next) { a.next = now + 2.5 + Math.random() * 4;
+      for (let n = 0; n < 8; n++) { const ang = Math.random() * 6.28, d = Math.random() * 2.2, tx = a.hx + Math.cos(ang) * d, tz = a.hz + Math.sin(ang) * d * 0.6;
+        if (!hitOb(tx, tz, r) && !crossOb(a.x, a.z, tx, tz, r)) { a.tx = tx; a.tz = tz; break; } } }
+    const dx = a.tx - a.x, dz = a.tz - a.z, L = Math.hypot(dx, dz); a.walking = L > 0.08;
+    if (a.walking) { const s = Math.min(L, 1.6 * dt), nx = a.x + dx / L * s, nz = a.z + dz / L * s;
+      if (!a.lord && hitOb(nx, nz, r) && !hitOb(a.x, a.z, r)) { a.tx = a.x; a.tz = a.z; a.walking = false; a.next = now + 0.3; }
+      else { a.x = nx; a.z = nz; if (Math.abs(dx) > 0.05) a.face = dx > 0 ? 1 : -1; } } });
   // 前のコマと何も変わらなければ描きなおさない（スマホで重くならないように）
   { const fq = a => { const F = a.mode === "mine" ? [0, 4, 1.1] : DFR25[a.mode === "sleep" ? "sleep" : a.walking ? "walk" : "idle"]; return Math.floor(((now + a.ph) / F[2] * F[1]) % F[1]); };
     const sig = W + "x" + H + "|" + R.acts.map(a => (a.x * 20 | 0) + "," + (a.z * 20 | 0) + "," + fq(a) + (a.walking ? "w" : "") + (a.face > 0 ? "r" : "l")).join(";") + "|" + ((D3.pops[i] || []).length ? now : 0) + "|" + (bg.px ? 1 : 0);
