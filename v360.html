@@ -7238,7 +7238,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.241（11/19 21:58）";
+const VER20 = "No.242（11/19 22:01）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -11369,7 +11369,7 @@ function dai25(R, i, now, dt, hitOb, crossOb){ const A = R.acts, P = R.pile || (
   if (!R.exit) { R.exit = [0, 4]; for (let z = 10; z > 2; z -= 0.25) if (inView(0, z, 0.6) && !hitOb(0, z, 0.6)) { R.exit = [0, z]; break; } }   // 下の階への階段（手前のまん中）
   A.forEach(a => { const r = a.rr || 0.4;
     // 仕事：掘る子は何回か叩いたら、鉱石をかかえて岩の横の山へ運ぶ
-    if (a.mode === "mine" && a.rk && !a.task) { if (a.carryAt == null) a.carryAt = now + 5 + Math.random() * 6;
+    if (DPILE25 && a.mode === "mine" && a.rk && !a.task) { if (a.carryAt == null) a.carryAt = now + 5 + Math.random() * 6;
       if (now > a.carryAt) { const sd = a.x < a.rk[0] ? -1 : 1; a.task = "carry"; a.side = sd; a.home2 = [a.x, a.z]; a.mode = "walkT"; go(a, a.rk[0] + sd * (a.rk[2] + 3.4), a.rk[1] + 4.6); a.tEnd = now + 12; } }
     else if (a.task === "carry" && (at(a) || now > a.tEnd)) { P[a.side < 0 ? 0 : 1] = Math.min(9, P[a.side < 0 ? 0 : 1] + 1); a.task = "back"; go(a, a.home2[0], a.home2[1]); a.tEnd = now + 12; }
     else if (a.task === "back" && a.carryAt != null && (at(a) || now > a.tEnd)) { a.x = a.home2[0]; a.z = a.home2[1]; go(a, a.x, a.z); a.task = null; a.mode = "mine"; a.carryAt = now + 8 + Math.random() * 8; }
@@ -11411,7 +11411,7 @@ function dgoal25(R, i, a, now, ok, inView, hitOb){ const A = R.acts, r = a.rr ||
   const guard = a.m && (a.m.job === "guard" || a.m.role === "guard"), d = typeof daysToRaid9 === "function" ? daysToRaid9(S) : null, near = d != null && d <= 1, tired = !!S.hungry;
   const rk = (A.find(b => b.rk) || {}).rk, pileN = R.pile && rk ? R.pile[0] + R.pile[1] : 0;
   // 襲撃が近いほど見回り・入口に集まる。腹ぺこの日は座りこむ。元気な日は鉱石運び・仕事の見物
-  const W = [["patrol", (near ? 0.3 : d === 2 ? 0.35 : 0.1) + (guard ? 0.3 : 0)], ["gather", near && !tired ? 0.75 : 0], ["haul", pileN && !tired ? 0.6 : 0], ["watch", workers.length && !tired ? 0.2 : 0], ["talk", others.length ? 0.18 : 0], ["follow", others.some(b => b.m && (b.m.lv || 1) > lv) ? 0.08 : 0], ["rest", tired ? 0.9 : 0.06], ["wander", 0.12]];
+  const W = [["patrol", (near ? 0.3 : d === 2 ? 0.35 : 0.1) + (guard ? 0.3 : 0)], ["gather", near && !tired ? 0.75 : 0], ["haul", DPILE25 && pileN && !tired ? 0.6 : 0], ["watch", workers.length && !tired ? 0.2 : 0], ["talk", others.length ? 0.3 : 0], ["follow", others.some(b => b.m && (b.m.lv || 1) > lv) ? 0.08 : 0], ["rest", tired ? 0.9 : 0.06], ["wander", 0.12]];
   let x = Math.random() * W.reduce((s, w) => s + w[1], 0), g = "wander"; for (const w of W) { if ((x -= w[1]) <= 0) { g = w[0]; break; } }
   const plan = (P, icon) => { const Q = P.filter(s => inView(s.x, s.z, r) && !hitOb(s.x, s.z, r)); if (!Q.length) return false; a.task = "plan"; a.plan = Q; a.waitEnd = null; a.tx = Q[0].x; a.tz = Q[0].z; a.tEnd = now + Math.max(9, Math.hypot(Q[0].x - a.x, Q[0].z - a.z) / 1.0 + 3); return true; };
   if (g === "patrol") { const sd = Math.random() < 0.5 ? -1 : 1; if (plan([{ x: (Math.random() - 0.5) * 2, z: -6.6, wait: 1.6, look: [0, -9], say: Math.random() < 0.5 ? (d != null && d <= 3 ? (d === 0 ? "今夜来るぞ" : `勇者まであと${d}日`) : "異常なし") : null },
@@ -11429,6 +11429,8 @@ function dgoal25(R, i, a, now, ok, inView, hitOb){ const A = R.acts, r = a.rr ||
     if (plan([{ x: (Math.random() - 0.5) * 7, z: -5.4 + Math.random() * 1.6, wait: 6 + Math.random() * 4, look: [0, -9], say: Math.random() < 0.5 ? L[Math.floor(Math.random() * L.length)] : null }, { x: a.hx, z: a.hz, wait: 0.3 }], "")) return; }
   for (let n = 0; n < 8; n++) { const ang = Math.random() * 6.28, d = Math.random() * 2.2, tx = a.hx + Math.cos(ang) * d, tz = a.hz + Math.sin(ang) * d * 0.6; if (ok(a, tx, tz)) { a.tx = tx; a.tz = tz; break; } } }
 // 運んだ鉱石の山（岩の左右）
+// 鉱石の山・運び役（見た目がいまいちなので止めている）
+const DPILE25 = false;
 // 鉱石ひとかけ：ごつごつした石に、光る結晶が刺さっている（下のまん中が x,y、半幅 u）
 const ORE25 = [["#7fd8ff", "#e2f8ff", "#2b6f9e"], ["#b890ff", "#efe4ff", "#5b3c9e"], ["#6ee8a2", "#e0ffec", "#257f50"], ["#ffcf6a", "#fff3cc", "#a06a14"]];
 function dore25(g, x, y, u, k, now){ const R = n => { const v = Math.sin(k * 12.9898 + n * 78.233) * 43758.5453; return v - Math.floor(v); };
@@ -11447,7 +11449,7 @@ function dore25(g, x, y, u, k, now){ const R = n => { const v = Math.sin(k * 12.
     if (!s2 && now != null) { const tw = Math.max(0, Math.sin(now * 2.3 + k * 1.7)); if (tw > 0.8) { const z = u * 0.5 * (tw - 0.8) * 5; g.fillStyle = "#fffbe8"; g.beginPath(); g.moveTo(ex, ey - z); g.lineTo(ex + z * 0.22, ey); g.lineTo(ex, ey + z); g.lineTo(ex - z * 0.22, ey); g.closePath(); g.fill(); g.beginPath(); g.moveTo(ex - z, ey); g.lineTo(ex, ey + z * 0.22); g.lineTo(ex + z, ey); g.lineTo(ex, ey - z * 0.22); g.closePath(); g.fill(); } } } }
 // 運んだ鉱石の山（岩の左右）：下の段から積む。影→かけら
 function dpileXZ25(rk, s){ const sd = s ? 1 : -1; return [rk[0] + sd * (rk[2] + 3.4) + sd * 1.0, rk[1] + 4.4]; }
-function dpile25(g, R, W, H){ const P = R.pile; if (!P) return; const m = R.acts.find(a => a.rk); if (!m) return; const rk = m.rk, now = performance.now() / 1000;
+function dpile25(g, R, W, H){ const P = R.pile; if (!P || !DPILE25) return; const m = R.acts.find(a => a.rk); if (!m) return; const rk = m.rk, now = performance.now() / 1000;
   [0, 1].forEach(s => { const n = P[s]; if (!n) return; const [px, pz] = dpileXZ25(rk, s), p = dproj25(px, 0, pz), x = p[0] * W, y = p[1] * H, u = Math.max(4, p[2] * W * 0.9);
     const rows = [4, 3, 2], spots = [], R2 = n => { const v = Math.sin(n * 91.7 + s * 13.1) * 9341.3; return v - Math.floor(v); }; let left = n; rows.forEach((c, r) => { const m2 = Math.min(c, left); left -= m2; for (let q = 0; q < m2; q++) spots.push([(q - (m2 - 1) / 2) * u * 1.2 + (R2(q + r * 5) - 0.5) * u * 0.3, -r * u * 0.75 + (R2(q * 3 + r) - 0.5) * u * 0.2]); });
     g.fillStyle = "rgba(0,0,0,0.28)"; g.beginPath(); g.ellipse(x, y + u * 0.05, u * (1.0 + Math.min(4, n) * 0.55), u * 0.45, 0, 0, 7); g.fill();
