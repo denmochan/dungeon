@@ -7238,7 +7238,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.229（11/19 12:01）";
+const VER20 = "No.230（11/19 13:03）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -11237,6 +11237,10 @@ const dimg25 = src => D3.img[src] || (D3.img[src] = (() => { const im = new Imag
 function dlum25(im, u, v){ if (!im.px) return 0.5; let s = 0, n = 0; const W = im.width, H = im.height;
   for (let dy = -4; dy <= 4; dy += 2) for (let dx = -4; dx <= 4; dx += 2) { const x = Math.max(0, Math.min(W - 1, Math.round(u * W) + dx)), y = Math.max(0, Math.min(H - 1, Math.round(v * H) + dy)), i = (y * W + x) * 4; s += im.px[i] * 0.3 + im.px[i + 1] * 0.59 + im.px[i + 2] * 0.11; n++; }
   return s / n / 255; }
+// 足もとの光の色（たいまつのオレンジ・結晶の青など）を拾う
+function dcol25(im, u, v){ if (!im.px) return [200, 160, 120]; let r = 0, g = 0, b = 0, n = 0; const W = im.width, H = im.height;
+  for (let dy = -10; dy <= 10; dy += 5) for (let dx = -10; dx <= 10; dx += 5) { const x = Math.max(0, Math.min(W - 1, Math.round(u * W) + dx)), y = Math.max(0, Math.min(H - 1, Math.round(v * H) + dy)), i = (y * W + x) * 4; r += im.px[i]; g += im.px[i + 1]; b += im.px[i + 2]; n++; }
+  return [r / n, g / n, b / n]; }
 const dbip25 = sp => ["goblin", "skeleton", "imp", "kobold", "orc", "golem", "human", "demon", "gobx", "lich", "noble"].includes(kitOf24(sp));
 function dspr25(sp, evo){ const k = sp + ":" + evo; if (D3.spr[k] !== undefined) return D3.spr[k]; const L = typeof CHR3D24 !== "undefined" && CHR3D24[sp]; if (!L) return D3.spr[k] = null;
   const im = new Image(); const o = { im, ok: false, ppu: (PPU25[k] || PPU25[sp + ":0"] || [36])[0], bip: dbip25(sp), foot: 122 };
@@ -11265,11 +11269,11 @@ function dai25(R, i, now, dt, hitOb, crossOb){ const A = R.acts, P = R.pile || (
     else if (a.task === "rest" && a.mode === "restS" && now > a.restEnd) { a.mode = "walkT"; a.task = "back2"; go(a, a.home2[0], a.home2[1]); a.tEnd = now + 8; }
     else if (a.task === "back2" && (at(a) || now > a.tEnd)) { a.x = a.home2[0]; a.z = a.home2[1]; go(a, a.x, a.z); a.task = null; a.mode = a.m0; a.face = a.look[0] > a.x ? 1 : -1; a.restAt = now + 12 + Math.random() * 10; }
     // 仲間：ひまな子は、近くの子のところへ話しに行く／強い子についていく／ふらっと歩く
-    else if (free(a) && now > a.next) { a.next = now + 2.5 + Math.random() * 4; const roll = Math.random(), others = A.filter(b => b !== a && free(b) && Math.hypot(b.x - a.x, b.z - a.z) < 9);
-      if (roll < 0.3 && others.length) { const f = others.sort((p, q) => (q.sp === a.sp) - (p.sp === a.sp) || Math.hypot(p.x - a.x, p.z - a.z) - Math.hypot(q.x - a.x, q.z - a.z))[0], sd = a.x < f.x ? -1 : 1, tx = f.x + sd * (r + (f.rr || 0.4) + 0.5), tz = f.z;
-        if (ok(a, tx, tz)) { a.task = "visit"; a.peer = f; f.busy = now + 12; go(f, f.x, f.z); go(a, tx, tz); a.tEnd = now + 7; } }
-      else if (roll < 0.45 && others.length) { const L2 = others.filter(b => b.m && a.m && (b.m.lv || 1) > (a.m.lv || 1)).sort((p, q) => (q.m.lv || 1) - (p.m.lv || 1))[0]; if (L2) { a.task = "follow"; a.lead = L2; a.tEnd = now + 7; } }
-      if (!a.task) for (let n = 0; n < 8; n++) { const ang = Math.random() * 6.28, d = Math.random() * 2.2, tx = a.hx + Math.cos(ang) * d, tz = a.hz + Math.sin(ang) * d * 0.6; if (ok(a, tx, tz)) { go(a, tx, tz); break; } } }
+    else if (free(a) && now > a.next) { a.next = now + 2 + Math.random() * 3; dgoal25(R, i, a, now, ok, inView, hitOb); }
+    else if (a.task === "plan") { const st = a.plan[0];
+      if (!st) { a.task = null; a.next = now + 2 + Math.random() * 3; }
+      else if (at(a) || now > a.tEnd) { if (a.waitEnd == null) { a.waitEnd = now + (st.wait || 0); go(a, a.x, a.z); if (st.look) a.face = st.look[0] > a.x ? 1 : -1; if (st.say) dsay25(i, a, st.say, st.talk !== false); if (st.sit) a.mode = "restS"; }
+        else if (now > a.waitEnd) { a.waitEnd = null; if (a.mode === "restS") a.mode = "idle"; a.plan.shift(); const nx = a.plan[0]; if (nx) { go(a, nx.x, nx.z); a.tEnd = now + 9; } } } }
     else if (a.task === "visit" && (at(a) || now > a.tEnd)) { const f = a.peer; if (at(a) && f) { faceTo(a, f); faceTo(f, a); const T = TALK25[Math.floor(Math.random() * TALK25.length)]; dsay25(i, a, T[0], true); a.reply = [now + 1.3, T[1]]; a.task = "chat"; a.tEnd = now + 4.5; f.busy = now + 4.5; } else { a.task = null; if (f) f.busy = 0; } }
     else if (a.task === "chat") { if (a.reply && now > a.reply[0]) { dsay25(i, a.peer, a.reply[1], true); a.reply = null; } if (now > a.tEnd) { a.task = null; a.next = now + 3 + Math.random() * 3; if (a.peer) { a.peer.busy = 0; a.peer.next = now + 2; } a.peer = null; } }
     else if (a.task === "follow") { const L2 = a.lead; if (!L2 || now > a.tEnd) { a.task = null; a.lead = null; }
@@ -11277,9 +11281,27 @@ function dai25(R, i, now, dt, hitOb, crossOb){ const A = R.acts, P = R.pile || (
     // 動かす（岩・家具にぶつかりそうなら止まる）
     const dx = a.tx - a.x, dz = a.tz - a.z, L = Math.hypot(dx, dz); a.walking = L > 0.08 && a.mode !== "mine";
     if (a.walking) { const s = Math.min(L, (a.task === "carry" || a.task === "back" ? 1.3 : 1.6) * dt), nx = a.x + dx / L * s, nz = a.z + dz / L * s;
-      if (!a.lord && !a.task && hitOb(nx, nz, r) && !hitOb(a.x, a.z, r)) { a.tx = a.x; a.tz = a.z; a.walking = false; a.next = now + 0.3; }
+      if (!a.lord && (!a.task || a.task === "plan" || a.task === "follow") && hitOb(nx, nz, r) && !hitOb(a.x, a.z, r)) { a.tx = a.x; a.tz = a.z; a.walking = false; a.next = now + 0.3; }
       else { a.x = nx; a.z = nz; if (Math.abs(dx) > 0.05) a.face = dx > 0 ? 1 : -1; } } });
 }
+// 目的を決める：見回り／仕事の見物／話す／強い子についていく／ひと休み（どれも、行き先と、そこで何をするかがある）
+const CHEER25 = ["がんばれ", "いい音だ", "おれにもやらせろ", "すげえな", "腰が入ってないぞ", "もっと強く！"];
+function dgoal25(R, i, a, now, ok, inView, hitOb){ const A = R.acts, r = a.rr || 0.4, lv = (a.m && a.m.lv) || 1;
+  const others = A.filter(b => b !== a && b.mode === "idle" && !b.lord && !b.boss && !b.task && !(b.busy > now) && Math.hypot(b.x - a.x, b.z - a.z) < 10);
+  const workers = A.filter(b => b !== a && (b.mode === "mine" || b.mode === "slash" || b.mode === "lift") && !b.task);
+  const guard = a.m && (a.m.job === "guard" || a.m.role === "guard"), W = [["patrol", guard ? 0.45 : 0.2], ["watch", workers.length ? 0.22 : 0], ["talk", others.length ? 0.25 : 0], ["follow", others.some(b => b.m && (b.m.lv || 1) > lv) ? 0.1 : 0], ["rest", 0.12], ["wander", 0.1]];
+  let x = Math.random() * W.reduce((s, w) => s + w[1], 0), g = "wander"; for (const w of W) { if ((x -= w[1]) <= 0) { g = w[0]; break; } }
+  const plan = (P, icon) => { const Q = P.filter(s => inView(s.x, s.z, r) && !hitOb(s.x, s.z, r)); if (!Q.length) return false; a.task = "plan"; a.plan = Q; a.waitEnd = null; a.tx = Q[0].x; a.tz = Q[0].z; a.tEnd = now + 9; if (icon) dsay25(i, a, icon, false); return true; };
+  if (g === "patrol") { const sd = Math.random() < 0.5 ? -1 : 1; if (plan([{ x: (Math.random() - 0.5) * 2, z: -6.6, wait: 1.6, look: [0, -9], say: Math.random() < 0.4 ? "異常なし" : null },
+      { x: sd * (8 + Math.random() * 5), z: -3 + Math.random() * 6, wait: 1.4, say: Math.random() < 0.3 ? "こっちもよし" : null }, { x: a.hx, z: a.hz, wait: 0.5 }], "👀")) return; }
+  if (g === "watch") { const w = workers[Math.floor(Math.random() * workers.length)], sd = w.x > 0 ? 1 : -1, tx = w.x + sd * (2.2 + r), tz = w.z + 0.9;
+    if (plan([{ x: tx, z: tz, wait: 4.5, look: [w.x, w.z], say: CHEER25[Math.floor(Math.random() * CHEER25.length)] }, { x: a.hx, z: a.hz, wait: 0.3 }], "👀")) return; }
+  if (g === "talk") { const f = others.sort((p, q) => (q.sp === a.sp) - (p.sp === a.sp) || Math.hypot(p.x - a.x, p.z - a.z) - Math.hypot(q.x - a.x, q.z - a.z))[0], sd = a.x < f.x ? -1 : 1, tx = f.x + sd * (r + (f.rr || 0.4) + 0.5), tz = f.z;
+    if (ok(a, tx, tz)) { a.task = "visit"; a.peer = f; f.busy = now + 12; f.tx = f.x; f.tz = f.z; a.tx = tx; a.tz = tz; a.tEnd = now + 7; dsay25(i, a, "💬", false); return; } }
+  if (g === "follow") { const L2 = others.filter(b => b.m && (b.m.lv || 1) > lv).sort((p, q) => (q.m.lv || 1) - (p.m.lv || 1))[0]; if (L2) { a.task = "follow"; a.lead = L2; a.tEnd = now + 7; return; } }
+  if (g === "rest") { const sd = a.x < 0 ? -1 : 1, tx = sd * (11 + Math.random() * 4), tz = a.z + (Math.random() - 0.5) * 2;
+    if (plan([{ x: tx, z: tz, wait: 5 + Math.random() * 3, sit: true, say: Math.random() < 0.5 ? "ふう…" : "ひと休み" }, { x: a.hx, z: a.hz, wait: 0.3 }], "💤")) return; }
+  for (let n = 0; n < 8; n++) { const ang = Math.random() * 6.28, d = Math.random() * 2.2, tx = a.hx + Math.cos(ang) * d, tz = a.hz + Math.sin(ang) * d * 0.6; if (ok(a, tx, tz)) { a.tx = tx; a.tz = tz; break; } } }
 // 運んだ鉱石の山（岩の左右）
 function dpile25(g, R, W, H){ const P = R.pile; if (!P) return; const m = R.acts.find(a => a.rk); if (!m) return; const rk = m.rk;
   [0, 1].forEach(s => { const n = P[s]; if (!n) return; const sd = s ? 1 : -1, p = dproj25(rk[0] + sd * (rk[2] + 3.4) + sd * 1.0, 0, rk[1] + 4.4), x = p[0] * W, y = p[1] * H, u = Math.max(3, p[2] * W * 0.6);
@@ -11317,7 +11339,7 @@ function dcard25(card, i, now, dt){
   const cv = card.querySelector("canvas"), r = cv.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1), W = Math.round(r.width * dpr), H = Math.round(r.height * dpr);
   if (!W) return; if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
   const g = cv.getContext("2d"); g.imageSmoothingEnabled = false;
-  const R = droom25(i), bk = R.kind === "lord" ? "lordday" : R.kind, src = `bg25/${bk}_full.webp?v=${BGSHIP25[bk] || 5}`, bg = dimg25(src);
+  const R = droom25(i), bk = R.kind === "lord" ? "lordday" : R.kind, src = `bg25/${bk}_full.webp?v=${BGSHIP25[bk] || 5}f2`, bg = dimg25(src);
   { const im = card.querySelector(".d3bg"); if (im && im.dataset.src !== src) { im.dataset.src = src; im.src = src; } }
   // 動き：ときどき近くへ歩く（働いている子・寝ている子はその場）
   // 歩く先は、岩・家具の上と、それを横切る道を選ばない（8回ためして、だめならその場にいる）
@@ -11340,9 +11362,11 @@ function dcard25(card, i, now, dt){
     const st = a.mode === "sleep" ? "sleep" : a.walking ? (o.bip ? "walk" : "hop") : (a.mode === "mine" || a.mode === "train" || a.mode === "slash" || a.mode === "lift") && o.bip ? "atk" : "idle";
     const F = MI ? [0, 4, 1.1] : DFR25[st], fr = F[0] + Math.floor(((now + a.ph) / F[2] * F[1]) % F[1]); const SRC = MI ? MI.im : o.im;
     const lum = dlum25(bg, p[0], p[1] - 0.04), br = Math.max(a.lord ? 0.8 : 0.42, Math.min(1.05, 0.3 + lum * 2.2));
-    g.save(); g.fillStyle = "rgba(0,0,0,0.3)"; g.beginPath(); g.ellipse(MI ? fx2 : fx, fy, Math.max(3, 11 * k), Math.max(2, 4.5 * k), 0, 0, 7); g.fill();
-    const bq = Math.round(br * 20) / 20, tk = SRC.src + "|" + fr + "|" + bq, TC = D3.tc || (D3.tc = new Map()); let T = TC.get(tk);
+    g.save(); { const sx = MI ? fx2 : fx, rx = Math.max(4, ((a.rr || 0.4) / 0.85) * p[2] * W * 1.1 * DAYK25), ry = rx * 0.38, sg = g.createRadialGradient(sx, fy, 0, sx, fy, rx); sg.addColorStop(0, "rgba(0,0,0,0.55)"); sg.addColorStop(0.6, "rgba(0,0,0,0.3)"); sg.addColorStop(1, "rgba(0,0,0,0)"); g.fillStyle = sg; g.beginPath(); g.ellipse(sx, fy + ry * 0.15, rx, ry, 0, 0, 7); g.fill(); }
+    const lc = dcol25(bg, p[0], p[1] - 0.02), lm = Math.max(lc[0], lc[1], lc[2], 1), lt = lc.map(v => Math.round(v / lm * 6) / 6);   // 光の色（明るさをのぞいた色み）
+    const bq = Math.round(br * 20) / 20, tk = SRC.src + "|" + fr + "|" + bq + "|" + lt.join(","), TC = D3.tc || (D3.tc = new Map()); let T = TC.get(tk);
     if (!T) { if (TC.size > 600) TC.clear(); T = document.createElement("canvas"); T.width = T.height = 128; const tg = T.getContext("2d"); tg.drawImage(SRC, fr * 128, 0, 128, 128, 0, 0, 128, 128);
+      tg.globalCompositeOperation = "multiply"; tg.fillStyle = `rgba(${Math.round(lt[0] * 255)},${Math.round(lt[1] * 255)},${Math.round(lt[2] * 255)},0.45)`; tg.fillRect(0, 0, 128, 128); tg.globalCompositeOperation = "destination-in"; tg.drawImage(SRC, fr * 128, 0, 128, 128, 0, 0, 128, 128);
       if (bq < 0.99) { tg.globalCompositeOperation = "source-atop"; tg.fillStyle = `rgba(16,9,5,${(1 - bq).toFixed(2)})`; tg.fillRect(0, 0, 128, 128); }
       else if (bq > 1.01) { tg.globalCompositeOperation = "source-atop"; tg.fillStyle = `rgba(255,190,110,${((bq - 1) * 2).toFixed(2)})`; tg.fillRect(0, 0, 128, 128); } TC.set(tk, T); }
     g.translate(MI ? fx2 : fx, fy); if (MI ? mdir < 0 : a.face < 0) g.scale(-1, 1); g.drawImage(T, 0, 0, 128, 128, -s / 2, -(o.foot + 1) * k, s, s); g.restore();
