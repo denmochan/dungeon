@@ -7238,7 +7238,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.227（11/19 11:37）";
+const VER20 = "No.228（11/19 11:52）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -10857,7 +10857,7 @@ const HAI25 = (() => {
     { id: "gateW", name: "主の間の入口（左の壁）", g: "none", txt: GATE25(-18.2, 0, 2), light: "LIGHT(-16.8,2.4,0.0,1.0,0.6,0.3,2.2)", foot: [[-17.6, 0, 1.8]] },
     { id: "orebig", name: "大きな鉱脈（奥の壁）", g: "none", txt: VEINBIG25(8.6, -10.6, 3.6), light: "LIGHT(8.0,2.0,-8.0,0.35,0.7,1.0,2.2)", foot: [[8.6, -9.6, 3.2]], vein: [[6.4, -10.6], [8.6, -10.6], [10.8, -10.4]] },
     { id: "seam", name: "壁の鉱石の層", g: "none", txt: SEAMX25(), light: "LIGHT(6.0,2.2,-8.6,0.35,0.7,1.0,2.4)", foot: [[6.0, -9.6, 3.6]], vein: [[3.4, -10.6], [6.0, -10.6], [8.6, -10.6]] },
-    { id: "orerockC", name: "結晶の鉱脈（部屋の真ん中）", g: "none", txt: OREROCK25(0, 1.2), light: "LIGHT(-0.6,3.4,3.7,0.75,0.6,1.0,3.0)", foot: [[0, 0.5, 3.4]], spots: [[-4.6, 0.9], [4.6, 0.9], [-4.2, 2.0], [4.2, 2.0], [-4.6, -0.1], [4.6, -0.1]], rockAt: [0, 0.5], rk: [0, 1.0, 3.5, 2.3] },
+    { id: "orerockC", name: "結晶の鉱脈（部屋の真ん中）", g: "none", txt: OREROCK25(0, 1.2), light: "LIGHT(-0.6,3.4,3.7,0.75,0.6,1.0,3.0)", foot: [[0, 0.5, 3.4]], spots: [[-4.2, 2.3], [4.2, 2.3], [-3.6, 2.9], [3.6, 2.9], [-4.6, 1.6], [4.6, 1.6]], rockAt: [0, 0.5], rk: [0, 1.0, 3.5, 2.3] },
     { id: "orerock", name: "結晶の鉱脈（2Dと同じ形）", g: "none", txt: OREROCK25(8.0, -9.9), light: "LIGHT(7.4,3.6,-6.8,0.75,0.6,1.0,3.0)", foot: [[8.0, -8.4, 4.0]], spots: [[3.9, -9.0], [12.1, -9.0], [4.1, -8.2], [11.9, -8.2], [4.5, -9.6], [11.5, -9.6]], rockAt: [8.0, -9.0], rk: [8.0, -10.0, 3.6, 2.3] },
     { id: "dummy", name: "わら人形", shell: 1, foot: [[-2.05 * 6.34, 0.55 * 5.76, 0.8]] },
     { id: "rack", name: "武器立て", shell: 1, foot: [[-1.35 * 6.34, -1.65 * 5.76, 0.8]] },
@@ -11298,7 +11298,7 @@ function dcard25(card, i, now, dt){
     // 掘る子：横向きの「掘る」コマを使い、つるはしの先が岩のふちにちょうど当たる位置に立たせる
     let MI = null, mdir = 1, fx2 = fx;
     if (a.mode === "mine" && o.bip && a.look && a.rk) { const M = dmine25(a.sp, a.evo); if (M && M.ok) { MI = M; mdir = a.look[0] > a.x ? 1 : -1;
-      const [cx, cz, hw, hz] = a.rk, q = (a.z - cz) / hz, w = hw * Math.sqrt(Math.max(0.05, 1 - q * q)), T = dproj25(cx - mdir * w * 0.88, 0, a.z);
+      const [cx, cz, hw, hz] = a.rk, q = (a.z - cz) / hz, w = hw * Math.sqrt(Math.max(0.05, 1 - q * q)), T = dproj25(cx - mdir * w * 0.97, 0, a.z);
       fx2 = T[0] * W - (M.hx - 64) * k * mdir; a.hitP = [fx2 + (M.hx - 64) * k * mdir, fy + (M.hy - o.foot - 1) * k]; } }
     const st = a.mode === "sleep" ? "sleep" : a.walking ? (o.bip ? "walk" : "hop") : (a.mode === "mine" || a.mode === "train" || a.mode === "slash" || a.mode === "lift") && o.bip ? "atk" : "idle";
     const F = MI ? [0, 4, 1.1] : DFR25[st], fr = F[0] + Math.floor(((now + a.ph) / F[2] * F[1]) % F[1]); const SRC = MI ? MI.im : o.im;
