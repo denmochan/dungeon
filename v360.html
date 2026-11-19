@@ -7238,7 +7238,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.234（11/19 18:30）";
+const VER20 = "No.235（11/19 18:40）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -11459,18 +11459,33 @@ function dhide25(g, O, W, H, x0, y0, x1, y1, P){ if (!O || !O.ok || window.__NOO
     if (O.mc.size > 500) O.mc.clear(); O.mc.set(key, M); }
   if (!M) return; g.save(); g.globalCompositeOperation = "destination-out"; g.imageSmoothingEnabled = false; g.drawImage(M, a0 / O.w * W, b0 / O.h * H, (a1 - a0) / O.w * W, (b1 - b0) / O.h * H); g.restore(); }
 // ---- 歩く子を、その場で3Dで描く（360度ビューアと同じゴブリン）。向き15度きざみ×足の運び6コマ、描いた絵は取っておく ----
-const DRT25 = { gl: null, fit: {}, fr: new Map(), q: [], busy: false, n: 0, bad: false, ms: [] };
+const DRT25 = { gl: null, fit: {}, fr: new Map(), q: [], bg: [], warm: {}, busy: false, n: 0, bad: false, ms: [] };
 function drtGL25(){ if (DRT25.gl || DRT25.bad) return DRT25.gl; try { const c = document.createElement("canvas"); c.width = c.height = 128; const gl = c.getContext("webgl", { preserveDrawingBuffer: true, antialias: false }); if (!gl || !window.STRIP24) throw 0; DRT25.gl = gl; } catch (e) { DRT25.bad = true; } return DRT25.gl; }
-function drt25(sp, evo, ai, ph, want){ const k = sp + ":" + evo + ":" + ai + ":" + ph, F = DRT25.fr.get(k); if (F) { F.u = DRT25.n; return F; }
-  if (want && !DRT25.q.includes(k)) { DRT25.q.unshift(k); if (DRT25.q.length > 48) DRT25.q.length = 48; setTimeout(drtRun25, 0); } return null; }
-async function drtRun25(){ if (DRT25.busy || !DRT25.q.length || !drtGL25()) return; DRT25.busy = true; const t0 = performance.now();
-  try { while (DRT25.q.length && performance.now() - t0 < 10) { const k = DRT25.q.shift(); if (DRT25.fr.has(k)) continue; const [sp, evo, ai, ph] = k.split(":"), fk = sp + ":" + evo, t1 = performance.now();
-      if (!DRT25.fit[fk]) DRT25.fit[fk] = await STRIP24.bakeStrip(DRT25.gl, sp, +evo, 128, null, true);
-      const cv = await STRIP24.bakeStrip(DRT25.gl, sp, +evo, 128, null, false, [{ mode: "walk", t: (+ph) / 6 * 0.8, view: -(+ai) * Math.PI / 12, rc: 0 }], DRT25.fit[fk]);
-      cv.id = "rt:" + k; DRT25.fr.set(k, { im: cv, u: DRT25.n }); DRT25.ms.push(Math.round(performance.now() - t1)); if (DRT25.ms.length > 50) DRT25.ms.shift();
-      if (DRT25.fr.size > 700) [...DRT25.fr.entries()].sort((a, b) => a[1].u - b[1].u).slice(0, 200).forEach(([kk]) => DRT25.fr.delete(kk)); } }
+// 欲しい絵を返す。まだなければ「すぐ描く」列に入れ、それまでは一番近い向きの絵で代用する（前の2コマの歩き方には戻さない）
+function drt25(sp, evo, ai, ph){ const b = sp + ":" + evo + ":", F = DRT25.fr.get(b + ai + ":" + ph); if (F) { F.u = DRT25.n; return F; }
+  const k = b + ai + ":" + ph; if (!DRT25.q.includes(k)) { DRT25.q.push(k); if (DRT25.q.length > 24) DRT25.q.shift(); } drtKick25();
+  for (let d = 1; d <= 12; d++) for (const a2 of [ai - d, ai + d]) { if (a2 < 0 || a2 > 12) continue; const G = DRT25.fr.get(b + a2 + ":" + ph); if (G) return G; }
+  for (let d = 1; d <= 3; d++) { const G = DRT25.fr.get(b + ai + ":" + ((ph + d) % 6)); if (G) return G; } return null; }
+// その種類の全部の向き（13×6コマ）を、手があいた時に少しずつ描いておく
+function drtWarm25(sp, evo){ const b = sp + ":" + evo; if (DRT25.warm[b] || DRT25.bad) return; DRT25.warm[b] = 1;
+  for (const ai of [0, 12, 6, 3, 9, 1, 2, 4, 5, 7, 8, 10, 11]) for (let ph = 0; ph < 6; ph++) DRT25.bg.push(b + ":" + ai + ":" + ph); drtKick25(); }
+function drtKick25(){ if (DRT25.busy || DRT25.kick || DRT25.bad) return; DRT25.kick = 1;
+  const go = () => { DRT25.kick = 0; drtRun25(); }; if (DRT25.q.length) setTimeout(go, 0); else if (window.requestIdleCallback) requestIdleCallback(go, { timeout: 300 }); else setTimeout(go, 60); }
+// 1回に1コマだけ描く（1コマが長くかかっても、画面が止まるのは1回きり）
+async function drtRun25(){ if (DRT25.busy || !drtGL25()) return; let k = null;
+  while (DRT25.q.length && !k) { const c = DRT25.q.pop(); if (!DRT25.fr.has(c)) k = c; } while (!k && DRT25.bg.length) { const c = DRT25.bg.shift(); if (!DRT25.fr.has(c)) k = c; }
+  if (!k) return; DRT25.busy = true;
+  try { const [sp, evo, ai, ph] = k.split(":"), fk = sp + ":" + evo, t1 = performance.now();
+    if (!DRT25.fit[fk]) DRT25.fit[fk] = await STRIP24.bakeStrip(DRT25.gl, sp, +evo, 128, null, true);
+    const cv = await STRIP24.bakeStrip(DRT25.gl, sp, +evo, 128, null, false, [{ mode: "walk", t: (+ph) / 6 * 0.8, view: -(+ai) * Math.PI / 12, rc: 0 }], DRT25.fit[fk]);
+    // 絵のある所だけ切り出して取っておく（メモリを食わないように）
+    const g = cv.getContext("2d"), d = g.getImageData(0, 0, 128, 128).data; let x0 = 128, y0 = 128, x1 = -1, y1 = -1;
+    for (let y = 0; y < 128; y++) for (let x = 0; x < 128; x++) if (d[(y * 128 + x) * 4 + 3]) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    let im = cv, ox = 0, oy = 0; if (x1 >= x0) { im = document.createElement("canvas"); im.width = x1 - x0 + 1; im.height = y1 - y0 + 1; im.getContext("2d").drawImage(cv, -x0, -y0); ox = x0; oy = y0; }
+    im.id = "rt:" + k; DRT25.fr.set(k, { im, ox, oy, u: DRT25.n }); DRT25.ms.push(Math.round(performance.now() - t1)); if (DRT25.ms.length > 50) DRT25.ms.shift();
+    if (DRT25.fr.size > 1600) [...DRT25.fr.entries()].sort((a, b) => a[1].u - b[1].u).slice(0, 300).forEach(([kk]) => DRT25.fr.delete(kk)); }
   catch (e) { console.warn("drt", e); DRT25.bad = true; }
-  DRT25.busy = false; if (DRT25.q.length) setTimeout(drtRun25, 30); }
+  DRT25.busy = false; if (DRT25.q.length || DRT25.bg.length) drtKick25(); }
 // ---- 1部屋を描く ----
 const DAYK25 = 1.8;   // 昼の画面だけ、キャラを大きめに描く（遠くて見えにくいので）
 const DFR25 = { idle: [0, 4, 1.6], walk: [15, 2, 0.5], hop: [11, 4, 0.6], atk: [5, 4, 0.55], sleep: [4, 1, 1] };
@@ -11502,21 +11517,23 @@ function dcard25(card, i, now, dt){ DRT25.n++;
     // 歩いている子：進む向き（手前・奥・横）の絵を使い、足の運びを進んだ距離に合わせる
     const cyc = 1.04 * sclOf24({ sp: a.sp, evo: a.evo }) * DAYK25;   // 1歩きの距離（0.8秒で進む分）
     let WK = null, wflip = null, RT = null; const wph = Math.floor((a.dist || 0) / Math.max(0.4, cyc) * 6) % 6;
-    if (!MI && a.walking && !a.lord) { const ph = Math.atan2(a.vx || 0, a.vz || 0), q = Math.abs(ph) / (Math.PI / 12), sg = ph < 0;
+    if (!a.lord && !DRT25.bad && o.ok) drtWarm25(a.sp, a.evo);
+    if (!MI && a.walking && !a.lord) { const sp2 = Math.hypot(a.vx || 0, a.vz || 0);
+      /* 進む向きをなめらかにする（斜めの道で向きが小刻みに揺れないように） */
+      if (sp2 > 0.15) { const h = Math.atan2(a.vx || 0, a.vz || 0); if (a.hd == null) a.hd = h; let dh = h - a.hd; dh -= Math.round(dh / (2 * Math.PI)) * 2 * Math.PI; a.hd += dh * Math.min(1, dt * 5); a.hd -= Math.round(a.hd / (2 * Math.PI)) * 2 * Math.PI; }
+      const ph = a.hd ?? 0, q = Math.abs(ph) / (Math.PI / 12), sg = ph < 0;
       /* 向き：0＝手前へ、6＝横、12＝奥へ（左向きは左右反転）。少しの揺れでは変えない */
-      if (typeof a.ai !== "number" || Math.abs(q - a.ai) > 0.7) a.ai = Math.round(q);
-      if (a.wsg === undefined || (sg !== a.wsg && a.ai > 0 && a.ai < 12)) a.wsg = sg; const flip = a.ai > 0 && a.ai < 12 && a.wsg;
-      if (!DRT25.bad) { RT = drt25(a.sp, a.evo, a.ai, wph, true);
-        for (let d = 1; !RT && d <= 3; d++) RT = drt25(a.sp, a.evo, a.ai - d, wph) || drt25(a.sp, a.evo, a.ai + d, wph);
-        if (RT) wflip = flip; }
+      if (typeof a.ai !== "number" || Math.abs(q - a.ai) > 0.75) a.ai = Math.round(q);
+      if (a.wsg === undefined || (sg !== a.wsg && Math.abs(ph) > 0.2 && Math.PI - Math.abs(ph) > 0.2)) a.wsg = sg; const flip = a.ai > 0 && a.ai < 12 && a.wsg;
+      if (!DRT25.bad) { RT = drt25(a.sp, a.evo, a.ai, wph); if (RT) wflip = flip; }
       else if (st === "walk") { const M2 = dwalk25(a.sp, a.evo); if (M2 && M2.ok) { WK = M2; a.wd = Math.min(4, Math.round(a.ai / 3)); wflip = a.wd > 0 && a.wd < 4 && a.wsg; if (WK.im.width < (a.wd + 1) * 6 * 128) WK = null; } } }
     const F = MI ? [0, 4, 1.1] : DFR25[st], fr = RT ? 0 : WK ? a.wd * 6 + wph : F[0] + Math.floor(((now + a.ph) / F[2] * F[1]) % F[1]); const SRC = MI ? MI.im : RT ? RT.im : WK ? WK.im : o.im;
     const lum = dlum25(bg, p[0], p[1] - 0.04), br = Math.max(a.lord ? 0.8 : 0.42, Math.min(1.05, 0.3 + lum * 2.2));
     g.save(); { const sx = MI ? fx2 : fx, rx = Math.max(4, ((a.rr || 0.4) / 0.85) * p[2] * W * 1.1 * DAYK25), ry = rx * 0.38, sg = g.createRadialGradient(sx, fy, 0, sx, fy, rx); sg.addColorStop(0, "rgba(0,0,0,0.55)"); sg.addColorStop(0.6, "rgba(0,0,0,0.3)"); sg.addColorStop(1, "rgba(0,0,0,0)"); g.fillStyle = sg; g.beginPath(); g.ellipse(sx, fy + ry * 0.15, rx, ry, 0, 0, 7); g.fill(); }
     const lc = dcol25(bg, p[0], p[1] - 0.02), lm = Math.max(lc[0], lc[1], lc[2], 1), lt = lc.map(v => Math.round(v / lm * 6) / 6);   // 光の色（明るさをのぞいた色み）
     const bq = Math.round(br * 20) / 20, tk = (SRC.src || SRC.id) + "|" + fr + "|" + bq + "|" + lt.join(","), TC = D3.tc || (D3.tc = new Map()); let T = TC.get(tk);
-    if (!T) { if (TC.size > 600) TC.clear(); T = document.createElement("canvas"); T.width = T.height = 128; const tg = T.getContext("2d"); tg.drawImage(SRC, fr * 128, 0, 128, 128, 0, 0, 128, 128);
-      tg.globalCompositeOperation = "multiply"; tg.fillStyle = `rgba(${Math.round(lt[0] * 255)},${Math.round(lt[1] * 255)},${Math.round(lt[2] * 255)},0.45)`; tg.fillRect(0, 0, 128, 128); tg.globalCompositeOperation = "destination-in"; tg.drawImage(SRC, fr * 128, 0, 128, 128, 0, 0, 128, 128);
+    if (!T) { if (TC.size > 600) TC.clear(); T = document.createElement("canvas"); T.width = T.height = 128; const tg = T.getContext("2d"), put = () => RT ? tg.drawImage(RT.im, RT.ox, RT.oy) : tg.drawImage(SRC, fr * 128, 0, 128, 128, 0, 0, 128, 128); put();
+      tg.globalCompositeOperation = "multiply"; tg.fillStyle = `rgba(${Math.round(lt[0] * 255)},${Math.round(lt[1] * 255)},${Math.round(lt[2] * 255)},0.45)`; tg.fillRect(0, 0, 128, 128); tg.globalCompositeOperation = "destination-in"; put();
       if (bq < 0.99) { tg.globalCompositeOperation = "source-atop"; tg.fillStyle = `rgba(16,9,5,${(1 - bq).toFixed(2)})`; tg.fillRect(0, 0, 128, 128); }
       else if (bq > 1.01) { tg.globalCompositeOperation = "source-atop"; tg.fillStyle = `rgba(255,190,110,${((bq - 1) * 2).toFixed(2)})`; tg.fillRect(0, 0, 128, 128); } TC.set(tk, T); }
     g.translate(MI ? fx2 : fx, fy); if (MI ? mdir < 0 : (WK || RT) ? wflip : a.face < 0) g.scale(-1, 1); g.drawImage(T, 0, 0, 128, 128, -s / 2, -(o.foot + 1) * k, s, s); g.restore();
