@@ -7238,7 +7238,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.235（11/19 18:40）";
+const VER20 = "No.236（11/19 18:54）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -11249,11 +11249,13 @@ document.addEventListener("click", ev => { const b = ev.target.closest && ev.tar
       + "col=c*(vec3(1.05,0.98,0.9)*1.15*clamp(dot(n,Ls),0.0,1.0)*s2+mix(vec3(0.14,0.12,0.13),vec3(0.36,0.36,0.42),n.y*0.5+0.5)*o2+vec3(0.3,0.3,0.36)*clamp(dot(n,Fl)*0.5+0.5,0.0,1.0)*o2*0.6)"
       + "+vec3(0.5,0.45,0.4)*pow(1.0-clamp(dot(n,-rd),0.0,1.0),3.0)*0.35*o2+c*emi;}else{" + s.slice(i + 2, j) + "}" + s.slice(j);
     s = s.replace("uniform float clr;", "uniform float clr;uniform float STUDIO;uniform vec3 LXZ;").replace("vec3 Ls=normalize(vec3(-0.45,0.85,0.55))", "vec3 Ls=normalize(vec3(-0.45*LXZ.x+0.55*LXZ.z,0.85,0.55*LXZ.x+0.45*LXZ.z))").replace("vec3 Fl=normalize(vec3(0.75,0.25,0.6))", "vec3 Fl=normalize(vec3(0.75*LXZ.x-0.6*LXZ.z,0.25,0.6*LXZ.x+0.75*LXZ.z))"); return s; };   // LXZ：光をカメラと一緒に回す（cos,0,sin）
-  const PROG = {};
-  function progFor(gl, kit){ if (PROG[kit]) return PROG[kit];
-    const sh = (ty, s) => { const o = gl.createShader(ty); gl.shaderSource(o, s); gl.compileShader(o); if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(o)); return o; };
-    const p = gl.createProgram(); gl.attachShader(p, sh(gl.VERTEX_SHADER, SDF_VS)); gl.attachShader(p, sh(gl.FRAGMENT_SHADER, studio(makeFS24("train", [{ sp: kit }], 1)))); gl.linkProgram(p);
-    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p)); return PROG[kit] = { p, U: n => gl.getUniformLocation(p, n) }; }
+  // 描き方（シェーダー）の準備。gl ごとに持つ。KHR_parallel_shader_compile があれば裏で組み立てて、画面を止めない
+  function progStart(gl, kit){ const C = gl.__prog || (gl.__prog = {}); if (C[kit]) return C[kit];
+    const ext = gl.getExtension("KHR_parallel_shader_compile"), mk = (ty, src) => { const o = gl.createShader(ty); gl.shaderSource(o, src); gl.compileShader(o); return o; };
+    const vs = mk(gl.VERTEX_SHADER, SDF_VS), fs = mk(gl.FRAGMENT_SHADER, studio(makeFS24("train", [{ sp: kit }], 1))), p = gl.createProgram(); gl.attachShader(p, vs); gl.attachShader(p, fs); gl.linkProgram(p);
+    return C[kit] = { p, vs, fs, ext, ok: false, U: n => gl.getUniformLocation(p, n) }; }
+  function progFor(gl, kit){ const P = progStart(gl, kit); if (!P.ok) { if (!gl.getProgramParameter(P.p, gl.LINK_STATUS)) { if (gl.isContextLost()) throw new Error("context lost"); throw new Error("link: " + (gl.getProgramInfoLog(P.p) || gl.getShaderInfoLog(P.fs))); } P.ok = true; } return P; }
+  function progReady(gl, kit){ const P = progStart(gl, kit); if (P.ok) return true; if (P.ext && !gl.getProgramParameter(P.p, P.ext.COMPLETION_STATUS_KHR)) return false; progFor(gl, kit); return true; }
   // 1コマの設定
   function frames(kit, sp){
     const bip = !!BIPED[kit], mage = /mage|priest|shaman|lich|ogremage|mindlord|lord/.test(sp), F = [];
@@ -11322,7 +11324,7 @@ document.addEventListener("click", ev => { const b = ev.target.closest && ev.tar
     if (WF.length) return { url: out.toDataURL("image/png") };
     if (mine) return { url: out.toDataURL("image/png"), hit: hit && hit.map(v => Math.round(v * 10) / 10) };
     return out.toDataURL("image/png"); }
-  window.STRIP24 = { bakeStrip, look, frames, progFor };
+  window.STRIP24 = { bakeStrip, look, frames, progFor, progReady };
 })();
 
 // ================= 25：昼のダンジョン画面を3Dにする（部屋を3D洞窟の写真の形で縦に並べる） =================
@@ -11459,33 +11461,54 @@ function dhide25(g, O, W, H, x0, y0, x1, y1, P){ if (!O || !O.ok || window.__NOO
     if (O.mc.size > 500) O.mc.clear(); O.mc.set(key, M); }
   if (!M) return; g.save(); g.globalCompositeOperation = "destination-out"; g.imageSmoothingEnabled = false; g.drawImage(M, a0 / O.w * W, b0 / O.h * H, (a1 - a0) / O.w * W, (b1 - b0) / O.h * H); g.restore(); }
 // ---- 歩く子を、その場で3Dで描く（360度ビューアと同じゴブリン）。向き15度きざみ×足の運び6コマ、描いた絵は取っておく ----
-const DRT25 = { gl: null, fit: {}, fr: new Map(), q: [], bg: [], warm: {}, busy: false, n: 0, bad: false, ms: [] };
-function drtGL25(){ if (DRT25.gl || DRT25.bad) return DRT25.gl; try { const c = document.createElement("canvas"); c.width = c.height = 128; const gl = c.getContext("webgl", { preserveDrawingBuffer: true, antialias: false }); if (!gl || !window.STRIP24) throw 0; DRT25.gl = gl; } catch (e) { DRT25.bad = true; } return DRT25.gl; }
+const DRT25 = { gl: null, fit: {}, fr: new Map(), q: [], bg: [], warm: {}, idb: {}, saved: {}, busy: false, n: 0, bad: false, lost: 0, ms: [] };
+const DRTV25 = "1";   // 描き方を変えたら上げる（スマホに保存した絵を作り直させる）
+function drtGL25(){ if (DRT25.gl || DRT25.bad) return DRT25.gl;
+  try { const c = document.createElement("canvas"); c.width = c.height = 128; const gl = c.getContext("webgl", { preserveDrawingBuffer: true, antialias: false }); if (!gl || !window.STRIP24) throw 0;
+    // 3Dが失われたら（スマホの都合で起きる）、作り直す。3回失われたら、前もって作った絵に切りかえる
+    c.addEventListener("webglcontextlost", e => { e.preventDefault(); if (DRT25.gl === gl) { DRT25.gl = null; DRT25.lost++; if (DRT25.lost >= 3) DRT25.bad = true; } });
+    DRT25.gl = gl; } catch (e) { DRT25.bad = true; } return DRT25.gl; }
+const drtKey25 = (sp, evo) => "rt:" + DRTV25 + ":" + sp + ":" + evo + ":" + CACHE25.hash(JSON.stringify([spCol24(sp), typeof varOf24 !== "undefined" ? varOf24(sp, evo) : 0, sclOf24({ sp, evo }), typeof EVOCOL25 !== "undefined" && EVOCOL25[sp] ? EVOCOL25[sp][evo] : 0]));
 // 欲しい絵を返す。まだなければ「すぐ描く」列に入れ、それまでは一番近い向きの絵で代用する（前の2コマの歩き方には戻さない）
 function drt25(sp, evo, ai, ph){ const b = sp + ":" + evo + ":", F = DRT25.fr.get(b + ai + ":" + ph); if (F) { F.u = DRT25.n; return F; }
   const k = b + ai + ":" + ph; if (!DRT25.q.includes(k)) { DRT25.q.push(k); if (DRT25.q.length > 24) DRT25.q.shift(); } drtKick25();
   for (let d = 1; d <= 12; d++) for (const a2 of [ai - d, ai + d]) { if (a2 < 0 || a2 > 12) continue; const G = DRT25.fr.get(b + a2 + ":" + ph); if (G) return G; }
   for (let d = 1; d <= 3; d++) { const G = DRT25.fr.get(b + ai + ":" + ((ph + d) % 6)); if (G) return G; } return null; }
-// その種類の全部の向き（13×6コマ）を、手があいた時に少しずつ描いておく
-function drtWarm25(sp, evo){ const b = sp + ":" + evo; if (DRT25.warm[b] || DRT25.bad) return; DRT25.warm[b] = 1;
+// その種類の全部の向き（13×6コマ）を用意する。スマホに保存してあれば読むだけ、なければ手があいた時に少しずつ描く
+function drtWarm25(sp, evo){ const b = sp + ":" + evo; if (DRT25.warm[b] || DRT25.bad) return; DRT25.warm[b] = 1; drtLoad25(sp, evo);
   for (const ai of [0, 12, 6, 3, 9, 1, 2, 4, 5, 7, 8, 10, 11]) for (let ph = 0; ph < 6; ph++) DRT25.bg.push(b + ":" + ai + ":" + ph); drtKick25(); }
-function drtKick25(){ if (DRT25.busy || DRT25.kick || DRT25.bad) return; DRT25.kick = 1;
-  const go = () => { DRT25.kick = 0; drtRun25(); }; if (DRT25.q.length) setTimeout(go, 0); else if (window.requestIdleCallback) requestIdleCallback(go, { timeout: 300 }); else setTimeout(go, 60); }
+function drtLoad25(sp, evo){ const b = sp + ":" + evo; if (DRT25.idb[b]) return; DRT25.idb[b] = "load";
+  CACHE25.get(drtKey25(sp, evo)).then(v => { try { if (v && v.f && v.f.length) { v.f.forEach(e => { const k = b + ":" + e[0]; if (DRT25.fr.has(k)) return; const im = document.createElement("canvas"); im.width = e[1]; im.height = e[2];
+        im.getContext("2d").putImageData(new ImageData(new Uint8ClampedArray(e[5]), e[1], e[2]), 0, 0); im.id = "rt:" + k; DRT25.fr.set(k, { im, ox: e[3], oy: e[4], u: DRT25.n }); }); DRT25.fit[b] = v.fit; DRT25.saved[b] = 1; } } catch (e) {}
+    DRT25.idb[b] = "done"; drtKick25(); }); }
+function drtSave25(sp, evo){ const b = sp + ":" + evo; if (DRT25.saved[b]) return; const f = [];
+  for (let ai = 0; ai <= 12; ai++) for (let ph = 0; ph < 6; ph++) { const F = DRT25.fr.get(b + ":" + ai + ":" + ph); if (!F) return; const d = F.im.getContext("2d").getImageData(0, 0, F.im.width, F.im.height).data; f.push([ai + ":" + ph, F.im.width, F.im.height, F.ox, F.oy, d.buffer]); }
+  DRT25.saved[b] = 1; CACHE25.put(drtKey25(sp, evo), { fit: DRT25.fit[b], f }); }
+function drtKick25(later){ if (DRT25.busy || DRT25.kick || DRT25.bad) return; DRT25.kick = 1;
+  const go = () => { DRT25.kick = 0; drtRun25(); }; if (later) setTimeout(go, later); else if (DRT25.q.length) setTimeout(go, 0); else if (window.requestIdleCallback) requestIdleCallback(go, { timeout: 300 }); else setTimeout(go, 60); }
 // 1回に1コマだけ描く（1コマが長くかかっても、画面が止まるのは1回きり）
-async function drtRun25(){ if (DRT25.busy || !drtGL25()) return; let k = null;
-  while (DRT25.q.length && !k) { const c = DRT25.q.pop(); if (!DRT25.fr.has(c)) k = c; } while (!k && DRT25.bg.length) { const c = DRT25.bg.shift(); if (!DRT25.fr.has(c)) k = c; }
-  if (!k) return; DRT25.busy = true;
-  try { const [sp, evo, ai, ph] = k.split(":"), fk = sp + ":" + evo, t1 = performance.now();
-    if (!DRT25.fit[fk]) DRT25.fit[fk] = await STRIP24.bakeStrip(DRT25.gl, sp, +evo, 128, null, true);
-    const cv = await STRIP24.bakeStrip(DRT25.gl, sp, +evo, 128, null, false, [{ mode: "walk", t: (+ph) / 6 * 0.8, view: -(+ai) * Math.PI / 12, rc: 0 }], DRT25.fit[fk]);
+async function drtRun25(){ if (DRT25.busy || DRT25.bad) return; const gl = drtGL25(); if (!gl) { if (!DRT25.bad) drtKick25(1500); return; }
+  const pick = L => { for (let j = L.length - 1; j >= 0; j--) { const c = L[j], b = c.split(":").slice(0, 2).join(":"); if (DRT25.fr.has(c)) { L.splice(j, 1); continue; } if (DRT25.idb[b] === "load") continue; L.splice(j, 1); return c; } return null; };
+  let k = pick(DRT25.q); if (!k) { DRT25.bg.reverse(); k = pick(DRT25.bg); DRT25.bg.reverse(); }
+  if (!k) { if (DRT25.q.length || DRT25.bg.length) drtKick25(200); return; }
+  const [sp, evo, ai, ph] = k.split(":"), fk = sp + ":" + evo;
+  // 描き方の準備がまだなら、画面を止めずに待つ
+  try { if (!STRIP24.progReady(gl, kitOf24(sp))) { DRT25.q.unshift(k); drtKick25(120); return; } } catch (e) { DRT25.q.unshift(k); drtFail25(e); return; }
+  DRT25.busy = true;
+  try { const t1 = performance.now();
+    if (!DRT25.fit[fk]) DRT25.fit[fk] = await STRIP24.bakeStrip(gl, sp, +evo, 128, null, true);
+    const cv = await STRIP24.bakeStrip(gl, sp, +evo, 128, null, false, [{ mode: "walk", t: (+ph) / 6 * 0.8, view: -(+ai) * Math.PI / 12, rc: 0 }], DRT25.fit[fk]);
+    if (gl.isContextLost()) throw new Error("context lost");
     // 絵のある所だけ切り出して取っておく（メモリを食わないように）
-    const g = cv.getContext("2d"), d = g.getImageData(0, 0, 128, 128).data; let x0 = 128, y0 = 128, x1 = -1, y1 = -1;
+    const d = cv.getContext("2d").getImageData(0, 0, 128, 128).data; let x0 = 128, y0 = 128, x1 = -1, y1 = -1;
     for (let y = 0; y < 128; y++) for (let x = 0; x < 128; x++) if (d[(y * 128 + x) * 4 + 3]) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
     let im = cv, ox = 0, oy = 0; if (x1 >= x0) { im = document.createElement("canvas"); im.width = x1 - x0 + 1; im.height = y1 - y0 + 1; im.getContext("2d").drawImage(cv, -x0, -y0); ox = x0; oy = y0; }
     im.id = "rt:" + k; DRT25.fr.set(k, { im, ox, oy, u: DRT25.n }); DRT25.ms.push(Math.round(performance.now() - t1)); if (DRT25.ms.length > 50) DRT25.ms.shift();
+    drtSave25(sp, +evo);
     if (DRT25.fr.size > 1600) [...DRT25.fr.entries()].sort((a, b) => a[1].u - b[1].u).slice(0, 300).forEach(([kk]) => DRT25.fr.delete(kk)); }
-  catch (e) { console.warn("drt", e); DRT25.bad = true; }
+  catch (e) { DRT25.q.unshift(k); drtFail25(e); }
   DRT25.busy = false; if (DRT25.q.length || DRT25.bg.length) drtKick25(); }
+function drtFail25(e){ console.warn("drt", e); const gl = DRT25.gl; if (!gl || gl.isContextLost()) { if (gl && DRT25.gl === gl) { DRT25.gl = null; DRT25.lost++; } if (DRT25.lost >= 3) DRT25.bad = true; else drtKick25(1500); } else DRT25.bad = true; }
 // ---- 1部屋を描く ----
 const DAYK25 = 1.8;   // 昼の画面だけ、キャラを大きめに描く（遠くて見えにくいので）
 const DFR25 = { idle: [0, 4, 1.6], walk: [15, 2, 0.5], hop: [11, 4, 0.6], atk: [5, 4, 0.55], sleep: [4, 1, 1] };
@@ -11691,11 +11714,13 @@ tutEls = (prev => function (st){ const a = prev(st); if (a.length || !st || !st.
       + "col=c*(vec3(1.05,0.98,0.9)*1.15*clamp(dot(n,Ls),0.0,1.0)*s2+mix(vec3(0.14,0.12,0.13),vec3(0.36,0.36,0.42),n.y*0.5+0.5)*o2+vec3(0.3,0.3,0.36)*clamp(dot(n,Fl)*0.5+0.5,0.0,1.0)*o2*0.6)"
       + "+vec3(0.5,0.45,0.4)*pow(1.0-clamp(dot(n,-rd),0.0,1.0),3.0)*0.35*o2+c*emi;}else{" + s.slice(i + 2, j) + "}" + s.slice(j);
     s = s.replace("uniform float clr;", "uniform float clr;uniform float STUDIO;uniform vec3 LXZ;").replace("vec3 Ls=normalize(vec3(-0.45,0.85,0.55))", "vec3 Ls=normalize(vec3(-0.45*LXZ.x+0.55*LXZ.z,0.85,0.55*LXZ.x+0.45*LXZ.z))").replace("vec3 Fl=normalize(vec3(0.75,0.25,0.6))", "vec3 Fl=normalize(vec3(0.75*LXZ.x-0.6*LXZ.z,0.25,0.6*LXZ.x+0.75*LXZ.z))"); return s; };   // LXZ：光をカメラと一緒に回す（cos,0,sin）
-  const PROG = {};
-  function progFor(gl, kit){ if (PROG[kit]) return PROG[kit];
-    const sh = (ty, s) => { const o = gl.createShader(ty); gl.shaderSource(o, s); gl.compileShader(o); if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(o)); return o; };
-    const p = gl.createProgram(); gl.attachShader(p, sh(gl.VERTEX_SHADER, SDF_VS)); gl.attachShader(p, sh(gl.FRAGMENT_SHADER, studio(makeFS24("train", [{ sp: kit }], 1)))); gl.linkProgram(p);
-    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p)); return PROG[kit] = { p, U: n => gl.getUniformLocation(p, n) }; }
+  // 描き方（シェーダー）の準備。gl ごとに持つ。KHR_parallel_shader_compile があれば裏で組み立てて、画面を止めない
+  function progStart(gl, kit){ const C = gl.__prog || (gl.__prog = {}); if (C[kit]) return C[kit];
+    const ext = gl.getExtension("KHR_parallel_shader_compile"), mk = (ty, src) => { const o = gl.createShader(ty); gl.shaderSource(o, src); gl.compileShader(o); return o; };
+    const vs = mk(gl.VERTEX_SHADER, SDF_VS), fs = mk(gl.FRAGMENT_SHADER, studio(makeFS24("train", [{ sp: kit }], 1))), p = gl.createProgram(); gl.attachShader(p, vs); gl.attachShader(p, fs); gl.linkProgram(p);
+    return C[kit] = { p, vs, fs, ext, ok: false, U: n => gl.getUniformLocation(p, n) }; }
+  function progFor(gl, kit){ const P = progStart(gl, kit); if (!P.ok) { if (!gl.getProgramParameter(P.p, gl.LINK_STATUS)) { if (gl.isContextLost()) throw new Error("context lost"); throw new Error("link: " + (gl.getProgramInfoLog(P.p) || gl.getShaderInfoLog(P.fs))); } P.ok = true; } return P; }
+  function progReady(gl, kit){ const P = progStart(gl, kit); if (P.ok) return true; if (P.ext && !gl.getProgramParameter(P.p, P.ext.COMPLETION_STATUS_KHR)) return false; progFor(gl, kit); return true; }
   // 1コマの設定
   function frames(kit, sp){
     const bip = !!BIPED[kit], mage = /mage|priest|shaman|lich|ogremage|mindlord|lord/.test(sp), F = [];
@@ -11764,7 +11789,7 @@ tutEls = (prev => function (st){ const a = prev(st); if (a.length || !st || !st.
     if (WF.length) return { url: out.toDataURL("image/png") };
     if (mine) return { url: out.toDataURL("image/png"), hit: hit && hit.map(v => Math.round(v * 10) / 10) };
     return out.toDataURL("image/png"); }
-  window.STRIP24 = { bakeStrip, look, frames, progFor };
+  window.STRIP24 = { bakeStrip, look, frames, progFor, progReady };
 })();
 
 // 360度ビュー：1体を本物の3Dで描き、道を歩かせる。指でぐるっと回せる（2本指・ホイールで寄る）
