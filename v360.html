@@ -3945,7 +3945,7 @@ function mixList11(S) {
 // 施設：⛏採掘場・💤寝床・⚔️訓練台・👁見張り台・🌀横穴。脇道はなくした
 FAC9.alcove = { name: "横穴", icon: "🌀", job: "", text: "部屋のわきの行き止まり。地図のない勇者が迷い込んで時間を失う", unlock: 0 };
 FAC9.mine.name = "採掘場"; FAC9.train.name = "訓練台"; FAC9.watch.name = "見張り台";
-const FAC12 = ["mine", "bed", "train", "watch", "alcove"], FAC_SLOTS12 = 2, FAC_COST12 = 50, ROOM_CAP12 = 4;
+const FAC12 = ["mine", "bed", "train", "watch", "alcove"], FAC_SLOTS12 = 1, FAC_COST12 = 50, ROOM_CAP12 = 4;
 const WORK12 = ["mine", "bed", "train", "watch"];   // 働ける施設（横穴は働かない）
 const facsOf12 = r => (r && r.kind === "den" && r.facs) || [];
 const hasFac12 = (r, k) => facsOf12(r).includes(k);
@@ -4404,7 +4404,7 @@ function estLv17(S, fc) {
 // ================= proto18：部屋は少なく・大きく・育てる =================
 // 掘れる部屋は入口・主の間をふくめて10まで（1層に2部屋）
 // 部屋を「広げる」と、定員と施設の枠が増える（広さ1→2→3：定員4→6→8・施設3→4→5）
-const SZ18 = { cap: [0, 4, 6, 8], slots: [0, 2, 2, 2] }, EXPCOST18 = [0, 0, 250, 650];
+const SZ18 = { cap: [0, 4, 6, 8], slots: [0, 1, 1, 1] }, EXPCOST18 = [0, 0, 250, 650];
 const szOf18 = r => (r && r.kind === "den" && r.sz) || 1;
 const facSlots18 = r => SZ18.slots[szOf18(r)];
 const expCost18 = (S, r) => { const s = szOf18(r); return s >= 3 ? null : Math.round(EXPCOST18[s + 1] * (1 + 0.5 * (((S.contract && S.contract.lv) || 1) - 1))); };
@@ -6494,7 +6494,7 @@ function gainText(m, i){
   const out = g.dp ? `💎+${g.dp}/日` : g.xp && job === "train" ? `⚔️+${g.xp}/日` : g.eye ? `👁+${g.eye}` : job === "bed" ? "💤" : "";
   return i === m.home ? `<button class="mini job" data-a="jobcyc" data-id="${m.id}">${m.job ? "" : "🪄"}${lab}</button> ${out}` : `${lab} ${out}`;
 }
-// 部屋の施設（2枠。11/20：5つまでは軽すぎるので2つに）
+// 部屋の施設（1枠。11/20：部屋の属性は1つ。属性ごとに部屋の形を変える）
 function facSlots12(i){
   const r = S.path[i]; if (!r || r.kind !== "den") return "";
   const F = facsOf12(r);
@@ -7242,7 +7242,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.252（11/20 15:39）";
+const VER20 = "No.253（11/20 17:28）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
