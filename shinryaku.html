@@ -1,0 +1,64 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>侵略モード設計</title>
+<style>
+:root{--bg:#1a1410;--card:#261d17;--fg:#efe3d3;--mut:#a8988a;--red:#e2614f;--yel:#e8b84a;--grn:#7cc68a;--line:#3b2f26;--pa:#e9d8b4;--ink:#4a3320}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.6 system-ui,"Hiragino Sans",sans-serif;padding:16px;max-width:640px;margin-inline:auto}
+h1{font-size:20px;margin:4px 0}p.s{color:var(--mut);margin:0 0 14px;font-size:13px}
+.map{background:var(--pa);border-radius:10px;padding:6px;margin:0 0 14px}
+.map svg{width:100%;height:auto;display:block}
+details{background:var(--card);border:1px solid var(--line);border-radius:10px;margin:0 0 10px;padding:4px 12px}
+summary{font-weight:700;padding:8px 0;cursor:pointer}
+ul{margin:4px 0 10px;padding-left:18px}li{margin:3px 0}
+b{color:var(--yel)}.q{color:var(--red)}
+</style></head><body>
+<h1>侵略モード設計</h1>
+<p class="s">11/20 決定分。タイトルで選ぶ別モード（防衛モードとは別ゲーム）。目安は王国を落とすまで100日以上。</p>
+
+<div class="map"><svg viewBox="0 0 320 200" font-family="serif" font-size="9" fill="#4a3320">
+<path d="M8 20 Q60 4 150 12 T312 18 L306 180 Q200 196 120 188 T10 176 Z" fill="none" stroke="#a88a5c" stroke-width="2"/>
+<g stroke="#8a6a44" stroke-width="1.2" stroke-dasharray="3 3" fill="none">
+<path d="M40 160 L80 130 L130 140 L170 110 L230 100 L270 60"/><path d="M80 130 L100 90 L170 110"/><path d="M130 140 L190 160 L230 100"/><path d="M100 90 L160 55 L230 100"/></g>
+<g stroke="#b0412f" stroke-width="2" fill="none"><circle cx="270" cy="60" r="24" stroke-dasharray="5 4"/></g>
+<g><circle cx="40" cy="160" r="6" fill="#3b2a1a"/><text x="22" y="178">本拠地</text>
+<circle cx="80" cy="130" r="3.5"/><circle cx="130" cy="140" r="3.5"/><circle cx="100" cy="90" r="3.5"/><circle cx="190" cy="160" r="3.5"/><text x="120" y="153">村</text>
+<rect x="166" y="105" width="9" height="9"/><rect x="156" y="50" width="9" height="9"/><text x="178" y="113">街</text>
+<path d="M226 92 l5 -8 l5 8 z M226 104 l5 -8 l5 8z" fill="#7a2a1a"/><text x="205" y="94">砦</text>
+<path d="M262 64 l8 -14 l8 14 z" fill="#b0412f"/><text x="258" y="76">王都</text></g>
+</svg></div>
+
+<details open><summary>地図と拠点</summary><ul>
+<li>古い羊皮紙の手描き地図。村・街・都市・砦・王都が点で並ぶ</li>
+<li>拠点は多め。<b>100日以上</b>かかる広さ</li>
+<li>どこからでも攻められる。王都のまわりの砦を落とすほど王都が弱る</li>
+<li>行ってない拠点は<b>強さの目安だけ</b>見える</li></ul></details>
+
+<details open><summary>始まりと引き継ぎ</summary><ul>
+<li>引き継ぎキャラ＋一部屋のダンジョンから始める</li>
+<li>引き継ぎのルールは防衛モードと同じ（スキル・ランク・色）</li>
+<li>本拠地は防衛モードと同じく掘って広げる</li></ul></details>
+
+<details open><summary>遠征</summary><ul>
+<li>編成して見るだけ。連れていく数は自由（留守が手薄になる）</li>
+<li>数日かかる。途中でできるのは<b>呼び戻し</b>だけ</li>
+<li>戦いは夜襲の画面を逆向きに（魔物が攻める側）。戦地の絵は<b>土地の種類ごと</b>に作る</li>
+<li>負けた魔物は重傷で帰り、寝床で休む</li></ul></details>
+
+<details open><summary>将軍</summary><ul>
+<li>拠点ごとに将軍。都市・王都は複数人</li>
+<li>⭐1〜5、⭐の数＝スキルの数</li>
+<li>1回の遠征で全員と連戦（門→城壁→中央）。力尽きたら撤退</li></ul></details>
+
+<details open><summary>報酬と拠点化</summary><ul>
+<li>DP・資源／新しい魔物と育成対象／拠点化／主の強化</li>
+<li>拠点化は地図の点だけ。毎日DPが入り、得る魔物を選べる</li>
+<li>取り返されたら拠点は失う。魔物は戻る</li></ul></details>
+
+<details open><summary>王国の反撃</summary><ul>
+<li>警戒度を<b>メーター</b>で見せる。反撃の大きさはこれで決まる</li>
+<li>王国も考えて動く。狙うのは：留守の魔物が少ない所・守りが薄い拠点・攻めてきた方角</li>
+<li>大きく攻めずに危険度が低ければ、反撃も小さい</li></ul></details>
+
+<details><summary>まだ決めてないこと</summary><ul class="q">
+<li>拠点のおおよその数・土地の種類（森・山・川・雪…）</li>
+<li>遠征の日数の決まり方（距離？）</li>
+<li>防衛モードの「30日の契約」→ 今は触らない</li></ul></details>
+</body></html>
