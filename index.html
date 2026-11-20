@@ -7242,7 +7242,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.256（11/21 00:16）";
+const VER20 = "No.257（11/21 06:14）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -11380,7 +11380,7 @@ function overlay25(now){ const ov = B3.ov, r = ov.getBoundingClientRect(), dpr =
   if (ov.width !== Math.round(r.width * dpr) || ov.height !== Math.round(r.height * dpr)) { ov.width = Math.round(r.width * dpr); ov.height = Math.round(r.height * dpr); }
   const g = ov.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, r.width, r.height);
   g.textAlign = "center"; g.lineJoin = "round";
-  const head = a => { const A = a.w; const sz = B3.size[a.key] || 1; return B3.C.toScreen([a.x, (a.id === "lord" ? 2.6 : 1.9) * sz + 0.2, a.z]); };
+  const head = a => { const A = a.w; const sz = B3.size[a.key] || 1; return B3.C.toScreen([a.x, (a.id === "lord" ? 2.6 : 1.9) * sz + 0.2 + Math.max(0, -(a.sink || 0)), a.z]); };
   // 体力と名前
   // 札（体力と名前）は重ならないように：手前の子から置き、ぶつかったら上へずらす。ずらしきれない名前は出さない
   const boxes = [], hit = (x0, y0, x1, y1) => boxes.some(b => x0 < b[2] && x1 > b[0] && y0 < b[3] && y1 > b[1]);
@@ -11422,7 +11422,7 @@ function b3Mount25(){
     const info = { set textContent(v){ const e = box.querySelector(".b3info"); if (e) e.textContent = v; } };
     const cv = box.querySelector(".b3cv"); dw.appendChild(box);
     B3 = { box, cv, ov: box.querySelector(".b3ov"), N, A: {}, fx: [], pops: [], tgt: {}, ang: {}, spots: {}, hi: (N.hit25 || []).length, size: {}, room: null, roomKey: null, pin: null, follow: true, now: 0 };
-    const C = Cave3D24(cv, info, { vk: window.__CV3DVK || 1, actors: frame25, noActorBake: true }); B3.C = C; if (!C) { b3Close25(); return; }
+    const C = Cave3D24(cv, info, { vk: window.__INVADE25 ? 1.5 : (window.__CV3DVK || 1), actors: frame25, noActorBake: true }); B3.C = C; if (!C) { b3Close25(); return; }
     C.st.scale = 2; C.st.zoom = 0.9;
     const kinds = kinds25(); kinds.forEach(k => { const c = { sp: k.sp, evo: k.evo }; B3.size[k.key] = Math.max(0.8, sclOf24(c) * (SPBOUND24[kitOf24(k.sp)][1] / 1.6)); });
     const i = focus25(); B3.room = i; B3.roomKey = roomKey25(i); setRoom25(i); C.setKinds(kinds, bakeRoom25());
