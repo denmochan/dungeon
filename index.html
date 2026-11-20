@@ -7242,7 +7242,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.249（11/20 11:19）";
+const VER20 = "No.250（11/20 14:37）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -9583,12 +9583,12 @@ const ROOMS24 = {
   float ln=sEll(q-vec3(0.35,1.22,0),vec3(0.085,0.11,0.085));if(ln<r.x)r=vec2(ln,17.0);float fr=max(max(abs(length((q-vec3(0.35,1.22,0)).xz)-0.095)-0.012,abs(q.y-1.22)-0.13),0.095-abs(q.y-1.22));if(fr<r.x)r=vec2(fr,18.0);}
  CRATES`, lights: `LIGHT(-0.85,1.22,0.9,1.0,0.66,0.32,3.0) LANTERNL`, keepDummy: false },
  sleep: { props: `
- for(int i=0;i<5;i++){vec3 c=i==0?vec3(-4.6,0.0,-2.3):i==1?vec3(-1.9,0.0,-3.5):i==2?vec3(2.4,0.0,-3.4):i==3?vec3(4.9,0.0,-1.3):vec3(-5.0,0.0,1.6);vec3 q=p-c;
-  float fr=sRBox(q-vec3(0,0.1,0),vec3(1.02,0.1,0.7),0.04);if(fr<r.x)r=vec2(fr,12.0);float b=sRBox(q-vec3(0,0.25,0),vec3(0.96,0.09,0.64),0.08)+(vnoise(q*14.0)-0.5)*0.04;if(b<r.x)r=vec2(b,13.0);
-  float bl=sRBox(q-vec3(0.24,0.35,0.0),vec3(0.62,0.045,0.62),0.05)+(vnoise(q*5.0)-0.5)*0.02;if(i!=4&&bl<r.x)r=vec2(bl,27.0);float pl=sEll(q-vec3(-0.66,0.38,0.0),vec3(0.2,0.09,0.36));if(pl<r.x)r=vec2(pl,15.0);}
+ for(int i=0;i<5;i++){vec3 c=i==0?vec3(-4.6,0.0,-2.3):i==1?vec3(-1.9,0.0,-3.5):i==2?vec3(2.4,0.0,-3.4):i==3?vec3(4.9,0.0,-1.3):vec3(-5.0,0.0,1.6);vec3 q=p-c;float an=(float(i)-2.0)*0.22;q.xz=mat2(cos(an),-sin(an),sin(an),cos(an))*q.xz;
+  float fr=min(sTap(q,vec3(-1.05,0.13,-0.68),vec3(1.05,0.13,-0.68),0.09,0.09),sTap(q,vec3(-1.05,0.13,0.68),vec3(1.05,0.13,0.68),0.09,0.09));fr=min(fr,sTap(q,vec3(-1.08,0.0,-0.72),vec3(-1.08,0.62,-0.72),0.08,0.07));fr=min(fr,sTap(q,vec3(-1.08,0.0,0.72),vec3(-1.08,0.62,0.72),0.08,0.07));fr=min(fr,sTap(q,vec3(-1.08,0.5,-0.72),vec3(-1.08,0.5,0.72),0.07,0.07));fr=min(fr,sTap(q,vec3(1.05,0.0,-0.68),vec3(1.05,0.24,-0.68),0.07,0.06));fr=min(fr,sTap(q,vec3(1.05,0.0,0.68),vec3(1.05,0.24,0.68),0.07,0.06));fr+=(vnoise(q*vec3(14.0,4.0,4.0))-0.5)*0.02;if(fr<r.x)r=vec2(fr,12.0);float b=sRBox(q-vec3(0,0.26,0),vec3(0.98,0.12,0.6),0.12)+(vnoise(q*11.0)-0.5)*0.06+(vnoise(q*vec3(30.0,8.0,30.0))-0.5)*0.035;if(b<r.x)r=vec2(b,13.0);
+  float bl=sRBox(q-vec3(0.3,0.31,0.0),vec3(0.66,0.11,0.66),0.07)+0.03*sin(q.x*7.0+q.z*2.0)*smoothstep(0.3,0.65,abs(q.z))+(vnoise(q*6.0)-0.5)*0.025;bl=max(bl,0.16-q.y);if(i!=4&&bl<r.x)r=vec2(bl,27.0);float fo=sRBox(q-vec3(-0.34,0.43,0.0),vec3(0.08,0.035,0.62),0.03);if(i!=4&&fo<r.x)r=vec2(fo,27.0);float pl=sEll(q-vec3(-0.72,0.44,0.0),vec3(0.22,0.1,0.38))+0.025*smoothstep(0.0,0.2,0.2-length(q.yz-vec2(0.52,0.0)));if(pl<r.x)r=vec2(pl,15.0);}
  FIREPIT(0.0,-0.9)
  {vec3 q=p-vec3(0.0,0.0,-0.9);float cl=abs(length(q-vec3(0,0.75,0))-0.34)-0.03;cl=max(cl,q.y-0.82);if(cl<r.x)r=vec2(cl,12.0);
-  float sp=sEll(q-vec3(0,0.78,0),vec3(0.3,0.02,0.3));if(sp<r.x)r=vec2(sp,25.0);
+  float sp=sEll(q-vec3(0,0.78,0),vec3(0.3,0.02,0.3));if(sp<r.x)r=vec2(sp,22.0);
   for(int i=0;i<3;i++){float a=float(i)*2.094+0.5;vec3 e=vec3(cos(a)*0.62,0.0,sin(a)*0.62);float lg=sTap(q,e,vec3(0,1.45,0),0.03,0.025);if(lg<r.x)r=vec2(lg,12.0);}
   float ch=sTap(q,vec3(0,1.45,0),vec3(0,1.1,0),0.012,0.012);if(ch<r.x)r=vec2(ch,18.0);}
  CRATES`, lights: `LIGHT(0.0,0.6,-0.9,1.0,0.55,0.22,3.6) LANTERNL`, keepDummy: false }
@@ -10742,7 +10742,7 @@ const GATE25 = (x0, z0, side) => { const x = (+x0).toFixed(2), z = (+z0).toFixed
   return ` {vec3 q=${q};float vd=sRBox(q-vec3(0.0,1.35,-0.45),vec3(1.55,1.35,0.4),0.05);if(vd<r.x)r=vec2(vd,26.0);
   float fr=min(sTap(q,vec3(-1.75,0.0,0.0),vec3(-1.75,2.85,0.0),0.17,0.15),sTap(q,vec3(1.75,0.0,0.0),vec3(1.75,2.85,0.0),0.17,0.15));
   fr=min(fr,sTap(q,vec3(-2.05,2.85,0.0),vec3(2.05,2.85,0.0),0.19,0.19));fr=min(fr,sTap(q,vec3(-1.75,2.3,0.05),vec3(-1.1,2.85,0.05),0.07,0.07));fr=min(fr,sTap(q,vec3(1.75,2.3,0.05),vec3(1.1,2.85,0.05),0.07,0.07));
-  fr+=1e3;if(fr<r.x)r=vec2(fr,12.0);
+  if(fr<r.x)r=vec2(fr,12.0);
   float st=1e3;for(int i=0;i<7;i++){float a=float(i)/6.0*3.1416;st=min(st,sEll(q-vec3(cos(a)*2.35,max(0.0,sin(a))*3.25,-0.15),vec3(0.42,0.38,0.32)));}st+=(vnoise(q*7.0)-0.5)*0.05;if(st<r.x)r=vec2(st,10.0);}`; };
 // 巣：わらの輪とたまご（s=大きさ、n=たまごの数）
 const NEST25 = (x, z, s, n) => { const X = (+x).toFixed(2), Z = (+z).toFixed(2), S = (+s).toFixed(2);
@@ -10751,17 +10751,17 @@ const NEST25 = (x, z, s, n) => { const X = (+x).toFixed(2), Z = (+z).toFixed(2),
   for(int i=0;i<3;i++){if(i>=${n})break;vec3 c=i==0?vec3(-0.32,0.48,-0.14):i==1?vec3(0.34,0.46,0.02):vec3(0.0,0.44,0.4);vec3 e=q-c;e.xy=mat2(0.96,0.28,-0.28,0.96)*e.xy;float eg=sEll(e,vec3(0.3,0.4,0.3));if(eg*${S}<r.x)r=vec2(eg*${S},15.0);}}`; };
 // 見張り：壁に立てかけたはしごと、上の足場
 const LADDER25 = (x, z, side) => { const X = (+x).toFixed(2), Z = (+z).toFixed(2), Q = side ? `vec3(p.z-(${Z}),p.y,-(p.x-(${X})))` : `(p-vec3(${X},0.0,${Z}))`;
-  return ` {vec3 q=${Q}/1.35;vec3 A=vec3(0.0,0.0,0.0),B=vec3(0.0,4.4,-1.5);float ld=1e3;
+  return ` {vec3 q=${Q}/1.55;vec3 A=vec3(0.0,0.0,0.0),B=vec3(0.0,4.4,-1.5);float ld=1e3;
   for(int s=0;s<2;s++){float sx=s==0?-0.42:0.42;ld=min(ld,sTap(q,A+vec3(sx,0.0,0.0),B+vec3(sx,0.0,0.0),0.065,0.06));}
-  for(int i=1;i<10;i++){float t=float(i)/10.0;vec3 c=mix(A,B,t);ld=min(ld,sTap(q,c-vec3(0.42,0.0,0.0),c+vec3(0.42,0.0,0.0),0.04,0.04));}ld*=1.35;if(ld<r.x)r=vec2(ld,12.0);
-  float pf=sRBox(q-vec3(0.0,4.35,-2.1),vec3(1.3,0.07,0.75),0.02)*1.35;if(pf<r.x)r=vec2(pf,22.0);
+  for(int i=1;i<10;i++){float t=float(i)/10.0;vec3 c=mix(A,B,t);ld=min(ld,sTap(q,c-vec3(0.42,0.0,0.0),c+vec3(0.42,0.0,0.0),0.04,0.04));}ld*=1.55;if(ld<r.x)r=vec2(ld,12.0);
+  float pf=sRBox(q-vec3(0.0,4.35,-2.1),vec3(1.3,0.07,0.75),0.02)*1.55;if(pf<r.x)r=vec2(pf,22.0);
   float po=min(sTap(q,vec3(-1.15,0.0,-2.65),vec3(-1.15,4.3,-2.65),0.08,0.08),sTap(q,vec3(1.15,0.0,-2.65),vec3(1.15,4.3,-2.65),0.08,0.08));po=min(po,sTap(q,vec3(-1.15,0.0,-1.45),vec3(-1.15,4.3,-1.45),0.08,0.08));po=min(po,sTap(q,vec3(1.15,0.0,-1.45),vec3(1.15,4.3,-1.45),0.08,0.08));
-  po=min(po,sTap(q,vec3(-1.25,4.75,-1.4),vec3(1.25,4.75,-1.4),0.04,0.04));po=min(po,sTap(q,vec3(-1.25,4.42,-1.4),vec3(-1.25,4.75,-1.4),0.04,0.04));po=min(po,sTap(q,vec3(1.25,4.42,-1.4),vec3(1.25,4.75,-1.4),0.04,0.04));po*=1.35;if(po<r.x)r=vec2(po,12.0);
-  float lt=sRBox(q-vec3(0.85,4.62,-1.95),vec3(0.13,0.18,0.13),0.03);if(lt*1.35<r.x)r=vec2(lt*1.35,18.0);float gl=sEll(q-vec3(0.85,4.62,-1.95),vec3(0.09,0.13,0.09));if(gl*1.35<r.x)r=vec2(gl*1.35,17.0);}`; };
+  po=min(po,sTap(q,vec3(-1.25,4.75,-1.4),vec3(1.25,4.75,-1.4),0.04,0.04));po=min(po,sTap(q,vec3(-1.25,4.42,-1.4),vec3(-1.25,4.75,-1.4),0.04,0.04));po=min(po,sTap(q,vec3(1.25,4.42,-1.4),vec3(1.25,4.75,-1.4),0.04,0.04));po*=1.55;if(po<r.x)r=vec2(po,12.0);
+  float lt=sRBox(q-vec3(0.85,4.62,-1.95),vec3(0.13,0.18,0.13),0.03);if(lt*1.55<r.x)r=vec2(lt*1.55,18.0);float gl=sEll(q-vec3(0.85,4.62,-1.95),vec3(0.09,0.13,0.09));if(gl*1.55<r.x)r=vec2(gl*1.55,17.0);}`; };
 // 入口のとげバリケード（丸太に、とがった杭を×に組む）
 const BARR25 = (x, z) => { const X = (+x).toFixed(2), Z = (+z).toFixed(2);
   return ` {vec3 q=(p-vec3(${X},0.0,${Z}))/1.6;float bl=sTap(q,vec3(-1.9,0.5,0.0),vec3(1.9,0.5,0.0),0.13,0.13);
-  for(int i=0;i<5;i++){float x0=-1.6+float(i)*0.8;bl=min(bl,sTap(q,vec3(x0,0.0,-0.75),vec3(x0,1.15,0.75),0.075,0.008));bl=min(bl,sTap(q,vec3(x0,0.0,0.75),vec3(x0,1.15,-0.75),0.075,0.008));}
+  bl=min(bl,sTap(q,vec3(-1.9,0.5,0.0),vec3(1.9,0.5,0.0),0.17,0.17));for(int i=0;i<5;i++){float x0=-1.6+float(i)*0.8;bl=min(bl,sTap(q,vec3(x0-0.5,0.0,1.25),vec3(x0+0.55,1.45,-1.35),0.09,0.005));bl=min(bl,sTap(q,vec3(x0+0.5,0.0,1.25),vec3(x0-0.55,1.45,-1.35),0.09,0.005));}
   bl+=(vnoise(q*9.0)-0.5)*0.02;bl*=1.6;if(bl<r.x)r=vec2(bl,12.0);}`; };
 // 見張り部屋の小物：地図の机・腰かけ・たる・遠めがね
 const WATCH25 = () => ` {vec3 q=p-vec3(11.0,0.0,3.6);float tb=sRBox(q-vec3(0.0,0.85,0.0),vec3(1.1,0.06,0.7),0.02);if(tb<r.x)r=vec2(tb,22.0);
@@ -10835,9 +10835,9 @@ const OREROCK25 = (x, z) => { const X = (+x).toFixed(2), Z = (+z).toFixed(2);
   return ` {vec3 q=(p-vec3(${X},0.0,${Z}))/1.45;vec2 rr=vec2(1e3,0.0);
   float rk=sEll(q-vec3(0.0,0.9,-0.5),vec3(2.5,1.55,1.75));rk=smin(rk,sEll(q-vec3(-1.6,0.4,0.4),vec3(1.0,0.6,0.8)),0.35);rk=smin(rk,sEll(q-vec3(1.7,0.35,0.3),vec3(0.9,0.5,0.7)),0.35);
   rk+=(vnoise(q*3.2)-0.5)*0.2+(vnoise(q*9.0)-0.5)*0.04;if(rk<rr.x)rr=vec2(rk,24.0);
-  float c1=min(sTap(q,vec3(-0.35,1.5,0.1),vec3(-0.5,3.9,0.35),0.62,0.02),sTap(q,vec3(-0.9,1.35,0.5),vec3(-1.35,2.75,0.95),0.33,0.02));if(c1<rr.x)rr=vec2(c1,31.0);
-  float c2=min(sTap(q,vec3(-1.6,1.1,0.2),vec3(-2.0,3.0,0.45),0.48,0.02),sTap(q,vec3(1.35,0.75,0.75),vec3(1.75,1.85,1.25),0.32,0.02));if(c2<rr.x)rr=vec2(c2,33.0);
-  float c3=min(sTap(q,vec3(0.75,1.25,0.45),vec3(1.0,2.95,0.8),0.5,0.02),sTap(q,vec3(0.15,0.9,1.05),vec3(0.3,1.75,1.6),0.26,0.02));if(c3<rr.x)rr=vec2(c3,32.0);
+  float c1=min(min(sTap(q,vec3(-0.35,1.5,0.1),vec3(-0.35,1.5,0.1)+(vec3(-0.5,3.9,0.35)-vec3(-0.35,1.5,0.1))*0.7,0.496,0.446),sTap(q,vec3(-0.35,1.5,0.1)+(vec3(-0.5,3.9,0.35)-vec3(-0.35,1.5,0.1))*0.7,vec3(-0.5,3.9,0.35),0.446,0.03)),min(sTap(q,vec3(-0.9,1.35,0.5),vec3(-0.9,1.35,0.5)+(vec3(-1.35,2.75,0.95)-vec3(-0.9,1.35,0.5))*0.7,0.264,0.238),sTap(q,vec3(-0.9,1.35,0.5)+(vec3(-1.35,2.75,0.95)-vec3(-0.9,1.35,0.5))*0.7,vec3(-1.35,2.75,0.95),0.238,0.03)));if(c1<rr.x)rr=vec2(c1,31.0);
+  float c2=min(min(sTap(q,vec3(-1.6,1.1,0.2),vec3(-1.6,1.1,0.2)+(vec3(-2.0,3.0,0.45)-vec3(-1.6,1.1,0.2))*0.7,0.384,0.346),sTap(q,vec3(-1.6,1.1,0.2)+(vec3(-2.0,3.0,0.45)-vec3(-1.6,1.1,0.2))*0.7,vec3(-2.0,3.0,0.45),0.346,0.03)),min(sTap(q,vec3(1.35,0.75,0.75),vec3(1.35,0.75,0.75)+(vec3(1.75,1.85,1.25)-vec3(1.35,0.75,0.75))*0.7,0.256,0.230),sTap(q,vec3(1.35,0.75,0.75)+(vec3(1.75,1.85,1.25)-vec3(1.35,0.75,0.75))*0.7,vec3(1.75,1.85,1.25),0.230,0.03)));if(c2<rr.x)rr=vec2(c2,33.0);
+  float c3=min(min(sTap(q,vec3(0.75,1.25,0.45),vec3(0.75,1.25,0.45)+(vec3(1.0,2.95,0.8)-vec3(0.75,1.25,0.45))*0.7,0.400,0.360),sTap(q,vec3(0.75,1.25,0.45)+(vec3(1.0,2.95,0.8)-vec3(0.75,1.25,0.45))*0.7,vec3(1.0,2.95,0.8),0.360,0.03)),min(sTap(q,vec3(0.15,0.9,1.05),vec3(0.15,0.9,1.05)+(vec3(0.3,1.75,1.6)-vec3(0.15,0.9,1.05))*0.7,0.208,0.187),sTap(q,vec3(0.15,0.9,1.05)+(vec3(0.3,1.75,1.6)-vec3(0.15,0.9,1.05))*0.7,vec3(0.3,1.75,1.6),0.187,0.03)));if(c3<rr.x)rr=vec2(c3,32.0);
   float hd=sTap(q,vec3(1.55,1.75,0.35),vec3(2.45,3.15,0.55),0.07,0.06);if(hd<rr.x)rr=vec2(hd,12.0);
   float ph=sTap(q,vec3(1.7,3.0,0.55),vec3(2.9,3.35,0.5),0.09,0.05);ph=min(ph,sTap(q,vec3(1.7,3.0,0.55),vec3(1.95,2.6,0.6),0.08,0.03));if(ph<rr.x)rr=vec2(ph,18.0);
   for(int i=0;i<6;i++){float fi=float(i);vec3 c=vec3(-2.6+fi*1.05+sin(fi*2.7)*0.3,0.1,1.3+cos(fi*1.9)*0.35);float k=sEll(q-c,vec3(0.24,0.16,0.2));if(k<rr.x)rr=vec2(k,24.0);
@@ -10883,7 +10883,7 @@ const HAI25 = (() => {
     { id: "nestS", name: "巣（たまご・端よせ）", g: "none", txt: NEST25(-9.5, -3.0, 1.7, 3) + NEST25(-11.0, 5.8, 1.25, 2) + NEST25(4.2, 4.2, 1.25, 3), light: "LIGHT(-9.5,1.8,-3.0,1.0,0.72,0.42,4.0)", foot: [[-9.5, -3.0, 2.4], [-11.0, 5.8, 1.8], [4.2, 4.2, 1.8]] },
     { id: "nestL", name: "巣（左よせ）", g: "none", txt: NEST25(-9.5, -3.0, 1.7, 3) + NEST25(-11.0, 5.8, 1.25, 2) + NEST25(-4.6, 5.6, 1.25, 3), light: "LIGHT(-9.5,1.8,-3.0,1.0,0.72,0.42,4.0)", foot: [[-9.5, -3.0, 2.4], [-11.0, 5.8, 1.8], [-4.6, 5.6, 1.8]] },
     { id: "nestR", name: "巣（右よせ）", g: "none", txt: NEST25(7.0, -2.8, 1.7, 3) + NEST25(12.2, 5.0, 1.25, 2) + NEST25(5.2, 5.8, 1.25, 3), light: "LIGHT(7.0,1.8,-2.8,1.0,0.72,0.42,4.0)", foot: [[7.0, -2.8, 2.4], [12.2, 5.0, 1.8], [5.2, 5.8, 1.8]] },
-    { id: "ladder", name: "見張りのはしごと足場", g: "none", txt: LADDER25(13.4, 5.0, 1), light: "LIGHT(15.4,5.2,5.0,0.75,0.85,1.0,3.4)", foot: [[13.6, 5.0, 1.4], [15.6, 5.0, 1.8]] },
+    { id: "ladder", name: "見張りのはしごと足場", g: "none", txt: LADDER25(12.9, 5.0, 1), light: "LIGHT(15.2,6.0,5.0,0.75,0.85,1.0,3.6)", foot: [[13.1, 5.0, 1.5], [15.4, 5.0, 2.0]] },
     { id: "watch2", name: "地図の机とたる・遠めがね", g: "none", txt: WATCH25(), light: "LIGHT(11.0,1.4,3.2,1.0,0.7,0.35,2.6)", foot: [[11.0, 3.6, 1.4], [9.7, 4.6, 0.5], [10.9, 7.3, 1.0], [13.0, 2.4, 0.7]] },
     { id: "barr", name: "とげのバリケード", g: "none", txt: BARR25(-4.4, -5.0) + BARR25(4.4, -5.0) + BARR25(-10.6, -3.4) + BARR25(10.6, -3.4), foot: [-7.2, -4.4, -1.6, 1.6, 4.4, 7.2, -13.4, -10.6, -7.8, 7.8, 10.6, 13.4].map((x, k) => [x, k < 6 ? -5.0 : -3.4, 1.2]) },
     { id: "throneB", name: "玉座の間（戦い・横向き）", g: "none", txt: THRONE25("B"), light: "LIGHT(9.4,2.1,-3.0,0.7,0.3,1.0,2.6) LIGHT(9.4,2.1,3.0,0.7,0.3,1.0,2.6) LIGHT(1.6,2.1,-3.0,0.7,0.3,1.0,2.2) LIGHT(1.6,2.1,3.0,0.7,0.3,1.0,2.2) LIGHT(12.0,4.2,0.0,0.75,0.35,1.0,3.0) LIGHT(4.5,2.0,0.0,1.0,0.55,0.3,2.0)",
@@ -10950,7 +10950,7 @@ const HAI25 = (() => {
         else { ti++; let rx = 0, rz = 0, ok = false;
           for (let s = 0; s < 24 && !ok; s++) { const ang = [0.55, 2.6, 0.95, 2.2, 0.25, 2.9, 1.25, 1.9][s % 8] + Math.floor(s / 8) * 0.18, rr = [2.2, 3.0, 3.8][Math.floor(s / 8)]; rx = cx + Math.cos(ang) * rr; rz = cz + Math.sin(ang) * rr * 0.85 - 0.5; ok = free(rx, rz, r * 0.8); }
           if (ok) { const L2 = [cx, cz]; c.mode = R() < 0.6 ? "slash" : "lift"; c.look = L2; c.r = Math.atan2(L2[0] - rx, L2[1] - rz); pos = [rx, rz]; } } }
-      if (!pos && e.act === "watch" && pi < perch.length) { const w = perch[pi++]; c.mode = "watch"; c.y = 5.9; c.look = [0, w[1]]; pos = w; }   // 見張り：はしごの上の足場から部屋を見る
+      if (!pos && e.act === "watch" && pi < perch.length) { const w = perch[pi++]; c.mode = "watch"; c.y = 6.7; c.look = [0, w[1]]; pos = w; }   // 見張り：はしごの上の足場から部屋を見る
       if (!pos && e.act === "nest" && ni < nests.length) { const n = nests[ni++]; c.mode = "nest"; c.y = 0.18 * n[2]; pos = [n[0], n[1] + 0.15]; }   // 巣ごもり：巣の上に座る
       if (!pos && e.act === "sleep" && bip && beds.length && bi < beds.length) { const b = beds[bi++]; c.mode = "sleep"; c.lie = true; c.r = 1.2; pos = [b[0] + 0.2, b[1]]; }
       if (!pos) { let bd = -1, nc = 0; for (let tries = 0; tries < 400 && nc < 14; tries++) { const x = (R() * 2 - 1) * (tries < 200 ? 14.5 : 17.5), z = (tries < 200 ? -3.5 + R() * 11.5 : -8.8 + R() * 18); if (!free(x, z, r)) continue; nc++; const d = taken.reduce((m, [tx, tz]) => Math.min(m, Math.hypot(x - tx, (z - tz) * 1.4)), 99); if (d > bd) { bd = d; pos = [x, z]; } } }   // 空いている所を何か所か試し、ほかの子からいちばん離れた所に置く（片側に寄らない）
@@ -11078,7 +11078,7 @@ function roomKind25(i){ const R = S.path[i] || {}; if (i === lordIdx(S)) return 
   return F.includes("train") ? "train" : F.includes("mine") ? "mine" : F.includes("bed") ? "bed" : R.fac === "mine" ? "mine" : R.fac === "bed" ? "bed" : R.fac === "train" ? "train" : F.includes("nest") || R.fac === "nest" ? "nest" : F.includes("watch") || R.fac === "watch" ? "watch" : F.includes("gate") || R.fac === "gate" ? "entry" : "plain"; }
 // 配った洞窟の絵（bg25/部屋の種類_c.png・_d.png）があれば、それを読み込む
 function setRoom25(i){ const C = B3.C; C.setRoom(B3.roomKey); const k = roomKind25(i); if (!BGSHIP25[k]) return; C.putBgImages(`bg25/${k}_c.webp?v=${BGSHIP25[k]}`, `bg25/${k}_d.webp?v=${BGSHIP25[k]}`, C.st.bgKey); }
-const BGSHIP25 = { train: "d81ee6b0", mine: "565ab686", bed: "97d392be", lord: "bb2cd4c0", plain: "ac727c96", nest: "55df6efe", watch: "1d11643f", entry: "8bc14818", train_mine: "30c326de", train_bed: "b26d41c5", train_nest: "fcd2fd21", train_watch: "075b341f", mine_bed: "22b273a0", mine_nest: "7996f6b3", mine_watch: "dd5dce5c", bed_nest: "b83f1a40", bed_watch: "d63fdc3f", nest_watch: "640361b6", lordday: "bb2cd4c0" };
+const BGSHIP25 = { train: "a0626023", mine: "a75a04d9", bed: "5a957785", lord: "8300d46a", plain: "6683282a", nest: "79d44eb4", watch: "46b0577d", entry: "52e41f17", train_mine: "e6d09ae2", train_bed: "07797128", train_nest: "d516a146", train_watch: "e1ad46e7", mine_bed: "fd1bfa8c", mine_nest: "ff6e8e1f", mine_watch: "72754dcf", bed_nest: "c0ed2d5f", bed_watch: "128be03b", nest_watch: "61532936", lordday: "8300d46a" };
 function roomKey25(i){ const on = {}; ROOMSET25[roomKind25(i)].forEach(k => on[k] = true); return HAI25.room(on); }
 // ---- 3Dのキャラの種類 ----
 const heroSp25 = h => (typeof heroId === "function" ? String(heroId(h)).replace(/\d+$/, "") : h.job) || "warrior";
@@ -11394,6 +11394,9 @@ document.addEventListener("click", ev => { const b = ev.target.closest && ev.tar
   window.STRIP24 = { bakeStrip, look, frames, progFor, progReady };
 })();
 
+/* 大型の細かい絵（hi/ に置く）：S=マスの大きさ、ppu=1単位の画素、w=[歩き絵1コマの幅,高さ,左上x,y] */
+const HI25 = {"dragon:0":{"S":320,"ppu":28.457,"v":"37e162","w":[164,134,32,106],"wS":240},"dragon:1":{"S":320,"ppu":27.834,"v":"fdf287","w":[177,142,26,98],"wS":240},"dragon:2":{"S":320,"ppu":27.314,"v":"acf980","w":[190,149,19,91],"wS":240},"bonedragon:0":{"S":320,"ppu":28.457,"v":"de7bb0","w":[163,133,32,107],"wS":240},"bonedragon:1":{"S":320,"ppu":27.834,"v":"32c9ca","w":[176,141,26,99],"wS":240},"bonedragon:2":{"S":320,"ppu":27.314,"v":"7fe28d","w":[189,149,19,91],"wS":240},"flamechimera:0":{"S":320,"ppu":29.179,"v":"31d397","w":[92,88,71,152],"wS":240},"flamechimera:1":{"S":320,"ppu":28.49,"v":"74440f","w":[99,92,68,148],"wS":240},"flamechimera:2":{"S":320,"ppu":27.916,"v":"9479de","w":[105,97,64,143],"wS":240},"maou:0":{"S":320,"ppu":26.933,"v":"7ca7ad","w":[94,129,73,107],"wS":240},"maou:1":{"S":320,"ppu":26.448,"v":"a3be25","w":[103,140,69,98],"wS":240},"maou:2":{"S":320,"ppu":24.444,"v":"b28a3d","w":[104,139,68,98],"wS":240},"elderdragon:0":{"S":320,"ppu":27.36,"v":"0fe34b","w":[107,149,69,88],"wS":240},"elderdragon:1":{"S":320,"ppu":26.836,"v":"385329","w":[130,162,50,78],"wS":240},"elderdragon:2":{"S":320,"ppu":26.4,"v":"4941ee","w":[140,178,47,56],"wS":240}};
+
 // ================= 25：昼のダンジョン画面を3Dにする（部屋を3D洞窟の写真の形で縦に並べる） =================
 // 部屋を押す＝選ぶ、もう一度＝のぞく、は今まで通り（部屋の札に .chall と data-room を付けているので、今の操作がそのまま効く）
 let day3dOn25 = (() => { try { return localStorage.getItem("day3d25") !== "0"; } catch (e) { return true; } })();
@@ -11413,9 +11416,11 @@ function dcol25(im, u, v){ if (!im.px) return [200, 160, 120]; let r = 0, g = 0,
   return [r / n, g / n, b / n]; }
 const dbip25 = sp => ["goblin", "skeleton", "imp", "kobold", "orc", "golem", "human", "demon", "gobx", "lich", "noble"].includes(kitOf24(sp));
 function dspr25(sp, evo){ const k = sp + ":" + evo; if (D3.spr[k] !== undefined) return D3.spr[k]; const L = typeof CHR3D24 !== "undefined" && CHR3D24[sp]; if (!L) return D3.spr[k] = null;
-  const im = new Image(); const o = { im, ok: false, ppu: (PPU25[k] || PPU25[sp + ":0"] || [36])[0], bip: dbip25(sp), foot: 122 };
-  im.onload = () => { try { const c = document.createElement("canvas"); c.width = c.height = 128; const g = c.getContext("2d"); g.drawImage(im, 0, 0); const d = g.getImageData(0, 0, 128, 128).data; let b = 0, t = 128; for (let y = 0; y < 128; y++) for (let x = 0; x < 128; x++) if (d[(y * 128 + x) * 4 + 3] > 128) { b = y; if (y < t) t = y; } o.foot = b; o.top = t; } catch (e) {} o.ok = true; };
-  im.src = L[Math.min(L.length - 1, evo)] || L[0]; return D3.spr[k] = o; }
+  // 大型は細かく焼いた絵（S px のマス）を使う。大きさ・足もとは 128 のマスに直して持つ
+  const HI = typeof HI25 !== "undefined" && HI25[k], hs = HI ? HI.S / 128 : 1;
+  const im = new Image(); const o = { im, ok: false, ppu: HI ? HI.ppu / hs : (PPU25[k] || PPU25[sp + ":0"] || [36])[0], bip: dbip25(sp), foot: 122, hs };
+  im.onload = () => { try { const N = Math.round(128 * hs), c = document.createElement("canvas"); c.width = c.height = N; const g = c.getContext("2d"); g.drawImage(im, 0, 0); const d = g.getImageData(0, 0, N, N).data; let b = 0, t = N; for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (d[(y * N + x) * 4 + 3] > 128) { b = y; if (y < t) t = y; } o.foot = b / hs; o.top = t / hs; } catch (e) {} o.ok = true; };
+  im.src = HI ? "hi/" + sp + "_" + evo + "_i.webp?v=" + HI.v : L[Math.min(L.length - 1, evo)] || L[0]; return D3.spr[k] = o; }
 // ---- 魔物の軽いAI：仲間とからむ（寄って話す・強い子についていく）＋仕事の流れ（鉱石を運ぶ・訓練の合間に休む） ----
 const TALK25 = [["今日も掘ったな", "腕がパンパンだ"], ["勇者、また来るかな", "来たら返り討ちだ"], ["腹へった…", "あとで鍋だな"], ["主さま、こわいよな", "しっ、聞こえるぞ"],
   ["その傷どうした？", "訓練でな"], ["いい石出た？", "まあまあだな"], ["眠い…", "おれもだ"], ["新入りか？", "よろしくな"], ["昨日の勇者、強かったな", "次は負けねえ"], ["ここ、住みやすいな", "主さまのおかげだ"]];
@@ -11528,9 +11533,9 @@ function dpile25(g, R, W, H){ const P = R.pile; if (!P || !DPILE25) return; cons
 // 跳ねて進む子の、6コマそれぞれの高さ（影を小さく薄くする）
 const HOP25 = { slime: [0, 0.15, 0.65, 1.0, 0.6, 0.1], mimic: [0, 0.15, 0.7, 1.0, 0.55, 0.1], myconid: [0, 0.15, 0.65, 1.0, 0.55, 0.1], gargoyle: [0, 0.15, 0.7, 1.0, 0.55, 0.1], eye: [0.5, 0.9, 1, 0.5, 0.1, 0], ghost: [0.5, 0.9, 1, 0.5, 0.1, 0], mindlord: [0.5, 0.9, 1, 0.5, 0.1, 0] };
 // 歩く18コマ（正面6・背中6・横6）
-function dwalk25(sp, evo){ const k = "walk:" + sp + ":" + evo; if (D3.spr[k] !== undefined) return D3.spr[k]; const L = typeof CHRWALK25 !== "undefined" && CHRWALK25[sp]; const e = L && (L[evo] || L[0]); if (!e) return D3.spr[k] = null;
-  const A = Array.isArray(e) ? e : [e, 128, 128, 0, 0], im = new Image(), o = D3.spr[k] = { im, ok: false, cw: A[1], ch: A[2], ox: A[3], oy: A[4] }; im.onload = () => { try { const c = document.createElement("canvas"); c.width = im.width; c.height = im.height; const g = c.getContext("2d"); g.drawImage(im, 0, 0); const d = g.getImageData(0, 0, im.width, im.height).data, B = [];
-    for (let r = 0; r < 13; r++) { let b = -1; for (let y = 0; y < o.ch; y++) for (let x = 0; x < o.cw; x++) if (d[((r * o.ch + y) * im.width + x) * 4 + 3] > 128) b = y; if (b >= 0) B.push(b); } B.sort((a, b) => a - b); if (B.length) o.foot = o.oy + B[B.length >> 1]; } catch (e) {} o.ok = true; }; im.src = A[0]; return o; }
+function dwalk25(sp, evo){ const k = "walk:" + sp + ":" + evo; if (D3.spr[k] !== undefined) return D3.spr[k]; const L = typeof CHRWALK25 !== "undefined" && CHRWALK25[sp], HI = typeof HI25 !== "undefined" && HI25[sp + ":" + evo]; const e = HI && HI.w ? ["hi/" + sp + "_" + evo + "_w.webp?v=" + HI.v, ...HI.w] : L && (L[evo] || L[0]); if (!e) return D3.spr[k] = null;
+  const A = Array.isArray(e) ? e : [e, 128, 128, 0, 0], im = new Image(), o = D3.spr[k] = { im, ok: false, cw: A[1], ch: A[2], ox: A[3], oy: A[4], hs: HI && HI.w ? (HI.wS || HI.S) / 128 : 1 }; im.onload = () => { try { const c = document.createElement("canvas"); c.width = im.width; c.height = im.height; const g = c.getContext("2d"); g.drawImage(im, 0, 0); const d = g.getImageData(0, 0, im.width, im.height).data, B = [];
+    for (let r = 0; r < 13; r++) { let b = -1; for (let y = 0; y < o.ch; y++) for (let x = 0; x < o.cw; x++) if (d[((r * o.ch + y) * im.width + x) * 4 + 3] > 128) b = y; if (b >= 0) B.push(b); } B.sort((a, b) => a - b); if (B.length) o.foot = (o.oy + B[B.length >> 1]) / o.hs; } catch (e) {} o.ok = true; }; im.src = A[0]; return o; }
 // 掘るコマ（横向き4コマ）：つるはしの当たる点 hx,hy（絵の中の位置）つき
 function dmine25(sp, evo){ const k = "mine:" + sp + ":" + evo; if (D3.spr[k] !== undefined) return D3.spr[k]; const L = typeof CHRMINE25 !== "undefined" && CHRMINE25[sp]; const e = L && (L[evo] || L[0]); if (!e) return D3.spr[k] = null;
   const im = new Image(), o = D3.spr[k] = { im, ok: false, hx: e[1], hy: e[2] }; im.onload = () => { o.ok = true; }; im.src = e[0]; return o; }
@@ -11558,7 +11563,7 @@ function droom25(i){ const kind = roomKind25(i), on = {}; ROOMSET25[kind].forEac
   return D3.act[i] = { sig, kind, acts, OB, beds: BEDS, nests: NESTS }; }
 // ---- 手前に立つ物（岩・柱・たいまつ・壁）のうしろに入った子を隠す ----
 // bg25/<部屋>_o.webp：半分の大きさ、明るさ＝カメラからの距離（255は床で、隠さない）
-const OCCV25 = {"bed":"ffd137","bed_nest":"38ae9c","bed_watch":"980c89","entry":"b680a7","lord":"7a49ae","lordday":"7a49ae","mine":"ab3c18","mine_bed":"8c45b2","mine_nest":"cb8149","mine_watch":"2d8182","nest":"ebbb5c","nest_watch":"5348d0","plain":"d6ca4a","train":"ac50f4","train_bed":"def9ce","train_mine":"3d956e","train_nest":"b771f9","train_watch":"02078c","watch":"1491ee"};
+const OCCV25 = {"bed":"cdcd9a","bed_nest":"2c664d","bed_watch":"212811","entry":"02e63e","lord":"33c3e1","lordday":"33c3e1","mine":"1bf5cb","mine_bed":"ecbda4","mine_nest":"a4afc8","mine_watch":"aa6931","nest":"353296","nest_watch":"a85f90","plain":"d8547b","train":"4da812","train_bed":"e480b6","train_mine":"0ab48c","train_nest":"8f5d0a","train_watch":"f9466e","watch":"400bc3"};
 function docc25(bk){ const k = "occ:" + bk; if (D3.img[k]) return D3.img[k]; const o = D3.img[k] = { ok: 0 }; if (!OCCV25[bk]) return o;
   const im = new Image(); im.onload = () => { try { const c = document.createElement("canvas"); c.width = im.width; c.height = im.height; const g = c.getContext("2d"); g.drawImage(im, 0, 0);
     const d = g.getImageData(0, 0, im.width, im.height).data, q = new Uint8Array(im.width * im.height); for (let j = 0; j < q.length; j++) q[j] = d[j * 4];
@@ -11665,18 +11670,18 @@ function dcard25(card, i, now, dt){ DRT25.n++;
       if (typeof a.ai !== "number" || Math.abs(q - a.ai) > 0.75) a.ai = Math.round(q);
       if (a.wsg === undefined || (sg !== a.wsg && Math.abs(ph) > 0.2 && Math.PI - Math.abs(ph) > 0.2)) a.wsg = sg; const flip = a.ai > 0 && a.ai < 12 && a.wsg;
       if (!DRT25.bad) { RT = drt25(a.sp, a.evo, a.ai, wph); if (RT) wflip = flip; }
-      else if (WS && WS.ok && WS.im.height >= WS.ch * 13) { RT = { im: WS.im, sx: wph * WS.cw, sy: a.ai * WS.ch, w: WS.cw, h: WS.ch, ox: WS.ox, oy: WS.oy + (WS.foot != null ? Math.round(o.foot - WS.foot) : 0), fi: a.ai * 6 + wph }; wflip = flip; } }
+      else if (WS && WS.ok && WS.im.height >= WS.ch * 13) { RT = { im: WS.im, sx: wph * WS.cw, sy: a.ai * WS.ch, w: WS.cw, h: WS.ch, ox: WS.ox, oy: WS.oy + (WS.foot != null ? Math.round((o.foot - WS.foot) * WS.hs) : 0), fi: a.ai * 6 + wph, hs: WS.hs }; wflip = flip; } }
     const F = MI ? [0, 4, 1.1] : DFR25[st], fr = RT ? (RT.fi || 0) : WK ? a.wd * 6 + wph : F[0] + Math.floor(((now + a.ph) / F[2] * F[1]) % F[1]); const SRC = MI ? MI.im : RT ? RT.im : WK ? WK.im : o.im;
     const lum = dlum25(bg, p[0], p[1] - 0.04), br = Math.max(a.lord ? 0.8 : 0.42, Math.min(1.05, 0.3 + lum * 2.2));
     g.save(); { const sx = MI ? fx2 : fx, hop = a.walking && !o.bip && HOP25[kitOf24(a.sp)] ? HOP25[kitOf24(a.sp)][Math.floor((a.dist || 0) / 0.4 * 6) % 6] : 0, rx = Math.max(4, ((a.rr || 0.4) / 0.85) * p[2] * W * 0.85 * DAYK25) * (1 - hop * 0.5), ry = rx * 0.36, cy = fy - ry * 0.35;
       g.save(); g.translate(sx, cy); g.scale(1, ry / rx); const sg = g.createRadialGradient(0, 0, 0, 0, 0, rx); sg.addColorStop(0, `rgba(0,0,0,${(0.5 * (1 - hop * 0.6)).toFixed(2)})`); sg.addColorStop(0.55, `rgba(0,0,0,${(0.32 * (1 - hop * 0.6)).toFixed(2)})`); sg.addColorStop(1, "rgba(0,0,0,0)"); g.fillStyle = sg; g.beginPath(); g.arc(0, 0, rx, 0, 7); g.fill(); g.restore(); }
     const lc = dcol25(bg, p[0], p[1] - 0.02), lm = Math.max(lc[0], lc[1], lc[2], 1), lt = lc.map(v => Math.round(v / lm * 6) / 6);   // 光の色（明るさをのぞいた色み）
     const bq = Math.round(br * 20) / 20, tk = (SRC.src || SRC.id) + "|" + fr + "|" + bq + "|" + lt.join(","), TC = D3.tc || (D3.tc = new Map()); let T = TC.get(tk);
-    if (!T) { if (TC.size > 600) TC.clear(); T = document.createElement("canvas"); T.width = T.height = 128; const tg = T.getContext("2d"), put = () => RT ? (RT.w ? tg.drawImage(RT.im, RT.sx, RT.sy, RT.w, RT.h, RT.ox, RT.oy, RT.w, RT.h) : tg.drawImage(RT.im, RT.ox, RT.oy)) : tg.drawImage(SRC, fr * 128, 0, 128, 128, 0, 0, 128, 128); put();
-      tg.globalCompositeOperation = "multiply"; tg.fillStyle = `rgba(${Math.round(lt[0] * 255)},${Math.round(lt[1] * 255)},${Math.round(lt[2] * 255)},0.45)`; tg.fillRect(0, 0, 128, 128); tg.globalCompositeOperation = "destination-in"; put();
-      if (bq < 0.99) { tg.globalCompositeOperation = "source-atop"; tg.fillStyle = `rgba(16,9,5,${(1 - bq).toFixed(2)})`; tg.fillRect(0, 0, 128, 128); }
-      else if (bq > 1.01) { tg.globalCompositeOperation = "source-atop"; tg.fillStyle = `rgba(255,190,110,${((bq - 1) * 2).toFixed(2)})`; tg.fillRect(0, 0, 128, 128); } TC.set(tk, T); }
-    g.translate(MI ? fx2 : fx, fy); if (MI ? mdir < 0 : (WK || RT) ? wflip : a.face < 0) g.scale(-1, 1); g.drawImage(T, 0, 0, 128, 128, -s / 2, -(o.foot + 1) * k, s, s); g.restore();
+    if (!T) { if (TC.size > 600) TC.clear(); const HS = RT ? (RT.hs || 1) : (WK || MI ? 1 : (o.hs || 1)), N = Math.round(128 * HS); T = document.createElement("canvas"); T.width = T.height = N; const tg = T.getContext("2d"), put = () => RT ? (RT.w ? tg.drawImage(RT.im, RT.sx, RT.sy, RT.w, RT.h, RT.ox, RT.oy, RT.w, RT.h) : tg.drawImage(RT.im, RT.ox, RT.oy)) : tg.drawImage(SRC, fr * N, 0, N, N, 0, 0, N, N); put();
+      tg.globalCompositeOperation = "multiply"; tg.fillStyle = `rgba(${Math.round(lt[0] * 255)},${Math.round(lt[1] * 255)},${Math.round(lt[2] * 255)},0.45)`; tg.fillRect(0, 0, T.width, T.height); tg.globalCompositeOperation = "destination-in"; put();
+      if (bq < 0.99) { tg.globalCompositeOperation = "source-atop"; tg.fillStyle = `rgba(16,9,5,${(1 - bq).toFixed(2)})`; tg.fillRect(0, 0, T.width, T.height); }
+      else if (bq > 1.01) { tg.globalCompositeOperation = "source-atop"; tg.fillStyle = `rgba(255,190,110,${((bq - 1) * 2).toFixed(2)})`; tg.fillRect(0, 0, T.width, T.height); } TC.set(tk, T); }
+    g.translate(MI ? fx2 : fx, fy); if (MI ? mdir < 0 : (WK || RT) ? wflip : a.face < 0) g.scale(-1, 1); g.drawImage(T, 0, 0, T.width, T.height, -s / 2, -(o.foot + 1) * k, s, s); g.restore();
     if (!MI) { const sx = fx; dhide25(g, OC, W, H, sx - s / 2 - 2, fy - (o.foot + 1) * k - 2, sx + s / 2 + 2, fy + s * 0.12, [a.x, a.y || 0, a.z], fy, p[2] * W); }
     // つるはしが当たったコマ：岩から石のかけらと結晶の光が飛ぶ
     if (MI && fr === 2 && a.hitP) { const ph = (((now + a.ph) / 1.1 * 4) % 1), [hx, hy] = a.hitP, u = Math.max(1, k * 1.6); g.save();
