@@ -7242,7 +7242,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.251（11/20 14:56）";
+const VER20 = "No.252（11/20 15:39）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -10481,6 +10481,7 @@ SP3D24.gobx = 1; SP3D24.lich = 1;
   props += ` for(int i=0;i<16;i++){float fi=float(i);float a=fi*0.3927+0.2;vec2 c2=vec2(cos(a)*${f(2.45 * WX)},sin(a)*${f(1.45 * WZ)})*(0.86+0.12*sin(fi*3.7));if(abs(c2.x)<${f(0.6 * WX)}&&c2.y<0.0)continue;
   float h=0.4+0.55*fract(sin(fi*12.9)*43.7);vec3 sb=vec3(c2.x,0.0,c2.y);float sg=sTap(p,sb,sb+vec3(0.07,h,0.04),0.34+0.12*fract(fi*0.37),0.05);sg=min(sg,sTap(p,sb+vec3(0.3,0.0,0.14),sb+vec3(0.33,h*0.55,0.17),0.2,0.03));sg+=(vnoise(p*5.0)-0.5)*0.11+(vnoise(p*13.0)-0.5)*0.03;if(sg<r.x)r=vec2(sg*0.85,10.0);
   float rb=sEll(p-vec3(c2.x+0.45,0.05,c2.y+0.3),vec3(0.24,0.14,0.2))+(vnoise(p*9.0)-0.5)*0.04;if(rb<r.x)r=vec2(rb,10.0);}\n`;
+  { const RA = (ROOMS24[room] || {}).stalAvoid; if (RA && RA.length) props = props.replace("if(abs(c2.x)<", RA.map(([x, z, r]) => `if(length(c2-vec2(${f(x)},${f(z)}))<${f(r + 0.6)})continue;`).join("") + "if(abs(c2.x)<"); }   // 施設の上には床の岩を置かない
   const RR = ROOMS24[room] || {}; if (RR.noTorch) { props = props.split("\n").filter(l => !l.includes("r=vec2(st,18.0)") && !l.includes("r=vec2(fla,17.0)")).join("\n"); lights = ""; }
   if (RR.noStal) { const k = props.indexOf(" for(int i=0;i<16;i++)"); if (k >= 0) props = props.slice(0, k); }
   rp(" //PROPS\n", " //PROPS\n" + props);
@@ -10831,6 +10832,25 @@ const VEINBIG25 = (x, z, w) => { const X = (+x).toFixed(2), Z = (+z).toFixed(2),
 const SEAMX25 = () => ` {for(int i=0;i<9;i++){float fi=float(i);vec3 c=vec3(2.6+fi*0.85+sin(fi*3.1)*0.3,0.12,-10.0+cos(fi*2.3)*0.25);vec3 q=p-c;float k=sEll(q,vec3(0.32+0.12*mod(fi,2.0),0.2+0.08*mod(fi,3.0),0.28))+(vnoise(q*9.0)-0.5)*0.05;if(k<r.x)r=vec2(k,24.0);
    if(mod(fi,3.0)<0.5){float cr=sTap(q,vec3(0.0,0.1,0.0),vec3(0.12,0.45,0.15),0.09,0.01);if(cr<r.x)r=vec2(cr,21.0);}}}`;
 // 2Dの「鉱脈」と同じ形：壁ぎわの大きな岩に、紫・水色・緑の大きな結晶が生え、つるはしが刺さっている
+// 寝室（11/20）：低い板壁で四角く区切った部屋。板張りの床に赤い敷物、ベッド4台は壁ぞいに整列、枕元に小さな台とろうそく、すみに炉と鍋
+const BED1_25 = `  float fr=min(sTap(b,vec3(-1.05,0.13,-0.68),vec3(1.05,0.13,-0.68),0.09,0.09),sTap(b,vec3(-1.05,0.13,0.68),vec3(1.05,0.13,0.68),0.09,0.09));
+  fr=min(fr,sTap(b,vec3(-1.08,0.0,-0.72),vec3(-1.08,0.66,-0.72),0.08,0.07));fr=min(fr,sTap(b,vec3(-1.08,0.0,0.72),vec3(-1.08,0.66,0.72),0.08,0.07));fr=min(fr,sRBox(b-vec3(-1.08,0.42,0.0),vec3(0.05,0.2,0.7),0.02));
+  fr=min(fr,sTap(b,vec3(1.05,0.0,-0.68),vec3(1.05,0.3,-0.68),0.07,0.06));fr=min(fr,sTap(b,vec3(1.05,0.0,0.68),vec3(1.05,0.3,0.68),0.07,0.06));fr+=(vnoise(b*vec3(14.0,4.0,4.0))-0.5)*0.02;if(fr<r.x)r=vec2(fr,12.0);
+  float mt=sRBox(b-vec3(0,0.27,0),vec3(0.98,0.12,0.6),0.12)+(vnoise(b*11.0)-0.5)*0.05+(vnoise(b*vec3(30.0,8.0,30.0))-0.5)*0.03;if(mt<r.x)r=vec2(mt,13.0);
+  float bl=sRBox(b-vec3(0.3,0.32,0.0),vec3(0.66,0.11,0.66),0.07)+0.03*sin(b.x*7.0+b.z*2.0)*smoothstep(0.3,0.65,abs(b.z))+(vnoise(b*6.0)-0.5)*0.025;bl=max(bl,0.17-b.y);if(bl<r.x)r=vec2(bl,27.0);
+  float fo=sRBox(b-vec3(-0.34,0.44,0.0),vec3(0.08,0.035,0.62),0.03);if(fo<r.x)r=vec2(fo,28.0);
+  float pw=sEll(b-vec3(-0.72,0.45,0.0),vec3(0.22,0.1,0.38));if(pw<r.x)r=vec2(pw,15.0);`;
+const BEDROOM25 = () => ` {vec3 q=p;
+  float fl=sRBox(q-vec3(0.0,0.06,-1.5),vec3(5.55,0.06,3.1),0.01);float sm=abs(fract((q.z+4.6)*1.5)-0.5);if(fl<r.x)r=vec2(fl,sm>0.44?12.0:22.0);
+  float wl=sRBox(q-vec3(0.0,0.42,-4.6),vec3(5.68,0.42,0.09),0.02);wl=min(wl,sRBox(vec3(abs(q.x),q.y,q.z)-vec3(5.6,0.42,-1.5),vec3(0.09,0.42,3.1),0.02));
+  wl=min(wl,sRBox(vec3(abs(q.x),q.y,q.z)-vec3(3.38,0.42,1.6),vec3(2.22,0.42,0.09),0.02));wl+=(vnoise(q*vec3(2.0,16.0,2.0))-0.5)*0.012;
+  {vec3 a=vec3(abs(q.x),q.y,q.z);wl=min(wl,min(sTap(a,vec3(5.6,0.0,-4.6),vec3(5.6,1.1,-4.6),0.11,0.1),min(sTap(a,vec3(5.6,0.0,1.6),vec3(5.6,1.1,1.6),0.11,0.1),sTap(a,vec3(1.16,0.0,1.6),vec3(1.16,1.2,1.6),0.11,0.1))));}if(wl<r.x)r=vec2(wl,12.0);
+  for(int i=0;i<4;i++){vec3 c=i==0?vec3(-3.2,0.1,-3.3):i==1?vec3(0.0,0.1,-3.3):i==2?vec3(3.2,0.1,-3.3):vec3(-3.2,0.1,-0.45);vec3 b=q-c;
+${BED1_25}}
+  {vec3 a=vec3(abs(q.x),q.y,q.z)-vec3(1.6,0.0,-3.85);float ns=sRBox(a-vec3(0.0,0.3,0.0),vec3(0.26,0.28,0.24),0.03);if(ns<r.x)r=vec2(ns,12.0);
+   float cd=sTap(a,vec3(0.0,0.58,0.0),vec3(0.0,0.78,0.0),0.05,0.045);if(cd<r.x)r=vec2(cd,15.0);float fl2=sTap(a,vec3(0.0,0.8,0.0),vec3(0.0,0.95,0.0),0.04,0.0);if(fl2<r.x)r=vec2(fl2,17.0);}
+  {float rg=sRBox(q-vec3(0.0,0.13,-1.25),vec3(0.62,0.015,2.55),0.01);if(rg<r.x)r=vec2(rg,27.0);}
+ }`;
 const OREROCK25 = (x, z) => { const X = (+x).toFixed(2), Z = (+z).toFixed(2);
   return ` {vec3 q=(p-vec3(${X},0.0,${Z}))/1.45;vec2 rr=vec2(1e3,0.0);
   float rk=sEll(q-vec3(0.0,0.9,-0.5),vec3(2.5,1.55,1.75));rk=smin(rk,sEll(q-vec3(-1.6,0.4,0.4),vec3(1.0,0.6,0.8)),0.35);rk=smin(rk,sEll(q-vec3(1.7,0.35,0.3),vec3(0.9,0.5,0.7)),0.35);
@@ -10861,7 +10881,7 @@ const DOJO25 = (x, z) => { const X = (+x).toFixed(2), Z = (+z).toFixed(2);
 const HAI25 = (() => {
   const L = r => ROOMS24[r].props.split("\n");
   const T = L("train"), M = L("mine"), S = L("sleep");
-  const G = { train: [-9, -2], trainC: [0, -1.5], mine: [8, 0], sleep: [-4, 6.5], crate: [-2, -1.5] };   // まとまりごとのずらし（洞窟の単位）
+  const G = { train: [-9, -2], trainC: [0, -1.5], mine: [8, 0], sleep: [-4, 5.3], crate: [-2, -1.5] };   // まとまりごとのずらし（洞窟の単位）
   const MODS = [
     { id: "stake", name: "木人（打ちこみ台）", g: "train", txt: T.slice(1, 4).join("\n"), foot: [[2.54, -4.43, 0.7]] },
     { id: "rocks", name: "岩の山", g: "train", txt: T[4], foot: [[6.8, -3.9, 1.0]] },
@@ -10873,9 +10893,10 @@ const HAI25 = (() => {
     { id: "pebble", name: "鉱石のかけら", g: "mine", txt: M[9], foot: [] },
     { id: "pick", name: "つるはし立て", g: "mine", txt: M[10], foot: [[-2.25, -4.9, 0.5]] },
     { id: "lamp", name: "ランタンの柱", g: "mine", txt: M.slice(11, 13).join("\n"), light: "LIGHT(-0.85,1.22,0.9,1.0,0.66,0.32,3.0)", foot: [[-1.2, 0.9, 0.5]] },
-    { id: "bed", name: "寝わら（5つ）", g: "sleep", txt: S.slice(1, 4).join("\n"), foot: [[-4.6, -2.3, 1.25], [-1.9, -3.5, 1.25], [2.4, -3.4, 1.25], [4.9, -1.3, 1.25], [-5.0, 1.6, 1.25]],
-      beds: [[-4.6, -2.3], [-1.9, -3.5], [2.4, -3.4], [4.9, -1.3], [-5.0, 1.6]] },
-    { id: "pot", name: "たき火と鍋（寝床）", g: "sleep", txt: "FIREPIT(0.0,-0.9)\n" + S.slice(5, 9).join("\n"), light: "LIGHT(0.0,0.6,-0.9,1.0,0.55,0.22,3.6)", foot: [[0, -0.9, 0.9]] },
+    { id: "bed", name: "寝室（板壁・ベッド4つ）", g: "sleep", txt: BEDROOM25(), light: "LIGHT(-1.6,1.3,-3.85,1.0,0.68,0.36,2.8) LIGHT(1.6,1.3,-3.85,1.0,0.68,0.36,2.8)",
+      foot: [[-4.3, -3.4, 1.6], [-1.45, -3.4, 1.6], [1.45, -3.4, 1.6], [4.3, -3.4, 1.6], [-4.3, -0.5, 1.6], [-1.45, -0.6, 1.4], [1.45, -0.6, 1.4], [4.3, -0.5, 1.6], [-5.6, 1.4, 0.8], [5.6, 1.4, 0.8], [-2.4, 1.6, 0.9], [2.4, 1.6, 0.9], [-4.0, 1.6, 0.9], [4.0, 1.6, 0.9], [-5.6, -1.5, 0.9], [5.6, -1.5, 0.9]],
+      beds: [[-3.4, -3.3], [-0.2, -3.3], [3.0, -3.3], [-3.4, -0.45]] },
+    { id: "pot", name: "炉と鍋（寝室のすみ）", g: "sleep", txt: "FIREPIT(3.2,-0.5)\n" + S.slice(5, 9).join("\n").split("vec3(0.0,0.0,-0.9)").join("vec3(3.2,0.0,-0.5)"), light: "LIGHT(3.2,0.6,-0.5,1.0,0.55,0.22,3.6)", foot: [[3.2, -0.5, 0.9]] },
     { id: "crate", name: "木箱とランタン", g: "crate", txt: "CRATES", light: "LANTERNL", foot: [[-1.8, -4.2, 0.8], [-3.2, 3.55, 0.6]] },
     { id: "gate", name: "入口の門（奥の壁）", g: "none", txt: GATE25(0, -9.4, 0), light: "LIGHT(0.0,2.4,-8.4,1.0,0.6,0.3,2.2)", foot: [[0, -9.2, 1.8]] },
     { id: "gate2", name: "出口の門（右の壁）", g: "none", txt: GATE25(18.4, 0, 1), light: "LIGHT(17.2,2.4,0.0,1.0,0.6,0.3,2.0)", foot: [[18.0, 0, 1.6]] },
@@ -10911,7 +10932,7 @@ const HAI25 = (() => {
   // 選んだ施設から部屋を作る（名前は中身ごとに変える）
   function room(on){ const MS = modsOf(on), key = "c_" + MS.map(m => m.id.replace("@", "A").replace(/,/g, "_").replace(/-/g, "m").replace(/\./g, "p")).join("_");
     if (!ROOMS24[key]) { const ms = MS.filter(m => !m.shell);
-      ROOMS24[key] = { props: "\n" + ms.map(wrap).join("\n"), lights: ms.filter(m => m.light).map(lightOf).join(" "), keepDummy: !!on.dummy, noRack: !on.rack, noTorch: !on.torch, noStal: !on.stal, noBeam: true, seam: on.seam ? [6.0, -10.5, 4.2] : null }; }
+      ROOMS24[key] = { props: "\n" + ms.map(wrap).join("\n"), lights: ms.filter(m => m.light).map(lightOf).join(" "), keepDummy: !!on.dummy, noRack: !on.rack, noTorch: !on.torch, noStal: !on.stal, noBeam: true, seam: on.seam ? [6.0, -10.5, 4.2] : null, stalAvoid: foots(on).filter(f => f[2] >= 1.2) }; }
     return key; }
   // 施設の場所（ぶつからないように）
   function foots(on){ const F = [];
@@ -11066,19 +11087,19 @@ ROOMSET25.train_mine = ROOMSET25.train_mine.map(k => k === "orerockC" ? "orerock
 // 2つ施設の部屋は、施設どうしが重ならないように左右へ分ける（id@dx,dz でまとまりごと動かす）
 { const mv = (k, map) => { ROOMSET25[k] = ROOMSET25[k].map(m => map[m] !== undefined ? map[m] : m).filter(Boolean); };
   const rockR = d => ({ orerockC: "orerockC@" + d, orerock: "orerockC@" + d, lamp: "lamp@" + d, pebble: "pebble@" + d });
-  mv("mine_bed", Object.assign(rockR("6,-0.5"), { bed: "bed@-4,-1.5", pot: "pot@-4,-1.5" }));
+  mv("mine_bed", Object.assign(rockR("6,-0.5"), { bed: "bed@-4,-0.3", pot: "pot@-4,-0.3" }));
   mv("mine_nest", Object.assign(rockR("5.5,-0.5"), { nest: "nestL", nestS: "nestL" }));
-  mv("train_bed", { dojo: "dojo@5.5,-0.5", bed: "bed@-5,-1.5", pot: "pot@-5,-1.5" });
+  mv("train_bed", { dojo: "dojo@5.5,-0.5", bed: "bed@-5,-0.3", pot: "pot@-5,-0.3" });
   mv("train_nest", { dojo: "dojo@5.5,-0.5", nest: "nestL", nestS: "nestL" });
   mv("train_mine", Object.assign(rockR("7,-0.5"), { dojo: "dojo@-6.5,0.5" }));
-  mv("bed_nest", { bed: "bed@-3,-2", pot: "pot@-3,-2", nest: "nestR" }); }
+  mv("bed_nest", { bed: "bed@-3,-0.8", pot: "pot@-3,-0.8", nest: "nestR" }); }
 function roomKind25(i){ const R = S.path[i] || {}; if (i === lordIdx(S)) return "lord";
   let F = []; try { F = pkLayout24(i).F || []; } catch (e) {}
   { const two = KORD25.filter(k => F.includes(k) || (k === R.fac && !F.length)).slice(0, 2); if (two.length === 2) return two.join("_"); }
   return F.includes("train") ? "train" : F.includes("mine") ? "mine" : F.includes("bed") ? "bed" : R.fac === "mine" ? "mine" : R.fac === "bed" ? "bed" : R.fac === "train" ? "train" : F.includes("nest") || R.fac === "nest" ? "nest" : F.includes("watch") || R.fac === "watch" ? "watch" : F.includes("gate") || R.fac === "gate" ? "entry" : "plain"; }
 // 配った洞窟の絵（bg25/部屋の種類_c.png・_d.png）があれば、それを読み込む
 function setRoom25(i){ const C = B3.C; C.setRoom(B3.roomKey); const k = roomKind25(i); if (!BGSHIP25[k]) return; C.putBgImages(`bg25/${k}_c.webp?v=${BGSHIP25[k]}`, `bg25/${k}_d.webp?v=${BGSHIP25[k]}`, C.st.bgKey); }
-const BGSHIP25 = { train: "a0626023", mine: "a75a04d9", bed: "5a957785", lord: "8300d46a", plain: "6683282a", nest: "79d44eb4", watch: "46b0577d", entry: "52e41f17", train_mine: "e6d09ae2", train_bed: "07797128", train_nest: "d516a146", train_watch: "e1ad46e7", mine_bed: "fd1bfa8c", mine_nest: "ff6e8e1f", mine_watch: "72754dcf", bed_nest: "c0ed2d5f", bed_watch: "128be03b", nest_watch: "61532936", lordday: "8300d46a" };
+const BGSHIP25 = { train: "a0626023", mine: "a75a04d9", bed: "2a21739f", lord: "8300d46a", plain: "6683282a", nest: "79d44eb4", watch: "46b0577d", entry: "52e41f17", train_mine: "e6d09ae2", train_bed: "06723853", train_nest: "d516a146", train_watch: "e1ad46e7", mine_bed: "373f048c", mine_nest: "ff6e8e1f", mine_watch: "72754dcf", bed_nest: "6754c89d", bed_watch: "50cdec00", nest_watch: "61532936", lordday: "8300d46a" };
 function roomKey25(i){ const on = {}; ROOMSET25[roomKind25(i)].forEach(k => on[k] = true); return HAI25.room(on); }
 // ---- 3Dのキャラの種類 ----
 const heroSp25 = h => (typeof heroId === "function" ? String(heroId(h)).replace(/\d+$/, "") : h.job) || "warrior";
@@ -11565,7 +11586,7 @@ function droom25(i){ const kind = roomKind25(i), on = {}; ROOMSET25[kind].forEac
   return D3.act[i] = { sig, kind, acts, OB, beds: BEDS, nests: NESTS }; }
 // ---- 手前に立つ物（岩・柱・たいまつ・壁）のうしろに入った子を隠す ----
 // bg25/<部屋>_o.webp：半分の大きさ、明るさ＝カメラからの距離（255は床で、隠さない）
-const OCCV25 = {"bed":"cdcd9a","bed_nest":"2c664d","bed_watch":"212811","entry":"02e63e","lord":"33c3e1","lordday":"33c3e1","mine":"1bf5cb","mine_bed":"ecbda4","mine_nest":"a4afc8","mine_watch":"aa6931","nest":"353296","nest_watch":"a85f90","plain":"d8547b","train":"4da812","train_bed":"e480b6","train_mine":"0ab48c","train_nest":"8f5d0a","train_watch":"f9466e","watch":"400bc3"};
+const OCCV25 = {"bed":"1092d0","bed_nest":"b13fef","bed_watch":"5f78f4","entry":"02e63e","lord":"33c3e1","lordday":"33c3e1","mine":"1bf5cb","mine_bed":"810f17","mine_nest":"a4afc8","mine_watch":"aa6931","nest":"353296","nest_watch":"a85f90","plain":"d8547b","train":"4da812","train_bed":"3ec288","train_mine":"0ab48c","train_nest":"8f5d0a","train_watch":"f9466e","watch":"400bc3"};
 function docc25(bk){ const k = "occ:" + bk; if (D3.img[k]) return D3.img[k]; const o = D3.img[k] = { ok: 0 }; if (!OCCV25[bk]) return o;
   const im = new Image(); im.onload = () => { try { const c = document.createElement("canvas"); c.width = im.width; c.height = im.height; const g = c.getContext("2d"); g.drawImage(im, 0, 0);
     const d = g.getImageData(0, 0, im.width, im.height).data, q = new Uint8Array(im.width * im.height); for (let j = 0; j < q.length; j++) q[j] = d[j * 4];
