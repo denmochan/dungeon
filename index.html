@@ -7242,7 +7242,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.250（11/20 14:37）";
+const VER20 = "No.251（11/20 14:56）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -11530,6 +11530,8 @@ function dpile25(g, R, W, H){ const P = R.pile; if (!P || !DPILE25) return; cons
     const rows = [4, 3, 2], spots = [], R2 = n => { const v = Math.sin(n * 91.7 + s * 13.1) * 9341.3; return v - Math.floor(v); }; let left = n; rows.forEach((c, r) => { const m2 = Math.min(c, left); left -= m2; for (let q = 0; q < m2; q++) spots.push([(q - (m2 - 1) / 2) * u * 1.2 + (R2(q + r * 5) - 0.5) * u * 0.3, -r * u * 0.75 + (R2(q * 3 + r) - 0.5) * u * 0.2]); });
     g.fillStyle = "rgba(0,0,0,0.28)"; g.beginPath(); g.ellipse(x, y + u * 0.05, u * (1.0 + Math.min(4, n) * 0.55), u * 0.45, 0, 0, 7); g.fill();
     spots.forEach(([ox, oy], q) => dore25(g, x + ox, y + oy, u, s * 17 + q * 3 + 1, now)); }); }
+// 歩くときの体のゆれ（よちよち）の大きさ：足のない子は大きめ、大型は小さめ
+const WAD25 = { ghost: 0.13, eye: 0.11, mindlord: 0.09, noble: 0.07, mimic: 0.1, myconid: 0.12, gargoyle: 0.09, serpent: 0.05, dragon: 0.05, chimera: 0.05, demon: 0.04, lich: 0.05, golem: 0.04 };
 // 跳ねて進む子の、6コマそれぞれの高さ（影を小さく薄くする）
 const HOP25 = { slime: [0, 0.15, 0.65, 1.0, 0.6, 0.1], mimic: [0, 0.15, 0.7, 1.0, 0.55, 0.1], myconid: [0, 0.15, 0.65, 1.0, 0.55, 0.1], gargoyle: [0, 0.15, 0.7, 1.0, 0.55, 0.1], eye: [0.5, 0.9, 1, 0.5, 0.1, 0], ghost: [0.5, 0.9, 1, 0.5, 0.1, 0], mindlord: [0.5, 0.9, 1, 0.5, 0.1, 0] };
 // 歩く18コマ（正面6・背中6・横6）
@@ -11651,7 +11653,9 @@ function dcard25(card, i, now, dt){ DRT25.n++;
   g.clearRect(0, 0, W, H);
   dpile25(g, R, W, H); const OC = docc25(bk);
   R.acts.slice().sort((a, b) => a.z - b.z).forEach(a => { const o = a.back ? dback25(a.evo) : dspr25(a.sp, a.evo); if (!o || !o.ok) return;
-    const p = dproj25(a.x, a.y || 0, a.z), fx = p[0] * W, fy = p[1] * H; let k = p[2] * W / o.ppu * DAYK25 * (a.lord ? 0.55 : 1); { const hp = (o.foot - (o.top || 0)) * k; if (hp > H * 0.3) k *= H * 0.3 / hp; } const s = 128 * k;   // 大きい子は部屋の高さの3割まで
+    const p = dproj25(a.x, a.y || 0, a.z), fx = p[0] * W, fy = p[1] * H; let k = p[2] * W / o.ppu * DAYK25 * (a.lord ? 0.55 : 1); { const hp = (o.foot - (o.top || 0)) * k; if (hp > H * 0.3) k *= H * 0.3 / hp; } const s = 128 * k;
+    // 1歩で進む距離は、画面に描いている体の高さに合わせる（大きく描かないのに歩幅だけ大きいと、足を動かさずに滑って見える）
+    if (!a.lord && o.top != null) a.cyc = Math.min(1.9, Math.max(0.3, 0.55 * (o.foot - o.top) * k / Math.max(1, p[2] * W)));   // 大型も歩幅は上限まで（足の運びが遅すぎると滑って見える）   // 大きい子は部屋の高さの3割まで
     // 掘る子：横向きの「掘る」コマを使い、つるはしの先が岩のふちにちょうど当たる位置に立たせる
     let MI = null, mdir = 1, fx2 = fx;
     if (a.mode === "mine" && o.bip && a.look && a.rk) { const M = dmine25(a.sp, a.evo); if (M && M.ok) { MI = M; mdir = a.look[0] > a.x ? 1 : -1;
@@ -11659,7 +11663,7 @@ function dcard25(card, i, now, dt){ DRT25.n++;
       fx2 = T[0] * W - (M.hx - 64) * k * mdir; a.hitP = [fx2 + (M.hx - 64) * k * mdir, fy + (M.hy - o.foot - 1) * k]; } }
     const st = a.mode === "sleep" ? "sleep" : a.walking ? (o.bip ? "walk" : "hop") : (a.mode === "mine" || a.mode === "train" || a.mode === "slash" || a.mode === "lift") && o.bip ? "atk" : "idle";
     // 歩いている子：進む向き（手前・奥・横）の絵を使い、足の運びを進んだ距離に合わせる
-    const cyc = 1.04 * sclOf24({ sp: a.sp, evo: a.evo }) * DAYK25;   // 1歩きの距離（0.8秒で進む分）
+    const cyc = a.cyc || 1.04 * sclOf24({ sp: a.sp, evo: a.evo }) * DAYK25;   // 1歩きの距離（0.8秒で進む分）
     let WK = null, wflip = null, RT = null; const wph = Math.floor((a.dist || 0) / Math.max(0.4, cyc) * 6) % 6;
     if (!a.lord && !DRT25.bad && o.ok) drtWarm25(a.sp, a.evo); const WS = a.lord ? null : dwalk25(a.sp, a.evo);   // 歩く絵は、歩き出す前から読んでおく
     if (!MI && a.walking && !a.lord) { const sp2 = Math.hypot(a.vx || 0, a.vz || 0);
@@ -11681,7 +11685,10 @@ function dcard25(card, i, now, dt){ DRT25.n++;
       tg.globalCompositeOperation = "multiply"; tg.fillStyle = `rgba(${Math.round(lt[0] * 255)},${Math.round(lt[1] * 255)},${Math.round(lt[2] * 255)},0.45)`; tg.fillRect(0, 0, T.width, T.height); tg.globalCompositeOperation = "destination-in"; put();
       if (bq < 0.99) { tg.globalCompositeOperation = "source-atop"; tg.fillStyle = `rgba(16,9,5,${(1 - bq).toFixed(2)})`; tg.fillRect(0, 0, T.width, T.height); }
       else if (bq > 1.01) { tg.globalCompositeOperation = "source-atop"; tg.fillStyle = `rgba(255,190,110,${((bq - 1) * 2).toFixed(2)})`; tg.fillRect(0, 0, T.width, T.height); } TC.set(tk, T); }
-    g.translate(MI ? fx2 : fx, fy); if (MI ? mdir < 0 : (WK || RT) ? wflip : a.face < 0) g.scale(-1, 1); g.drawImage(T, 0, 0, T.width, T.height, -s / 2, -(o.foot + 1) * k, s, s); g.restore();
+    g.translate(MI ? fx2 : fx, fy);
+    // 足のない子・大型は、歩くとき左右に体をゆらして（よちよち）、一歩ごとに少し上下する：止まった絵が床を滑って見えないように
+    if (a.walking && !MI) { const am = WAD25[kitOf24(a.sp)]; if (am) { const ph = (a.dist || 0) / Math.max(0.3, cyc) * Math.PI * 2; g.rotate(am * Math.sin(ph)); g.translate(0, -Math.abs(Math.sin(ph)) * s * 0.035); } }
+    if (MI ? mdir < 0 : (WK || RT) ? wflip : a.face < 0) g.scale(-1, 1); g.drawImage(T, 0, 0, T.width, T.height, -s / 2, -(o.foot + 1) * k, s, s); g.restore();
     if (!MI) { const sx = fx; dhide25(g, OC, W, H, sx - s / 2 - 2, fy - (o.foot + 1) * k - 2, sx + s / 2 + 2, fy + s * 0.12, [a.x, a.y || 0, a.z], fy, p[2] * W); }
     // つるはしが当たったコマ：岩から石のかけらと結晶の光が飛ぶ
     if (MI && fr === 2 && a.hitP) { const ph = (((now + a.ph) / 1.1 * 4) % 1), [hx, hy] = a.hitP, u = Math.max(1, k * 1.6); g.save();
