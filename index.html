@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="apple-mobile-web-app-title" content="ダンジョン"><meta name="theme-color" content="#120d0a"><link rel="apple-touch-icon" href="icon.png">
 <title>ダンジョンマスター（仮）</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Noto+Sans+JP:wght@400;700&family=Shippori+Mincho+B1:wght@500&family=Zen+Antique&display=swap" rel="stylesheet">
 <style>
 :root{ --bg:#120d0a; --panel:#1f1813; --panel2:#2b211a; --line:#4a3a2c; --text:#f0e6d8; --dim:#a8988a; --gold:#e8b85a; --red:#e8604f; --green:#7ccc7c; --blue:#7ab0ff; }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --bg:#120d0a; } }
@@ -1098,6 +1098,35 @@ button:active,.chall:active{transform:scale(.96);filter:brightness(1.25);transit
 .inv25n{cursor:pointer}
 .inv25sheet{position:absolute;left:0;right:0;bottom:0;padding:10px 10px calc(10px + env(safe-area-inset-bottom,0px))}
 .inv25sheet .inv25card h3 small{font-size:12px;color:#bfae98;margin-left:4px}
+/* ===== 魔王のかけら ===== */
+.kk25ov{position:fixed;inset:0;z-index:260;background:radial-gradient(ellipse at 50% 45%,rgba(40,14,30,.88),rgba(5,3,6,.96));display:flex;align-items:center;justify-content:center;padding:max(16px,env(safe-area-inset-top)) 16px;animation:kkfade .5s ease;overflow:auto}
+.kk25ov.list{align-items:flex-start}
+@keyframes kkfade{from{opacity:0}to{opacity:1}}
+.kkget{position:relative;text-align:center;color:#efe3cf;font-family:"Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif;max-width:340px;width:100%}
+.kkglow{position:absolute;left:50%;top:38%;width:220px;height:220px;margin:-110px 0 0 -110px;border-radius:50%;background:radial-gradient(circle,rgba(200,120,255,.45),rgba(120,40,160,.12) 45%,transparent 70%);animation:kkpulse 2.4s ease-in-out infinite;pointer-events:none}
+@keyframes kkpulse{50%{transform:scale(1.15);opacity:.7}}
+.kkt{font-family:"Zen Antique","Shippori Mincho B1",serif;letter-spacing:.3em;color:#c9a8ff;font-size:14px}
+.kkshard{font-size:64px;line-height:1.3;color:#e8d0ff;text-shadow:0 0 18px #b070ff,0 0 40px #7a30c0;animation:kkspin 1s cubic-bezier(.2,1.6,.4,1)}
+@keyframes kkspin{from{transform:scale(.2) rotate(-90deg);opacity:0}}
+.kknm{font-family:"Zen Antique","Shippori Mincho B1",serif;font-size:28px;letter-spacing:.2em;color:#fff3e0;margin:4px 0 10px}
+.kkhow{font-size:13px;color:#a99}.kkeff{font-size:16px;color:#9fe0a8;margin:6px 0 14px}
+.kkcnt{display:inline-block;border:1px solid #6a3a8a;border-radius:20px;padding:4px 14px;font-size:13px;letter-spacing:.1em;color:#d8c0f0}
+.kktap{margin-top:18px;font-size:12px;color:#776;letter-spacing:.2em;animation:kkpulse 2s infinite}
+.kkmemwrap,.kklist{width:100%;max-width:380px;text-align:center}
+.kkmt{font-family:"Zen Antique","Shippori Mincho B1",serif;letter-spacing:.4em;color:#c9a8ff;font-size:15px;margin-bottom:6px}
+.kkmem{text-align:left;position:relative;color:#3a2614;margin:12px 0;padding:18px 20px 16px;font-family:"Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho","Noto Serif JP","Noto Serif CJK JP",serif;font-size:15.5px;line-height:1.95;letter-spacing:.06em;background:radial-gradient(ellipse at 20% 15%,rgba(255,250,230,.55),transparent 55%),radial-gradient(ellipse at 85% 90%,rgba(120,70,20,.18),transparent 60%),linear-gradient(170deg,#efdcb2,#e2c690 60%,#d6b47a);border-radius:3px 6px 4px 7px/6px 3px 7px 4px;box-shadow:inset 0 0 28px rgba(110,60,15,.45),inset 0 0 4px rgba(80,40,10,.5),0 3px 14px rgba(0,0,0,.6);animation:kkunroll .9s ease}
+@keyframes kkunroll{from{clip-path:inset(0 0 100% 0);opacity:.3}to{clip-path:inset(0 0 0 0);opacity:1}}
+.kkmem p{margin:0 0 .9em;word-break:auto-phrase;text-shadow:0 0 .6px rgba(58,38,20,.6)}.kkmem p:last-child{margin:0}
+.kkmem span{display:block;padding-left:1em;text-indent:-1em}
+.kkmh{font-family:"Zen Antique","Shippori Mincho B1","Noto Serif CJK JP",serif;font-size:19px;letter-spacing:.18em;color:#5a1f12;border-bottom:1px solid rgba(90,40,15,.35);padding-bottom:4px;margin-bottom:8px;display:flex;align-items:baseline}
+.kkmh b{font-size:12px;color:#8a5a30;letter-spacing:.05em;font-weight:400;margin-left:auto}
+.kk25ov.list .kkmem{animation:none}.kkmem.locked{background:#221a24;box-shadow:inset 0 0 0 1px #3a2a40;color:#776}.kkmem.locked .kkmh{color:#887}.kkmem.locked .kkmh b{color:#665}.kkmem.locked .kkmh{border:0;margin:0;padding:0}
+.kkall{display:grid;grid-template-columns:1fr 1fr;gap:6px;text-align:left}.kkall div{background:#1d1520;border:1px solid #3a2a40;border-radius:8px;padding:6px 8px;color:#887}.kkall div.got{color:#efe3cf;border-color:#6a3a8a}.kkall b{display:block;font-size:13px}.kkall small{font-size:12px;color:#998}
+.kkclose{margin:16px 0 30px;padding:10px 30px;border-radius:10px;background:#3a2a40;color:#efe3cf;border:1px solid #6a3a8a;font-size:15px}
+.title .kk25bar,.kk25bar{position:relative;display:block;width:80%;height:22px!important;min-height:22px;margin:6px auto 2px;max-width:300px;border-radius:11px;background:#1a1020;border:1px solid #5a3a70;overflow:hidden}
+.kk25bar .kkfill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#4a1a6a,#9a50d0);box-shadow:0 0 10px #9a50d0}
+.kk25bar .kktx{position:relative;display:block;text-align:center;line-height:22px;font-size:12px;letter-spacing:.15em;color:#f0e0ff;font-family:"Zen Antique","Shippori Mincho B1",serif}
+.kk25mapc{font-size:12px;color:#5a1f12;font-weight:700}
 </style>
 </head>
 <body>
@@ -2958,7 +2987,7 @@ const bookLv8 = (S, k) => metaOf8(S).book[k] || 0;
 const bookCost8 = (S, k) => Math.round(BOOK8[k].base * Math.pow(1.7, bookLv8(S, k)));
 // 守りきった夜の数で魂が決まる（後半ほど一気に増える）
 // 途中で自分から転生したとき（契約を達成していない・負けてもいない）は1/4（すぐ転生して魂を稼ぐのを防ぐ）
-const soulsFor8 = S => { const n = Math.max(0, S.ended ? S.best : S.night - 1); return Math.floor(n * (n + 1) / 4 * (S.ended || S.contractDone ? 1 : 0.25)); };
+const soulsFor8 = S => { const n = Math.max(0, S.ended ? S.best : S.night - 1); return Math.floor(n * (n + 1) / 4 * (S.ended || S.contractDone ? 1 : 0.25) * (1 + (typeof kkFx25 === "function" ? kkFx25(S, "soul") : 0))); };
 function newRun8(meta, rnd = Math.random) {
   const S = newRun7(rnd);
   S.meta = meta || null; metaOf8(S);
@@ -4665,7 +4694,7 @@ function lordNight18(S) {
 BOOK8.vessel = { name: "主の器", icon: "🏺", base: 5, text: lv => `保管庫から連れていける魔物 ${1 + lv}体` }; BOOK8_IDS.push("vessel");
 const VAULT_MAX18 = 24;
 const vaultOf18 = S => { const M = metaOf8(S); M.vault = M.vault || []; return M.vault; };
-const vaultCap18 = S => 1 + bookLv8(S, "vessel") + ((S.diff || 0) >= 2 ? 1 : 0) + ((S.diff || 0) >= 4 ? 1 : 0);
+const vaultCap18 = S => 1 + bookLv8(S, "vessel") + ((S.diff || 0) >= 2 ? 1 : 0) + ((S.diff || 0) >= 4 ? 1 : 0) + (typeof kkFx25 === "function" ? kkFx25(S, "keep") : 0);
 function saveToVault18(S, id) {
   const m = S.mons.find(o => o.id === id); if (!m) return false; const V = vaultOf18(S);
   V.push({ sp: m.sp, sk: { ...(m.sk || {}) }, nick: m.nick, quirk: m.quirk, rar19: m.rar19, shiny19: m.shiny19, run: (metaOf8(S).runs || 0) + 1 });
@@ -7274,7 +7303,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.266（11/21 12:28）";
+const VER20 = "No.267（11/21 14:37）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -12303,6 +12332,144 @@ tutEls = (prev => function (st){ const a = prev(st); if (a.length || !st || !st.
 // 画面が切りかわった直後（夜→昼など）の0.5秒は、ボタンを押しても効かない（前の画面のつもりの押し間違いを防ぐ）
 { let lv = null, lt = 0; const _r = render; render = function (){ const v = _r.apply(this, arguments); try { const k = view + "|" + !!N + "|" + (modal ? 1 : 0); if (k !== lv) { lv = k; lt = Date.now(); } } catch (e) {} return v; };
   document.addEventListener("click", ev => { if (Date.now() - lt < 450 && ev.target.closest && ev.target.closest("button,[data-a]") && !ev.target.closest(".tutov")) { ev.stopPropagation(); ev.preventDefault(); } }, true); }
+
+// ================= 魔王のかけら（40個）と記憶の場面 =================
+// 主は砕かれた魔王のかけら。防衛の節目と、侵略で落とした街・都市・砦・王都でかけらが手に入る。
+// 4個ごとに記憶が1場面もどる。数は転生しても残る（meta.k25）
+const KK25 = [
+  // 防衛：勇者を初めて倒す
+  { id: "warrior", nm: "折れた角", how: "戦士を初めて倒す", eff: "主の攻撃 +3%", fx: { latk: .03 } },
+  { id: "knight", nm: "黒い鱗", how: "聖騎士を初めて倒す", eff: "主の体力 +5%", fx: { lhp: .05 } },
+  { id: "thief", nm: "影の爪", how: "盗賊を初めて倒す", eff: "罠の威力 +5%", fx: { trap: .05 } },
+  { id: "mage", nm: "灰の瞳", how: "魔法使いを初めて倒す", eff: "魔法の威力 +5%", fx: { magic: .05 } },
+  { id: "priest", nm: "焦げた羽", how: "僧侶を初めて倒す", eff: "回復 +5%", fx: { heal: .05 } },
+  { id: "hunter", nm: "遠吠えの牙", how: "狩人を初めて倒す", eff: "飛び道具 +5%", fx: { bow: .05 } },
+  // 防衛：夜をしのぐ
+  { id: "n10", nm: "古い鎖", how: "10夜しのぐ", eff: "毎日 💎+2", fx: { dp: 2 } },
+  { id: "n20", nm: "地の底の脈", how: "20夜しのぐ", eff: "毎日 💎+3", fx: { dp: 3 } },
+  { id: "n30", nm: "眠りの砂", how: "30夜しのぐ", eff: "寝床の回復が早い", fx: { bed: 1 } },
+  { id: "n50", nm: "闇の外套", how: "50夜しのぐ", eff: "勇者に地図を持ち帰られにくい", fx: { mapx: 1 } },
+  { id: "n70", nm: "番人の杖", how: "70夜しのぐ", eff: "魔物みんなの体力 +3%", fx: { mhp: .03 } },
+  { id: "n100", nm: "王冠のかけら", how: "100夜しのぐ", eff: "魔物みんなの攻撃 +3%", fx: { matk: .03 } },
+  // 防衛：転生
+  { id: "r1", nm: "最初の息", how: "初めて転生する", eff: "主の体力 +5%", fx: { lhp: .05 } },
+  { id: "r3", nm: "呼ぶ声", how: "転生3回", eff: "転生で連れていける子 +1", fx: { keep: 1 } },
+  { id: "r5", nm: "古い名", how: "転生5回", eff: "もらえる魂 +10%", fx: { soul: .1 } },
+  { id: "r10", nm: "二つめの声", how: "転生10回", eff: "転生で連れていける子 +1", fx: { keep: 1 } },
+  // 防衛：戦いの節目
+  { id: "throne", nm: "玉座の石", how: "主の間で勇者を倒す", eff: "主の攻撃 +3%", fx: { latk: .03 } },
+  { id: "wipe", nm: "血の盃", how: "勇者の一行を全滅させる", eff: "もらえる魂 +5%", fx: { soul: .05 } },
+  { id: "nomap", nm: "迷いの霧", how: "地図を一度も持ち帰らせず30夜", eff: "勇者が迷いやすい", fx: { lost: 1 } },
+  { id: "evo1", nm: "芽吹く卵", how: "初めて進化させる", eff: "育つのが早い +5%", fx: { xp: .05 } },
+  { id: "evo2", nm: "竜の骨", how: "最後の姿まで進化させる", eff: "育つのが早い +5%", fx: { xp: .05 } },
+  { id: "k100", nm: "吸われた魂", how: "勇者を100人倒す", eff: "もらえる魂 +10%", fx: { soul: .1 } },
+  { id: "boss5", nm: "聖剣の破片", how: "名のある勇者5人をすべて倒す", eff: "主の攻撃 +5%", fx: { latk: .05 } },
+  // 侵略：街8
+  { id: "t1", nm: "鉄の鱗", how: "街を落とす", eff: "魔物みんなの体力 +2%", fx: { mhp: .02 }, src: "town" },
+  { id: "t2", nm: "赤い爪", how: "街を落とす", eff: "門へのダメージ +10%", fx: { gate: .1 }, src: "town" },
+  { id: "t3", nm: "夜の翼", how: "街を落とす", eff: "飛ぶ魔物の攻撃 +5%", fx: { fly: .05 }, src: "town" },
+  { id: "t4", nm: "石の牙", how: "街を落とす", eff: "櫓への攻撃 +10%", fx: { tower: .1 }, src: "town" },
+  { id: "t5", nm: "渇きの舌", how: "街を落とす", eff: "毎日 💎+3", fx: { dp: 3 }, src: "town" },
+  { id: "t6", nm: "静かな足", how: "街を落とす", eff: "遠征が1日短い", fx: { march: 1 }, src: "town" },
+  { id: "t7", nm: "遠い耳", how: "街を落とす", eff: "警戒度が上がりにくい", fx: { alert: 1 }, src: "town" },
+  { id: "t8", nm: "黒い血", how: "街を落とす", eff: "魔物みんなの攻撃 +2%", fx: { matk: .02 }, src: "town" },
+  // 侵略：都市3
+  { id: "c1", nm: "見る目", how: "都市を落とす", eff: "将軍の⭐とスキルが見える", fx: { eye: 1 }, src: "city" },
+  { id: "c2", nm: "聞く耳", how: "都市を落とす", eff: "反撃の方角が前の日にわかる", fx: { ear: 1 }, src: "city" },
+  { id: "c3", nm: "語る口", how: "都市を落とす", eff: "拠点で選べる魔物 +1", fx: { pick: 1 }, src: "city" },
+  // 侵略：砦＝封印の楔5
+  ...["一", "二", "三", "四", "五"].map((k, i) => ({ id: "w" + (i + 1), nm: "封印の楔 " + k, how: "砦を落とす", eff: "王都の守りが弱る・主の攻撃と体力 +3%", fx: { latk: .03, lhp: .03, wedge: 1 }, src: "fort" })),
+  // 王都
+  { id: "heart", nm: "魔王の心臓", how: "王都の封印石を壊す", eff: "魔王の復活", fx: {}, src: "capital" },
+];
+const KKMAX25 = KK25.length;
+// いま効いている効果の種類（ほかは準備中と出す）
+const KKON25 = ["latk", "lhp", "mhp", "matk", "dp", "soul", "keep", "xp"];
+const kkEff25 = k => k.eff + (k.id === "heart" || Object.keys(k.fx).some(x => KKON25.includes(x)) ? "" : "（準備中）");
+// 記憶の場面（かけら4個ごと）。| で段落、\n で行
+const MEM25 = [
+  ["目覚め", "暗い。冷たい。\n体のどこにも、自分の形がない。|「目を覚ませ。\n　おまえは砕かれたのだ」|声は、足もとの石の奥から聞こえた。"],
+  ["番人", "地の底には、熱い川が流れていた。\n目には見えない、魔力の川。|わたしはその岸に座り、\nあふれぬよう、ずっと見張っていた。|膝では、小さな魔物が眠っていた。"],
+  ["狩り", "倒れた魔物から、\n白い光が立ちのぼる。|光は勇者の剣に吸いこまれ、\n刃が、かすかに明るくなる。|あれは退治ではない。\n刈り取りだ。"],
+  ["昔の地上", "丘の向こうに、人の村。\nこちらには、魔物の森。|あいだに石が一つ置かれていて、\n誰もそれをこえなかった。|それで、うまくいっていた。"],
+  ["王の使い", "金の冠をかぶった男が、\n地の底まで降りてきた。|「その力を、\n　少し分けてはくれまいか」|わたしは首をふった。\nあふれたら、誰にも止められない。|……そして、あの夜が来た。"],
+  ["裏切り", "地の底への道を知る人間は、\n一人だけだった。|わたしが友と呼び、\n川のほとりで何度も語りあった男。|勇者たちの先頭で\n松明をかかげていたのは、\nその男だった。"],
+  ["楔", "砕かれたわたしの上に、\n大きな石が据えられた。|五本の楔が打ちこまれ、\nそのたびに、地がうめいた。|楔があるかぎり、石は割れない。|……一本ずつなら、抜ける。"],
+  ["砕かれた夜", "剣が胸に届いたとき、\n痛みより先に、音がした。|硝子が割れるような、高い音。|わたしは千のかけらになって、\n闇の底へ散った。|最後に見えたのは、\n魔物たちが一匹ずつ、\n光に変わっていく姿だった。"],
+  ["あふれる魔力", "番人のいない川は、\n少しずつ岸を削っていた。|地上の井戸が熱を帯び、\n封印石に、細いひびが走る。|王国はまだ知らない。\n足もとが、崩れかけていることを。"],
+  ["すべて思い出す", "封印石の前に立つ。\n中で、わたしの心臓が脈打っている。|思い出した。\nわたしは、奪いに来たのではない。\n席に戻りに来たのだ。|石に手をかける。\n地の底の川が、\nわたしの名を呼んだ。"],
+];
+function kk25(S0) { const M = metaOf8(S0); const K = M.k25 = M.k25 || {}; K.got = K.got || {}; K.job = K.job || {}; K.boss = K.boss || {}; K.q = K.q || []; K.seen = K.seen || 0; return K; }
+const kkN25 = S0 => Object.keys(kk25(S0).got).length;
+function kkFx25(S0, key) { try { if (!S0) return 0; const K = kk25(S0); let t = 0; KK25.forEach(k => { if (K.got[k.id] && k.fx[key]) t += k.fx[key]; }); return t; } catch (e) { return 0; } }
+function kkGive25(S0, id) { const K = kk25(S0); if (K.got[id] || !KK25.find(k => k.id === id)) return false; K.got[id] = 1; K.q.push(id); return true; }
+// 防衛の節目をまとめて確かめる
+function kkCheck25(S0) {
+  const K = kk25(S0), M = metaOf8(S0), st = (typeof stats15 === "function" ? stats15(S0) : {}) || {};
+  ["warrior", "knight", "thief", "mage", "priest", "hunter"].forEach(j => { if (K.job[j]) kkGive25(S0, j); });
+  const best = Math.max(S0.best || 0, M.bestNight || 0);
+  [10, 20, 30, 50, 70, 100].forEach(n => { if (best >= n) kkGive25(S0, "n" + n); });
+  [1, 3, 5, 10].forEach(n => { if ((M.runs || 0) >= n) kkGive25(S0, "r" + n); });
+  if (K.throne) kkGive25(S0, "throne");
+  if ((st.perfect || 0) >= 1) kkGive25(S0, "wipe");
+  if ((S0.best || 0) >= 30 && !S0.mapLeak25) kkGive25(S0, "nomap");
+  const ev = Math.max(K.evo || 0, ...(S0.mons || []).map(m => m.evos || 0)); K.evo = ev;
+  if (ev >= 1) kkGive25(S0, "evo1"); if (ev >= 2) kkGive25(S0, "evo2");
+  if ((st.kills || 0) >= 100) kkGive25(S0, "k100");
+  if (typeof BOSS_NAMES5 !== "undefined" && BOSS_NAMES5.every(n => K.boss[n])) kkGive25(S0, "boss5");
+}
+// 襲撃のあと：倒した勇者の種類・主の間・名のある勇者・地図を持ち帰られたか
+{ const _er = endRaid9; endRaid9 = function (S0, N0) {
+  try { const K = kk25(S0);
+    N0.heroes.forEach(h => { if (h.st === "dead") { if (h.job) K.job[h.job] = 1; if (h.boss) { K.job.knight = 1; if (h.name) K.boss[h.name] = 1; } const r = S0.path[h.pos]; if (r && r.kind === "lord") K.throne = 1; }
+      else if ((h.st === "escaped") && h.map) S0.mapLeak25 = 1; });
+  } catch (e) {}
+  const out = _er(S0, N0); try { kkCheck25(S0); } catch (e) {} return out; }; }
+{ const _rb = rebirth8; rebirth8 = function (S0) { const T = _rb(S0); try { kkCheck25(T); } catch (e) {} return T; }; }
+{ const _fd = finishDay9; finishDay9 = function (S0, rep) { const r = _fd(S0, rep); try { kkCheck25(S0); } catch (e) {} return r; }; }
+// 効果：主の攻撃・体力
+{ const _sn = startNight8; startNight8 = function (S0, rnd) { const N0 = _sn(S0, rnd); try { const a = 1 + kkFx25(S0, "latk"), h = 1 + kkFx25(S0, "lhp"); if (N0.lord) { const r = N0.lord.hp / N0.lord.max; N0.lord.atk = Math.round(N0.lord.atk * a); N0.lord.max = Math.round(N0.lord.max * h); N0.lord.hp = Math.max(1, Math.round(N0.lord.max * r)); } } catch (e) {} return N0; }; }
+// 効果：魔物の体力・攻撃（カードの数字にも出る）
+{ const _bm = bookMul23; bookMul23 = function (k) { const b = _bm(k); try { return b * (1 + (k === "hp" ? kkFx25(S, "mhp") : k === "atk" ? kkFx25(S, "matk") : 0)); } catch (e) { return b; } }; }
+// 効果：育つ早さ・毎日のDP
+{ const _en = endNight8; endNight8 = function (S0, N0) { try { const x = 1 + kkFx25(S0, "xp"); if (x > 1) N0.mons.forEach(bm => { bm.xp = Math.round(bm.xp * x); }); } catch (e) {}
+  const out = _en(S0, N0); try { const d = kkFx25(S0, "dp"); if (d && out) { S0.dp += d; out.dp = (out.dp || 0) + d; out.daily = (out.daily || 0) + d; } } catch (e) {} return out; }; }
+// 侵略：街・都市・砦・王都を落とすと、その種類のかけらを順に
+if (typeof invReward25 === "function") { const _ir = invReward25; invReward25 = function (n, st) { try { if (n && ["town", "city", "fort", "capital"].includes(n.type)) { const k = KK25.find(o => o.src === n.type && !kk25(S).got[o.id]); if (k) kkGive25(S, k.id); } } catch (e) {} const r = _ir(n, st); setTimeout(kkShow25, 50); return r; }; }
+
+// ---------- 画面：かけらを手に入れた → 記憶の場面 ----------
+function kkMemHtml25(i) { const [t, b] = MEM25[i];
+  return `<div class="kkmem"><div class="kkmh">${t}<b>かけら ${(i + 1) * 4}</b></div>${b.split("|").map(p => `<p>${p.split("\n").map(l => `<span>${l}</span>`).join("")}</p>`).join("")}</div>`; }
+function kkShow25() {
+  if (typeof S === "undefined" || !S || document.querySelector(".kk25ov")) return;
+  if ((typeof view !== "undefined" && view === "night") || document.querySelector(".inv25wrap")) return;   // 戦いの最中は出さない
+  const K = kk25(S); if (!K.q.length && K.seen >= Math.min(MEM25.length, Math.floor(kkN25(S) / 4))) return;
+  const ov = document.createElement("div"); ov.className = "kk25ov"; document.body.appendChild(ov);
+  const step = () => {
+    if (K.q.length) { const id = K.q.shift(), k = KK25.find(o => o.id === id), n = KK25.filter(o => K.got[o.id]).indexOf(k) + 1;
+      ov.innerHTML = `<div class="kkget"><div class="kkglow"></div><div class="kkt">かけらを手に入れた</div><div class="kkshard">✦</div><div class="kknm">${k.nm}</div><div class="kkhow">${k.how}</div><div class="kkeff">${kkEff25(k)}</div><div class="kkcnt">魔王復活 ${kkN25(S)}/${KKMAX25}</div><div class="kktap">タップで次へ</div></div>`;
+      try { if (typeof sfx16 === "function") sfx16("win"); } catch (e) {} }
+    else if (K.seen < Math.min(MEM25.length, Math.floor(kkN25(S) / 4))) { ov.innerHTML = `<div class="kkmemwrap"><div class="kkmt">記憶がもどる</div>${kkMemHtml25(K.seen)}<div class="kktap">タップで閉じる</div></div>`; K.seen++; }
+    else { ov.remove(); try { if (typeof save === "function") save(); } catch (e) {} if (typeof render === "function") render(); return; }
+    try { if (typeof save === "function") save(); } catch (e) {} };
+  ov.onclick = step; step();
+}
+// 記憶をあとから読み返す
+function kkMemList25() { const K = kk25(S), ov = document.createElement("div"); ov.className = "kk25ov list"; document.body.appendChild(ov);
+  ov.innerHTML = `<div class="kklist"><div class="kkmt">記憶　${K.seen}/${MEM25.length}</div>${MEM25.map((m, i) => i < K.seen ? kkMemHtml25(i) : `<div class="kkmem locked"><div class="kkmh">？？？<b>かけら ${(i + 1) * 4}</b></div></div>`).join("")}
+    <div class="kkmt" style="margin-top:14px">かけら　${kkN25(S)}/${KKMAX25}</div><div class="kkall">${KK25.map(k => K.got[k.id] ? `<div class="got"><b>✦ ${k.nm}</b><small>${kkEff25(k)}</small></div>` : `<div><b>？</b><small>${k.how}</small></div>`).join("")}</div>
+    <button class="kkclose">閉じる</button></div>`;
+  ov.querySelector(".kkclose").onclick = () => ov.remove(); }
+document.addEventListener("click", ev => { const b = ev.target.closest('[data-a="kkmem25"]'); if (!b) return; ev.stopPropagation(); kkMemList25(); }, true);
+// タイトルに「魔王復活 n/40」と記憶ボタン
+{ const _ts = titleScreen; titleScreen = function () { const h = _ts(); try { if (altar || diffScr) return h; const K = kk25(S), n = kkN25(S);
+  return h.replace('<div class="tmenu">', `<div class="kk25bar"><span class="kkfill" style="width:${n / KKMAX25 * 100}%"></span><span class="kktx">✦ 魔王復活　${n}/${KKMAX25}</span></div><div class="tmenu">`)
+    .replace('<button data-a="dex">', `<button data-a="kkmem25">📜 記憶とかけら<small>記憶 ${K.seen}/${MEM25.length}</small></button><button data-a="dex">`); } catch (e) { return h; } }; }
+// 描くたびに、まだ見せていないかけらがあれば出す
+{ const _r = render; render = function () { const r = _r.apply(this, arguments); setTimeout(kkShow25, 30); return r; }; }
+// 侵略の地図：かけらの数と、楔（28個目の記憶「楔」を見たあと）
+if (typeof invOpenMap25 === "function") { const _om = invOpenMap25; invOpenMap25 = function () { const r = _om.apply(this, arguments); try { const top = document.querySelector(".inv25map .inv25top"); if (top) { const K = kk25(S), w = 5 - KK25.filter(k => k.src === "fort" && K.got[k.id]).length;
+  const s = document.createElement("span"); s.className = "kk25mapc"; s.textContent = `✦ ${kkN25(S)}/${KKMAX25}` + (K.seen >= 7 ? `・封印石を支える楔 ${w}/5` : ""); top.insertBefore(s, top.querySelector(".inv25cl")); } } catch (e) {} return r; }; }
 
 </script>
 </body>
