@@ -3813,7 +3813,7 @@ function stepNight5(S, N) {
     h.pos = i; h.maxPos = Math.max(h.maxPos || 0, mainOf11(S, i)); enterSlot(S, N, h);
     const kn = known10(S, i), eye = partyEye(), here = monsAt(i), R = S.path[i] || {};
     if (R.kind === "dead") { h.stuck = Math.max(h.stuck, 2); if (!F["deadSay" + i]) { F["deadSay" + i] = 1; say5(N, h.name, "行き止まりだ…道をまちがえた", i); pop10(N, i, "迷った！", "info"); } return; }
-    if (hasFac12(R, "alcove") && !kn && !eye && !F["lost" + i + ":" + h.id] && rnd() < 0.45 + here.reduce((a, m) => a + ((m.s11 && m.s11.lure) || 0), 0)) { F["lost" + i + ":" + h.id] = 1; h.stuck = Math.max(h.stuck, 2); h.lostUntil = N.t + 3; if (!F["lostSay" + i]) { F["lostSay" + i] = 1; say5(N, h.name, "横穴だ…道をまちがえた", i); pop10(N, i, "迷った！", "info"); } }
+    if (hasFac12(R, "alcove") && !kn && !eye && !F["lost" + i + ":" + h.id] && rnd() < 0.45 + here.reduce((a, m) => a + ((m.s11 && m.s11.lure) || 0), 0) + 0.15 * (typeof kkFx25 === "function" ? kkFx25(S, "lost") : 0)) { F["lost" + i + ":" + h.id] = 1; h.stuck = Math.max(h.stuck, 2); h.lostUntil = N.t + 3; if (!F["lostSay" + i]) { F["lostSay" + i] = 1; say5(N, h.name, "横穴だ…道をまちがえた", i); pop10(N, i, "迷った！", "info"); } }
     if (h.job === "thief" && hasFac12(R, "mine") && !here.length && !F["rob" + i + ":" + h.id]) { F["rob" + i + ":" + h.id] = 1; const g = Math.round(20 * (1 + 0.1 * h.lv)); N.stolen = (N.stolen || 0) + g; say5(N, h.name, `魔石を${g}いただいた！`, i, "esc"); pop10(N, i, `-${g}DP`, "bad"); }
     if (here.length && !kn && !eye && (here.some(m => m.job === "watch") || here.some(m => m.s11 && m.s11.ambush)) && !F["amb" + i]) {
       F["amb" + i] = N.t; inRoom().filter(x => x.pos === i).forEach(x => { x.stuck = Math.max(x.stuck, 1); }); say5(N, h.name, "待ち伏せだ！", i, "bad"); pop10(N, i, "待ち伏せ！");
@@ -7303,7 +7303,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.267（11/21 14:37）";
+const VER20 = "No.268（11/21 14:58）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -11589,7 +11589,7 @@ const INV25 = (() => {
   const GATE = { x: GX, z: 0, top: 5.6 }, TOWER = [LT(-3, 4.4, 2.6), LT(3, 4.4, 2.6)].map(q => [q[0], q[2]]), UP = 4.4 * SK;
   const shotOf = m => { if (INVFLY25[m.sp] && /dragon|chimera|ifrit/.test(m.sp)) return "fire"; for (const k in (m.ref.sk || {})) if (INVRSK25[k]) return INVRSK25[k]; return null; };
   function start(list, vt, node){ const T = INVVT25[vt] || INVVT25.farm;
-    const lv = node ? node.lv : 3, mul = (typeof heroMul5 === "function" ? heroMul5(lv) : 1) * T.mul * (node ? { village: 0.5, town: 0.38, city: 0.42, fort: 0.5, capital: 0.6 }[node.type] : 0.75), tier = typeof heroTier === "function" ? heroTier(lv, false) : 0;
+    const lv = node ? node.lv : 3, mul = (typeof heroMul5 === "function" ? heroMul5(lv) : 1) * T.mul * (node ? { village: 0.5, town: 0.38, city: 0.42, fort: 0.5, capital: 0.6 }[node.type] : 0.75) * (node && node.type === "capital" ? 1 - 0.12 * (typeof kkFx25 === "function" ? kkFx25(S, "wedge") : 0) : 1), tier = typeof heroTier === "function" ? heroTier(lv, false) : 0;
     const vil = [], W = x => { const zc = -5 + 7.6 * Math.sqrt(Math.max(0, 1 - (x / 17.5) ** 2)) - 0.75, q = LT(x, 0, zc); return [q[0], q[2]]; };
     // 部隊：n人で1つ。体力も攻撃も人数ぶん。倒れていくと人数が減る
     const mk = (job, base, x, z, up, role, nm) => { const J = (typeof JOB5 !== "undefined" && JOB5[base]) || { hp: 60, atk: 9 }, n = nm || 1, hp = Math.round(J.hp * mul * n);
@@ -11617,7 +11617,7 @@ const INV25 = (() => {
     st = { vil, mons, gate: { hp: Math.round((90 + 35 * list.length) * T.gate * (node ? 1 + node.lv / 10 : 1)), max: Math.round((90 + 35 * list.length) * T.gate * (node ? 1 + node.lv / 10 : 1)), broken: false }, vt: T, t: 0, step: 0, over: null, pops: [], hits: [], spd: 1 };
     return st; }
   const near = (a, L) => L.filter(b => !b.dead).sort((p, q) => Math.hypot(p.x - a.x, p.z - a.z) - Math.hypot(q.x - a.x, q.z - a.z))[0];
-  const hit = (a, b, d, far, shot) => { d = Math.max(1, Math.round(d * (0.85 + R() * 0.3) * (b.up ? 0.5 : 1))); b.hp -= d; const kill = b.hp <= 0 && !b.dead; if (kill) b.dead = true;
+  const hit = (a, b, d, far, shot) => { const kk = a && a.ref && st.mons.includes(a) ? 1 + (a.fly ? (typeof kkFx25 === "function" ? kkFx25(S, "fly") : 0) : 0) + (b.up ? (typeof kkFx25 === "function" ? kkFx25(S, "tower") : 0) : 0) : 1; d = Math.max(1, Math.round(d * kk * (0.85 + R() * 0.3) * (b.up ? 0.5 : 1))); b.hp -= d; const kill = b.hp <= 0 && !b.dead; if (kill) b.dead = true;
     const aid = a.n ? a.id + "_0" : a.id, bid = b.n ? b.id + "_0" : b.id;
     st.hits.push({ a: aid, b: bid, d, kill: kill, far: !!far, shot: shot || null, big: d > b.max * 0.3 });
     if (a.n > 1 && B3 && typeof play25 === "function") for (let k = 1; k < alive(a); k++) { const A = B3.A[a.id + "_" + k]; if (A) play25(A, "atk", 0.42); } };
@@ -11643,7 +11643,7 @@ const INV25 = (() => {
       if (dd > 0.2) { m.x += ddx / dd * Math.min(dd, sp); m.z += ddz / dd * Math.min(dd, sp); }
       const inR = toGate ? dd < 0.5 : tgt && Math.hypot(m.x - tgt.x, m.z - tgt.z) < (tgt.up ? (m.fly && !m.shot ? 2.9 : 6.5) : reach + 0.3);
       if (inR && m.cd <= 0) { m.cd = 1.3 + R() * 0.4;
-        if (toGate) { const d = Math.max(1, Math.round(m.atk * (0.85 + R() * 0.3) * (m.fly ? 0.5 : 1))); st.gate.hp -= d; st.pops.push({ txt: d + "", at: st.t, z: GATE.z + (R() - 0.5) * 2, col: "#ffd27a" }); const A = B3 && B3.A[m.id]; if (A && typeof play25 === "function") { play25(A, "atk", 0.42); A.lunge = [GATE.x - m.x, GATE.z - m.z]; } if (B3) B3.shake = Math.max(B3.shake || 0, 0.06);
+        if (toGate) { const d = Math.max(1, Math.round(m.atk * (1 + (typeof kkFx25 === "function" ? kkFx25(S, "gate") : 0)) * (0.85 + R() * 0.3) * (m.fly ? 0.5 : 1))); st.gate.hp -= d; st.pops.push({ txt: d + "", at: st.t, z: GATE.z + (R() - 0.5) * 2, col: "#ffd27a" }); const A = B3 && B3.A[m.id]; if (A && typeof play25 === "function") { play25(A, "atk", 0.42); A.lunge = [GATE.x - m.x, GATE.z - m.z]; } if (B3) B3.shake = Math.max(B3.shake || 0, 0.06);
           if (st.gate.hp <= 0 && !st.gate.broken) breakGate(); }
         else hit(m, tgt, m.atk, !!m.shot && !(tgt.up && m.fly), m.shot); } });
     // 村人：隊列を守りながら戦う
@@ -11781,14 +11781,14 @@ function invOpenMap25(){ if (typeof S === "undefined" || !S) return; const I = i
   el.querySelectorAll(".inv25n").forEach(g => g.onclick = () => { const n = M.nodes.find(q => q.id === g.dataset.n); const sh = el.querySelector(".inv25sheet"); if (!n) { sh.hidden = true; return; }
     const T = INVVT25[n.vt], fight = Math.round(n.pop * T.fight);
     sh.hidden = false; sh.innerHTML = `<div class="inv25card"><h3>${n.name}<small>（${INVNT25[n.type].name}）</small></h3>
-      ${I.own[n.id] ? `<div class="inv25hint">🚩 拠点。毎日 💎+${8 + n.lv * 3}</div>` : `<div class="inv25hint">強さ ${star(n)}・${T.name}・人口およそ${Math.round(n.pop / 10) * 10}・守り${fight}人ほど${n.gen ? `・将軍${n.gen}人` : ""}<br>${n.days ? `遠征 ${n.days}日` : "近いので当日で帰れる"}</div>`}
+      ${I.own[n.id] ? `<div class="inv25hint">🚩 拠点。毎日 💎+${8 + n.lv * 3}</div>` : `<div class="inv25hint">強さ ${star(n)}・${T.name}・人口およそ${Math.round(n.pop / 10) * 10}・守り${fight}人ほど${n.gen ? `・将軍${n.gen}人${(typeof kkFx25 === "function" ? kkFx25(S, "eye") : 0) ? `（${"★".repeat(Math.max(1, Math.min(5, Math.round(n.lv / 5))))}・スキル${Math.max(1, Math.min(5, Math.round(n.lv / 5)))}つ）` : ""}` : ""}<br>${Math.max(0, n.days - (typeof kkFx25 === "function" ? kkFx25(S, "march") : 0)) ? `遠征 ${Math.max(0, n.days - (typeof kkFx25 === "function" ? kkFx25(S, "march") : 0))}日` : "近いので当日で帰れる"}</div>`}
       <div class="inv25btns">${I.own[n.id] ? "" : `<button class="inv25go">攻める</button>`}<button class="inv25no">閉じる</button></div></div>`;
     sh.querySelector(".inv25no").onclick = () => sh.hidden = true;
     const go = sh.querySelector(".inv25go"); if (go) go.onclick = () => { window.__invNode = n; invOpenForm25(n); }; }); }
 // 勝ったときのごほうび：DP・魔物を1体えらぶ・拠点にする
 const INVPOOL25 = { village: [0], town: [0, 1], city: [1], fort: [1, 2], capital: [2, 3] };
 function invReward25(n, st){ const I = invSt25(), tiers = INVPOOL25[n.type] || [0], rk = k => +(MON[k].rar || MON[k].rank || MON[k].tier || 0), pool = Object.keys(MON).filter(k => tiers.includes(rk(k)) && (typeof SP3D24 === "undefined" || SP3D24[kitOf24(k)]));
-  const pick3 = pool.sort(() => Math.random() - 0.5).slice(0, 3), dp = 30 + n.lv * 12; S.dp += dp; I.own[n.id] = 1; I.alert = Math.min(100, I.alert + 4 + n.lv); I.cleared++;
+  const pick3 = pool.sort(() => Math.random() - 0.5).slice(0, 3 + (typeof kkFx25 === "function" ? kkFx25(S, "pick") : 0)), dp = 30 + n.lv * 12; S.dp += dp; I.own[n.id] = 1; I.alert = Math.min(100, I.alert + Math.round((4 + n.lv) * ((typeof kkFx25 === "function" ? kkFx25(S, "alert") : 0) ? 0.6 : 1))); I.cleared++;
   const d = document.createElement("div"); d.className = "inv25end"; d.innerHTML = `<div class="inv25card"><h3>🏴 ${n.name}を落とした！</h3><div class="inv25hint">💎+${dp}・${n.name}は拠点になった（毎日 💎+${8 + n.lv * 3}）・王国の警戒度が上がった<br>仲間にする魔物を1体えらぶ</div>
     <div class="inv25list">${pick3.map(k => `<label data-sp="${k}">${typeof img === "function" ? img(k, 0, "sp") : ""}<span>${typeof monName5 === "function" ? monName5({ sp: k, evos: 0 }) : k}<small>Lv${Math.max(3, n.lv + 2)}</small></span></label>`).join("")}</div></div>`;
   invBox25.appendChild(d);
@@ -12384,7 +12384,7 @@ const KK25 = [
 ];
 const KKMAX25 = KK25.length;
 // いま効いている効果の種類（ほかは準備中と出す）
-const KKON25 = ["latk", "lhp", "mhp", "matk", "dp", "soul", "keep", "xp"];
+const KKON25 = ["latk", "lhp", "mhp", "matk", "dp", "soul", "keep", "xp", "trap", "magic", "heal", "bow", "bed", "mapx", "lost", "gate", "fly", "tower", "march", "alert", "eye", "pick", "wedge"];
 const kkEff25 = k => k.eff + (k.id === "heart" || Object.keys(k.fx).some(x => KKON25.includes(x)) ? "" : "（準備中）");
 // 記憶の場面（かけら4個ごと）。| で段落、\n で行
 const MEM25 = [
@@ -12434,6 +12434,18 @@ function kkCheck25(S0) {
 // 効果：育つ早さ・毎日のDP
 { const _en = endNight8; endNight8 = function (S0, N0) { try { const x = 1 + kkFx25(S0, "xp"); if (x > 1) N0.mons.forEach(bm => { bm.xp = Math.round(bm.xp * x); }); } catch (e) {}
   const out = _en(S0, N0); try { const d = kkFx25(S0, "dp"); if (d && out) { S0.dp += d; out.dp = (out.dp || 0) + d; out.daily = (out.daily || 0) + d; } } catch (e) {} return out; }; }
+
+// 効果：罠（倒した魔物がいない傷＝罠・毒）・魔法（呪い役・部屋ごと攻撃）・飛び道具
+{ const _hh = hurtHero5; hurtHero5 = function (S0, N0, h, d, killer) { try { let k = 1;
+  if (!killer) k += kkFx25(S0, "trap");
+  else { if (killer.role === "hex" || (killer.fx && killer.fx.all)) k += kkFx25(S0, "magic"); if (killer.role === "bow") k += kkFx25(S0, "bow"); }
+  if (k !== 1) d = Math.round(d * k); } catch (e) {} return _hh(S0, N0, h, d, killer); }; }
+// 効果：回復（戦いの始めに、癒やし役の回復量を上げる）
+{ const _sn2 = startNight8; startNight8 = function (S0, rnd) { const N0 = _sn2(S0, rnd); try { const x = kkFx25(S0, "heal"); if (x) N0.mons.forEach(bm => { if (bm.fx && bm.fx.heal) bm.fx = { ...bm.fx, heal: bm.fx.heal * (1 + x) }; }); } catch (e) {} return N0; }; }
+// 効果：寝床の回復が早い（休みの子は、日ごとに半分の確率でもう1日早く治る）
+{ const _fd2 = finishDay9; finishDay9 = function (S0, rep) { const r = _fd2(S0, rep); try { if (kkFx25(S0, "bed")) S0.mons.forEach(m => { if (m.rest > 0 && Math.random() < 0.5) m.rest--; }); } catch (e) {} return r; }; }
+// 効果：地図を持ち帰られにくい（逃げた勇者が書いた部屋の半分は、まちがった地図になる）
+if (typeof mapAfter10 === "function") { const _ma = mapAfter10; mapAfter10 = function (S0, N0, out) { const before = { ...(S0.map10 || {}) }; _ma(S0, N0, out); try { if (kkFx25(S0, "mapx")) { let n = 0; Object.keys(S0.map10).forEach(k => { if (!before[k] && Math.random() < 0.5) { delete S0.map10[k]; n++; } }); if (n) { out.mapAdd = Math.max(0, (out.mapAdd || 0) - n); out.mapKnown = mapCount10(S0); } } } catch (e) {} }; }
 // 侵略：街・都市・砦・王都を落とすと、その種類のかけらを順に
 if (typeof invReward25 === "function") { const _ir = invReward25; invReward25 = function (n, st) { try { if (n && ["town", "city", "fort", "capital"].includes(n.type)) { const k = KK25.find(o => o.src === n.type && !kk25(S).got[o.id]); if (k) kkGive25(S, k.id); } } catch (e) {} const r = _ir(n, st); setTimeout(kkShow25, 50); return r; }; }
 
