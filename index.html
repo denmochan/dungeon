@@ -7242,7 +7242,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.257（11/21 06:14）";
+const VER20 = "No.258（11/21 10:29）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -11329,7 +11329,8 @@ function frame25(tm){
     const a = e.a && B3.A[e.a], b = B3.A[e.b];
     if (e.a && e.a[0] === "h") { if (B3.tgt[e.a] !== e.b) delete B3.ang[e.a]; B3.tgt[e.a] = e.b; } if (e.a && e.a[0] === "m" && e.b) B3.tgt[e.b] = B3.tgt[e.b] || e.a;
     const delay = a ? 0.18 : 0;
-    if (a) { play25(a, "atk", 0.42); a.lunge = b ? [b.x - a.x, b.z - a.z] : null; if (b) a.face = b.x >= a.x ? 1 : -1; if (e.far) B3.fx.push({ k: "shot", from: [a.x, a.z, a.key], to: e.b, at: now, dur: 0.25, kind: e.shot || "arrow" }); }
+    if (a) { const up = Math.max(0, -(a.sink || 0)); play25(a, "atk", 0.42); a.lunge = b && !up ? [b.x - a.x, b.z - a.z] : null; if (b) a.face = b.x >= a.x ? 1 : -1;
+      if (e.far || up) B3.fx.push({ k: "shot", from: [a.x, a.z, a.key, up], to: e.b, at: now, dur: up ? 0.4 : 0.25, kind: up ? (/^(mage|priest)/.test(a.key) ? "magic" : "arrow") : (e.shot || "arrow") }); }
     B3.fx.push({ k: "hit", who: e.b, at: now + delay, d: e.d, kill: e.kill, big: e.big, hero: e.b[0] === "h" }); }
   // 主が叩かれた（記録の入口がないので、体力の差で見る）
   if (N.lord && B3.lordHp != null && N.lord.hp < B3.lordHp && want.lord) { const by = N.heroes.find(h => h.st === "in" && h.pos === B3.room && h.walk == null); const a = by && B3.A["h" + by.id];
@@ -11392,7 +11393,13 @@ function overlay25(now){ const ov = B3.ov, r = ov.getBoundingClientRect(), dpr =
     if (nm) { g.lineWidth = 3; g.strokeStyle = "rgba(0,0,0,0.8)"; g.strokeText(nm, p[0], y - 4); g.fillStyle = a.id === "lord" ? "#ffe08a" : "#ffd9c9"; g.fillText(nm, p[0], y - 4); } });
   // 飛び道具
   B3.fx.forEach(f => { if (f.k !== "shot") return; const b = B3.A[f.to]; if (!b) return; const p = Math.min(1, (now - f.at) / f.dur);
-    const s0 = B3.C.toScreen([f.from[0], 1.0, f.from[1]]), s1 = B3.C.toScreen([b.x, 1.0, b.z]); const x = s0[0] + (s1[0] - s0[0]) * p, y = s0[1] + (s1[1] - s0[1]) * p - Math.sin(p * Math.PI) * 18;
+    const s0 = B3.C.toScreen([f.from[0], 1.0 + (f.from[3] || 0), f.from[1]]), s1 = B3.C.toScreen([b.x, 1.0, b.z]); const arc = f.from[3] ? 10 : 18;
+    const at = q => [s0[0] + (s1[0] - s0[0]) * q, s0[1] + (s1[1] - s0[1]) * q - Math.sin(q * Math.PI) * arc]; const [x, y] = at(p);
+    if (f.kind === "arrow") { const [x2, y2] = at(Math.max(0, p - 0.08)); const L = Math.hypot(x - x2, y - y2) || 1, ux = (x - x2) / L, uy = (y - y2) / L;
+      g.strokeStyle = "rgba(0,0,0,0.6)"; g.lineWidth = 4.5; g.beginPath(); g.moveTo(x - ux * 20, y - uy * 20); g.lineTo(x + ux * 5, y + uy * 5); g.stroke(); g.strokeStyle = "#efe2c4"; g.lineWidth = 2.5; g.beginPath(); g.moveTo(x - ux * 20, y - uy * 20); g.lineTo(x, y); g.stroke(); g.fillStyle = "#dfe6ec"; g.beginPath(); g.moveTo(x + ux * 6, y + uy * 6); g.lineTo(x - uy * 4, y + ux * 4); g.lineTo(x + uy * 4, y - ux * 4); g.fill();
+      g.strokeStyle = "#c8493a"; g.lineWidth = 4; g.beginPath(); g.moveTo(x - ux * 20, y - uy * 20); g.lineTo(x - ux * 14, y - uy * 14); g.stroke(); return; }
+    if (f.kind === "magic") { for (let t = 4; t >= 0; t--) { const [tx, ty] = at(Math.max(0, p - t * 0.04)); g.fillStyle = `rgba(150,190,255,${0.15 + 0.12 * (4 - t)})`; g.beginPath(); g.arc(tx, ty, 4 + (4 - t) * 1.2, 0, 7); g.fill(); }
+      g.fillStyle = "#f2f6ff"; g.beginPath(); g.arc(x, y, 5, 0, 7); g.fill(); return; }
     g.fillStyle = f.kind === "fire" ? "#ff8a2a" : f.kind === "eye" ? "#c070ff" : f.kind === "rock" ? "#a99a85" : "#f3e6c0"; g.beginPath(); g.arc(x, y, f.kind === "fire" ? 5 : 3, 0, 7); g.fill(); });
   // 斬った光
   Object.values(B3.A).forEach(a => { if (a.anim !== "atk" || !a.lunge) return; const p = (now - a.at) / (a.dur || 0.42); if (p < 0.3 || p > 0.7) return; const b = B3.A[B3.tgt[a.id]] || null;
