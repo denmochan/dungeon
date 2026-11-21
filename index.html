@@ -1085,6 +1085,11 @@ button:active,.chall:active{transform:scale(.96);filter:brightness(1.25);transit
 .inv25vt button.on{border-color:#d9a441;background:#3d2c1c}.inv25vt small{display:block;color:#bfae98;font-size:12px}
 .inv25drag{position:absolute;left:0;right:0;top:calc(10px + env(safe-area-inset-top,0px));text-align:center;color:#efe3cf;font-size:12px;font-weight:700;text-shadow:0 1px 3px #000;pointer-events:none;animation:inv25f 4s forwards}
 @keyframes inv25f{0%,70%{opacity:1}100%{opacity:0}}
+.inv25row{margin-left:auto;font-style:normal;font-size:12px;font-weight:800;padding:3px 7px;border-radius:8px;background:#5a3a22;border:1px solid #c98a4a;color:#ffe9c9}
+.inv25list label{position:relative}
+.inv25rot{display:none;position:absolute;inset:0;z-index:9;background:rgba(10,6,4,.92);color:#efe3cf;align-items:center;justify-content:center;text-align:center;font-weight:800;font-size:18px;line-height:1.8}
+@media (orientation:portrait){.inv25rot{display:flex}}
+@media (orientation:landscape) and (max-height:500px){.inv25card{max-width:760px;max-height:94vh;padding:10px}.inv25vt{flex-direction:row}.inv25vt button{flex:1}.inv25list{grid-template-columns:repeat(3,1fr)}.inv25hint{font-size:12px}}
 </style>
 </head>
 <body>
@@ -7261,7 +7266,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.264（11/21 11:47）";
+const VER20 = "No.265（11/21 12:18）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -10491,7 +10496,7 @@ SP3D24.gobx = 1; SP3D24.lich = 1;
   if (SHP) rp("float caveIn(vec2 q){vec2 d=abs(q)-vec2(3.05,2.05)+1.0;float r=length(max(d,0.0))+min(max(d.x,d.y),0.0)-1.0;", shapeGl25(SHP));
   if ((ROOMS24[room] || {}).outdoor) { { const a = s.indexOf(" // かがり火（2つ）"), b = s.indexOf("\n return r;}", a); if (a > 0 && b > a) s = s.slice(0, a) + s.slice(b); }
     { const a = s.indexOf(" // 石筍・がれき"), b = s.indexOf(" p=P0;", a); if (a > 0 && b > a) s = s.slice(0, a) + s.slice(b); }
-    rp("   c=mix(rk,gd,fl2);", `   c=mix(rk,gd,fl2);{vec3 pl=(p-vec3(0.0,0.0,2.0))/1.3+vec3(0.0,0.0,2.6);float wn=vnoise(vec3(pl.xz*0.9,4.0));
+    rp("   c=mix(rk,gd,fl2);", `   c=mix(rk,gd,fl2);{vec3 pl=${(ROOMS24[room] || {}).outdoor === 2 ? 'vec3(p.z/1.15,p.y/1.15,2.6+(7.5-p.x)/1.15)' : '(p-vec3(0.0,0.0,2.0))/1.3+vec3(0.0,0.0,2.6)'};float wn=vnoise(vec3(pl.xz*0.9,4.0));
     float sq=1.0-smoothstep(0.8,1.15,length(vec2(pl.x/5.2,(pl.z+5.4)/3.6))+0.12*(vnoise(vec3(pl.xz*0.7,2.0))-0.5));
     float mp=(1.0-smoothstep(1.1,1.9,abs(pl.x+0.3*sin(pl.z*0.5))))*step(-5.0,pl.z);
     float sp=0.0;for(int i=0;i<5;i++){vec2 e=i==0?vec2(-9.2,-2.6):i==1?vec2(-12.2,-8.6):i==2?vec2(-5.6,-10.6):i==3?vec2(10.6,-8.4):vec2(10.8,-2.4);vec2 o=vec2(0.4,-5.6);vec2 ab=e-o;float t=clamp(dot(pl.xz-o,ab)/dot(ab,ab),0.0,1.0);sp=max(sp,1.0-smoothstep(0.55,1.1,length(pl.xz-o-ab*t)+0.4*(wn-0.5)));}
@@ -11056,7 +11061,10 @@ const VWALK25 = () => ` {float ax=abs(p.x);if(ax>4.3&&ax<12.8){float zc=-5.0+7.6
   float lad=max(sBox(vec3(ax-4.7,q.y-1.15,q.z+1.0),vec3(0.35,1.2,0.06)),-sBox(vec3(ax-4.7,mod(q.y,0.45)-0.22,q.z+1.0),vec3(0.27,0.17,0.2)));wk=min(wk,lad);
   wk+=abs(fract(p.x*2.4)-0.5)*0.02;if(wk<r.x)r=vec2(wk,12.0);}}`;
 const VK25 = 1.3, VLT25 = (x, y, z) => [x * VK25, y * VK25, (z - 2.6) * VK25 + 2.0].map(v => v.toFixed(2)).join(",");
-const VILLAGE25 = (bk) => " {vec3 pW=p;p=(p-vec3(0.0,0.0,2.0))/" + VK25.toFixed(2) + "+vec3(0.0,0.0,2.6);r.x/=" + VK25.toFixed(2) + ";\n" + [
+// 横向きの戦場：村をまわして、門が左を向くように置く（世界 → 村の中の座標：x=z/K, z=2.6+(GX-x)/K）
+const VSK25 = 1.15, VSGX25 = 7.5, VLTS25 = (x, y, z) => [VSGX25 - (z - 2.6) * VSK25, y * VSK25, x * VSK25].map(v => v.toFixed(2)).join(",");
+const VILLAGE25 = (bk, side) => (side ? " {vec3 pW=p;p=vec3(p.z/" + VSK25.toFixed(2) + ",p.y/" + VSK25.toFixed(2) + ",2.6+(" + VSGX25.toFixed(2) + "-p.x)/" + VSK25.toFixed(2) + ");r.x/=" + VSK25.toFixed(2) + ";\n"
+  : " {vec3 pW=p;p=(p-vec3(0.0,0.0,2.0))/" + VK25.toFixed(2) + "+vec3(0.0,0.0,2.6);r.x/=" + VK25.toFixed(2) + ";\n") + [
   VHOUSE25(-9.2, -2.6, 1.7, 1.5, 2.3, 1.15, 0, 46), VHOUSE25(-12.2, -8.6, 1.9, 1.5, 2.4, 0.55, 0, 46), VHOUSE25(-5.6, -10.6, 1.6, 1.4, 2.2, 0.12, 0, 46),
   VCHAPEL25(4.2, -11.4), VHOUSE25(10.6, -8.4, 1.9, 1.6, 2.5, -0.6), VHOUSE25(10.8, -2.4, 1.6, 1.4, 2.2, -1.2, 0, 46),
   VWELL25(0.4, -5.6), VLINE25(-12.6, -4.6, -9.6, -6.4), VWOOD25(13.4, -5.0, 1.2), VBARREL25(7.4, -5.6), VBARREL25(8.2, -5.0), VCRATE25(7.6, -4.2, 0.4),
@@ -11064,7 +11072,7 @@ const VILLAGE25 = (bk) => " {vec3 pW=p;p=(p-vec3(0.0,0.0,2.0))/" + VK25.toFixed(
   VPOST25(-2.2, -0.4), VPOST25(2.4, -0.6), VTOWER25(-10.0, -12.6),
   VTREE25(-19.6, 6.0, 1.3), VTREE25(19.4, 7.0, 1.3), VTREE25(-20.5, -6.0, 1.4), VTREE25(20.6, -5.2, 1.4), VTREE25(-17.0, 11.0, 1.1), VTREE25(16.5, 11.5, 1.1),
   VCHEV25(-13.5, -5.0, 4.4), VCHEV25(5.0, 13.5, 4.4), VDEBRIS25(),
-  VWALK25(), VRING25(bk)].join("\n") + "\n p=pW;r.x*=" + VK25.toFixed(2) + ";}";
+  VWALK25(), VRING25(bk)].join("\n") + "\n p=pW;r.x*=" + (side ? VSK25 : VK25).toFixed(2) + ";}";
 const HAI25 = (() => {
   const L = r => ROOMS24[r].props.split("\n");
   const T = L("train"), M = L("mine"), S = L("sleep");
@@ -11110,6 +11118,8 @@ const HAI25 = (() => {
   rb=min(rb,sEll(q-vec3(1.2,0.15,0.6),vec3(0.9,0.5,0.7)));rb+=(vnoise(q*7.0)-0.5)*0.12;if(rb<r.x)r=vec2(rb*0.85,10.0);}`, light: "LIGHT(-6.0,4.2,-2.5,0.4,0.65,1.0,45.0) LIGHT(-6.0,1.8,-2.5,0.4,0.6,1.0,6.0)", foot: [[-6.0, -2.5, 1.2], [-2.9, -2.5, 0.7], [-9.1, -2.5, 0.7]] },
     { id: "village", name: "草原の村（夜）", g: "none", txt: VILLAGE25(), outdoor: 1, light: `LIGHT(${VLT25(-3.8,5.6,1.8)},1.0,0.6,0.28,8.0) LIGHT(${VLT25(3.8,5.6,1.8)},1.0,0.6,0.28,8.0) LIGHT(${VLT25(-2.2,2.9,-0.4)},1.0,0.6,0.28,5.5) LIGHT(${VLT25(2.4,2.9,-0.6)},1.0,0.6,0.28,5.5) LIGHT(${VLT25(-10.0,6.2,-12.6)},1.0,0.55,0.25,4.5) LIGHT(${VLT25(0.4,3.0,-6.5)},1.0,0.7,0.35,4.0)`, foot: [] },
     { id: "villageB", name: "草原の村（門が壊れた後）", g: "none", txt: VILLAGE25(1), outdoor: 1, light: `LIGHT(${VLT25(-3.8,0.9,4.2)},1.0,0.6,0.28,8.0) LIGHT(${VLT25(3.8,0.9,4.2)},1.0,0.6,0.28,8.0) LIGHT(${VLT25(-2.2,2.9,-0.4)},1.0,0.6,0.28,5.5) LIGHT(${VLT25(2.4,2.9,-0.6)},1.0,0.6,0.28,5.5) LIGHT(${VLT25(-10.0,6.2,-12.6)},1.0,0.55,0.25,4.5) LIGHT(${VLT25(0.4,3.0,-6.5)},1.0,0.7,0.35,4.0)`, foot: [] },
+    { id: "villageS", name: "草原の村・横（夜）", g: "none", txt: VILLAGE25(0, 1), outdoor: 2, light: `LIGHT(${VLTS25(-3.8,5.6,1.8)},1.0,0.6,0.28,8.0) LIGHT(${VLTS25(3.8,5.6,1.8)},1.0,0.6,0.28,8.0) LIGHT(${VLTS25(-2.2,2.9,-0.4)},1.0,0.6,0.28,5.5) LIGHT(${VLTS25(2.4,2.9,-0.6)},1.0,0.6,0.28,5.5) LIGHT(${VLTS25(-10.0,6.2,-12.6)},1.0,0.55,0.25,4.5) LIGHT(${VLTS25(0.4,3.0,-6.5)},1.0,0.7,0.35,4.0) LIGHT(-14.0,6.5,-2.0,0.42,0.52,0.78,38.0) LIGHT(-4.0,6.5,3.0,0.42,0.52,0.78,38.0) LIGHT(-9.0,6.5,8.0,0.42,0.52,0.78,30.0)`, foot: [] },
+    { id: "villageSB", name: "草原の村・横（門が壊れた後）", g: "none", txt: VILLAGE25(1, 1), outdoor: 2, light: `LIGHT(${VLTS25(-3.8,0.9,4.2)},1.0,0.6,0.28,8.0) LIGHT(${VLTS25(3.8,0.9,4.2)},1.0,0.6,0.28,8.0) LIGHT(${VLTS25(-2.2,2.9,-0.4)},1.0,0.6,0.28,5.5) LIGHT(${VLTS25(2.4,2.9,-0.6)},1.0,0.6,0.28,5.5) LIGHT(${VLTS25(-10.0,6.2,-12.6)},1.0,0.55,0.25,4.5) LIGHT(${VLTS25(0.4,3.0,-6.5)},1.0,0.7,0.35,4.0) LIGHT(-14.0,6.5,-2.0,0.42,0.52,0.78,38.0) LIGHT(-4.0,6.5,3.0,0.42,0.52,0.78,38.0) LIGHT(-9.0,6.5,8.0,0.42,0.52,0.78,30.0)`, foot: [] },
     { id: "shOpen", shell: 1, shape: "open", foot: [] },
     { id: "shTunnel", shell: 1, shape: "tunnel", foot: [] }, { id: "shArena", shell: 1, shape: "arena", foot: [] }, { id: "shDen", shell: 1, shape: "den", foot: [] },
     { id: "shCavern", shell: 1, shape: "cavern", foot: [] }, { id: "shShaft", shell: 1, shape: "shaft", foot: [] },
@@ -11129,7 +11139,7 @@ const HAI25 = (() => {
   // 選んだ施設から部屋を作る（名前は中身ごとに変える）
   function room(on){ const MS = modsOf(on), key = "c_" + MS.map(m => m.id.replace("@", "A").replace(/,/g, "_").replace(/-/g, "m").replace(/\./g, "p")).join("_");
     if (!ROOMS24[key]) { const ms = MS.filter(m => !m.shell);
-      ROOMS24[key] = { props: "\n" + ms.map(wrap).join("\n"), lights: ms.filter(m => m.light).map(lightOf).join(" "), keepDummy: !!on.dummy, noRack: !on.rack, noTorch: !on.torch, noStal: !on.stal, noBeam: true, seam: on.seam ? [6.0, -10.5, 4.2] : null, stalAvoid: foots(on).filter(f => f[2] >= 1.2), shape: (MS.find(m => m.shape) || {}).shape, outdoor: MS.some(m => m.outdoor), carve: MS.some(m => m.carve) ? BURROWCARVE25() : "" }; }
+      ROOMS24[key] = { props: "\n" + ms.map(wrap).join("\n"), lights: ms.filter(m => m.light).map(lightOf).join(" "), keepDummy: !!on.dummy, noRack: !on.rack, noTorch: !on.torch, noStal: !on.stal, noBeam: true, seam: on.seam ? [6.0, -10.5, 4.2] : null, stalAvoid: foots(on).filter(f => f[2] >= 1.2), shape: (MS.find(m => m.shape) || {}).shape, outdoor: (MS.find(m => m.outdoor) || {}).outdoor || 0, carve: MS.some(m => m.carve) ? BURROWCARVE25() : "" }; }
     return key; }
   // 施設の場所（ぶつからないように）
   function foots(on){ const F = [];
@@ -11278,7 +11288,9 @@ const ROOMSET25 = {
   entry: ["barr", "crate", "lamp", "rack", "torch", "stal", "gate"],
   plain: ["crate", "torch", "stal", "gate"],
   v_grass: ["village", "shOpen"],
-  v_grass_b: ["villageB", "shOpen"] };
+  v_grass_b: ["villageB", "shOpen"],
+  v_side: ["villageS", "shOpen"],
+  v_side_b: ["villageSB", "shOpen"] };
 // 施設が2つ以上ある部屋は、上位2つを合わせた部屋（例：mine_bed）
 const KORD25 = ["train", "mine", "bed", "nest", "watch"];
 KORD25.forEach((a, i) => KORD25.slice(i + 1).forEach(b => { ROOMSET25[a + "_" + b] = [...new Set(ROOMSET25[a].concat(ROOMSET25[b]))]; }));
@@ -11300,7 +11312,7 @@ function roomKind25(i){ if (window.__INVADE25) return typeof window.__INVADE25 =
   return F.includes("train") ? "train" : F.includes("mine") ? "mine" : F.includes("bed") ? "bed" : R.fac === "mine" ? "mine" : R.fac === "bed" ? "bed" : R.fac === "train" ? "train" : F.includes("nest") || R.fac === "nest" ? "nest" : F.includes("watch") || R.fac === "watch" ? "watch" : F.includes("gate") || R.fac === "gate" ? "entry" : "plain"; }
 // 配った洞窟の絵（bg25/部屋の種類_c.png・_d.png）があれば、それを読み込む
 function setRoom25(i){ const C = B3.C; C.setRoom(B3.roomKey); const k = roomKind25(i); if (!BGSHIP25[k]) return; C.putBgImages(`bg25/${k}_c.webp?v=${BGSHIP25[k]}`, `bg25/${k}_d.webp?v=${BGSHIP25[k]}`, C.st.bgKey); }
-const BGSHIP25 = { v_grass: "bde48e94", v_grass_b: "26495de2", train: "177c07dc", mine: "93e6d2c5", bed: "a3af377b", lord: "8300d46a", plain: "6683282a", nest: "e3d92db3", watch: "22cc5774", entry: "52e41f17", train_mine: "e6d09ae2", train_bed: "06723853", train_nest: "d516a146", train_watch: "e1ad46e7", mine_bed: "373f048c", mine_nest: "ff6e8e1f", mine_watch: "72754dcf", bed_nest: "6754c89d", bed_watch: "50cdec00", nest_watch: "61532936", lordday: "8300d46a" };
+const BGSHIP25 = { v_side: "c40f25a4", v_side_b: "59c7db12", v_grass: "bde48e94", v_grass_b: "26495de2", train: "177c07dc", mine: "93e6d2c5", bed: "a3af377b", lord: "8300d46a", plain: "6683282a", nest: "e3d92db3", watch: "22cc5774", entry: "52e41f17", train_mine: "e6d09ae2", train_bed: "06723853", train_nest: "d516a146", train_watch: "e1ad46e7", mine_bed: "373f048c", mine_nest: "ff6e8e1f", mine_watch: "72754dcf", bed_nest: "6754c89d", bed_watch: "50cdec00", nest_watch: "61532936", lordday: "8300d46a" };
 function roomKey25(i){ const on = {}; ROOMSET25[roomKind25(i)].forEach(k => on[k] = true); return HAI25.room(on); }
 // ---- 3Dのキャラの種類 ----
 const heroSp25 = h => (typeof heroId === "function" ? String(heroId(h)).replace(/\d+$/, "") : h.job) || "warrior";
@@ -11356,7 +11368,7 @@ function targets25(i){ const L = lordIdx(S), sp = B3.spots[i] || (B3.spots[i] = 
 // ---- 毎フレーム：記録を動きに変える ----
 function frame25(tm){
   if (!B3 || !N) return [];
-  if (!B3.zset && B3.cv.height > 10) { B3.zset = 1; const st0 = B3.C.st; st0.zoom = Math.max(B3.C.minZoom(), B3.cv.height / B3.C.VRES[1] * 0.95); }
+  if (!B3.zset && B3.cv.height > 10) { B3.zset = 1; const st0 = B3.C.st; if (window.__INVADE25) { st0.zoom = Math.max(B3.cv.width / B3.C.VRES[0], B3.cv.height / B3.C.VRES[1]) * 1.25; const q = B3.C.proj([-1.5, 0.8, 0.5]); st0.cx = q[0]; st0.cy = q[1]; } else st0.zoom = Math.max(B3.C.minZoom(), B3.cv.height / B3.C.VRES[1] * 0.95); }
   const now = B3.now = tm, dt = Math.min(0.1, now - (B3.last || now)); B3.last = now;
   const i = window.__INVADE25 ? 0 : focus25();
   if (i !== B3.room && (now - (B3.switchAt || -9)) > 1.5) { B3.room = i; B3.switchAt = now; B3.A = {}; B3.fx = []; const key = roomKey25(i); if (key !== B3.roomKey) { B3.roomKey = key; setRoom25(i); } roomTabs25(); }
@@ -11406,7 +11418,7 @@ function frame25(tm){
     if (a.shake) { ox += (Math.random() - 0.5) * a.shake; a.shake = Math.max(0, a.shake - dt); }
     a.fl = Math.max(0, (a.fl || 0) - dt * 6);
     const L = { idle: 3.6, walk: 0.8, atk: a.dur || 0.42, hurt: a.dur || 0.35 }[a.anim] || 1, ph = a.anim === "atk" || a.anim === "hurt" ? Math.min(0.999, (now - a.at) / L) : (((now - a.at) / L) % 1 + 1) % 1;
-    out.push({ key: a.key, back: !!(window.__INVADE25 && a.id[0] === "m"), x: a.x + ox, z: a.z + oz, y: -(a.sink || 0), face: a.face, anim: a.anim, ft: ph, al: Math.max(0, Math.min(1, a.al)), fl: a.fl, tint: a.dying ? [0.75, 0.6, 0.6] : null }); });
+    out.push({ key: a.key, back: !!(window.__INVADE25 && window.__INVBACK !== 0 && a.id[0] === "m"), x: a.x + ox, z: a.z + oz, y: -(a.sink || 0), face: a.face, anim: a.anim, ft: ph, al: Math.max(0, Math.min(1, a.al)), fl: a.fl, tint: a.dying ? [0.75, 0.6, 0.6] : null }); });
   // カメラ：戦っている子たちの真ん中へ寄せる
   const live = Object.values(B3.A).filter(a => a.al > 0.3); if (live.length && B3.follow) { let cx = 0, cz = 0; live.forEach(a => { cx += a.x; cz += a.z; }); cx /= live.length; cz /= live.length;
     const q = B3.C.proj([cx, 0.8, cz]); const s2 = B3.C.st; s2.cx += (q[0] - s2.cx) * Math.min(1, dt * 2); s2.cy += (q[1] - s2.cy) * Math.min(1, dt * 2); }
@@ -11532,29 +11544,33 @@ const INVVT25 = {
 const INV25 = (() => {
   let st = null;
   const R = () => Math.random();
-  // 村の位置（世界の座標）：門は z=2.0、櫓の上は y=5.75
-  const GATE = { x: 0, z: 2.0, top: 5.9 }, TOWER = [[-3.9, 2.0], [3.9, 2.0]], UP = 5.75;
+  // 横向きの戦場：村は右、門は x=7.5 で左を向く。lat=縦の並び（z）、dep=門から左へのきょり
+  const GX = 7.5, SK = 1.15, P = (lat, dep) => [GX - dep, lat], LT = (x, y, z) => [GX - (z - 2.6) * SK, y * SK, x * SK];
+  const GATE = { x: GX, z: 0, top: 5.6 }, TOWER = [LT(-3, 4.4, 2.6), LT(3, 4.4, 2.6)].map(q => [q[0], q[2]]), UP = 4.4 * SK;
   const shotOf = m => { if (INVFLY25[m.sp] && /dragon|chimera|ifrit/.test(m.sp)) return "fire"; for (const k in (m.ref.sk || {})) if (INVRSK25[k]) return INVRSK25[k]; return null; };
   function start(list, vt){ const T = INVVT25[vt] || INVVT25.farm;
     const lv = 3, mul = (typeof heroMul5 === "function" ? heroMul5(lv) : 1) * T.mul, tier = typeof heroTier === "function" ? heroTier(lv, false) : 0;
-    const vil = [], VK = 1.3, W = x => { const zc = -5 + 7.6 * Math.sqrt(Math.max(0, 1 - (x / 17.5) ** 2)) - 0.75; return [x * VK, (zc - 2.6) * VK + 2.0]; };
+    const vil = [], W = x => { const zc = -5 + 7.6 * Math.sqrt(Math.max(0, 1 - (x / 17.5) ** 2)) - 0.75, q = LT(x, 0, zc); return [q[0], q[2]]; };
     // 部隊：n人で1つ。体力も攻撃も人数ぶん。倒れていくと人数が減る
     const mk = (job, base, x, z, up, role, nm) => { const J = (typeof JOB5 !== "undefined" && JOB5[base]) || { hp: 60, atk: 9 }, n = nm || 1, hp = Math.round(J.hp * mul * n);
       vil.push({ id: "h" + vil.length, job, key: job + ":" + tier, n, hp, max: hp, atk: Math.round(J.atk * mul * (0.55 + 0.45 * n)), x, z, hx: x, hz: z, up, role, cd: R() * 1.2, dead: false }); };
     const n = Math.round(T.pop * T.fight), cnt = k => Math.max(1, Math.round(n * T.mix[k]));
     // 1隊3〜4人。横に並べる（1列6隊まで、はみ出たら前にもう1列）
-    const row = (people, per, z0, dz, job, base, role) => { let sq = Math.max(1, Math.round(people / per)), r = 0; const all = sq; while (sq > 0) { const c = Math.min(6, sq), w = (c - 1) * 3.0;
-        for (let k = 0; k < c; k++) mk(job, base, -w / 2 + k * 3.0 + (r % 2) * 1.5, z0 + r * dz, 0, role, Math.min(per, Math.max(1, people - (all - sq) * per - k * per) || per)); sq -= c; r++; } };
+    const row = (people, per, d0, dd, job, base, role) => { let sq = Math.max(1, Math.round(people / per)), r = 0; const all = sq; while (sq > 0) { const c = Math.min(6, sq), w = (c - 1) * 2.8;
+        for (let k = 0; k < c; k++) { const [x, z] = P(-w / 2 + k * 2.8 + (r % 2) * 1.4, d0 + r * dd); mk(job, base, x, z, 0, role, Math.min(per, Math.max(1, people - (all - sq) * per - k * per) || per)); } sq -= c; r++; } };
     // 弓：櫓に1人ずつ→柵の上の通路に3人ずつ→あふれたら地上の後列
     let na = cnt("arch"); mk("mage", "mage", TOWER[0][0], TOWER[0][1], UP, "tower", 1); mk("hunter", "thief", TOWER[1][0], TOWER[1][1], UP, "tower", 1); na -= 2;
-    [-7.3, 7.3, -10.3, 10.3].forEach(x => { if (na <= 0) return; const [wx, wz] = W(x); mk("hunter", "thief", wx, wz, 3.65, "wall", Math.min(3, na)); na -= 3; });
-    row(cnt("front"), 4, 6.2, 1.9, "warrior", "warrior", "front"); row(cnt("second"), 4, 4.4, -1.2, "thief", "thief", "second");
-    if (na > 0) row(na, 3, 3.1, -1.0, "hunter", "thief", "archer");
-    const nc = cnt("caster"); for (let k = 0; k < Math.ceil(nc / 2); k++) mk("mage", "mage", (k - (Math.ceil(nc / 2) - 1) / 2) * 3.4, 2.4, 0, "caster", Math.min(2, nc - k * 2));
-    const nh = cnt("healer"); for (let k = 0; k < Math.ceil(nh / 2); k++) mk("priest", "priest", (k % 2 ? 1 : -1) * (6.5 + Math.floor(k / 2) * 2), 2.8, 0, "healer", Math.min(2, nh - k * 2));
-    const FW = Math.max(10, (Math.min(6, Math.round(cnt("front") / 4)) - 1) * 3.0 + 2), mons = list.map((m, k) => { const hp = typeof monHp5 === "function" ? monHp5(m) : 50, n = list.length, row = Math.floor(k / 6), col = k % 6;
-      const x = (col - (Math.min(6, n - row * 6) - 1) / 2) * 3.0, z = 11.5 + row * 2.4 + R() * 0.6;
-      return { id: "m" + m.id, ref: m, sp: m.sp, key: m.sp + ":" + (m.evos || 0), hp, max: hp, atk: typeof monAtk5 === "function" ? monAtk5(m) : 10, x, z, fly: !!INVFLY25[m.sp], shot: shotOf({ sp: m.sp, ref: m }), cd: 0.5 + R(), dead: false, lx: -FW / 2 + (k + 0.5) * FW / list.length }; });
+    [-7.3, 7.3, -10.3, 10.3].forEach(x => { if (na <= 0) return; const [wx, wz] = W(x); mk("hunter", "thief", wx, wz, 2.8 * SK, "wall", Math.min(3, na)); na -= 3; });
+    row(cnt("front"), 4, 7.0, 2.0, "warrior", "warrior", "front"); row(cnt("second"), 4, 5.0, -1.1, "thief", "thief", "second");
+    if (na > 0) row(na, 3, 3.2, -0.8, "hunter", "thief", "archer");
+    const nc = cnt("caster"); for (let k = 0; k < Math.ceil(nc / 2); k++) { const [x, z] = P((k - (Math.ceil(nc / 2) - 1) / 2) * 3.4, 2.0); mk("mage", "mage", x, z, 0, "caster", Math.min(2, nc - k * 2)); }
+    const nh = cnt("healer"); for (let k = 0; k < Math.ceil(nh / 2); k++) { const [x, z] = P((k % 2 ? 1 : -1) * (6.2 + Math.floor(k / 2) * 2), 3.4); mk("priest", "priest", x, z, 0, "healer", Math.min(2, nh - k * 2)); }
+    // 魔物：前列・後列（編成で決める）。それぞれ縦に並べる
+    const FW = Math.max(10, (Math.min(6, Math.round(cnt("front") / 4)) - 1) * 2.8 + 2), rows = { front: [], back: [] };
+    list.forEach(m => rows[(window.__invRow || {})[m.id] || (INVFLY25[m.sp] || Object.keys(m.sk || {}).some(k => INVRSK25[k]) ? "back" : "front")].push(m));
+    const slot = {}; ["front", "back"].forEach((rk, ri) => { const L = rows[rk], per = 7; L.forEach((m, k) => { const col = Math.floor(k / per), i = k % per, c = Math.min(per, L.length - col * per); slot[m.id] = { lat: (i - (c - 1) / 2) * 2.6, dep: 20 + ri * 3.4 + col * 2.4, row: rk }; }); });
+    const mons = list.map((m, k) => { const hp = typeof monHp5 === "function" ? monHp5(m) : 50, sl = slot[m.id], [x, z] = P(sl.lat, sl.dep + R() * 0.5);
+      return { id: "m" + m.id, ref: m, sp: m.sp, key: m.sp + ":" + (m.evos || 0), hp, max: hp, atk: typeof monAtk5 === "function" ? monAtk5(m) : 10, x, z, fly: !!INVFLY25[m.sp], shot: shotOf({ sp: m.sp, ref: m }), cd: 0.5 + R(), dead: false, row: sl.row, lx: Math.max(-FW / 2, Math.min(FW / 2, sl.lat)) }; });
     st = { vil, mons, gate: { hp: Math.round((90 + 35 * list.length) * T.gate), max: Math.round((90 + 35 * list.length) * T.gate), broken: false }, vt: T, t: 0, step: 0, over: null, pops: [], hits: [], spd: 1 };
     return st; }
   const near = (a, L) => L.filter(b => !b.dead).sort((p, q) => Math.hypot(p.x - a.x, p.z - a.z) - Math.hypot(q.x - a.x, q.z - a.z))[0];
@@ -11570,21 +11586,21 @@ const INV25 = (() => {
       let tgt = null, toGate = false;
       const canUp = m.fly || !!m.shot, ups = V.filter(v => v.up);
       if (canUp && ups.length && (!ground.length || R() < 0.02 || m.tgt && m.tgt.up && !m.tgt.dead)) tgt = m.tgt && !m.tgt.dead && m.tgt.up ? m.tgt : near(m, ups);
-      if (!tgt && ground.length) { const cur = m.tgt && !m.tgt.dead && !m.tgt.up ? m.tgt : null, cand = cur || near({ x: st.gate.broken ? m.x : m.lx * 0.7 + m.x * 0.3, z: m.z }, ground);
+      if (!tgt && ground.length) { const cur = m.tgt && !m.tgt.dead && !m.tgt.up ? m.tgt : null, cand = cur || near({ x: m.x, z: st.gate.broken ? m.z : m.lx * 0.7 + m.z * 0.3 }, ground);
         const crowd = M.filter(o => o !== m && o.tgt === cand).length; tgt = (!cur && crowd >= 2 && !st.gate.broken && !m.shot) ? null : cand; }
       if (!tgt && !st.gate.broken) toGate = true;
       if (!tgt && st.gate.broken) tgt = near(m, V);
       m.tgt = tgt;
       const reach = m.shot ? 6.5 : 3.0 + (B3 && B3.size[m.key] || 1) * 0.6;
       let tx, tz;
-      if (toGate) { tx = m.gx != null ? m.gx : (m.gx = Math.max(-2.4, Math.min(2.4, m.lx * 0.4 + (R() - 0.5) * 1.2))); tz = GATE.z + 1.4 + (B3 && B3.size[m.key] || 1) * 0.4; }
-      else if (tgt) { const dx = m.x - tgt.x, dz = m.z - tgt.z, L = Math.hypot(dx, dz) || 1, want = tgt.up ? (m.fly && !m.shot ? 1.4 : 5.0) : reach * 0.92; tx = tgt.x + dx / L * want; tz = Math.max(tgt.up ? tgt.z + 1.8 : -20, tgt.z + dz / L * want); }
+      if (toGate) { tz = m.gx != null ? m.gx : (m.gx = Math.max(-2.2, Math.min(2.2, m.lx * 0.4 + (R() - 0.5) * 1.2))); tx = GATE.x - 1.6 - (B3 && B3.size[m.key] || 1) * 0.5; }
+      else if (tgt) { const dx = m.x - tgt.x, dz = m.z - tgt.z, L = Math.hypot(dx, dz) || 1, want = tgt.up ? (m.fly && !m.shot ? 1.4 : 5.0) : reach * 0.92; tx = Math.min(tgt.up ? tgt.x - 1.8 : 99, tgt.x + dx / L * want); tz = tgt.z + dz / L * want; }
       else return;
-      const ddx = tx - m.x, ddz = tz - m.z, dd = Math.hypot(ddx, ddz), sp = 3.0 * dt;
+      const ddx = tx - m.x, ddz = tz - m.z, dd = Math.hypot(ddx, ddz), sp = (m.row === "back" && !m.shot && st.t < 5 ? 1.2 : 2.6) * dt;
       if (dd > 0.2) { m.x += ddx / dd * Math.min(dd, sp); m.z += ddz / dd * Math.min(dd, sp); }
       const inR = toGate ? dd < 0.5 : tgt && Math.hypot(m.x - tgt.x, m.z - tgt.z) < (tgt.up ? (m.fly && !m.shot ? 2.9 : 6.5) : reach + 0.3);
       if (inR && m.cd <= 0) { m.cd = 1.3 + R() * 0.4;
-        if (toGate) { const d = Math.max(1, Math.round(m.atk * (0.85 + R() * 0.3) * (m.fly ? 0.5 : 1))); st.gate.hp -= d; st.pops.push({ txt: d + "", at: st.t, x: GATE.x + (R() - 0.5) * 2, col: "#ffd27a" }); const A = B3 && B3.A[m.id]; if (A && typeof play25 === "function") { play25(A, "atk", 0.42); A.lunge = [GATE.x - m.x, GATE.z - m.z]; } if (B3) B3.shake = Math.max(B3.shake || 0, 0.06);
+        if (toGate) { const d = Math.max(1, Math.round(m.atk * (0.85 + R() * 0.3) * (m.fly ? 0.5 : 1))); st.gate.hp -= d; st.pops.push({ txt: d + "", at: st.t, z: GATE.z + (R() - 0.5) * 2, col: "#ffd27a" }); const A = B3 && B3.A[m.id]; if (A && typeof play25 === "function") { play25(A, "atk", 0.42); A.lunge = [GATE.x - m.x, GATE.z - m.z]; } if (B3) B3.shake = Math.max(B3.shake || 0, 0.06);
           if (st.gate.hp <= 0 && !st.gate.broken) breakGate(); }
         else hit(m, tgt, m.atk, !!m.shot && !(tgt.up && m.fly), m.shot); } });
     // 村人：隊列を守りながら戦う
@@ -11607,16 +11623,16 @@ const INV25 = (() => {
       if (d < need) { const push = (need - d) * 0.5 * Math.min(1, dt * 8), ux = dx / d, uz = dz / d, fa = a.role === "front" ? 0.2 : 1, fb = b.role === "front" ? 0.2 : 1; a.x -= ux * push * fa; a.z -= uz * push * fa; b.x += ux * push * fb; b.z += uz * push * fb; } }
     if (!st.vil.some(v => !v.dead)) end(true); else if (!st.mons.some(m => !m.dead)) end(false); }
   function breakGate(){ st.gate.broken = true; st.gate.hp = 0; st.brokeAt = st.t;
-    st.vil.forEach(v => { if (!v.up || v.dead || v.role !== "tower") return; v.up = 0; v.x += Math.sign(v.x) * 0.6; v.z += 1.6; v.hx = v.x; v.hz = v.z; const d = Math.round(v.max * 0.3); v.hp -= d; st.hits.push({ a: null, b: v.id + "_0", d, kill: v.hp <= 0, big: true }); if (v.hp <= 0) v.dead = true; });
-    st.pops.push({ txt: "門を破った！", at: st.t, x: 0, col: "#ffe9a0", big: 1 });
-    window.__INVADE25 = "v_grass_b"; if (B3 && B3.C) { B3.roomKey = roomKey25(0); setRoom25(0); } }
+    st.vil.forEach(v => { if (!v.up || v.dead || v.role !== "tower") return; v.up = 0; v.x -= 1.6; v.z += Math.sign(v.z) * 0.6; v.hx = v.x; v.hz = v.z; const d = Math.round(v.max * 0.3); v.hp -= d; st.hits.push({ a: null, b: v.id + "_0", d, kill: v.hp <= 0, big: true }); if (v.hp <= 0) v.dead = true; });
+    st.pops.push({ txt: "門を破った！", at: st.t, z: 0, col: "#ffe9a0", big: 1 });
+    window.__INVADE25 = "v_side_b"; if (B3 && B3.C) { B3.roomKey = roomKey25(0); setRoom25(0); } }
   function end(win){ st.over = win ? "win" : "lose"; setTimeout(() => showEnd(win), 1400); }
   // 画面に渡す
   function want(now, dt){ if (!st) return {}; if (B3 && B3.C && B3.C.bgReady && !B3.C.bgReady()) return want0(); sim(Math.min(0.1, dt) * st.spd);
     N.hit25.push(...st.hits.filter(h => h.b)); st.hits = []; return want0(); }
   function want0(){ const W = {};
     st.mons.forEach(m => { if (m.dead && !(B3 && B3.A[m.id])) return; W[m.id] = { x: m.x, z: m.z, key: m.key, hp: Math.max(0, m.hp) / m.max, down: m.dead, name: m.ref.nick, fixed: 1 }; });
-    const OFF = [[0, 0], [-0.85, -0.5], [0.85, -0.5], [0, -1.0]], OFFW = [[0, 0], [-0.9, 0], [0.9, 0]];
+    const OFF = [[0, 0], [0.6, -0.85], [0.6, 0.85], [1.2, 0]], OFFW = [[0, 0], [0, -0.9], [0, 0.9]];
     st.vil.forEach(v => { const m = v.dead ? 1 : alive(v); for (let k = 0; k < m; k++) { const id = v.id + "_" + k; if (v.dead && !(B3 && B3.A[id])) continue; const o = (v.up ? OFFW : OFF)[k] || [0, 0];
       W[id] = { x: v.x + o[0], z: v.z + o[1], key: v.key, hp: Math.max(0, v.hp) / v.max, down: v.dead, name: v.general ? v.name : null, fixed: 1, up: v.up || 0, nobar: k > 0 }; } });
     return W; }
@@ -11625,7 +11641,7 @@ const INV25 = (() => {
     if (!st.gate.broken) { g.font = "700 11px system-ui,sans-serif"; g.lineWidth = 3; g.strokeStyle = "rgba(0,0,0,.8)"; g.strokeText("門", s[0], s[1] - 8); g.fillStyle = "#f3e6c0"; g.fillText("門", s[0], s[1] - 8);
       g.fillStyle = "rgba(10,8,8,.8)"; g.fillRect(s[0] - w / 2 - 1, s[1] - 3, w + 2, 7); g.fillStyle = "#d9a441"; g.fillRect(s[0] - w / 2, s[1] - 2, w * k, 5); }
     st.pops = st.pops.filter(p => st.t - p.at < (p.big ? 2.2 : 1.0));
-    st.pops.forEach(p => { const q = B3.C.toScreen([p.x, GATE.top - 0.6, GATE.z]), kk = (st.t - p.at) / (p.big ? 2.2 : 1.0); g.globalAlpha = Math.min(1, 2.5 * (1 - kk));
+    st.pops.forEach(p => { const q = B3.C.toScreen([GATE.x, GATE.top - 0.6, p.z]), kk = (st.t - p.at) / (p.big ? 2.2 : 1.0); g.globalAlpha = Math.min(1, 2.5 * (1 - kk));
       g.font = `900 ${p.big ? 22 : 13}px system-ui,sans-serif`; g.lineWidth = 4; g.strokeStyle = "rgba(20,8,6,.9)"; const y = q[1] - 10 - kk * (p.big ? 30 : 22); g.strokeText(p.txt, q[0], y); g.fillStyle = p.col; g.fillText(p.txt, q[0], y); g.globalAlpha = 1; }); }
   return { start, want, overlay, get st(){ return st; }, set spd(v){ if (st) st.spd = v; } };
 })();
@@ -11635,20 +11651,21 @@ let invBox25 = null;
 function invClose25(){ try { B3 && B3.C && B3.C.destroy(); } catch (e) {} B3 = null; if (invBox25) invBox25.remove(); invBox25 = null; window.__INVADE25 = 0; N = window.__invN0 || null; }
 function invOpenForm25(){ if (typeof S === "undefined" || !S || !S.mons) return;
   const el = document.createElement("div"); el.className = "inv25form";
-  const ms = S.mons.slice().sort((a, b) => (b.lv || 1) - (a.lv || 1)); const pick = new Set(ms.map(m => m.id)); let vt = window.__invVT || "farm";
-  const draw = () => { el.innerHTML = `<div class="inv25card"><h3>⚔ 侵略（試作）：草原の村</h3><div class="inv25vt">${Object.entries(INVVT25).map(([k, T]) => `<button data-vt="${k}" class="${k === vt ? "on" : ""}"><b>${T.name}</b><small>${T.text}・守り${Math.min(44, Math.round(T.pop * T.fight))}人</small></button>`).join("")}</div><div class="inv25hint">連れていく魔物をえらぶ（何体でも）。門を壊して村人を倒せば勝ち。</div>
-    <div class="inv25list">${ms.map(m => `<label class="${pick.has(m.id) ? "on" : ""}"><input type="checkbox" data-id="${m.id}" ${pick.has(m.id) ? "checked" : ""}>${typeof img === "function" ? simg23(m, m.evos || 0, "sp") : ""}<span>${m.nick || m.sp}<small> Lv${m.lv || 1}${INVFLY25[m.sp] ? "・飛" : ""}${Object.keys(m.sk || {}).some(k => INVRSK25[k]) ? "・遠" : ""}</small></span></label>`).join("")}</div>
+  const ms = S.mons.slice().sort((a, b) => (b.lv || 1) - (a.lv || 1)); const pick = new Set(ms.map(m => m.id)); let vt = window.__invVT || "farm"; const rowOf = m => (window.__invRow = window.__invRow || {})[m.id] || (INVFLY25[m.sp] || Object.keys(m.sk || {}).some(k => INVRSK25[k]) ? "back" : "front");
+  const draw = () => { el.innerHTML = `<div class="inv25card"><h3>⚔ 侵略（試作）：草原の村</h3><div class="inv25vt">${Object.entries(INVVT25).map(([k, T]) => `<button data-vt="${k}" class="${k === vt ? "on" : ""}"><b>${T.name}</b><small>${T.text}・守り${Math.min(44, Math.round(T.pop * T.fight))}人</small></button>`).join("")}</div><div class="inv25hint">連れていく魔物をえらぶ（何体でも）。「前列／後列」をタップで切りかえ。門を壊して村人を倒せば勝ち。戦いはスマホを横にして見る。</div>
+    <div class="inv25list">${ms.map(m => `<label class="${pick.has(m.id) ? "on" : ""}"><input type="checkbox" data-id="${m.id}" ${pick.has(m.id) ? "checked" : ""}>${typeof img === "function" ? simg23(m, m.evos || 0, "sp") : ""}<span>${m.nick || m.sp}<small> Lv${m.lv || 1}${INVFLY25[m.sp] ? "・飛" : ""}${Object.keys(m.sk || {}).some(k => INVRSK25[k]) ? "・遠" : ""}</small></span>${pick.has(m.id) ? `<i class="inv25row" data-row="${m.id}">${rowOf(m) === "back" ? "後列" : "前列"}</i>` : ""}</label>`).join("")}</div>
     <div class="inv25btns"><button class="inv25go" ${pick.size ? "" : "disabled"}>出撃（${pick.size}体）</button><button class="inv25no">やめる</button></div></div>`;
     el.querySelectorAll("input").forEach(c => c.onchange = () => { const id = +c.dataset.id; if (c.checked) pick.add(id); else pick.delete(id); draw(); });
+    el.querySelectorAll("[data-row]").forEach(b => b.onclick = e => { e.preventDefault(); e.stopPropagation(); const m = ms.find(q => q.id === +b.dataset.row); window.__invRow[m.id] = rowOf(m) === "back" ? "front" : "back"; draw(); });
     el.querySelectorAll("[data-vt]").forEach(b => b.onclick = () => { vt = window.__invVT = b.dataset.vt; draw(); });
     el.querySelector(".inv25no").onclick = () => el.remove();
     el.querySelector(".inv25go").onclick = () => { el.remove(); invStart25(ms.filter(m => pick.has(m.id)), vt); }; };
   draw(); document.body.appendChild(el); }
 function invStart25(list, vt){
-  window.__invN0 = typeof N !== "undefined" ? N : null; window.__INVADE25 = "v_grass";
+  window.__invN0 = typeof N !== "undefined" ? N : null; window.__INVADE25 = "v_side"; window.__INVBACK = 0;
   INV25.start(list, vt); window.__invVT = vt; N = { t: 0, mons: [], heroes: [], hit25: [], lord: null, done: false, inv: 1 };
   const wrap = document.createElement("div"); wrap.className = "inv25wrap"; invBox25 = wrap;
-  wrap.innerHTML = `<div id="b3d25"><canvas class="b3cv"></canvas><canvas class="b3ov"></canvas><div class="b3tabs"></div><div class="b3info"></div></div><div class="inv25bar"><button data-s="1" class="on">×1</button><button data-s="2">×2</button><button class="inv25x">退く</button></div><div class="inv25drag">← 指で左右にずらせる →</div>`;
+  wrap.innerHTML = `<div id="b3d25"><canvas class="b3cv"></canvas><canvas class="b3ov"></canvas><div class="b3tabs"></div><div class="b3info"></div></div><div class="inv25bar"><button data-s="1" class="on">×1</button><button data-s="2">×2</button><button class="inv25x">退く</button></div><div class="inv25drag">← 指で左右にずらせる →</div><div class="inv25rot"><div>📱↻<br>スマホを横にしてね</div></div>`;
   document.body.appendChild(wrap);
   const box = wrap.querySelector("#b3d25"), cv = box.querySelector(".b3cv"), info = { set textContent(v){ const e = box.querySelector(".b3info"); if (e) e.textContent = v; } };
   B3 = { box, cv, ov: box.querySelector(".b3ov"), N, A: {}, fx: [], pops: [], tgt: {}, ang: {}, spots: {}, hi: 0, size: {}, room: 0, roomKey: null, pin: 0, follow: false, now: 0 };
