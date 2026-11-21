@@ -7261,7 +7261,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.263（11/21 11:44）";
+const VER20 = "No.264（11/21 11:47）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -11401,7 +11401,7 @@ function frame25(tm){
     if (!a.dying && !busy && dist < 0.15) { const fo = a.id[0] === "h" ? B3.A[B3.tgt[a.id]] : null; if (fo) a.face = fo.x >= a.x ? 1 : -1; else if (a.id[0] === "m" || a.id === "lord") { const h = Object.values(B3.A).find(o => o.id[0] === "h" && !o.dying); if (h) a.face = h.x >= a.x ? 1 : -1; } }
     // 見た目
     let ox = 0, oz = 0, oy = 0;
-    if (a.anim === "atk" && a.lunge) { const p = Math.min(1, (now - a.at) / a.dur), k = Math.sin(p * Math.PI) * 0.45, L = Math.hypot(a.lunge[0], a.lunge[1]) || 1, reach = Math.min(L * 0.45, 1.6); ox = a.lunge[0] / L * reach * k * 2; oz = a.lunge[1] / L * reach * k * 2; }
+    if (a.anim === "atk" && a.lunge) { const p = Math.min(1, (now - a.at) / a.dur), k = Math.sin(p * Math.PI) * 0.45, L = Math.hypot(a.lunge[0], a.lunge[1]) || 1, reach = window.__INVADE25 ? Math.min(L * 0.3, 1.2) : Math.min(L * 0.45, 1.6); ox = a.lunge[0] / L * reach * k * 2; oz = a.lunge[1] / L * reach * k * 2; }
     if (a.kb) { const fo = a.id[0] === "h" ? 1 : -1; oz -= a.kb * 0.6 * fo * 0.5; a.kb = Math.max(0, a.kb - dt * 3); }
     if (a.shake) { ox += (Math.random() - 0.5) * a.shake; a.shake = Math.max(0, a.shake - dt); }
     a.fl = Math.max(0, (a.fl || 0) - dt * 6);
@@ -11575,10 +11575,10 @@ const INV25 = (() => {
       if (!tgt && !st.gate.broken) toGate = true;
       if (!tgt && st.gate.broken) tgt = near(m, V);
       m.tgt = tgt;
-      const reach = m.shot ? 5.5 : 2.2 + (B3 && B3.size[m.key] || 1) * 0.5;
+      const reach = m.shot ? 6.5 : 3.0 + (B3 && B3.size[m.key] || 1) * 0.6;
       let tx, tz;
       if (toGate) { tx = m.gx != null ? m.gx : (m.gx = Math.max(-2.4, Math.min(2.4, m.lx * 0.4 + (R() - 0.5) * 1.2))); tz = GATE.z + 1.4 + (B3 && B3.size[m.key] || 1) * 0.4; }
-      else if (tgt) { const dx = m.x - tgt.x, dz = m.z - tgt.z, L = Math.hypot(dx, dz) || 1, want = tgt.up ? (m.fly && !m.shot ? 1.4 : 4.5) : reach * 0.85; tx = tgt.x + dx / L * want; tz = Math.max(tgt.up ? tgt.z + 1.8 : -20, tgt.z + dz / L * want); }
+      else if (tgt) { const dx = m.x - tgt.x, dz = m.z - tgt.z, L = Math.hypot(dx, dz) || 1, want = tgt.up ? (m.fly && !m.shot ? 1.4 : 5.0) : reach * 0.92; tx = tgt.x + dx / L * want; tz = Math.max(tgt.up ? tgt.z + 1.8 : -20, tgt.z + dz / L * want); }
       else return;
       const ddx = tx - m.x, ddz = tz - m.z, dd = Math.hypot(ddx, ddz), sp = 3.0 * dt;
       if (dd > 0.2) { m.x += ddx / dd * Math.min(dd, sp); m.z += ddz / dd * Math.min(dd, sp); }
@@ -11598,9 +11598,9 @@ const INV25 = (() => {
       if (v.role === "archer") { if (v.cd <= 0 && dTo < 14) { v.cd = 1.8 + R() * 0.5; hit(v, t, v.atk, true, "arrow"); } return; }
       if (v.role === "caster") { if (v.cd <= 0 && dTo < 10) { v.cd = 2.0 + R() * 0.5; hit(v, t, v.atk * 1.2, true, "magic"); } return; }
       const free = st.gate.broken, leash = free ? 40 : v.role === "front" ? 1.6 : 2.4;
-      let tx = v.hx, tz = v.hz; if (free || Math.hypot(t.x - v.hx, t.z - v.hz) < leash + 1.6) { const L = dTo || 1; tx = t.x + (v.x - t.x) / L * 1.4; tz = t.z + (v.z - t.z) / L * 1.4; if (!free) { const ox = tx - v.hx, oz = tz - v.hz, oL = Math.hypot(ox, oz); if (oL > leash) { tx = v.hx + ox / oL * leash; tz = v.hz + oz / oL * leash; } } }
+      let tx = v.hx, tz = v.hz; if (free || Math.hypot(t.x - v.hx, t.z - v.hz) < leash + 1.6) { const L = dTo || 1; tx = t.x + (v.x - t.x) / L * 3.2; tz = t.z + (v.z - t.z) / L * 3.2; if (!free) { const ox = tx - v.hx, oz = tz - v.hz, oL = Math.hypot(ox, oz); if (oL > leash) { tx = v.hx + ox / oL * leash; tz = v.hz + oz / oL * leash; } } }
       const ddx = tx - v.x, ddz = tz - v.z, dd = Math.hypot(ddx, ddz), sp = 3.4 * dt; if (dd > 0.2) { v.x += ddx / dd * Math.min(dd, sp); v.z += ddz / dd * Math.min(dd, sp); }
-      if (dTo < 2.6 && v.cd <= 0) { v.cd = 1.2 + R() * 0.4; hit(v, t, v.atk, false, null); } });
+      if (dTo < 3.6 + ((B3 && B3.size[t.key]) || 1) * 0.6 && v.cd <= 0) { v.cd = 1.2 + R() * 0.4; hit(v, t, v.atk, false, null); } });
     // 重なりをほどく（地上どうし）
     const G = st.mons.filter(m => !m.dead).concat(st.vil.filter(v => !v.dead && !v.up)), rad = u => (u.n ? (u.n > 2 ? 1.25 : u.n > 1 ? 1.0 : 0.6) : 0.55) * ((B3 && B3.size[u.key]) || 1);
     for (let i = 0; i < G.length; i++) for (let j = i + 1; j < G.length; j++) { const a = G[i], b = G[j], dx = b.x - a.x, dz = b.z - a.z, d = Math.hypot(dx, dz) || 0.01, need = rad(a) + rad(b);
