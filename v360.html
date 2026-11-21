@@ -7329,7 +7329,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.274（11/21 22:49）";
+const VER20 = "No.275（11/21 23:02）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -11432,6 +11432,18 @@ function targets25(i){ const L = lordIdx(S), sp = B3.spots[i] || (B3.spots[i] = 
     if (!atk) return; const hA = B3.A[atk], w = want[mid], dx = hA.x - w.x, dz = hA.z - w.z, L = Math.hypot(dx, dz); if (L < 2.4) return; const mv = Math.min(L - 1.8, L * 0.65); w.x += dx / L * mv; w.z = Math.max(-5.5, w.z + dz / L * mv); });
   return want; }
 // ---- 毎フレーム：記録を動きに変える ----
+// 離れた相手への攻撃の見せ方（種族ごと）。弓を持たない子が矢を放たないように
+const RST25 = (() => { const T = {}, put = (k, list) => list.split(" ").forEach(sp => T[sp] = k);
+  put("fire", "salamander dragon imp ifrit chimera lavaslime flamechimera firebat emberskel elderdragon bonedragon");
+  put("eye", "lich vampire eye wraitheye ghost count underlord stoneeye eyebat eyespider mindlord maou ghostslime");
+  put("magic", "shaman ogremage");
+  put("spore", "myconid fungus sporewraith sporerat rotlord");
+  put("web", "spider nightspider stonespider webgoblin");
+  put("spit", "slime slimeknight rotslime bogtroll");
+  put("rock", "goblin kobold orc minerorc sapper goldkobold golem fortgolem gargoyle ratking berserker ghoul");
+  put("arrow", "skeleton bonewarden wolfrider");
+  put("leap", "wolf nightwolf jackal rat bat mimic hauntchest gemeater vaultkeeper");
+  return T; })();
 const FLYB25 = { bat: 1, firebat: 1, eyebat: 1, ghost: 1, imp: 1, wraitheye: 1, eye: 1, sporewraith: 1 };   // 戦いで浮かせて描く子
 function frame25(tm){
   if (!B3 || !N) return [];
@@ -11448,7 +11460,9 @@ function frame25(tm){
     const delay = a ? 0.18 : 0;
     if (a) { const up = Math.max(0, -(a.sink || 0)); play25(a, "atk", 0.42); const dAB = b ? Math.hypot(b.x - a.x, b.z - a.z) : 0, rng = /^(mage|priest|hunter)/.test(a.key || "");
       a.lunge = b && !up && dAB < 4 ? [b.x - a.x, b.z - a.z] : null; if (b && Math.abs(b.x - a.x) > 0.4) a.face = b.x >= a.x ? 1 : -1;   /* 離れた相手に剣をふらない */
-      if (e.far || up || (b && dAB >= 4 && (rng || e.a[0] === "m"))) B3.fx.push({ k: "shot", from: [a.x, a.z, a.key, up], to: e.b, at: now, dur: up ? 0.4 : 0.25, kind: up || rng ? (/^(mage|priest)/.test(a.key) ? "magic" : "arrow") : (e.shot || "arrow") }); }
+      const mst = e.a[0] === "m" ? (RST25[(a.key || "").split(":")[0]] || "rock") : null;
+      if (mst === "leap" && b && (e.far || dAB >= 4)) { if (dAB <= 8) a.pounce = { x: b.x, z: b.z, t0: now }; a.lunge = null; }   /* 牙や爪の子は飛びかかって、また戻る */
+      else if (e.far || up || (b && dAB >= 4 && (rng || e.a[0] === "m"))) B3.fx.push({ k: "shot", from: [a.x, a.z, a.key, up], to: e.b, at: now, dur: up ? 0.4 : 0.25, kind: up || rng ? (/^(mage|priest)/.test(a.key) ? "magic" : "arrow") : mst ? (e.shot === "fire" || e.shot === "eye" ? e.shot : mst) : (e.shot || "arrow") }); }
     B3.fx.push({ k: "hit", who: e.b, at: now + delay, d: e.d, kill: e.kill, big: e.big, hero: e.b[0] === "h" }); }
   // 主が叩かれた（記録の入口がないので、体力の差で見る）
   if (N.lord && B3.lordHp != null && N.lord.hp < B3.lordHp && want.lord) { const by = N.heroes.find(h => h.st === "in" && h.pos === B3.room && h.walk == null); const a = by && B3.A["h" + by.id];
@@ -11491,8 +11505,9 @@ function frame25(tm){
     if (a.shake) { ox += (Math.random() - 0.5) * a.shake; a.shake = Math.max(0, a.shake - dt); }
     a.fl = Math.max(0, (a.fl || 0) - dt * 6);
     const L = { idle: 3.6, walk: 0.8, atk: a.dur || 0.42, hurt: a.dur || 0.35 }[a.anim] || 1, ph = a.anim === "atk" || a.anim === "hurt" ? Math.min(0.999, (now - a.at) / L) : (((now - a.at) / L) % 1 + 1) % 1;
-    const hov = FLYB25[(a.key || '').split(':')[0]] ? 0.9 + 0.08 * Math.sin(now * 3 + (a.id.length * 7)) : 0;
-    out.push({ key: a.key, back: !!(window.__INVADE25 && window.__INVBACK !== 0 && a.id[0] === "m"), x: a.x + ox, z: a.z + oz, y: -(a.sink || 0) + hov, face: a.face, anim: a.anim, ft: ph, al: Math.max(0, Math.min(1, a.al)), fl: a.fl, tint: a.dying ? [0.75, 0.6, 0.6] : null }); });
+    let pdx = 0, pdz = 0, pdy = 0; if (a.pounce) { const q = (now - a.pounce.t0) / 0.5; if (q >= 1 || a.dying) a.pounce = null; else { const f = Math.sin(q * Math.PI); pdx = (a.pounce.x - a.x) * 0.8 * f; pdz = (a.pounce.z - a.z) * 0.8 * f; pdy = 0.8 * f; } }
+    const hov = pdy + (FLYB25[(a.key || '').split(':')[0]] ? 0.9 + 0.08 * Math.sin(now * 3 + (a.id.length * 7)) : 0);
+    out.push({ key: a.key, back: !!(window.__INVADE25 && window.__INVBACK !== 0 && a.id[0] === "m"), x: a.x + ox + pdx, z: a.z + oz + pdz, y: -(a.sink || 0) + hov, face: a.face, anim: a.anim, ft: ph, al: Math.max(0, Math.min(1, a.al)), fl: a.fl, tint: a.dying ? [0.75, 0.6, 0.6] : null }); });
   // カメラ：戦っている子たちの真ん中へ寄せる
   let live = Object.values(B3.A).filter(a => a.al > 0.3); const fight = live.filter(a => a.id[0] === "h" || Object.values(B3.tgt).includes(a.id)); if (fight.length) live = fight; if (live.length && B3.follow) { let cx = 0, cz = 0; live.forEach(a => { cx += a.x; cz += a.z; }); cx /= live.length; cz /= live.length;
     const q = B3.C.proj([cx, 0.8, cz]); const s2 = B3.C.st; s2.cx += (q[0] - s2.cx) * Math.min(1, dt * 2); s2.cy += (q[1] - s2.cy) * Math.min(1, dt * 2); }
@@ -11530,6 +11545,11 @@ function overlay25(now){ const ov = B3.ov, r = ov.getBoundingClientRect(), dpr =
       g.strokeStyle = "#c8493a"; g.lineWidth = 4; g.beginPath(); g.moveTo(x - ux * 20, y - uy * 20); g.lineTo(x - ux * 14, y - uy * 14); g.stroke(); return; }
     if (f.kind === "magic") { for (let t = 4; t >= 0; t--) { const [tx, ty] = at(Math.max(0, p - t * 0.04)); g.fillStyle = `rgba(150,190,255,${0.15 + 0.12 * (4 - t)})`; g.beginPath(); g.arc(tx, ty, 4 + (4 - t) * 1.2, 0, 7); g.fill(); }
       g.fillStyle = "#f2f6ff"; g.beginPath(); g.arc(x, y, 5, 0, 7); g.fill(); return; }
+    if (f.kind === "web") { g.strokeStyle = "rgba(235,235,240,.85)"; g.lineWidth = 1.6; g.beginPath(); g.moveTo(s0[0], s0[1]); for (let q = 0.1; q <= p; q += 0.1) { const [qx, qy] = at(q); g.lineTo(qx + Math.sin(q * 30) * 1.5, qy); } g.stroke(); g.fillStyle = "#f4f4f8"; g.beginPath(); g.arc(x, y, 4, 0, 7); g.fill(); return; }
+    if (f.kind === "spit") { for (let t = 3; t >= 0; t--) { const [tx, ty] = at(Math.max(0, p - t * 0.05)); g.fillStyle = `rgba(120,220,90,${0.2 + 0.2 * (3 - t)})`; g.beginPath(); g.arc(tx, ty, 3 + (3 - t), 0, 7); g.fill(); } return; }
+    if (f.kind === "spore") { for (let t = 0; t < 6; t++) { const [tx, ty] = at(Math.max(0, p - t * 0.03)); g.fillStyle = `rgba(210,230,120,${0.5 - t * 0.07})`; g.beginPath(); g.arc(tx + Math.sin(t * 2.3 + p * 9) * 5, ty + Math.cos(t * 1.7 + p * 7) * 4, 2.5, 0, 7); g.fill(); } return; }
+    if (f.kind === "fire") { for (let t = 4; t >= 0; t--) { const [tx, ty] = at(Math.max(0, p - t * 0.04)); g.fillStyle = `rgba(255,${120 + t * 20},40,${0.15 + 0.15 * (4 - t)})`; g.beginPath(); g.arc(tx, ty, 3 + (4 - t) * 1.3, 0, 7); g.fill(); } return; }
+    if (f.kind === "eye") { for (let t = 4; t >= 0; t--) { const [tx, ty] = at(Math.max(0, p - t * 0.04)); g.fillStyle = `rgba(180,90,255,${0.12 + 0.13 * (4 - t)})`; g.beginPath(); g.arc(tx, ty, 3 + (4 - t) * 1.2, 0, 7); g.fill(); } return; }
     g.fillStyle = f.kind === "fire" ? "#ff8a2a" : f.kind === "eye" ? "#c070ff" : f.kind === "rock" ? "#a99a85" : "#f3e6c0"; g.beginPath(); g.arc(x, y, f.kind === "fire" ? 5 : 3, 0, 7); g.fill(); });
   // 斬った光
   Object.values(B3.A).forEach(a => { if (a.anim !== "atk" || !a.lunge) return; const p = (now - a.at) / (a.dur || 0.42); if (p < 0.3 || p > 0.7) return; const b = B3.A[B3.tgt[a.id]] || null; if (Math.hypot(a.lunge[0], a.lunge[1]) > 4.5) return;   // 遠い相手への弧は出さない（宙に浮いて見えた）
