@@ -1150,6 +1150,9 @@ button:active,.chall:active{transform:scale(.96);filter:brightness(1.25);transit
 .kkfl{font-size:14px;color:#d8c8b8;margin:-4px 0 10px;letter-spacing:.06em;line-height:1.7}.kkall small.kkfl2{color:#b8a8c8;font-size:10.5px}
 
 body:has(.modal) .inv25btn,body:has(.ntfull19) .inv25btn{display:none}
+
+.d3stack .chall.d3card{aspect-ratio:2.4/1}.d3card .d3bg,.d3card>canvas{height:120%!important;bottom:auto}
+.nt19{top:150px!important}
 </style>
 </head>
 <body>
@@ -5498,7 +5501,7 @@ function cGo(w, tx, ty, now, speed = 520){
 }
 // 洞窟の中にふわっと出る文字（💎＋、💤、ダメージなど）
 function cPop(f, x, y, text, cls = "", ms = 1100){
-  if (!CV.el || !CV.els) return; const M = CV.maps[f]; if (!M) return;
+  if (!CV.el || !CV.els) return; const M = CV.maps[f]; if (!M) return; if (typeof day3dOn25 !== "undefined" && day3dOn25 && !N) return;   // 3Dの昼は2Dの文字（⛏など）を出さない
   const d = document.createElement("div"); d.className = "cpop " + cls; d.textContent = text;
   // 文字が重ならないように：近くに出ている文字があれば、上へずらす。多すぎるときは小さい文字を出さない
   const now = Date.now(); CV.pops = (CV.pops || []).filter(q => q.until > now && q.f === f);
@@ -7326,7 +7329,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.271（11/21 19:05）";
+const VER20 = "No.272（11/21 20:25）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -10024,7 +10027,7 @@ function Cave3D24(cv, info, opt = {}){
     const key = st.bgKey = "bg:" + VRES.join("x") + ":" + CACHE25.hash(makeFS24(room, [{ sp: "goblin" }]) + JSON.stringify(CAMP24));
     CACHE25.get(key).then(v => { st.pend--; if (!v || st.bgKey !== key || !st.alive) return; const n = VRES[0] * VRES[1] * 4; if (v.byteLength !== n * 2) return;
       const c = new Uint8Array(v, 0, n), d = new Uint8Array(v, n, n);
-      gl.bindTexture(gl.TEXTURE_2D, bgCT); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, VRES[0], VRES[1], 0, gl.RGBA, gl.UNSIGNED_BYTE, c);
+      gl.bindTexture(gl.TEXTURE_2D, bgCT); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, VRES[0], VRES[1], 0, gl.RGBA, gl.UNSIGNED_BYTE, c); [gl.TEXTURE_MIN_FILTER, gl.TEXTURE_MAG_FILTER].forEach(k => gl.texParameteri(gl.TEXTURE_2D, k, gl.LINEAR));
       gl.bindTexture(gl.TEXTURE_2D, bgDT); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, VRES[0], VRES[1], 0, gl.RGBA, gl.UNSIGNED_BYTE, d); st.bake = st.bakeN * 2; st.bgSaved = true; st.bgHit = (st.bgHit || 0) + 1; }); }
   // 配った洞窟の絵（色・奥行き）を読み込む。c=色のPNG、d=[色のα,奥行き2バイト]のPNG
   function putBgImages(urlC, urlD, key){ st.pend = (st.pend || 0) + 1; st.pendT = performance.now(); const L = u => new Promise(res => { const im = new Image(); im.crossOrigin = "anonymous"; im.onload = () => res(im); im.onerror = () => res(null); im.src = u; });
@@ -10032,7 +10035,7 @@ function Cave3D24(cv, info, opt = {}){
       const g = document.createElement("canvas"); g.width = VRES[0]; g.height = VRES[1]; const x = g.getContext("2d"); x.drawImage(a, 0, 0); const A = x.getImageData(0, 0, VRES[0], VRES[1]).data; x.clearRect(0, 0, VRES[0], VRES[1]); x.drawImage(b, 0, 0); const B = x.getImageData(0, 0, VRES[0], VRES[1]).data;
       const n = VRES[0] * VRES[1], c = new Uint8Array(n * 4), d = new Uint8Array(n * 4);
       for (let i = 0; i < n; i++) { c[i * 4] = A[i * 4]; c[i * 4 + 1] = A[i * 4 + 1]; c[i * 4 + 2] = A[i * 4 + 2]; c[i * 4 + 3] = B[i * 4]; d[i * 4] = B[i * 4 + 1]; d[i * 4 + 1] = B[i * 4 + 2]; d[i * 4 + 2] = 0; d[i * 4 + 3] = 255; }
-      gl.bindTexture(gl.TEXTURE_2D, bgCT); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, VRES[0], VRES[1], 0, gl.RGBA, gl.UNSIGNED_BYTE, c);
+      gl.bindTexture(gl.TEXTURE_2D, bgCT); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, VRES[0], VRES[1], 0, gl.RGBA, gl.UNSIGNED_BYTE, c); [gl.TEXTURE_MIN_FILTER, gl.TEXTURE_MAG_FILTER].forEach(k => gl.texParameteri(gl.TEXTURE_2D, k, gl.LINEAR));
       gl.bindTexture(gl.TEXTURE_2D, bgDT); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, VRES[0], VRES[1], 0, gl.RGBA, gl.UNSIGNED_BYTE, d); st.bake = st.bakeN * 2; st.bgSaved = false; st.bgHit = (st.bgHit || 0) + 1; }); }
   // 焼いた洞窟の絵をそのまま取り出す（配る絵を作るとき用）
   function dumpBg(){ const n = VRES[0] * VRES[1] * 4, c = new Uint8Array(n), d = new Uint8Array(n);
@@ -11347,7 +11350,8 @@ const ROOMSET25 = {
   watch: ["ladder", "watch2", "moon", "crate", "torch", "stal", "gate", "shShaft"],
   entry: ["barr", "crate", "lamp", "rack", "torch", "stal", "gate"],
   plain: ["crate", "torch", "stal", "gate"],
-  guard: ["barr", "rack", "ladder", "crate", "torch", "stal", "gate"],   // 守る部屋：とげの柵・武器だな・見張りの足場（狙撃台）
+  guard: ["barr", "rack", "ladder", "crate", "torch", "stal", "gate"],
+  entry_mine: ["oreT", "barr", "lamp", "crate", "torch", "stal", "gate"],   // 採掘場つきの入口：入口らしさ（柵・ランプ）を残し、鉱脈は奥の壁だけ   // 守る部屋：とげの柵・武器だな・見張りの足場（狙撃台）
   v_grass: ["village", "shOpen"],
   v_grass_b: ["villageB", "shOpen"],
   v_side: ["villageS", "shOpen"],
@@ -11369,11 +11373,12 @@ ROOMSET25.train_mine = ROOMSET25.train_mine.map(k => k === "orerockC" ? "orerock
   mv("bed_nest", { bed: "bed@-3,-0.8", pot: "pot@-3,-0.8", nest: "nestR" }); }
 function roomKind25(i){ if (window.__INVADE25) return typeof window.__INVADE25 === "string" ? window.__INVADE25 : "v_grass"; const R = S.path[i] || {}; if (i === lordIdx(S)) return "lord";
   let F = []; try { F = pkLayout24(i).F || []; } catch (e) {}
+  if (i === 0 && (F.includes("mine") || R.fac === "mine")) return "entry_mine";
   { const two = KORD25.filter(k => F.includes(k) || (k === R.fac && !F.length)).slice(0, 2); if (two.length === 2) return two.join("_"); }
   return F.includes("train") ? "train" : F.includes("mine") ? "mine" : F.includes("bed") ? "bed" : R.fac === "mine" ? "mine" : R.fac === "bed" ? "bed" : R.fac === "train" ? "train" : F.includes("nest") || R.fac === "nest" ? "nest" : F.includes("watch") || R.fac === "watch" ? "watch" : F.includes("gate") || R.fac === "gate" ? "entry" : (typeof polOf13 === "function" && polOf13(R) === "guard") ? "guard" : "plain"; }
 // 配った洞窟の絵（bg25/部屋の種類_c.png・_d.png）があれば、それを読み込む
 function setRoom25(i){ const C = B3.C; C.setRoom(B3.roomKey); const k = roomKind25(i); if (!BGSHIP25[k]) return; C.putBgImages(`bg25/${k}_c.webp?v=${BGSHIP25[k]}`, `bg25/${k}_d.webp?v=${BGSHIP25[k]}`, C.st.bgKey); }
-const BGSHIP25 = { guard: "917f8f8a", v_side: "c40f25a4", v_side_b: "59c7db12", v_grass: "bde48e94", v_grass_b: "26495de2", train: "177c07dc", mine: "93e6d2c5", bed: "a3af377b", lord: "8300d46a", plain: "6683282a", nest: "e3d92db3", watch: "22cc5774", entry: "52e41f17", train_mine: "e6d09ae2", train_bed: "06723853", train_nest: "d516a146", train_watch: "e1ad46e7", mine_bed: "373f048c", mine_nest: "ff6e8e1f", mine_watch: "72754dcf", bed_nest: "6754c89d", bed_watch: "50cdec00", nest_watch: "61532936", lordday: "8300d46a" };
+const BGSHIP25 = { entry_mine: "701550de", guard: "917f8f8a", v_side: "c40f25a4", v_side_b: "59c7db12", v_grass: "bde48e94", v_grass_b: "26495de2", train: "177c07dc", mine: "93e6d2c5", bed: "a3af377b", lord: "8300d46a", plain: "6683282a", nest: "e3d92db3", watch: "22cc5774", entry: "52e41f17", train_mine: "e6d09ae2", train_bed: "06723853", train_nest: "d516a146", train_watch: "e1ad46e7", mine_bed: "373f048c", mine_nest: "ff6e8e1f", mine_watch: "72754dcf", bed_nest: "6754c89d", bed_watch: "50cdec00", nest_watch: "61532936", lordday: "8300d46a" };
 function roomKey25(i){ const on = {}; ROOMSET25[roomKind25(i)].forEach(k => on[k] = true); return HAI25.room(on); }
 // ---- 3Dのキャラの種類 ----
 const heroSp25 = h => (typeof heroId === "function" ? String(heroId(h)).replace(/\d+$/, "") : h.job) || "warrior";
@@ -11427,6 +11432,7 @@ function targets25(i){ const L = lordIdx(S), sp = B3.spots[i] || (B3.spots[i] = 
     if (!atk) return; const hA = B3.A[atk], w = want[mid], dx = hA.x - w.x, dz = hA.z - w.z, L = Math.hypot(dx, dz); if (L < 2.4) return; const mv = Math.min(L - 1.8, L * 0.65); w.x += dx / L * mv; w.z = Math.max(-5.5, w.z + dz / L * mv); });
   return want; }
 // ---- 毎フレーム：記録を動きに変える ----
+const FLYB25 = { bat: 1, firebat: 1, eyebat: 1, ghost: 1, imp: 1, wraitheye: 1, eye: 1, sporewraith: 1 };   // 戦いで浮かせて描く子
 function frame25(tm){
   if (!B3 || !N) return [];
   if (!B3.zset && B3.cv.height > 10) { B3.zset = 1; const st0 = B3.C.st; if (window.__INVADE25) { st0.zoom = Math.max(B3.cv.width / B3.C.VRES[0], B3.cv.height / B3.C.VRES[1]) * 1.25; const q = B3.C.proj([-1.5, 0.8, 0.5]); st0.cx = q[0]; st0.cy = q[1]; } else st0.zoom = Math.max(B3.C.minZoom(), B3.cv.height / B3.C.VRES[1] * 0.95) * (B3.cv.height > B3.cv.width * 1.2 ? 1.15 : 1); }   // 縦画面は寄せて、上下の暗い空きを減らしキャラを大きく
@@ -11454,7 +11460,7 @@ function frame25(tm){
       if (old && f.d > 0) { old.sum += f.d; old.txt = old.sum + ""; old.at = now; old.big = old.big || f.big || f.kill; old.pos = null; }
       else { B3.pops = B3.pops.filter(q => !(q.who === f.who && !q.banner)); B3.pops.push({ who: f.who, txt: (f.d > 0 ? f.d : "MISS") + "", sum: f.d > 0 ? f.d : null, at: now, col: f.hero ? "#ffd27a" : "#ff6a5a", big: f.big || f.kill }); }
       const nb = B3.pops.filter(q => !q.banner); if (nb.length > 6) { const drop = new Set(nb.slice(0, nb.length - 6)); B3.pops = B3.pops.filter(q => !drop.has(q)); } }
-    if (f.kill) B3.pops.push({ who: f.who, txt: f.hero ? "撃破！" : "やられた…", at: now + 0.1, col: f.hero ? "#ffe9a0" : "#c9b7ff", big: true, banner: 1 });
+    if (f.kill) { const ob = B3.pops.find(q => q.banner && q.hero === f.hero && now - q.at < 0.9); if (ob) { ob.n = (ob.n || 1) + 1; ob.txt = (f.hero ? "撃破" : "やられた") + " ×" + ob.n; ob.at = now; } else B3.pops.push({ who: f.who, txt: f.hero ? "撃破！" : "やられた…", at: now + 0.1, col: f.hero ? "#ffe9a0" : "#c9b7ff", big: true, banner: 1, hero: f.hero }); }   /* 続けて倒したときは札を1枚にまとめる */
     B3.shake = Math.max(B3.shake || 0, f.kill ? 0.35 : f.big ? 0.2 : 0.08); });
   B3.fx = B3.fx.filter(f => !(f.done && now - f.at > 1) && !(f.k === "shot" && now - f.at > f.dur));
   // 動かす
@@ -11466,7 +11472,7 @@ function frame25(tm){
   Object.values(B3.A).forEach(a => { if (!a.w) return;
     const vis = want[a.id] != null;
     // 死ぬ・消える
-    if (a.dying && now > a.dying) { a.al -= dt * 2.6; a.sink = (a.sink || 0) + dt * 0.9; }
+    if (a.dying && now > a.dying) { a.al -= dt * (window.__INVADE25 ? 4 : 2.6); if (!window.__INVADE25) a.sink = (a.sink || 0) + dt * 0.9; }   // 侵略では地面に沈めない（黒いかたまりに見えた）
     else if (!vis || (a.w.leave && Math.hypot(a.x - a.tx, a.z - a.tz) < 0.6)) a.al -= dt * 2; else a.al = Math.min(1, a.al + dt * 2.5);
     if (a.al <= 0 && (a.dying || !vis || a.w.leave)) { if (a.dying) (B3.gone || (B3.gone = new Set())).add(a.id); delete B3.A[a.id]; return; }
     // 歩く
@@ -11482,7 +11488,8 @@ function frame25(tm){
     if (a.shake) { ox += (Math.random() - 0.5) * a.shake; a.shake = Math.max(0, a.shake - dt); }
     a.fl = Math.max(0, (a.fl || 0) - dt * 6);
     const L = { idle: 3.6, walk: 0.8, atk: a.dur || 0.42, hurt: a.dur || 0.35 }[a.anim] || 1, ph = a.anim === "atk" || a.anim === "hurt" ? Math.min(0.999, (now - a.at) / L) : (((now - a.at) / L) % 1 + 1) % 1;
-    out.push({ key: a.key, back: !!(window.__INVADE25 && window.__INVBACK !== 0 && a.id[0] === "m"), x: a.x + ox, z: a.z + oz, y: -(a.sink || 0), face: a.face, anim: a.anim, ft: ph, al: Math.max(0, Math.min(1, a.al)), fl: a.fl, tint: a.dying ? [0.75, 0.6, 0.6] : null }); });
+    const hov = FLYB25[(a.key || '').split(':')[0]] ? 0.9 + 0.08 * Math.sin(now * 3 + (a.id.length * 7)) : 0;
+    out.push({ key: a.key, back: !!(window.__INVADE25 && window.__INVBACK !== 0 && a.id[0] === "m"), x: a.x + ox, z: a.z + oz, y: -(a.sink || 0) + hov, face: a.face, anim: a.anim, ft: ph, al: Math.max(0, Math.min(1, a.al)), fl: a.fl, tint: a.dying ? [0.75, 0.6, 0.6] : null }); });
   // カメラ：戦っている子たちの真ん中へ寄せる
   let live = Object.values(B3.A).filter(a => a.al > 0.3); const fight = live.filter(a => a.id[0] === "h" || Object.values(B3.tgt).includes(a.id)); if (fight.length) live = fight; if (live.length && B3.follow) { let cx = 0, cz = 0; live.forEach(a => { cx += a.x; cz += a.z; }); cx /= live.length; cz /= live.length;
     const q = B3.C.proj([cx, 0.8, cz]); const s2 = B3.C.st; s2.cx += (q[0] - s2.cx) * Math.min(1, dt * 2); s2.cy += (q[1] - s2.cy) * Math.min(1, dt * 2); }
@@ -11497,7 +11504,7 @@ function overlay25(now){ const ov = B3.ov, r = ov.getBoundingClientRect(), dpr =
   g.textAlign = "center"; g.lineJoin = "round";
   const head = a => { const A = a.w; const sz = B3.size[a.key] || 1; return B3.C.toScreen([a.x, (a.id === "lord" ? 2.6 : 1.9) * sz + 0.2 + Math.max(0, -(a.sink || 0)), a.z]); };
   // 侵略：味方（青）と敵（赤）の足元の輪
-  if (window.__INVADE25) Object.values(B3.A).forEach(a => { if (!a.w || !a.w.team || a.dying || a.al < 0.3) return; const sz = B3.size[a.key] || 1, up = Math.max(0, -(a.sink || 0)), c = B3.C.toScreen([a.x, up + 0.02, a.z]), e = B3.C.toScreen([a.x + 0.5 * sz, up + 0.02, a.z]), rx = Math.max(6, Math.abs(e[0] - c[0]));
+  if (window.__INVADE25) Object.values(B3.A).forEach(a => { if (!a.w || !a.w.team || a.dying || a.al < 0.3 || a.w.nobar) return;   /* 輪は隊の1人目だけ */ const sz = B3.size[a.key] || 1, up = Math.max(0, -(a.sink || 0)), c = B3.C.toScreen([a.x, up + 0.02, a.z]), e = B3.C.toScreen([a.x + 0.5 * sz, up + 0.02, a.z]), rx = Math.max(6, Math.abs(e[0] - c[0]));
     g.strokeStyle = a.w.team === 1 ? "rgba(90,170,255,.9)" : "rgba(255,80,60,.85)"; g.fillStyle = a.w.team === 1 ? "rgba(90,170,255,.16)" : "rgba(255,80,60,.14)"; g.lineWidth = 2; g.beginPath(); g.ellipse(c[0], c[1], rx, rx * 0.42, 0, 0, 7); g.fill(); g.stroke(); });
   // 体力と名前
   // 札（体力と名前）は重ならないように：手前の子から置き、ぶつかったら上へずらす。ずらしきれない名前は出さない
@@ -11522,14 +11529,15 @@ function overlay25(now){ const ov = B3.ov, r = ov.getBoundingClientRect(), dpr =
       g.fillStyle = "#f2f6ff"; g.beginPath(); g.arc(x, y, 5, 0, 7); g.fill(); return; }
     g.fillStyle = f.kind === "fire" ? "#ff8a2a" : f.kind === "eye" ? "#c070ff" : f.kind === "rock" ? "#a99a85" : "#f3e6c0"; g.beginPath(); g.arc(x, y, f.kind === "fire" ? 5 : 3, 0, 7); g.fill(); });
   // 斬った光
-  Object.values(B3.A).forEach(a => { if (a.anim !== "atk" || !a.lunge) return; const p = (now - a.at) / (a.dur || 0.42); if (p < 0.3 || p > 0.7) return; const b = B3.A[B3.tgt[a.id]] || null;
+  Object.values(B3.A).forEach(a => { if (a.anim !== "atk" || !a.lunge) return; const p = (now - a.at) / (a.dur || 0.42); if (p < 0.3 || p > 0.7) return; const b = B3.A[B3.tgt[a.id]] || null; if (Math.hypot(a.lunge[0], a.lunge[1]) > 4.5) return;   // 遠い相手への弧は出さない（宙に浮いて見えた）
     const L = Math.hypot(a.lunge[0], a.lunge[1]) || 1; const c = B3.C.toScreen([a.x + a.lunge[0] * 0.6, 1.0, a.z + a.lunge[1] * 0.6]); const k = (p - 0.3) / 0.4;
     g.strokeStyle = `rgba(255,245,220,${1 - k})`; g.lineWidth = 3; g.beginPath(); g.arc(c[0], c[1], 10 + 8 * k, -2.4 + k * 1.2, -0.6 + k * 1.2); g.stroke(); });
   // 数字
   B3.pops = B3.pops.filter(p => now - p.at < 1.1).sort((a, b) => (a.banner ? 1 : 0) - (b.banner ? 1 : 0));
-  B3.pops.forEach(p => { if (now < p.at) return; const a = B3.A[p.who]; if (!a && !p.pos) return; if (!p.pos) p.pos = [a.x, a.z, a.key]; const s = head({ id: p.who, x: p.pos[0], z: p.pos[1], key: p.pos[2], w: {} });
+  B3.pops.forEach(p => { if (now < p.at) return; const a = B3.A[p.who]; if (!a && !p.pos) return; if (!a && !p.banner && now - p.at > 0.35) return;   /* 相手が消えたあとの数字は早めに消す */ if (!p.pos) p.pos = [a.x, a.z, a.key]; const s = head({ id: p.who, x: p.pos[0], z: p.pos[1], key: p.pos[2], w: {} });
     if (p.lane == null) { const live = B3.pops.filter(q => q !== p && q.lane != null && now - q.at < 0.8 && Math.abs((q.sx ?? 0) - s[0]) < 40); let L = 0; while (live.some(q => q.lane === L)) L++; p.lane = L; p.sx = s[0]; }
     const lab = a && a.labY != null ? a.labY - 12 : s[1] - 22, k = (now - p.at) / 1.1, y = Math.min(s[1] - 22, lab) - k * 22 - (p.banner ? 18 : Math.floor(p.lane / 2) * 16), sxl = p.banner ? s[0] : s[0] + (p.lane % 2 ? 20 : -20) * (p.lane ? 1 : 0); g.globalAlpha = Math.min(1, (1 - k) * 2);
+    if (!p.banner && (sxl < 8 || sxl > r.width - 8)) return;   // 画面の外の子の数字は出さない（端に積もっていた）
     const X = Math.max(22, Math.min(r.width - 22, sxl)), Y = Math.max(p.banner ? 70 : 52, y);   // 画面の外に出さない（上は部屋の札の下まで）
     if (p.banner) { g.font = "900 18px system-ui,sans-serif"; const bw = g.measureText(p.txt).width + 16; g.fillStyle = "rgba(20,8,6,0.75)"; g.fillRect(X - bw / 2, Y - 18, bw, 24); g.strokeStyle = p.col; g.lineWidth = 1.5; g.strokeRect(X - bw / 2, Y - 18, bw, 24); g.fillStyle = p.col; g.fillText(p.txt, X, Y); g.globalAlpha = 1; return; }
     g.font = `900 ${p.big ? 17 : 13}px system-ui,sans-serif`; g.lineWidth = 4; g.strokeStyle = "rgba(20,8,6,0.9)"; g.strokeText(p.txt, X, Y); g.fillStyle = p.col; g.fillText(p.txt, X, Y); g.globalAlpha = 1; });
@@ -11641,7 +11649,7 @@ const INV25 = (() => { let spd0 = 2;
         for (let k = 0; k < c; k++) { const [x, z] = P(-w / 2 + k * 3.5 + (r % 2) * 1.75, d0 + r * dd); mk(job, base, x, z, 0, role, Math.min(per, Math.max(1, people - (all - sq) * per - k * per) || per)); } sq -= c; r++; } };
     // 弓：櫓に1人ずつ→柵の上の通路に3人ずつ→あふれたら地上の後列
     let na = cnt("arch"); mk("mage", "mage", TOWER[0][0], TOWER[0][1], UP, "tower", 1); mk("hunter", "thief", TOWER[1][0], TOWER[1][1], UP, "tower", 1); na -= 2;
-    [-7.3, 7.3, -10.3, 10.3].forEach(x => { if (na <= 0) return; const [wx, wz] = W(x); mk("hunter", "thief", wx, wz, 2.8 * SK, "wall", Math.min(3, na)); na -= 3; });
+    [-7.3, 7.3, -10.3, 10.3].forEach(x => { if (na <= 0) return; const [wx, wz] = W(x); mk("hunter", "thief", wx, wz, 3.1 * SK, "wall", Math.min(3, na)); na -= 3; });
     row(cnt("front"), 4, 7.4, 2.4, "warrior", "warrior", "front"); row(cnt("second"), 4, 4.8, -1.5, "thief", "thief", "second");
     if (na > 0) row(na, 3, 3.2, -0.8, "hunter", "thief", "archer");
     const nc = cnt("caster"); for (let k = 0; k < Math.ceil(nc / 2); k++) { const [x, z] = P((k - (Math.ceil(nc / 2) - 1) / 2) * 3.4, 2.0); mk("mage", "mage", x, z, 0, "caster", Math.min(2, nc - k * 2)); }
@@ -11679,7 +11687,7 @@ const INV25 = (() => { let spd0 = 2;
       m.tgt = tgt;
       const reach = m.shot ? 6.5 : 3.0 + (B3 && B3.size[m.key] || 1) * 0.6;
       let tx, tz;
-      if (toGate) { tz = m.gx != null ? m.gx : (m.gx = Math.max(-2.2, Math.min(2.2, m.lx * 0.4 + (R() - 0.5) * 1.2))); tx = GATE.x - 1.6 - (B3 && B3.size[m.key] || 1) * 0.5; }
+      if (toGate) { tz = m.gx != null ? m.gx : (m.gx = Math.max(-2.2, Math.min(2.2, m.lx * 0.4 + (R() - 0.5) * 1.2))); tx = GATE.x - 2.6 - (B3 && B3.size[m.key] || 1) * 0.5; }
       else if (tgt) { const dx = m.x - tgt.x, dz = m.z - tgt.z, L = Math.hypot(dx, dz) || 1, want = tgt.up ? (m.fly && !m.shot ? 1.4 : 5.0) : reach * 0.92; tx = Math.min(tgt.up ? tgt.x - 1.8 : 99, tgt.x + dx / L * want); tz = tgt.z + dz / L * want; }
       else return;
       const ddx = tx - m.x, ddz = tz - m.z, dd = Math.hypot(ddx, ddz), sp = (m.row === "back" && !m.shot && st.t < 5 ? 1.2 : 2.6) * dt;
@@ -11711,11 +11719,11 @@ const INV25 = (() => { let spd0 = 2;
     if (!st.vil.some(v => !v.dead)) end(true); else if (!st.mons.some(m => !m.dead)) end(false); }
   function breakGate(){ st.gate.broken = true; st.gate.hp = 0; st.brokeAt = st.t;
     st.vil.forEach(v => { if (!v.up || v.dead || v.role !== "tower") return; v.up = 0; v.x -= 1.6; v.z += Math.sign(v.z) * 0.6; v.hx = v.x; v.hz = v.z; const d = Math.round(v.max * 0.3); v.hp -= d; st.hits.push({ a: null, b: v.id + "_0", d, kill: v.hp <= 0, big: true }); if (v.hp <= 0) v.dead = true; });
-    st.pops.push({ txt: "門を破った！", at: st.t, z: 0, col: "#ffe9a0", big: 1 });
+    st.banner = { txt: "門を破った！", at: st.t };   // 門の上ではなく、画面の上の帯の下に大きく出す（撃破！や数字と重なっていた）
     window.__INVADE25 = "v_side_b"; if (B3 && B3.C) { B3.roomKey = roomKey25(0); setRoom25(0); } }
   function end(win){ st.over = win ? "win" : "lose"; setTimeout(() => showEnd(win), 1400); }
   // 画面に渡す
-  function want(now, dt){ if (!st) return {}; if (B3 && B3.C && B3.C.bgReady && !B3.C.bgReady()) return want0(); if (innerWidth >= innerHeight) { let t = Math.min(0.5, dt) * st.spd; while (t > 1e-4) { const k = Math.min(0.1, t); sim(k); t -= k; } }   // 縦のあいだは止める。重い機種でもゆっくりにならないよう細かく刻む
+  function want(now, dt){ if (!st) return {}; if (B3 && B3.C && B3.C.bgReady && !B3.C.bgReady()) return want0(); if (innerWidth >= innerHeight) { let t = Math.min(0.5, dt) * st.spd; while (t > 1e-4) { const k = Math.min(0.1, t); sim(k); t -= k; } }   /* 縦のあいだは止める。重い機種でもゆっくりにならないよう細かく刻む */
     N.hit25.push(...st.hits.filter(h => h.b)); st.hits = []; return want0(); }
   function want0(){ const W = {};
     st.mons.forEach(m => { if (m.dead && !(B3 && B3.A[m.id])) return; W[m.id] = { x: m.x, z: m.z, key: m.key, hp: Math.max(0, m.hp) / m.max, down: m.dead, name: m.ref.nick, fixed: 1, team: 1 }; });
@@ -11727,11 +11735,14 @@ const INV25 = (() => { let spd0 = 2;
   function overlay(g, now, r){ if (!st || !B3) return; const k = Math.max(0, st.gate.hp) / st.gate.max;
     { // 上のまん中に、門の体力と両軍の残り（宙に浮いた「門」の札はやめた）
       const mA = st.mons.filter(m => !m.dead).length, vA = st.vil.filter(v => !v.dead).reduce((a, v) => a + Math.max(1, Math.round((v.n || 1) * Math.max(0, v.hp) / v.max)), 0), v0 = st.vil.reduce((a, v) => a + (v.n || 1), 0);
-      const W2 = Math.min(360, r.width - 40), x0 = (r.width - W2) / 2, y0 = 8; g.fillStyle = "rgba(14,10,8,.72)"; g.fillRect(x0, y0, W2, 34);
-      g.textAlign = "left"; g.font = "700 11px system-ui,sans-serif"; g.fillStyle = "#9fc8ff"; g.fillText(`魔物 ${mA}/${st.mons.length}`, x0 + 8, y0 + 14);
+      const W2 = Math.min(360, r.width - 40), x0 = (r.width - W2) / 2, y0 = 8; g.fillStyle = "rgba(10,7,6,.85)"; g.fillRect(x0, y0, W2, 34);
+      g.textAlign = "left"; g.font = "700 11px system-ui,sans-serif"; g.fillStyle = "#cfe4ff"; g.fillText(`魔物 ${mA}/${st.mons.length}`, x0 + 8, y0 + 14);
       g.textAlign = "right"; g.fillStyle = "#ffb0a0"; g.fillText(`守り ${vA}/${v0}人`, x0 + W2 - 8, y0 + 14);
       g.textAlign = "center"; g.fillStyle = "#f3e6c0"; g.fillText(st.gate.broken ? "門 破壊！" : `門 ${Math.max(0, Math.round(st.gate.hp))}/${st.gate.max}`, x0 + W2 / 2, y0 + 14);
       const bw = W2 - 16; g.fillStyle = "rgba(0,0,0,.7)"; g.fillRect(x0 + 8, y0 + 21, bw, 7); g.fillStyle = st.gate.broken ? "#777" : "#d9a441"; g.fillRect(x0 + 8, y0 + 22, bw * k, 5); }
+    if (st.banner && st.t - st.banner.at < 2.4) { const k = (st.t - st.banner.at) / 2.4, y = 78; g.globalAlpha = Math.min(1, 3 * (1 - k)); g.font = "900 26px system-ui,sans-serif"; g.textAlign = "center"; g.lineWidth = 6; g.strokeStyle = "rgba(20,8,6,.9)"; g.strokeText(st.banner.txt, r.width / 2, y); g.fillStyle = "#ffe9a0"; g.fillText(st.banner.txt, r.width / 2, y); g.globalAlpha = 1; }
+    // 門の場所の目印（地面の高さに小さく。門がどこか絵でわかるように）
+    if (!st.gate.broken) { const q = B3.C.toScreen([GATE.x, 0.4, GATE.z]); g.font = "800 11px system-ui,sans-serif"; g.textAlign = "center"; g.lineWidth = 3; g.strokeStyle = "rgba(0,0,0,.85)"; g.strokeText("▼ 門", q[0], q[1] - 34); g.fillStyle = "#f3e6c0"; g.fillText("▼ 門", q[0], q[1] - 34); }
     st.pops = st.pops.filter(p => st.t - p.at < (p.big ? 2.2 : 1.0));
     st.pops.forEach(p => { const q = B3.C.toScreen([GATE.x, GATE.top - 0.6, p.z]), kk = (st.t - p.at) / (p.big ? 2.2 : 1.0); g.globalAlpha = Math.min(1, 2.5 * (1 - kk));
       g.font = `900 ${p.big ? 22 : 13}px system-ui,sans-serif`; g.lineWidth = 4; g.strokeStyle = "rgba(20,8,6,.9)"; const y = q[1] - 10 - kk * (p.big ? 30 : 22); g.strokeText(p.txt, q[0], y); g.fillStyle = p.col; g.fillText(p.txt, q[0], y); g.globalAlpha = 1; }); }
@@ -11810,7 +11821,7 @@ function invMap25(seed){ const R = invRng25(seed), N = [], HOME = { id: "home", 
   const syl = INVSYL25.slice().sort(() => R() - 0.5).concat(INVSYL25.map(a => a + "ノ"), INVSYL25.map(a => "ミ" + a));
   N.forEach((n, i) => { const d = Math.hypot(n.x - HOME.x, n.y - HOME.y); n.name = syl[i % syl.length] + INVNT25[n.type].name;
     n.lv = Math.round(2 + d / 13 + { village: 0, town: 2, city: 4, fort: 5, capital: 8 }[n.type]); n.vt = n.type === "fort" || n.type === "capital" ? "war" : VT[Math.floor(R() * VT.length)];
-    n.pop = { village: Math.round(30 + Math.min(1, d / 70) * 90 + R() * (20 + Math.min(1, d / 70) * 50)), town: 300, city: 700, fort: 220, capital: 1500 }[n.type];   // 迷宮に近い村ほど小さい（最初の数体でも落とせる） n.days = d < 24 ? 0 : Math.ceil(d / 22);
+    n.pop = { village: Math.round(30 + Math.min(1, d / 70) * 90 + R() * (20 + Math.min(1, d / 70) * 50)), town: 300, city: 700, fort: 220, capital: 1500 }[n.type];   /* 迷宮に近い村ほど小さい（最初の数体でも落とせる） */ n.days = d < 24 ? 0 : Math.ceil(d / 22);
     n.gen = n.type === "fort" ? 2 : n.type === "city" ? 2 : n.type === "capital" ? 4 : n.type === "town" ? 1 : 0; });
   // 迷宮にいちばん近い3つの村は、はじめの数体でも落とせる小さな農村にする（最初の1勝が見えるように）
   N.filter(n => n.type === "village").sort((a, b) => Math.hypot(a.x - HOME.x, a.y - HOME.y) - Math.hypot(b.x - HOME.x, b.y - HOME.y)).slice(0, 3).forEach((n, i) => { n.lv = 1 + i; n.pop = 22 + i * 10 + Math.round(R() * 6); n.vt = "farm"; n.days = 0; });
@@ -12003,7 +12014,7 @@ function dspr25(sp, evo){ const k = sp + ":" + evo; if (D3.spr[k] !== undefined)
 // ---- 魔物の軽いAI：仲間とからむ（寄って話す・強い子についていく）＋仕事の流れ（鉱石を運ぶ・訓練の合間に休む） ----
 const TALK25 = [["今日も掘ったな", "腕がパンパンだ"], ["勇者、また来るかな", "来たら返り討ちだ"], ["腹へった…", "あとで鍋だな"], ["主さま、こわいよな", "しっ、聞こえるぞ"],
   ["その傷どうした？", "訓練でな"], ["いい石出た？", "まあまあだな"], ["眠い…", "おれもだ"], ["新入りか？", "よろしくな"], ["昨日の勇者、強かったな", "次は負けねえ"], ["ここ、住みやすいな", "主さまのおかげだ"]];
-function dsay25(i, a, text, talk){ const L = D3.pops[i] || (D3.pops[i] = []); if (L.length >= 4) return; L.push({ a, u: 0.5, v: 0.5, text, cls: talk ? "talk" : "gem", talk, lift: 0, t0: performance.now() / 1000, ms: talk ? 2.4 : 1.2 }); }
+function dsay25(i, a, text, talk){ if (!text || !String(text).trim()) return; const L = D3.pops[i] || (D3.pops[i] = []); if (L.length >= 4) return; L.push({ a, u: 0.5, v: 0.5, text, cls: talk ? "talk" : "gem", talk, lift: 0, t0: performance.now() / 1000, ms: talk ? 2.4 : 1.2 }); }
 function dai25(R, i, now, dt, hitOb, crossOb){ const A = R.acts, P = R.pile || (R.pile = [0, 0]);
   const inView = (x, z, r) => { const p = dproj25(x, 0, z), pw = r / 0.85 * p[2] * DAYK25; return p[0] - pw > 0.1 && p[0] + pw < 0.9 && p[1] > 0.36 && p[1] < 0.84 && (!R.fl || R.fl(x, z, r)); };
   const ok = (a, x, z) => { const r = a.rr || 0.4; return inView(x, z, r) && !hitOb(x, z, r) && !crossOb(a.x, a.z, x, z, r) && !A.some(b => b !== a && Math.hypot(b.x - x, b.z - z) < (b.rr || 0.4) + r); };
@@ -12139,17 +12150,17 @@ function droom25(i){ const kind = roomKind25(i), on = {}; ROOMSET25[kind].forEac
   const list = all.map(m => ({ sp: m.sp, evo: m.evos || 0, n: 1, act: job(m) }));
   const cast = HAI25.place(on, list, 11 + i * 17);
   // 岩・家具・門のある場所（ここには立たない・ここを通らない）
-  const BEDS = HAI25.beds ? HAI25.beds(on) : [], NESTS = HAI25.nests ? HAI25.nests(on) : [], OB = HAI25.foots(on).filter(o => o[2] >= 0.5).concat([[0, -7.2, 2.6]]), rOf = m => HAI25.footR({ sp: m.sp, evo: m.evos || 0 }) * 0.85;
+  const BEDS = HAI25.beds ? HAI25.beds(on) : [], NESTS = HAI25.nests ? HAI25.nests(on) : [], OB = HAI25.foots(on).filter(o => o[2] >= 0.5).concat([[0, -7.2, 2.6]]), rOf = m => HAI25.footR({ sp: m.sp, evo: m.evos || 0 }) * 0.85 * DAYK25 / 1.8;   // 大きく描いたぶん、ぶつかる大きさも大きく
   const inOb = (x, z, r) => OB.some(([ox, oz, or]) => Math.hypot(x - ox, z - oz) < or + r);
   const outOf = (x, z, r) => { for (let n = 0; n < 12; n++) { const o = OB.find(([ox, oz, or]) => Math.hypot(x - ox, z - oz) < or + r); if (!o) break; const dx = x - o[0], dz = z - o[1], L = Math.hypot(dx, dz) || 1, need = o[2] + r + 0.05; x = o[0] + dx / L * need; z = o[1] + dz / L * need; } return [x, z]; };
   const order = all.map((m, k) => ({ m, a: list[k] })).sort((a, b) => HAI25.footR({ sp: b.m.sp, evo: b.m.evos || 0 }) - HAI25.footR({ sp: a.m.sp, evo: a.m.evos || 0 }));
   const FL = HAI25.floorIn(on), fit = (x, z, r) => { for (let n = 0; n < 30; n++) { const p = dproj25(x, 0, z), pw = r * p[2] * DAYK25; if (p[0] - pw > 0.1 && p[0] + pw < 0.9 && p[1] > 0.36 && p[1] < 0.84 && (!FL || FL(x, z, r))) break; x *= 0.92; z = z * 0.9 + 0.3; } return [x, z]; };
-  const acts = []; cast.forEach((c, k) => { const o = order[k]; if (!o) return; const [fx0, fz0] = c.mode === "mine" || c.mode === "sleep" || c.mode === "nest" || c.look || c.boss ? [c.o[0], c.o[2]] : fit(c.o[0], c.o[2], HAI25.footR({ sp: o.m.sp, evo: o.m.evos || 0 })); /* 掘る子・寝る子は、岩や寝床のそばから動かさない */ const fixed = c.mode === "mine" || c.mode === "sleep" || c.mode === "nest" || c.look || c.boss, [fx1, fz1] = fixed ? [fx0, fz0] : outOf(fx0, fz0, rOf(o.m)); c.o[0] = fx1; c.o[2] = fz1; acts.push({ rr: rOf(o.m), boss: !!c.boss, m: o.m, sp: o.m.sp, evo: o.m.evos || 0, x: c.o[0], y: c.y || 0, z: c.o[2], hx: c.o[0], hz: c.o[2], tx: c.o[0], tz: c.o[2], mode: c.mode, look: c.look, rk: c.rk, face: c.look ? (c.look[0] > c.o[0] ? 1 : -1) : Math.random() < 0.5 ? 1 : -1, next: 0, ph: Math.random() * 3 }); });
+  const acts = []; cast.forEach((c, k) => { const o = order[k]; if (!o) return; const [fx0, fz0] = c.mode === "mine" || c.mode === "sleep" || c.mode === "nest" || c.look || c.boss ? [c.o[0], c.o[2]] : fit(c.o[0], c.o[2], HAI25.footR({ sp: o.m.sp, evo: o.m.evos || 0 })); /* 掘る子・寝る子は、岩や寝床のそばから動かさない */ const fixed = c.mode === "sleep" || c.mode === "nest" || c.look || c.boss, [fx1, fz1] = fixed ? [fx0, fz0] : outOf(fx0, fz0, rOf(o.m)); c.o[0] = fx1; c.o[2] = fz1; acts.push({ rr: rOf(o.m), boss: !!c.boss, m: o.m, sp: o.m.sp, evo: o.m.evos || 0, x: c.o[0], y: c.y || 0, z: c.o[2], hx: c.o[0], hz: c.o[2], tx: c.o[0], tz: c.o[2], mode: c.mode, look: c.look, rk: c.rk, face: c.look ? (c.look[0] > c.o[0] ? 1 : -1) : Math.random() < 0.5 ? 1 : -1, next: 0, ph: Math.random() * 3 }); });
   if (S.path[i].kind === "lord") acts.push({ lord: true, back: true, sp: "lord", evo: typeof lordTier === "function" ? lordTier() : 0, x: 0, y: 1.3, z: 7.7, hx: 0, hz: 7.7, tx: 0, tz: 7.7, mode: "idle", face: 1, next: 1e12, ph: 0 });
   return D3.act[i] = { sig, kind, acts, OB, beds: BEDS, nests: NESTS, fl: HAI25.floorIn(on) }; }
 // ---- 手前に立つ物（岩・柱・たいまつ・壁）のうしろに入った子を隠す ----
 // bg25/<部屋>_o.webp：半分の大きさ、明るさ＝カメラからの距離（255は床で、隠さない）
-const OCCV25 = {"guard":"e9155c","bed":"36315e","bed_nest":"b13fef","bed_watch":"5f78f4","entry":"02e63e","lord":"33c3e1","lordday":"33c3e1","mine":"e49c6f","mine_bed":"810f17","mine_nest":"a4afc8","mine_watch":"aa6931","nest":"c49743","nest_watch":"a85f90","plain":"d8547b","train":"dd2817","train_bed":"3ec288","train_mine":"0ab48c","train_nest":"8f5d0a","train_watch":"f9466e","watch":"64b739"};
+const OCCV25 = {"entry_mine":"85d124","guard":"e9155c","bed":"36315e","bed_nest":"b13fef","bed_watch":"5f78f4","entry":"02e63e","lord":"33c3e1","lordday":"33c3e1","mine":"e49c6f","mine_bed":"810f17","mine_nest":"a4afc8","mine_watch":"aa6931","nest":"c49743","nest_watch":"a85f90","plain":"d8547b","train":"dd2817","train_bed":"3ec288","train_mine":"0ab48c","train_nest":"8f5d0a","train_watch":"f9466e","watch":"64b739"};
 function docc25(bk){ const k = "occ:" + bk; if (D3.img[k]) return D3.img[k]; const o = D3.img[k] = { ok: 0 }; if (!OCCV25[bk]) return o;
   const im = new Image(); im.onload = () => { try { const c = document.createElement("canvas"); c.width = im.width; c.height = im.height; const g = c.getContext("2d"); g.drawImage(im, 0, 0);
     const d = g.getImageData(0, 0, im.width, im.height).data, q = new Uint8Array(im.width * im.height); for (let j = 0; j < q.length; j++) q[j] = d[j * 4];
@@ -12251,7 +12262,7 @@ function dcard25(card, i, now, dt){ DRT25.n++;
     const cyc = a.cyc || 1.04 * sclOf24({ sp: a.sp, evo: a.evo }) * DAYK25;   // 1歩きの距離（0.8秒で進む分）
     let WK = null, wflip = null, RT = null; const wph = Math.floor((a.dist || 0) / Math.max(0.4, cyc) * 6) % 6;
     if (!a.lord && !DRT25.bad && o.ok) drtWarm25(a.sp, a.evo); const WS = a.lord ? null : dwalk25(a.sp, a.evo);   // 歩く絵は、歩き出す前から読んでおく
-    if (!MI && a.walking && !a.lord) { const sp2 = Math.hypot(a.vx || 0, a.vz || 0);
+    if (!MI && a.walking && !a.lord && !DHOV25[a.sp]) { const sp2 = Math.hypot(a.vx || 0, a.vz || 0);
       /* 進む向きをなめらかにする（斜めの道で向きが小刻みに揺れないように） */
       if (sp2 > 0.15) { const h = Math.atan2(a.vx || 0, a.vz || 0); if (a.hd == null) a.hd = h; let dh = h - a.hd; dh -= Math.round(dh / (2 * Math.PI)) * 2 * Math.PI; a.hd += dh * Math.min(1, dt * 5); a.hd -= Math.round(a.hd / (2 * Math.PI)) * 2 * Math.PI; }
       const ph = a.hd ?? 0, q = Math.abs(ph) / (Math.PI / 12), sg = ph < 0;
@@ -12577,6 +12588,12 @@ if (typeof invOpenMap25 === "function") { const _om = invOpenMap25; invOpenMap25
   document.addEventListener("click", ev => { if (!ev.isTrusted || Date.now() - pd > 700) return; const b = ev.target.closest && ev.target.closest(SEL); if (b) { ev.stopPropagation(); ev.preventDefault(); } }, true); }
 // 夜の2Dの画面にも「3Dで見る」を出す（いったん2Dにすると戻せなかった）
 { const _r = render; render = function () { const r = _r.apply(this, arguments); try { if (typeof view !== "undefined" && view === "night" && N && typeof bat3dOn25 !== "undefined" && !bat3dOn25) { const cf = document.querySelector('[data-a="cfollow"]'); if (cf && !cf.parentElement.querySelector(".b3back25")) cf.insertAdjacentHTML("beforebegin", '<button class="b3back25" data-a="bat3dt">🎥 3Dで見る</button>'); } } catch (e) {} return r; }; }
+// 昼の3D：いま見えている階に、階ボタンの金枠を合わせる（押した階と見えている階がずれていた）
+{ let tq = 0; const upd = () => { tq = 0; try { if (typeof day3dOn25 === "undefined" || !day3dOn25 || N) return; const st = document.querySelector(".d3stack"); if (!st) return;
+    const fl = [...st.querySelectorAll(".d3floor")], y0 = 140; let f = 0; fl.forEach((d, k) => { if (d.getBoundingClientRect().top < y0 + 60) f = k + 1; });
+    document.querySelectorAll('[data-a="cfl"]').forEach(b => { const v = +b.dataset.v; if (v >= 0) b.classList.toggle("on", v === f); }); } catch (e) {} };
+  window.addEventListener("scroll", () => { if (!tq) tq = requestAnimationFrame(upd); }, { passive: true, capture: true });
+  document.addEventListener("scroll", () => { if (!tq) tq = requestAnimationFrame(upd); }, { passive: true, capture: true }); }
 
 </script>
 <script>// ================= 3Dの子を、今のコマアニメと同じ並び（17コマ）の絵に焼く（開発用・ページ内で実行） =================
