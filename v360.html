@@ -7242,7 +7242,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.258（11/21 10:29）";
+const VER20 = "No.259（11/21 10:34）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -11672,7 +11672,12 @@ function dai25(R, i, now, dt, hitOb, crossOb){ const A = R.acts, P = R.pile || (
 }
 // 目的を決める：見回り／仕事の見物／話す／強い子についていく／ひと休み（どれも、行き先と、そこで何をするかがある）
 const CHEER25 = ["がんばれ", "いい音だ", "おれにもやらせろ", "すげえな", "腰が入ってないぞ", "もっと強く！"];
+// あまり動かない子（石像・宝箱・岩の番人など）。たまに少し向きを変えるだけで、ほとんどその場にいる
+const STILL25 = { gargoyle: 1, golem: 1, fortgolem: 1, mimic: 1, hauntchest: 1, vaultkeeper: 1, stoneeye: 1, fungus: 1 };
 function dgoal25(R, i, a, now, ok, inView, hitOb){ const A = R.acts, r = a.rr || 0.4, lv = (a.m && a.m.lv) || 1;
+  if (a.m && STILL25[a.m.sp]) { if (a.stillUntil > now) { a.tx = a.x; a.tz = a.z; return; }
+    if (Math.random() < 0.85) { a.stillUntil = now + 10 + Math.random() * 14; a.tx = a.x; a.tz = a.z; return; }
+    for (let n = 0; n < 6; n++) { const ang = Math.random() * 6.28, dd = 0.6 + Math.random() * 0.9, tx = a.hx + Math.cos(ang) * dd, tz = a.hz + Math.sin(ang) * dd * 0.6; if (ok(a, tx, tz)) { a.tx = tx; a.tz = tz; break; } } a.stillUntil = now + 8; return; }
   const others = A.filter(b => b !== a && b.mode === "idle" && !b.lord && !b.boss && !b.task && !(b.busy > now) && Math.hypot(b.x - a.x, b.z - a.z) < 10);
   const workers = A.filter(b => b !== a && (b.mode === "mine" || b.mode === "slash" || b.mode === "lift") && !b.task);
   const guard = a.m && (a.m.job === "guard" || a.m.role === "guard"), d = typeof daysToRaid9 === "function" ? daysToRaid9(S) : null, near = d != null && d <= 1, tired = !!S.hungry;
