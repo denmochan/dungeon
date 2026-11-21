@@ -7261,7 +7261,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.262（11/21 11:38）";
+const VER20 = "No.263（11/21 11:44）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -11423,7 +11423,7 @@ function overlay25(now){ const ov = B3.ov, r = ov.getBoundingClientRect(), dpr =
   // 体力と名前
   // 札（体力と名前）は重ならないように：手前の子から置き、ぶつかったら上へずらす。ずらしきれない名前は出さない
   const boxes = [], hit = (x0, y0, x1, y1) => boxes.some(b => x0 < b[2] && x1 > b[0] && y0 < b[3] && y1 > b[1]);
-  Object.values(B3.A).filter(a => a.w && a.al >= 0.3 && !a.dying).sort((a, b) => b.z - a.z).forEach(a => { const p = head(a), w = 26, nm = (a.id[0] === "h" || a.id === "lord") ? a.w.name : "";
+  Object.values(B3.A).filter(a => a.w && a.al >= 0.3 && !a.dying && !a.w.nobar).sort((a, b) => b.z - a.z).forEach(a => { const p = head(a), w = 26, nm = (a.id[0] === "h" || a.id === "lord") ? a.w.name : "";
     g.font = "bold 10px system-ui,sans-serif"; const tw = nm ? g.measureText(nm).width + 4 : 0, H = nm ? 17 : 6; let y = p[1];
     for (let k = 0; k < 4 && hit(p[0] - Math.max(w, tw) / 2, y - H + 5, p[0] + Math.max(w, tw) / 2, y + 5); k++) y -= H;
     if (hit(p[0] - w / 2, y - 1, p[0] + w / 2, y + 5)) return; boxes.push([p[0] - Math.max(w, tw) / 2, y - H + 5, p[0] + Math.max(w, tw) / 2, y + 5]); a.labY = y;
@@ -11538,26 +11538,31 @@ const INV25 = (() => {
   function start(list, vt){ const T = INVVT25[vt] || INVVT25.farm;
     const lv = 3, mul = (typeof heroMul5 === "function" ? heroMul5(lv) : 1) * T.mul, tier = typeof heroTier === "function" ? heroTier(lv, false) : 0;
     const vil = [], VK = 1.3, W = x => { const zc = -5 + 7.6 * Math.sqrt(Math.max(0, 1 - (x / 17.5) ** 2)) - 0.75; return [x * VK, (zc - 2.6) * VK + 2.0]; };
-    const mk = (job, base, x, z, up, role) => { const J = (typeof JOB5 !== "undefined" && JOB5[base]) || { hp: 60, atk: 9 }, hp = Math.round(J.hp * mul);
-      vil.push({ id: "h" + vil.length, job, key: job + ":" + tier, hp, max: hp, atk: Math.round(J.atk * mul), x, z, hx: x, hz: z, up, role, cd: R() * 1.2, dead: false }); };
-    const n = Math.min(44, Math.round(T.pop * T.fight)), cnt = k => Math.max(1, Math.round(n * T.mix[k]));
-    // 横に広い列：1列に13人まで、はみ出たら前にもう1列
-    const row = (num, z0, dz, job, base, role) => { let left = num, r = 0; while (left > 0) { const c = Math.min(13, left), w = (c - 1) * 1.5; for (let k = 0; k < c; k++) mk(job, base, -w / 2 + k * 1.5 + (r % 2) * 0.75, z0 + r * dz, 0, role); left -= c; r++; } };
-    // 弓：櫓2つ→柵の上の通路（6か所）→あふれたら地上の後列
-    let na = cnt("arch"); mk("mage", "mage", TOWER[0][0], TOWER[0][1], UP, "tower"); mk("hunter", "thief", TOWER[1][0], TOWER[1][1], UP, "tower"); na -= 1;
-    [-6.2, 6.2, -8.4, 8.4, -10.6, 10.6].forEach(x => { if (na <= 0) return; const [wx, wz] = W(x); mk("hunter", "thief", wx, wz, 3.65, "wall"); na--; });
-    row(cnt("front"), 6.2, 1.6, "warrior", "warrior", "front"); row(cnt("second"), 4.6, -1.1, "thief", "thief", "second");
-    if (na > 0) row(na, 3.3, -0.9, "hunter", "thief", "archer");
-    const nc = cnt("caster"); for (let k = 0; k < nc; k++) mk("mage", "mage", (k - (nc - 1) / 2) * 2.4, 2.5, 0, "caster");
-    const nh = cnt("healer"); for (let k = 0; k < nh; k++) mk("priest", "priest", (k % 2 ? 1 : -1) * (6 + Math.floor(k / 2) * 1.4), 3.0, 0, "healer");
-    const FW = Math.max(9, (Math.min(13, cnt("front")) - 1) * 1.5), mons = list.map((m, k) => { const hp = typeof monHp5 === "function" ? monHp5(m) : 50, n = list.length, row = Math.floor(k / 6), col = k % 6;
+    // 部隊：n人で1つ。体力も攻撃も人数ぶん。倒れていくと人数が減る
+    const mk = (job, base, x, z, up, role, nm) => { const J = (typeof JOB5 !== "undefined" && JOB5[base]) || { hp: 60, atk: 9 }, n = nm || 1, hp = Math.round(J.hp * mul * n);
+      vil.push({ id: "h" + vil.length, job, key: job + ":" + tier, n, hp, max: hp, atk: Math.round(J.atk * mul * (0.55 + 0.45 * n)), x, z, hx: x, hz: z, up, role, cd: R() * 1.2, dead: false }); };
+    const n = Math.round(T.pop * T.fight), cnt = k => Math.max(1, Math.round(n * T.mix[k]));
+    // 1隊3〜4人。横に並べる（1列6隊まで、はみ出たら前にもう1列）
+    const row = (people, per, z0, dz, job, base, role) => { let sq = Math.max(1, Math.round(people / per)), r = 0; const all = sq; while (sq > 0) { const c = Math.min(6, sq), w = (c - 1) * 3.0;
+        for (let k = 0; k < c; k++) mk(job, base, -w / 2 + k * 3.0 + (r % 2) * 1.5, z0 + r * dz, 0, role, Math.min(per, Math.max(1, people - (all - sq) * per - k * per) || per)); sq -= c; r++; } };
+    // 弓：櫓に1人ずつ→柵の上の通路に3人ずつ→あふれたら地上の後列
+    let na = cnt("arch"); mk("mage", "mage", TOWER[0][0], TOWER[0][1], UP, "tower", 1); mk("hunter", "thief", TOWER[1][0], TOWER[1][1], UP, "tower", 1); na -= 2;
+    [-7.3, 7.3, -10.3, 10.3].forEach(x => { if (na <= 0) return; const [wx, wz] = W(x); mk("hunter", "thief", wx, wz, 3.65, "wall", Math.min(3, na)); na -= 3; });
+    row(cnt("front"), 4, 6.2, 1.9, "warrior", "warrior", "front"); row(cnt("second"), 4, 4.4, -1.2, "thief", "thief", "second");
+    if (na > 0) row(na, 3, 3.1, -1.0, "hunter", "thief", "archer");
+    const nc = cnt("caster"); for (let k = 0; k < Math.ceil(nc / 2); k++) mk("mage", "mage", (k - (Math.ceil(nc / 2) - 1) / 2) * 3.4, 2.4, 0, "caster", Math.min(2, nc - k * 2));
+    const nh = cnt("healer"); for (let k = 0; k < Math.ceil(nh / 2); k++) mk("priest", "priest", (k % 2 ? 1 : -1) * (6.5 + Math.floor(k / 2) * 2), 2.8, 0, "healer", Math.min(2, nh - k * 2));
+    const FW = Math.max(10, (Math.min(6, Math.round(cnt("front") / 4)) - 1) * 3.0 + 2), mons = list.map((m, k) => { const hp = typeof monHp5 === "function" ? monHp5(m) : 50, n = list.length, row = Math.floor(k / 6), col = k % 6;
       const x = (col - (Math.min(6, n - row * 6) - 1) / 2) * 3.0, z = 11.5 + row * 2.4 + R() * 0.6;
       return { id: "m" + m.id, ref: m, sp: m.sp, key: m.sp + ":" + (m.evos || 0), hp, max: hp, atk: typeof monAtk5 === "function" ? monAtk5(m) : 10, x, z, fly: !!INVFLY25[m.sp], shot: shotOf({ sp: m.sp, ref: m }), cd: 0.5 + R(), dead: false, lx: -FW / 2 + (k + 0.5) * FW / list.length }; });
     st = { vil, mons, gate: { hp: Math.round((90 + 35 * list.length) * T.gate), max: Math.round((90 + 35 * list.length) * T.gate), broken: false }, vt: T, t: 0, step: 0, over: null, pops: [], hits: [], spd: 1 };
     return st; }
   const near = (a, L) => L.filter(b => !b.dead).sort((p, q) => Math.hypot(p.x - a.x, p.z - a.z) - Math.hypot(q.x - a.x, q.z - a.z))[0];
   const hit = (a, b, d, far, shot) => { d = Math.max(1, Math.round(d * (0.85 + R() * 0.3) * (b.up ? 0.5 : 1))); b.hp -= d; const kill = b.hp <= 0 && !b.dead; if (kill) b.dead = true;
-    st.hits.push({ a: a.id, b: b.id, d, kill, far: !!far, shot: shot || null, big: d > b.max * 0.3 }); };
+    const aid = a.n ? a.id + "_0" : a.id, bid = b.n ? b.id + "_0" : b.id;
+    st.hits.push({ a: aid, b: bid, d, kill: kill, far: !!far, shot: shot || null, big: d > b.max * 0.3 });
+    if (a.n > 1 && B3 && typeof play25 === "function") for (let k = 1; k < alive(a); k++) { const A = B3.A[a.id + "_" + k]; if (A) play25(A, "atk", 0.42); } };
+  const alive = v => v.dead ? 0 : Math.max(1, Math.ceil(v.n * Math.max(0, v.hp) / v.max));
   function sim(dt){ if (!st || st.over) return; st.t += dt;
     const V = st.vil.filter(v => !v.dead), M = st.mons.filter(m => !m.dead), ground = V.filter(v => !v.up);
     // 魔物
@@ -11570,7 +11575,7 @@ const INV25 = (() => {
       if (!tgt && !st.gate.broken) toGate = true;
       if (!tgt && st.gate.broken) tgt = near(m, V);
       m.tgt = tgt;
-      const reach = m.shot ? 5.5 : 1.6 + (B3 && B3.size[m.key] || 1) * 0.5;
+      const reach = m.shot ? 5.5 : 2.2 + (B3 && B3.size[m.key] || 1) * 0.5;
       let tx, tz;
       if (toGate) { tx = m.gx != null ? m.gx : (m.gx = Math.max(-2.4, Math.min(2.4, m.lx * 0.4 + (R() - 0.5) * 1.2))); tz = GATE.z + 1.4 + (B3 && B3.size[m.key] || 1) * 0.4; }
       else if (tgt) { const dx = m.x - tgt.x, dz = m.z - tgt.z, L = Math.hypot(dx, dz) || 1, want = tgt.up ? (m.fly && !m.shot ? 1.4 : 4.5) : reach * 0.85; tx = tgt.x + dx / L * want; tz = Math.max(tgt.up ? tgt.z + 1.8 : -20, tgt.z + dz / L * want); }
@@ -11589,20 +11594,20 @@ const INV25 = (() => {
     V.forEach(v => { v.cd -= dt; const t = near(v, M); if (!t) return; const dTo = Math.hypot(t.x - v.x, t.z - v.z);
       if (v.up) { if (v.cd <= 0 && dTo < 17) { v.cd = (v.role === "wall" ? 1.8 : 1.5) + R() * 0.5; hit(v, t, v.atk, true, null); } return; }
       if (v.role === "healer") { if (v.cd <= 0) { const w = V.filter(o => o.hp < o.max && Math.hypot(o.x - v.x, o.z - v.z) < 9).sort((p, q) => p.hp / p.max - q.hp / q.max)[0]; v.cd = 2.6 + R() * 0.6;
-          if (w) { const h = Math.min(w.max - w.hp, Math.round(v.atk * 2.2)); w.hp += h; if (B3) B3.pops.push({ who: w.id, txt: "+" + h, at: B3.now, col: "#7cf09a" }); const A = B3 && B3.A[v.id]; if (A && typeof play25 === "function") play25(A, "atk", 0.42); } } return; }
+          if (w) { const h = Math.min(w.max - w.hp, Math.round(v.atk * 2.2)); w.hp += h; if (B3) B3.pops.push({ who: w.id + "_0", txt: "+" + h, at: B3.now, col: "#7cf09a" }); const A = B3 && B3.A[v.id + "_0"]; if (A && typeof play25 === "function") play25(A, "atk", 0.42); } } return; }
       if (v.role === "archer") { if (v.cd <= 0 && dTo < 14) { v.cd = 1.8 + R() * 0.5; hit(v, t, v.atk, true, "arrow"); } return; }
       if (v.role === "caster") { if (v.cd <= 0 && dTo < 10) { v.cd = 2.0 + R() * 0.5; hit(v, t, v.atk * 1.2, true, "magic"); } return; }
       const free = st.gate.broken, leash = free ? 40 : v.role === "front" ? 1.6 : 2.4;
       let tx = v.hx, tz = v.hz; if (free || Math.hypot(t.x - v.hx, t.z - v.hz) < leash + 1.6) { const L = dTo || 1; tx = t.x + (v.x - t.x) / L * 1.4; tz = t.z + (v.z - t.z) / L * 1.4; if (!free) { const ox = tx - v.hx, oz = tz - v.hz, oL = Math.hypot(ox, oz); if (oL > leash) { tx = v.hx + ox / oL * leash; tz = v.hz + oz / oL * leash; } } }
       const ddx = tx - v.x, ddz = tz - v.z, dd = Math.hypot(ddx, ddz), sp = 3.4 * dt; if (dd > 0.2) { v.x += ddx / dd * Math.min(dd, sp); v.z += ddz / dd * Math.min(dd, sp); }
-      if (dTo < 2.0 && v.cd <= 0) { v.cd = 1.2 + R() * 0.4; hit(v, t, v.atk, false, null); } });
+      if (dTo < 2.6 && v.cd <= 0) { v.cd = 1.2 + R() * 0.4; hit(v, t, v.atk, false, null); } });
     // 重なりをほどく（地上どうし）
-    const G = st.mons.filter(m => !m.dead).concat(st.vil.filter(v => !v.dead && !v.up)), rad = u => 0.55 * ((B3 && B3.size[u.key]) || 1);
+    const G = st.mons.filter(m => !m.dead).concat(st.vil.filter(v => !v.dead && !v.up)), rad = u => (u.n ? (u.n > 2 ? 1.25 : u.n > 1 ? 1.0 : 0.6) : 0.55) * ((B3 && B3.size[u.key]) || 1);
     for (let i = 0; i < G.length; i++) for (let j = i + 1; j < G.length; j++) { const a = G[i], b = G[j], dx = b.x - a.x, dz = b.z - a.z, d = Math.hypot(dx, dz) || 0.01, need = rad(a) + rad(b);
       if (d < need) { const push = (need - d) * 0.5 * Math.min(1, dt * 8), ux = dx / d, uz = dz / d, fa = a.role === "front" ? 0.2 : 1, fb = b.role === "front" ? 0.2 : 1; a.x -= ux * push * fa; a.z -= uz * push * fa; b.x += ux * push * fb; b.z += uz * push * fb; } }
     if (!st.vil.some(v => !v.dead)) end(true); else if (!st.mons.some(m => !m.dead)) end(false); }
   function breakGate(){ st.gate.broken = true; st.gate.hp = 0; st.brokeAt = st.t;
-    st.vil.forEach(v => { if (!v.up || v.dead || v.role !== "tower") return; v.up = 0; v.x += Math.sign(v.x) * 0.6; v.z += 1.6; v.hx = v.x; v.hz = v.z; const d = Math.round(v.max * 0.3); v.hp -= d; st.hits.push({ a: null, b: v.id, d, kill: v.hp <= 0, big: true }); if (v.hp <= 0) v.dead = true; });
+    st.vil.forEach(v => { if (!v.up || v.dead || v.role !== "tower") return; v.up = 0; v.x += Math.sign(v.x) * 0.6; v.z += 1.6; v.hx = v.x; v.hz = v.z; const d = Math.round(v.max * 0.3); v.hp -= d; st.hits.push({ a: null, b: v.id + "_0", d, kill: v.hp <= 0, big: true }); if (v.hp <= 0) v.dead = true; });
     st.pops.push({ txt: "門を破った！", at: st.t, x: 0, col: "#ffe9a0", big: 1 });
     window.__INVADE25 = "v_grass_b"; if (B3 && B3.C) { B3.roomKey = roomKey25(0); setRoom25(0); } }
   function end(win){ st.over = win ? "win" : "lose"; setTimeout(() => showEnd(win), 1400); }
@@ -11611,7 +11616,9 @@ const INV25 = (() => {
     N.hit25.push(...st.hits.filter(h => h.b)); st.hits = []; return want0(); }
   function want0(){ const W = {};
     st.mons.forEach(m => { if (m.dead && !(B3 && B3.A[m.id])) return; W[m.id] = { x: m.x, z: m.z, key: m.key, hp: Math.max(0, m.hp) / m.max, down: m.dead, name: m.ref.nick, fixed: 1 }; });
-    st.vil.forEach(v => { if (v.dead && !(B3 && B3.A[v.id])) return; W[v.id] = { x: v.x, z: v.z, key: v.key, hp: Math.max(0, v.hp) / v.max, down: v.dead, name: v.general ? v.name : null, fixed: 1, up: v.up || 0 }; });
+    const OFF = [[0, 0], [-0.85, -0.5], [0.85, -0.5], [0, -1.0]], OFFW = [[0, 0], [-0.9, 0], [0.9, 0]];
+    st.vil.forEach(v => { const m = v.dead ? 1 : alive(v); for (let k = 0; k < m; k++) { const id = v.id + "_" + k; if (v.dead && !(B3 && B3.A[id])) continue; const o = (v.up ? OFFW : OFF)[k] || [0, 0];
+      W[id] = { x: v.x + o[0], z: v.z + o[1], key: v.key, hp: Math.max(0, v.hp) / v.max, down: v.dead, name: v.general ? v.name : null, fixed: 1, up: v.up || 0, nobar: k > 0 }; } });
     return W; }
   // 門の体力と「門を破った！」
   function overlay(g, now, r){ if (!st || !B3) return; const s = B3.C.toScreen([GATE.x, GATE.top, GATE.z]), w = 90, k = Math.max(0, st.gate.hp) / st.gate.max;
