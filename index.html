@@ -1068,7 +1068,7 @@ button:active,.chall:active{transform:scale(.96);filter:brightness(1.25);transit
 .raidban>button[data-a="stagenext"]{margin-top:12px!important;position:relative}
 
 .inv25btn{position:fixed;right:10px;top:calc(64px + env(safe-area-inset-top,0px));z-index:60;background:#7a2a1a;color:#ffe9c9;border:1px solid #d9744a;border-radius:12px;padding:8px 12px;font-weight:800;font-size:14px;box-shadow:0 2px 8px rgba(0,0,0,.5)}
-.inv25form,.inv25end{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:12px}
+.inv25form,.inv25end{position:fixed;inset:0;z-index:220;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:12px}
 .inv25end{position:absolute}
 .inv25card{background:#241a14;border:1px solid #6a4a30;border-radius:14px;padding:14px;max-width:420px;width:100%;max-height:86vh;display:flex;flex-direction:column;gap:8px;color:#efe3cf}
 .inv25card h3{margin:0;font-size:16px}.inv25hint{font-size:12px;color:#bfae98}
@@ -1078,7 +1078,7 @@ button:active,.chall:active{transform:scale(.96);filter:brightness(1.25);transit
 .inv25list small{display:block;color:#bfae98;font-size:11px}
 .inv25btns{display:flex;gap:8px}.inv25btns button{flex:1;padding:10px;border-radius:10px;font-weight:800;border:1px solid #6a4a30;background:#3a2a1e;color:#efe3cf}
 .inv25btns .inv25go{background:#a0462a;border-color:#e08a5a}.inv25btns .inv25go:disabled{opacity:.4}
-.inv25wrap{position:fixed;inset:0;z-index:65;background:#000}
+.inv25wrap{position:fixed;inset:0;z-index:210;background:#000}
 .inv25bar{position:absolute;left:0;right:0;bottom:calc(8px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;gap:8px;z-index:6}
 .inv25bar button{padding:8px 14px;border-radius:10px;background:rgba(30,22,18,.85);color:#efe3cf;border:1px solid #5a4636;font-weight:800}.inv25bar button.on{background:#7a4a22;border-color:#c98a4a}
 .inv25vt{display:flex;flex-direction:column;gap:5px}.inv25vt button{text-align:left;padding:7px 10px;border-radius:10px;background:#2f231b;border:1px solid #4a3828;color:#efe3cf}
@@ -1090,6 +1090,14 @@ button:active,.chall:active{transform:scale(.96);filter:brightness(1.25);transit
 .inv25rot{display:none;position:absolute;inset:0;z-index:9;background:rgba(10,6,4,.92);color:#efe3cf;align-items:center;justify-content:center;text-align:center;font-weight:800;font-size:18px;line-height:1.8}
 @media (orientation:portrait){.inv25rot{display:flex}}
 @media (orientation:landscape) and (max-height:500px){.inv25card{max-width:760px;max-height:94vh;padding:10px}.inv25vt{flex-direction:row}.inv25vt button{flex:1}.inv25list{grid-template-columns:repeat(3,1fr)}.inv25hint{font-size:12px}}
+.inv25map{position:fixed;inset:0;z-index:200;background:#2a1d14;display:flex;flex-direction:column}
+.inv25top{display:flex;align-items:center;gap:8px;padding:calc(8px + env(safe-area-inset-top,0px)) 10px 8px;color:#efe3cf;font-size:12px;background:#241a14;border-bottom:1px solid #5a4030}
+.inv25top b{font-size:14px}.inv25top .inv25cl{margin-left:auto;padding:6px 10px;border-radius:9px;background:#3a2a1e;color:#efe3cf;border:1px solid #6a4a30}
+.inv25al{display:flex;align-items:center;gap:4px}.inv25al b{display:block;width:60px;height:7px;border-radius:4px;background:#3a2a1e;overflow:hidden}.inv25al i{display:block;height:100%;background:#c0392b}
+.inv25mw{flex:1;overflow:auto;display:flex;justify-content:center;align-items:flex-start}.inv25svg{width:min(100%,560px);height:auto;display:block}
+.inv25n{cursor:pointer}
+.inv25sheet{position:absolute;left:0;right:0;bottom:0;padding:10px 10px calc(10px + env(safe-area-inset-bottom,0px))}
+.inv25sheet .inv25card h3 small{font-size:12px;color:#bfae98;margin-left:4px}
 </style>
 </head>
 <body>
@@ -7266,7 +7274,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.265（11/21 12:18）";
+const VER20 = "No.266（11/21 12:28）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -11432,6 +11440,9 @@ function overlay25(now){ const ov = B3.ov, r = ov.getBoundingClientRect(), dpr =
   const g = ov.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, r.width, r.height);
   g.textAlign = "center"; g.lineJoin = "round";
   const head = a => { const A = a.w; const sz = B3.size[a.key] || 1; return B3.C.toScreen([a.x, (a.id === "lord" ? 2.6 : 1.9) * sz + 0.2 + Math.max(0, -(a.sink || 0)), a.z]); };
+  // 侵略：味方（青）と敵（赤）の足元の輪
+  if (window.__INVADE25) Object.values(B3.A).forEach(a => { if (!a.w || !a.w.team || a.dying || a.al < 0.3) return; const sz = B3.size[a.key] || 1, up = Math.max(0, -(a.sink || 0)), c = B3.C.toScreen([a.x, up + 0.02, a.z]), e = B3.C.toScreen([a.x + 0.5 * sz, up + 0.02, a.z]), rx = Math.max(6, Math.abs(e[0] - c[0]));
+    g.strokeStyle = a.w.team === 1 ? "rgba(90,170,255,.9)" : "rgba(255,80,60,.85)"; g.fillStyle = a.w.team === 1 ? "rgba(90,170,255,.16)" : "rgba(255,80,60,.14)"; g.lineWidth = 2; g.beginPath(); g.ellipse(c[0], c[1], rx, rx * 0.42, 0, 0, 7); g.fill(); g.stroke(); });
   // 体力と名前
   // 札（体力と名前）は重ならないように：手前の子から置き、ぶつかったら上へずらす。ずらしきれない名前は出さない
   const boxes = [], hit = (x0, y0, x1, y1) => boxes.some(b => x0 < b[2] && x1 > b[0] && y0 < b[3] && y1 > b[1]);
@@ -11548,13 +11559,13 @@ const INV25 = (() => {
   const GX = 7.5, SK = 1.15, P = (lat, dep) => [GX - dep, lat], LT = (x, y, z) => [GX - (z - 2.6) * SK, y * SK, x * SK];
   const GATE = { x: GX, z: 0, top: 5.6 }, TOWER = [LT(-3, 4.4, 2.6), LT(3, 4.4, 2.6)].map(q => [q[0], q[2]]), UP = 4.4 * SK;
   const shotOf = m => { if (INVFLY25[m.sp] && /dragon|chimera|ifrit/.test(m.sp)) return "fire"; for (const k in (m.ref.sk || {})) if (INVRSK25[k]) return INVRSK25[k]; return null; };
-  function start(list, vt){ const T = INVVT25[vt] || INVVT25.farm;
-    const lv = 3, mul = (typeof heroMul5 === "function" ? heroMul5(lv) : 1) * T.mul, tier = typeof heroTier === "function" ? heroTier(lv, false) : 0;
+  function start(list, vt, node){ const T = INVVT25[vt] || INVVT25.farm;
+    const lv = node ? node.lv : 3, mul = (typeof heroMul5 === "function" ? heroMul5(lv) : 1) * T.mul * (node ? { village: 0.5, town: 0.38, city: 0.42, fort: 0.5, capital: 0.6 }[node.type] : 0.75), tier = typeof heroTier === "function" ? heroTier(lv, false) : 0;
     const vil = [], W = x => { const zc = -5 + 7.6 * Math.sqrt(Math.max(0, 1 - (x / 17.5) ** 2)) - 0.75, q = LT(x, 0, zc); return [q[0], q[2]]; };
     // 部隊：n人で1つ。体力も攻撃も人数ぶん。倒れていくと人数が減る
     const mk = (job, base, x, z, up, role, nm) => { const J = (typeof JOB5 !== "undefined" && JOB5[base]) || { hp: 60, atk: 9 }, n = nm || 1, hp = Math.round(J.hp * mul * n);
       vil.push({ id: "h" + vil.length, job, key: job + ":" + tier, n, hp, max: hp, atk: Math.round(J.atk * mul * (0.55 + 0.45 * n)), x, z, hx: x, hz: z, up, role, cd: R() * 1.2, dead: false }); };
-    const n = Math.round(T.pop * T.fight), cnt = k => Math.max(1, Math.round(n * T.mix[k]));
+    const n = Math.min(60, Math.round((node ? node.pop : T.pop) * T.fight)), cnt = k => Math.max(1, Math.round(n * T.mix[k]));
     // 1隊3〜4人。横に並べる（1列6隊まで、はみ出たら前にもう1列）
     const row = (people, per, d0, dd, job, base, role) => { let sq = Math.max(1, Math.round(people / per)), r = 0; const all = sq; while (sq > 0) { const c = Math.min(6, sq), w = (c - 1) * 2.8;
         for (let k = 0; k < c; k++) { const [x, z] = P(-w / 2 + k * 2.8 + (r % 2) * 1.4, d0 + r * dd); mk(job, base, x, z, 0, role, Math.min(per, Math.max(1, people - (all - sq) * per - k * per) || per)); } sq -= c; r++; } };
@@ -11564,6 +11575,9 @@ const INV25 = (() => {
     row(cnt("front"), 4, 7.0, 2.0, "warrior", "warrior", "front"); row(cnt("second"), 4, 5.0, -1.1, "thief", "thief", "second");
     if (na > 0) row(na, 3, 3.2, -0.8, "hunter", "thief", "archer");
     const nc = cnt("caster"); for (let k = 0; k < Math.ceil(nc / 2); k++) { const [x, z] = P((k - (Math.ceil(nc / 2) - 1) / 2) * 3.4, 2.0); mk("mage", "mage", x, z, 0, "caster", Math.min(2, nc - k * 2)); }
+    // 将軍：名前と★（★の数＝スキルの数）。門の前の真ん中に立つ
+    for (let g = 0; g < (node ? node.gen : 0); g++) { const [x, z] = P((g - ((node.gen - 1) / 2)) * 3.2, 8.6); mk("knight", "knight", x, z, 0, "front", 1); const v = vil[vil.length - 1], star = Math.max(1, Math.min(5, Math.round(node.lv / 5)));
+      v.general = 1; v.name = (typeof HERO_NAMES5 !== "undefined" ? HERO_NAMES5[(node.x * 7 + g * 13 | 0) % HERO_NAMES5.length] : "将軍") + " " + "★".repeat(star); v.hp = v.max = Math.round(v.max * (2 + star)); v.atk = Math.round(v.atk * (1.2 + star * 0.25)); v.key = "knight:" + Math.max(1, tier); }
     const nh = cnt("healer"); for (let k = 0; k < Math.ceil(nh / 2); k++) { const [x, z] = P((k % 2 ? 1 : -1) * (6.2 + Math.floor(k / 2) * 2), 3.4); mk("priest", "priest", x, z, 0, "healer", Math.min(2, nh - k * 2)); }
     // 魔物：前列・後列（編成で決める）。それぞれ縦に並べる
     const FW = Math.max(10, (Math.min(6, Math.round(cnt("front") / 4)) - 1) * 2.8 + 2), rows = { front: [], back: [] };
@@ -11571,7 +11585,7 @@ const INV25 = (() => {
     const slot = {}; ["front", "back"].forEach((rk, ri) => { const L = rows[rk], per = 7; L.forEach((m, k) => { const col = Math.floor(k / per), i = k % per, c = Math.min(per, L.length - col * per); slot[m.id] = { lat: (i - (c - 1) / 2) * 2.6, dep: 20 + ri * 3.4 + col * 2.4, row: rk }; }); });
     const mons = list.map((m, k) => { const hp = typeof monHp5 === "function" ? monHp5(m) : 50, sl = slot[m.id], [x, z] = P(sl.lat, sl.dep + R() * 0.5);
       return { id: "m" + m.id, ref: m, sp: m.sp, key: m.sp + ":" + (m.evos || 0), hp, max: hp, atk: typeof monAtk5 === "function" ? monAtk5(m) : 10, x, z, fly: !!INVFLY25[m.sp], shot: shotOf({ sp: m.sp, ref: m }), cd: 0.5 + R(), dead: false, row: sl.row, lx: Math.max(-FW / 2, Math.min(FW / 2, sl.lat)) }; });
-    st = { vil, mons, gate: { hp: Math.round((90 + 35 * list.length) * T.gate), max: Math.round((90 + 35 * list.length) * T.gate), broken: false }, vt: T, t: 0, step: 0, over: null, pops: [], hits: [], spd: 1 };
+    st = { vil, mons, gate: { hp: Math.round((90 + 35 * list.length) * T.gate * (node ? 1 + node.lv / 10 : 1)), max: Math.round((90 + 35 * list.length) * T.gate * (node ? 1 + node.lv / 10 : 1)), broken: false }, vt: T, t: 0, step: 0, over: null, pops: [], hits: [], spd: 1 };
     return st; }
   const near = (a, L) => L.filter(b => !b.dead).sort((p, q) => Math.hypot(p.x - a.x, p.z - a.z) - Math.hypot(q.x - a.x, q.z - a.z))[0];
   const hit = (a, b, d, far, shot) => { d = Math.max(1, Math.round(d * (0.85 + R() * 0.3) * (b.up ? 0.5 : 1))); b.hp -= d; const kill = b.hp <= 0 && !b.dead; if (kill) b.dead = true;
@@ -11631,10 +11645,10 @@ const INV25 = (() => {
   function want(now, dt){ if (!st) return {}; if (B3 && B3.C && B3.C.bgReady && !B3.C.bgReady()) return want0(); sim(Math.min(0.1, dt) * st.spd);
     N.hit25.push(...st.hits.filter(h => h.b)); st.hits = []; return want0(); }
   function want0(){ const W = {};
-    st.mons.forEach(m => { if (m.dead && !(B3 && B3.A[m.id])) return; W[m.id] = { x: m.x, z: m.z, key: m.key, hp: Math.max(0, m.hp) / m.max, down: m.dead, name: m.ref.nick, fixed: 1 }; });
+    st.mons.forEach(m => { if (m.dead && !(B3 && B3.A[m.id])) return; W[m.id] = { x: m.x, z: m.z, key: m.key, hp: Math.max(0, m.hp) / m.max, down: m.dead, name: m.ref.nick, fixed: 1, team: 1 }; });
     const OFF = [[0, 0], [0.6, -0.85], [0.6, 0.85], [1.2, 0]], OFFW = [[0, 0], [0, -0.9], [0, 0.9]];
     st.vil.forEach(v => { const m = v.dead ? 1 : alive(v); for (let k = 0; k < m; k++) { const id = v.id + "_" + k; if (v.dead && !(B3 && B3.A[id])) continue; const o = (v.up ? OFFW : OFF)[k] || [0, 0];
-      W[id] = { x: v.x + o[0], z: v.z + o[1], key: v.key, hp: Math.max(0, v.hp) / v.max, down: v.dead, name: v.general ? v.name : null, fixed: 1, up: v.up || 0, nobar: k > 0 }; } });
+      W[id] = { x: v.x + o[0], z: v.z + o[1], key: v.key, hp: Math.max(0, v.hp) / v.max, down: v.dead, name: v.general ? v.name : null, fixed: 1, up: v.up || 0, nobar: k > 0, team: 2 }; } });
     return W; }
   // 門の体力と「門を破った！」
   function overlay(g, now, r){ if (!st || !B3) return; const s = B3.C.toScreen([GATE.x, GATE.top, GATE.z]), w = 90, k = Math.max(0, st.gate.hp) / st.gate.max;
@@ -11648,22 +11662,22 @@ const INV25 = (() => {
 
 // ---- 入口・編成・戦闘の画面 ----
 let invBox25 = null;
-function invClose25(){ try { B3 && B3.C && B3.C.destroy(); } catch (e) {} B3 = null; if (invBox25) invBox25.remove(); invBox25 = null; window.__INVADE25 = 0; N = window.__invN0 || null; }
-function invOpenForm25(){ if (typeof S === "undefined" || !S || !S.mons) return;
+function invClose25(){ try { B3 && B3.C && B3.C.destroy(); } catch (e) {} B3 = null; if (invBox25) invBox25.remove(); invBox25 = null; window.__INVADE25 = 0; N = window.__invN0 || null; try { if (typeof save === "function") save(); } catch (e) {} }
+function invOpenForm25(node){ if (typeof S === "undefined" || !S || !S.mons) return; node = node || window.__invNode || null;
   const el = document.createElement("div"); el.className = "inv25form";
   const ms = S.mons.slice().sort((a, b) => (b.lv || 1) - (a.lv || 1)); const pick = new Set(ms.map(m => m.id)); let vt = window.__invVT || "farm"; const rowOf = m => (window.__invRow = window.__invRow || {})[m.id] || (INVFLY25[m.sp] || Object.keys(m.sk || {}).some(k => INVRSK25[k]) ? "back" : "front");
-  const draw = () => { el.innerHTML = `<div class="inv25card"><h3>⚔ 侵略（試作）：草原の村</h3><div class="inv25vt">${Object.entries(INVVT25).map(([k, T]) => `<button data-vt="${k}" class="${k === vt ? "on" : ""}"><b>${T.name}</b><small>${T.text}・守り${Math.min(44, Math.round(T.pop * T.fight))}人</small></button>`).join("")}</div><div class="inv25hint">連れていく魔物をえらぶ（何体でも）。「前列／後列」をタップで切りかえ。門を壊して村人を倒せば勝ち。戦いはスマホを横にして見る。</div>
+  const draw = () => { el.innerHTML = `<div class="inv25card"><h3>⚔ ${node ? node.name + "を攻める" : "侵略（試作）：草原の村"}</h3><div class="inv25vt" style="${node ? "display:none" : ""}">${Object.entries(INVVT25).map(([k, T]) => `<button data-vt="${k}" class="${k === vt ? "on" : ""}"><b>${T.name}</b><small>${T.text}・守り${Math.min(44, Math.round(T.pop * T.fight))}人</small></button>`).join("")}</div><div class="inv25hint">連れていく魔物をえらぶ（何体でも）。「前列／後列」をタップで切りかえ。門を壊して村人を倒せば勝ち。戦いはスマホを横にして見る。</div>
     <div class="inv25list">${ms.map(m => `<label class="${pick.has(m.id) ? "on" : ""}"><input type="checkbox" data-id="${m.id}" ${pick.has(m.id) ? "checked" : ""}>${typeof img === "function" ? simg23(m, m.evos || 0, "sp") : ""}<span>${m.nick || m.sp}<small> Lv${m.lv || 1}${INVFLY25[m.sp] ? "・飛" : ""}${Object.keys(m.sk || {}).some(k => INVRSK25[k]) ? "・遠" : ""}</small></span>${pick.has(m.id) ? `<i class="inv25row" data-row="${m.id}">${rowOf(m) === "back" ? "後列" : "前列"}</i>` : ""}</label>`).join("")}</div>
     <div class="inv25btns"><button class="inv25go" ${pick.size ? "" : "disabled"}>出撃（${pick.size}体）</button><button class="inv25no">やめる</button></div></div>`;
     el.querySelectorAll("input").forEach(c => c.onchange = () => { const id = +c.dataset.id; if (c.checked) pick.add(id); else pick.delete(id); draw(); });
     el.querySelectorAll("[data-row]").forEach(b => b.onclick = e => { e.preventDefault(); e.stopPropagation(); const m = ms.find(q => q.id === +b.dataset.row); window.__invRow[m.id] = rowOf(m) === "back" ? "front" : "back"; draw(); });
     el.querySelectorAll("[data-vt]").forEach(b => b.onclick = () => { vt = window.__invVT = b.dataset.vt; draw(); });
     el.querySelector(".inv25no").onclick = () => el.remove();
-    el.querySelector(".inv25go").onclick = () => { el.remove(); invStart25(ms.filter(m => pick.has(m.id)), vt); }; };
+    el.querySelector(".inv25go").onclick = () => { el.remove(); invStart25(ms.filter(m => pick.has(m.id)), node ? node.vt : vt, node); }; };
   draw(); document.body.appendChild(el); }
-function invStart25(list, vt){
+function invStart25(list, vt, node){ window.__invNode = node || null;
   window.__invN0 = typeof N !== "undefined" ? N : null; window.__INVADE25 = "v_side"; window.__INVBACK = 0;
-  INV25.start(list, vt); window.__invVT = vt; N = { t: 0, mons: [], heroes: [], hit25: [], lord: null, done: false, inv: 1 };
+  INV25.start(list, vt, node); window.__invVT = vt; N = { t: 0, mons: [], heroes: [], hit25: [], lord: null, done: false, inv: 1 };
   const wrap = document.createElement("div"); wrap.className = "inv25wrap"; invBox25 = wrap;
   wrap.innerHTML = `<div id="b3d25"><canvas class="b3cv"></canvas><canvas class="b3ov"></canvas><div class="b3tabs"></div><div class="b3info"></div></div><div class="inv25bar"><button data-s="1" class="on">×1</button><button data-s="2">×2</button><button class="inv25x">退く</button></div><div class="inv25drag">← 指で左右にずらせる →</div><div class="inv25rot"><div>📱↻<br>スマホを横にしてね</div></div>`;
   document.body.appendChild(wrap);
@@ -11681,13 +11695,76 @@ function invStart25(list, vt){
     if (typeof BACK25 !== "undefined" && BACK25[k.sp]) C.useStrip(k.key + "~b", "back/" + k.sp + "_" + Math.min(2, k.evo) + ".webp?v=" + BACK25[k.sp], (typeof BACKPPU25 !== "undefined" && BACKPPU25[k.sp + ":" + Math.min(2, k.evo)]) || (pp ? pp[0] : 36 * msc / scl), !bip); });
   wrap.querySelectorAll(".inv25bar [data-s]").forEach(b => b.onclick = () => { INV25.spd = +b.dataset.s; wrap.querySelectorAll(".inv25bar [data-s]").forEach(x => x.classList.toggle("on", x === b)); });
   wrap.querySelector(".inv25x").onclick = invClose25; }
-function showEnd(win){ if (!invBox25) return; const st = INV25.st, dead = st.mons.filter(m => m.dead).length;
+function showEnd(win){ if (!invBox25) return; const st = INV25.st, dead = st.mons.filter(m => m.dead).length; if (win && window.__invNode) { invReward25(window.__invNode, st); return; }
   const d = document.createElement("div"); d.className = "inv25end"; d.innerHTML = `<div class="inv25card"><h3>${win ? "🏴 村を落とした！" : "💀 退却…"}</h3><div class="inv25hint">倒れた魔物 ${dead}/${st.mons.length}体・門 ${st.gate.broken ? "破壊" : "残り" + Math.max(0, st.gate.hp)}</div>
     <div class="inv25btns"><button class="inv25go">もう一度</button><button class="inv25no">閉じる</button></div></div>`;
-  invBox25.appendChild(d); d.querySelector(".inv25no").onclick = invClose25; d.querySelector(".inv25go").onclick = () => { const L = st.mons.map(m => m.ref); invClose25(); invStart25(L, window.__invVT); }; }
+  invBox25.appendChild(d); d.querySelector(".inv25no").onclick = () => { invClose25(); if (window.__invNode) invOpenMap25(); }; d.querySelector(".inv25go").onclick = () => { const L = st.mons.map(m => m.ref); invClose25(); invStart25(L, window.__invVT); }; }
 // 入口：URLに #invade があるとき、画面の左下に「侵略（試作）」ボタンを出す
-(function invEntry25(){ const put = () => { if (!/invade/.test(location.hash) || document.querySelector(".inv25btn")) return; const b = document.createElement("button"); b.className = "inv25btn"; b.textContent = "⚔ 侵略（試作）"; b.onclick = invOpenForm25; document.body.appendChild(b); };
+(function invEntry25(){ const put = () => { if (!/invade/.test(location.hash) || document.querySelector(".inv25btn")) return; const b = document.createElement("button"); b.className = "inv25btn"; b.textContent = "⚔ 侵略（試作）"; b.onclick = () => invOpenMap25(); document.body.appendChild(b); };
   window.addEventListener("hashchange", put); setTimeout(put, 800); })();
+
+// ======== 世界地図（試作）：拠点を選んで攻める・ごほうび・拠点化 ========
+const INVNT25 = { village: { name: "村", n: 25 }, town: { name: "街", n: 8 }, city: { name: "都市", n: 3 }, fort: { name: "砦", n: 5 }, capital: { name: "王都", n: 1 } };
+const INVSYL25 = ["ハル", "ミナ", "ロウ", "セキ", "アオ", "クレ", "トネ", "ヨシ", "カヤ", "ニレ", "スズ", "モリ", "イサ", "ワカ", "タチ", "ヒバ", "ナギ", "オウ", "ケヤ", "サク", "ユズ", "フジ", "ミオ", "エダ"];
+function invRng25(seed){ let a = seed >>> 0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function invMap25(seed){ const R = invRng25(seed), N = [], HOME = { id: "home", x: 14, y: 140, type: "home", name: "わが迷宮" };
+  const far = (x, y, d) => N.every(n => Math.hypot(n.x - x, n.y - y) >= d) && Math.hypot(HOME.x - x, HOME.y - y) >= d;
+  const put = (type, fx) => { for (let t = 0; t < 400; t++) { const [x, y] = fx(); if (x < 6 || x > 94 || y < 8 || y > 146) continue; if (far(x, y, type === "village" ? 9 : 11)) { N.push({ id: type[0] + N.length, type, x, y }); return; } } };
+  put("capital", () => [84, 14]);
+  for (let k = 0; k < 5; k++) put("fort", () => { const a = Math.PI * (0.55 + k * 0.22) + (R() - 0.5) * 0.2; return [84 + Math.cos(a) * 24, 14 - Math.sin(a) * 24 * -1 + 4]; });
+  for (let k = 0; k < 3; k++) put("city", () => [30 + R() * 55, 30 + R() * 45]);
+  for (let k = 0; k < 8; k++) put("town", () => [10 + R() * 80, 40 + R() * 70]);
+  for (let k = 0; k < 25; k++) put("village", () => [6 + R() * 88, 50 + R() * 96]);
+  const VT = ["farm", "farm", "hunt", "war"];
+  const syl = INVSYL25.slice().sort(() => R() - 0.5).concat(INVSYL25.map(a => a + "ノ"), INVSYL25.map(a => "ミ" + a));
+  N.forEach((n, i) => { const d = Math.hypot(n.x - HOME.x, n.y - HOME.y); n.name = syl[i % syl.length] + INVNT25[n.type].name;
+    n.lv = Math.round(2 + d / 13 + { village: 0, town: 2, city: 4, fort: 5, capital: 8 }[n.type]); n.vt = n.type === "fort" || n.type === "capital" ? "war" : VT[Math.floor(R() * VT.length)];
+    n.pop = { village: 80 + Math.round(R() * 80), town: 300, city: 700, fort: 220, capital: 1500 }[n.type]; n.days = d < 24 ? 0 : Math.ceil(d / 22);
+    n.gen = n.type === "fort" ? 2 : n.type === "city" ? 2 : n.type === "capital" ? 4 : n.type === "town" ? 1 : 0; });
+  // 道：近い2〜3か所とつなぐ
+  const E = [], all = [HOME].concat(N); all.forEach(a => { all.filter(b => b !== a).sort((p, q) => Math.hypot(p.x - a.x, p.y - a.y) - Math.hypot(q.x - a.x, q.y - a.y)).slice(0, 2 + (R() < 0.3 ? 1 : 0)).forEach(b => { if (!E.some(e => e[0] === b && e[1] === a)) E.push([a, b]); }); });
+  return { home: HOME, nodes: N, edges: E }; }
+const invSt25 = () => { if (!S.inv25) S.inv25 = { seed: (Math.random() * 1e9) | 0, own: {}, alert: 0, cleared: 0 }; return S.inv25; };
+const invIncome25 = S0 => { const I = S0.inv25; if (!I) return 0; const M = invMap25(I.seed); return M.nodes.filter(n => I.own[n.id]).reduce((s, n) => s + 8 + n.lv * 3, 0); };
+// 毎日、拠点からDPが入る
+{ const _f = finishDay9; finishDay9 = function (S0, rep){ const r = _f.apply(this, arguments); try { const inc = invIncome25(S0); if (inc) { S0.dp += inc; rep.dp = (rep.dp || 0) + inc; } } catch (e) {} return r; }; }
+let invMapEl25 = null;
+function invOpenMap25(){ if (typeof S === "undefined" || !S) return; const I = invSt25(), M = invMap25(I.seed);
+  if (invMapEl25) invMapEl25.remove(); const el = invMapEl25 = document.createElement("div"); el.className = "inv25map";
+  const star = n => "★".repeat(Math.max(1, Math.min(5, Math.round(n.lv / 5))));
+  const icon = n => { const own = I.own[n.id], c = own ? "#7a1e14" : "#3b2614";
+    if (n.type === "home") return `<circle r="3.2" fill="#3a1a4a" stroke="#c7a0ff" stroke-width=".7"/><text y="1.3" font-size="3.4" text-anchor="middle">👑</text>`;
+    const sh = n.type === "village" ? `<circle r="2" fill="${c}"/>` : n.type === "town" ? `<rect x="-2.4" y="-2.4" width="4.8" height="4.8" fill="${c}"/>` : n.type === "city" ? `<rect x="-3.2" y="-3.2" width="6.4" height="6.4" rx="1" fill="${c}"/><rect x="-1.6" y="-5" width="3.2" height="2" fill="${c}"/>` : n.type === "fort" ? `<path d="M-3 2.6 L0 -3.4 L3 2.6 Z" fill="${c}"/>` : `<path d="M-4.4 3 L-4.4 -2 L-2.2 0 L0 -4 L2.2 0 L4.4 -2 L4.4 3 Z" fill="#8a1a10" stroke="#e8c060" stroke-width=".6"/>`;
+    return sh + (own ? `<path d="M0.6 -2 L0.6 -7.5 L4.2 -6.2 L0.6 -5" fill="#c0392b" stroke="#3b2614" stroke-width=".35"/>` : ""); };
+  const svg = `<svg viewBox="0 0 100 150" class="inv25svg"><defs><filter id="pp"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="${I.seed % 97}"/><feColorMatrix values="0 0 0 0 .35  0 0 0 0 .25  0 0 0 0 .12  0 0 0 .35 0"/><feComposite in2="SourceGraphic" operator="in"/></filter>
+    <radialGradient id="vg" cx="50%" cy="50%" r="70%"><stop offset="60%" stop-color="#e9d8b4"/><stop offset="100%" stop-color="#c9ac78"/></radialGradient></defs>
+    <rect width="100" height="150" fill="url(#vg)"/><rect width="100" height="150" fill="#e9d8b4" filter="url(#pp)" opacity=".9"/>
+    <path d="M62 2 Q70 30 58 52 T64 96 Q60 120 74 148" fill="none" stroke="#7fa0b8" stroke-width="1.6" opacity=".55"/>
+    ${[[22, 22], [30, 30], [16, 36], [70, 70], [78, 64], [86, 74]].map(([x, y]) => `<path d="M${x - 4} ${y + 2} L${x} ${y - 4} L${x + 4} ${y + 2}" fill="none" stroke="#6b5232" stroke-width=".6" opacity=".6"/>`).join("")}
+    ${M.edges.map(([a, b]) => `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="#7a5a34" stroke-width=".45" stroke-dasharray="1.4 1.1" opacity=".75"/>`).join("")}
+    <circle cx="84" cy="14" r="27" fill="none" stroke="#9a2a18" stroke-width=".6" stroke-dasharray="2 1.5" opacity=".7"/>
+    ${[M.home].concat(M.nodes).map(n => `<g class="inv25n" data-n="${n.id}" transform="translate(${n.x} ${n.y})">${icon(n)}<text y="${n.type === "village" ? 5.2 : 7}" font-size="${n.type === "village" ? 2.4 : 3}" text-anchor="middle" fill="#3b2614" font-weight="700">${n.name}</text><circle r="5" fill="transparent"/></g>`).join("")}
+    <text x="50" y="146" font-size="3" text-anchor="middle" fill="#6b5232" font-style="italic">王国の地図</text></svg>`;
+  const inc = invIncome25(S), own = Object.keys(I.own).length;
+  el.innerHTML = `<div class="inv25top"><b>🗺 侵略（試作）</b><span>拠点 ${own}/40・💎+${inc}/日</span><span class="inv25al">警戒度<b><i style="width:${Math.min(100, I.alert)}%"></i></b></span><button class="inv25cl">閉じる</button></div><div class="inv25mw">${svg}</div><div class="inv25sheet" hidden></div>`;
+  document.body.appendChild(el);
+  el.querySelector(".inv25cl").onclick = () => { el.remove(); invMapEl25 = null; if (typeof render === "function") render(); };
+  el.querySelectorAll(".inv25n").forEach(g => g.onclick = () => { const n = M.nodes.find(q => q.id === g.dataset.n); const sh = el.querySelector(".inv25sheet"); if (!n) { sh.hidden = true; return; }
+    const T = INVVT25[n.vt], fight = Math.round(n.pop * T.fight);
+    sh.hidden = false; sh.innerHTML = `<div class="inv25card"><h3>${n.name}<small>（${INVNT25[n.type].name}）</small></h3>
+      ${I.own[n.id] ? `<div class="inv25hint">🚩 拠点。毎日 💎+${8 + n.lv * 3}</div>` : `<div class="inv25hint">強さ ${star(n)}・${T.name}・人口およそ${Math.round(n.pop / 10) * 10}・守り${fight}人ほど${n.gen ? `・将軍${n.gen}人` : ""}<br>${n.days ? `遠征 ${n.days}日` : "近いので当日で帰れる"}</div>`}
+      <div class="inv25btns">${I.own[n.id] ? "" : `<button class="inv25go">攻める</button>`}<button class="inv25no">閉じる</button></div></div>`;
+    sh.querySelector(".inv25no").onclick = () => sh.hidden = true;
+    const go = sh.querySelector(".inv25go"); if (go) go.onclick = () => { window.__invNode = n; invOpenForm25(n); }; }); }
+// 勝ったときのごほうび：DP・魔物を1体えらぶ・拠点にする
+const INVPOOL25 = { village: [0], town: [0, 1], city: [1], fort: [1, 2], capital: [2, 3] };
+function invReward25(n, st){ const I = invSt25(), tiers = INVPOOL25[n.type] || [0], rk = k => +(MON[k].rar || MON[k].rank || MON[k].tier || 0), pool = Object.keys(MON).filter(k => tiers.includes(rk(k)) && (typeof SP3D24 === "undefined" || SP3D24[kitOf24(k)]));
+  const pick3 = pool.sort(() => Math.random() - 0.5).slice(0, 3), dp = 30 + n.lv * 12; S.dp += dp; I.own[n.id] = 1; I.alert = Math.min(100, I.alert + 4 + n.lv); I.cleared++;
+  const d = document.createElement("div"); d.className = "inv25end"; d.innerHTML = `<div class="inv25card"><h3>🏴 ${n.name}を落とした！</h3><div class="inv25hint">💎+${dp}・${n.name}は拠点になった（毎日 💎+${8 + n.lv * 3}）・王国の警戒度が上がった<br>仲間にする魔物を1体えらぶ</div>
+    <div class="inv25list">${pick3.map(k => `<label data-sp="${k}">${typeof img === "function" ? img(k, 0, "sp") : ""}<span>${typeof monName5 === "function" ? monName5({ sp: k, evos: 0 }) : k}<small>Lv${Math.max(3, n.lv + 2)}</small></span></label>`).join("")}</div></div>`;
+  invBox25.appendChild(d);
+  d.querySelectorAll("[data-sp]").forEach(l => l.onclick = () => { const m = newMon5(l.dataset.sp, Math.max(3, n.lv + 2)); m.home = null; S.mons.push(m); if (S.dex && !S.dex.includes(m.sp)) S.dex.push(m.sp); try { if (typeof save === "function") save(); } catch (e) {}
+    invClose25(); invOpenMap25(); }); }
 
 // ================= 3Dの子を、今のコマアニメと同じ並び（17コマ）の絵に焼く（開発用・ページ内で実行） =================
 // 0-3 待機 / 4 まばたき・寝る / 5-8 攻撃 / 9-10 被弾 / 11-14 跳ねる / 15-16 歩き
