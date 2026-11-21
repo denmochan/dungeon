@@ -1081,6 +1081,10 @@ button:active,.chall:active{transform:scale(.96);filter:brightness(1.25);transit
 .inv25wrap{position:fixed;inset:0;z-index:65;background:#000}
 .inv25bar{position:absolute;left:0;right:0;bottom:calc(8px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;gap:8px;z-index:6}
 .inv25bar button{padding:8px 14px;border-radius:10px;background:rgba(30,22,18,.85);color:#efe3cf;border:1px solid #5a4636;font-weight:800}.inv25bar button.on{background:#7a4a22;border-color:#c98a4a}
+.inv25vt{display:flex;flex-direction:column;gap:5px}.inv25vt button{text-align:left;padding:7px 10px;border-radius:10px;background:#2f231b;border:1px solid #4a3828;color:#efe3cf}
+.inv25vt button.on{border-color:#d9a441;background:#3d2c1c}.inv25vt small{display:block;color:#bfae98;font-size:12px}
+.inv25drag{position:absolute;left:0;right:0;top:calc(10px + env(safe-area-inset-top,0px));text-align:center;color:#efe3cf;font-size:12px;font-weight:700;text-shadow:0 1px 3px #000;pointer-events:none;animation:inv25f 4s forwards}
+@keyframes inv25f{0%,70%{opacity:1}100%{opacity:0}}
 </style>
 </head>
 <body>
@@ -7257,7 +7261,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.261（11/21 11:27）";
+const VER20 = "No.262（11/21 11:38）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -11520,29 +11524,36 @@ document.addEventListener("click", ev => { const b = ev.target.closest && ev.tar
 //         門には体力があり地上の魔物がたたいて壊す／門が壊れると櫓も崩れ、上の村人は落ちて傷を負う
 const INVFLY25 = { bat: 1, firebat: 1, eyebat: 1, ghost: 1, gargoyle: 1, dragon: 1, elderdragon: 1, bonedragon: 1, imp: 1, wraitheye: 1, eye: 1, ifrit: 1, sporewraith: 1, chimera: 1, flamechimera: 1 };
 const INVRSK25 = { fire: "fire", inferno: "fire", dark: "eye", eye: "eye", sling: "rock" };
+// 村の種類：人口と特色で、戦える人数・並び・強さが変わる
+const INVVT25 = {
+  farm: { name: "農村", pop: 100, fight: 0.24, mix: { front: 0.34, second: 0.24, arch: 0.26, caster: 0.08, healer: 0.08 }, mul: 1.0, gate: 1.0, text: "人口100。畑を守る素朴な村" },
+  hunt: { name: "狩人の村", pop: 120, fight: 0.32, mix: { front: 0.22, second: 0.18, arch: 0.46, caster: 0.07, healer: 0.07 }, mul: 1.05, gate: 0.9, text: "人口120。弓を持てる者が多い" },
+  war: { name: "砦の村", pop: 150, fight: 0.27, mix: { front: 0.42, second: 0.22, arch: 0.22, caster: 0.07, healer: 0.07 }, mul: 1.2, gate: 1.5, text: "人口150。争いが多く、守りが発達" } };
 const INV25 = (() => {
   let st = null;
   const R = () => Math.random();
   // 村の位置（世界の座標）：門は z=2.0、櫓の上は y=5.75
   const GATE = { x: 0, z: 2.0, top: 5.9 }, TOWER = [[-3.9, 2.0], [3.9, 2.0]], UP = 5.75;
   const shotOf = m => { if (INVFLY25[m.sp] && /dragon|chimera|ifrit/.test(m.sp)) return "fire"; for (const k in (m.ref.sk || {})) if (INVRSK25[k]) return INVRSK25[k]; return null; };
-  function start(list){
-    const lv = 3, mul = (typeof heroMul5 === "function" ? heroMul5(lv) : 1), tier = typeof heroTier === "function" ? heroTier(lv, false) : 0;
-    const names = (typeof HERO_NAMES5 !== "undefined" ? HERO_NAMES5 : ["アレン", "ベル", "カイ", "ドナ", "エド", "フィン"]).slice().sort(() => R() - 0.5);
+  function start(list, vt){ const T = INVVT25[vt] || INVVT25.farm;
+    const lv = 3, mul = (typeof heroMul5 === "function" ? heroMul5(lv) : 1) * T.mul, tier = typeof heroTier === "function" ? heroTier(lv, false) : 0;
     const vil = [], VK = 1.3, W = x => { const zc = -5 + 7.6 * Math.sqrt(Math.max(0, 1 - (x / 17.5) ** 2)) - 0.75; return [x * VK, (zc - 2.6) * VK + 2.0]; };
     const mk = (job, base, x, z, up, role) => { const J = (typeof JOB5 !== "undefined" && JOB5[base]) || { hp: 60, atk: 9 }, hp = Math.round(J.hp * mul);
       vil.push({ id: "h" + vil.length, job, key: job + ":" + tier, hp, max: hp, atk: Math.round(J.atk * mul), x, z, hx: x, hz: z, up, role, cd: R() * 1.2, dead: false }); };
-    // 村の人口100人ほど → 戦える者が26人。櫓に魔法使いと狩人、柵の上の通路に弓、門の前に盾の列とその後ろに控え、うしろに魔法使いと僧侶
-    mk("mage", "mage", TOWER[0][0], TOWER[0][1], UP, "tower"); mk("hunter", "thief", TOWER[1][0], TOWER[1][1], UP, "tower");
-    [-10.6, -8.4, -6.2, 6.2, 8.4, 10.6].forEach(x => { const [wx, wz] = W(x); mk("hunter", "thief", wx, wz, 3.65, "wall"); });
-    for (let k = 0; k < 7; k++) mk("warrior", "warrior", -4.5 + k * 1.5, 4.7, 0, "front");
-    for (let k = 0; k < 5; k++) mk("thief", "thief", -3 + k * 1.5, 3.6, 0, "second");
-    mk("mage", "mage", -1.6, 2.9, 0, "caster"); mk("mage", "mage", 1.6, 2.9, 0, "caster");
-    mk("priest", "priest", -5.6, 3.2, 0, "healer"); mk("priest", "priest", 5.6, 3.2, 0, "healer");
-    const mons = list.map((m, k) => { const hp = typeof monHp5 === "function" ? monHp5(m) : 50, n = list.length, row = Math.floor(k / 6), col = k % 6;
-      const x = (col - (Math.min(6, n - row * 6) - 1) / 2) * 2.6, z = 9.5 + row * 2.2 + R() * 0.6;
-      return { id: "m" + m.id, ref: m, sp: m.sp, key: m.sp + ":" + (m.evos || 0), hp, max: hp, atk: typeof monAtk5 === "function" ? monAtk5(m) : 10, x, z, fly: !!INVFLY25[m.sp], shot: shotOf({ sp: m.sp, ref: m }), cd: 0.5 + R(), dead: false }; });
-    st = { vil, mons, gate: { hp: 90 + 35 * list.length, max: 90 + 35 * list.length, broken: false }, t: 0, step: 0, over: null, pops: [], hits: [], spd: 1 };
+    const n = Math.min(44, Math.round(T.pop * T.fight)), cnt = k => Math.max(1, Math.round(n * T.mix[k]));
+    // 横に広い列：1列に13人まで、はみ出たら前にもう1列
+    const row = (num, z0, dz, job, base, role) => { let left = num, r = 0; while (left > 0) { const c = Math.min(13, left), w = (c - 1) * 1.5; for (let k = 0; k < c; k++) mk(job, base, -w / 2 + k * 1.5 + (r % 2) * 0.75, z0 + r * dz, 0, role); left -= c; r++; } };
+    // 弓：櫓2つ→柵の上の通路（6か所）→あふれたら地上の後列
+    let na = cnt("arch"); mk("mage", "mage", TOWER[0][0], TOWER[0][1], UP, "tower"); mk("hunter", "thief", TOWER[1][0], TOWER[1][1], UP, "tower"); na -= 1;
+    [-6.2, 6.2, -8.4, 8.4, -10.6, 10.6].forEach(x => { if (na <= 0) return; const [wx, wz] = W(x); mk("hunter", "thief", wx, wz, 3.65, "wall"); na--; });
+    row(cnt("front"), 6.2, 1.6, "warrior", "warrior", "front"); row(cnt("second"), 4.6, -1.1, "thief", "thief", "second");
+    if (na > 0) row(na, 3.3, -0.9, "hunter", "thief", "archer");
+    const nc = cnt("caster"); for (let k = 0; k < nc; k++) mk("mage", "mage", (k - (nc - 1) / 2) * 2.4, 2.5, 0, "caster");
+    const nh = cnt("healer"); for (let k = 0; k < nh; k++) mk("priest", "priest", (k % 2 ? 1 : -1) * (6 + Math.floor(k / 2) * 1.4), 3.0, 0, "healer");
+    const FW = Math.max(9, (Math.min(13, cnt("front")) - 1) * 1.5), mons = list.map((m, k) => { const hp = typeof monHp5 === "function" ? monHp5(m) : 50, n = list.length, row = Math.floor(k / 6), col = k % 6;
+      const x = (col - (Math.min(6, n - row * 6) - 1) / 2) * 3.0, z = 11.5 + row * 2.4 + R() * 0.6;
+      return { id: "m" + m.id, ref: m, sp: m.sp, key: m.sp + ":" + (m.evos || 0), hp, max: hp, atk: typeof monAtk5 === "function" ? monAtk5(m) : 10, x, z, fly: !!INVFLY25[m.sp], shot: shotOf({ sp: m.sp, ref: m }), cd: 0.5 + R(), dead: false, lx: -FW / 2 + (k + 0.5) * FW / list.length }; });
+    st = { vil, mons, gate: { hp: Math.round((90 + 35 * list.length) * T.gate), max: Math.round((90 + 35 * list.length) * T.gate), broken: false }, vt: T, t: 0, step: 0, over: null, pops: [], hits: [], spd: 1 };
     return st; }
   const near = (a, L) => L.filter(b => !b.dead).sort((p, q) => Math.hypot(p.x - a.x, p.z - a.z) - Math.hypot(q.x - a.x, q.z - a.z))[0];
   const hit = (a, b, d, far, shot) => { d = Math.max(1, Math.round(d * (0.85 + R() * 0.3) * (b.up ? 0.5 : 1))); b.hp -= d; const kill = b.hp <= 0 && !b.dead; if (kill) b.dead = true;
@@ -11554,14 +11565,14 @@ const INV25 = (() => {
       let tgt = null, toGate = false;
       const canUp = m.fly || !!m.shot, ups = V.filter(v => v.up);
       if (canUp && ups.length && (!ground.length || R() < 0.02 || m.tgt && m.tgt.up && !m.tgt.dead)) tgt = m.tgt && !m.tgt.dead && m.tgt.up ? m.tgt : near(m, ups);
-      if (!tgt && ground.length) { const cur = m.tgt && !m.tgt.dead && !m.tgt.up ? m.tgt : null, cand = cur || near(m, ground);
+      if (!tgt && ground.length) { const cur = m.tgt && !m.tgt.dead && !m.tgt.up ? m.tgt : null, cand = cur || near({ x: st.gate.broken ? m.x : m.lx * 0.7 + m.x * 0.3, z: m.z }, ground);
         const crowd = M.filter(o => o !== m && o.tgt === cand).length; tgt = (!cur && crowd >= 2 && !st.gate.broken && !m.shot) ? null : cand; }
       if (!tgt && !st.gate.broken) toGate = true;
       if (!tgt && st.gate.broken) tgt = near(m, V);
       m.tgt = tgt;
       const reach = m.shot ? 5.5 : 1.6 + (B3 && B3.size[m.key] || 1) * 0.5;
       let tx, tz;
-      if (toGate) { tx = m.gx != null ? m.gx : (m.gx = (R() - 0.5) * 3.2); tz = GATE.z + 1.4 + (B3 && B3.size[m.key] || 1) * 0.4; }
+      if (toGate) { tx = m.gx != null ? m.gx : (m.gx = Math.max(-2.4, Math.min(2.4, m.lx * 0.4 + (R() - 0.5) * 1.2))); tz = GATE.z + 1.4 + (B3 && B3.size[m.key] || 1) * 0.4; }
       else if (tgt) { const dx = m.x - tgt.x, dz = m.z - tgt.z, L = Math.hypot(dx, dz) || 1, want = tgt.up ? (m.fly && !m.shot ? 1.4 : 4.5) : reach * 0.85; tx = tgt.x + dx / L * want; tz = Math.max(tgt.up ? tgt.z + 1.8 : -20, tgt.z + dz / L * want); }
       else return;
       const ddx = tx - m.x, ddz = tz - m.z, dd = Math.hypot(ddx, ddz), sp = 3.0 * dt;
@@ -11579,6 +11590,7 @@ const INV25 = (() => {
       if (v.up) { if (v.cd <= 0 && dTo < 17) { v.cd = (v.role === "wall" ? 1.8 : 1.5) + R() * 0.5; hit(v, t, v.atk, true, null); } return; }
       if (v.role === "healer") { if (v.cd <= 0) { const w = V.filter(o => o.hp < o.max && Math.hypot(o.x - v.x, o.z - v.z) < 9).sort((p, q) => p.hp / p.max - q.hp / q.max)[0]; v.cd = 2.6 + R() * 0.6;
           if (w) { const h = Math.min(w.max - w.hp, Math.round(v.atk * 2.2)); w.hp += h; if (B3) B3.pops.push({ who: w.id, txt: "+" + h, at: B3.now, col: "#7cf09a" }); const A = B3 && B3.A[v.id]; if (A && typeof play25 === "function") play25(A, "atk", 0.42); } } return; }
+      if (v.role === "archer") { if (v.cd <= 0 && dTo < 14) { v.cd = 1.8 + R() * 0.5; hit(v, t, v.atk, true, "arrow"); } return; }
       if (v.role === "caster") { if (v.cd <= 0 && dTo < 10) { v.cd = 2.0 + R() * 0.5; hit(v, t, v.atk * 1.2, true, "magic"); } return; }
       const free = st.gate.broken, leash = free ? 40 : v.role === "front" ? 1.6 : 2.4;
       let tx = v.hx, tz = v.hz; if (free || Math.hypot(t.x - v.hx, t.z - v.hz) < leash + 1.6) { const L = dTo || 1; tx = t.x + (v.x - t.x) / L * 1.4; tz = t.z + (v.z - t.z) / L * 1.4; if (!free) { const ox = tx - v.hx, oz = tz - v.hz, oL = Math.hypot(ox, oz); if (oL > leash) { tx = v.hx + ox / oL * leash; tz = v.hz + oz / oL * leash; } } }
@@ -11616,19 +11628,20 @@ let invBox25 = null;
 function invClose25(){ try { B3 && B3.C && B3.C.destroy(); } catch (e) {} B3 = null; if (invBox25) invBox25.remove(); invBox25 = null; window.__INVADE25 = 0; N = window.__invN0 || null; }
 function invOpenForm25(){ if (typeof S === "undefined" || !S || !S.mons) return;
   const el = document.createElement("div"); el.className = "inv25form";
-  const ms = S.mons.slice().sort((a, b) => (b.lv || 1) - (a.lv || 1)); const pick = new Set(ms.map(m => m.id));
-  const draw = () => { el.innerHTML = `<div class="inv25card"><h3>⚔ 侵略（試作）：草原の村</h3><div class="inv25hint">連れていく魔物をえらぶ（何体でも）。門を壊して村人を倒せば勝ち。</div>
+  const ms = S.mons.slice().sort((a, b) => (b.lv || 1) - (a.lv || 1)); const pick = new Set(ms.map(m => m.id)); let vt = window.__invVT || "farm";
+  const draw = () => { el.innerHTML = `<div class="inv25card"><h3>⚔ 侵略（試作）：草原の村</h3><div class="inv25vt">${Object.entries(INVVT25).map(([k, T]) => `<button data-vt="${k}" class="${k === vt ? "on" : ""}"><b>${T.name}</b><small>${T.text}・守り${Math.min(44, Math.round(T.pop * T.fight))}人</small></button>`).join("")}</div><div class="inv25hint">連れていく魔物をえらぶ（何体でも）。門を壊して村人を倒せば勝ち。</div>
     <div class="inv25list">${ms.map(m => `<label class="${pick.has(m.id) ? "on" : ""}"><input type="checkbox" data-id="${m.id}" ${pick.has(m.id) ? "checked" : ""}>${typeof img === "function" ? simg23(m, m.evos || 0, "sp") : ""}<span>${m.nick || m.sp}<small> Lv${m.lv || 1}${INVFLY25[m.sp] ? "・飛" : ""}${Object.keys(m.sk || {}).some(k => INVRSK25[k]) ? "・遠" : ""}</small></span></label>`).join("")}</div>
     <div class="inv25btns"><button class="inv25go" ${pick.size ? "" : "disabled"}>出撃（${pick.size}体）</button><button class="inv25no">やめる</button></div></div>`;
     el.querySelectorAll("input").forEach(c => c.onchange = () => { const id = +c.dataset.id; if (c.checked) pick.add(id); else pick.delete(id); draw(); });
+    el.querySelectorAll("[data-vt]").forEach(b => b.onclick = () => { vt = window.__invVT = b.dataset.vt; draw(); });
     el.querySelector(".inv25no").onclick = () => el.remove();
-    el.querySelector(".inv25go").onclick = () => { el.remove(); invStart25(ms.filter(m => pick.has(m.id))); }; };
+    el.querySelector(".inv25go").onclick = () => { el.remove(); invStart25(ms.filter(m => pick.has(m.id)), vt); }; };
   draw(); document.body.appendChild(el); }
-function invStart25(list){
+function invStart25(list, vt){
   window.__invN0 = typeof N !== "undefined" ? N : null; window.__INVADE25 = "v_grass";
-  INV25.start(list); N = { t: 0, mons: [], heroes: [], hit25: [], lord: null, done: false, inv: 1 };
+  INV25.start(list, vt); window.__invVT = vt; N = { t: 0, mons: [], heroes: [], hit25: [], lord: null, done: false, inv: 1 };
   const wrap = document.createElement("div"); wrap.className = "inv25wrap"; invBox25 = wrap;
-  wrap.innerHTML = `<div id="b3d25"><canvas class="b3cv"></canvas><canvas class="b3ov"></canvas><div class="b3tabs"></div><div class="b3info"></div></div><div class="inv25bar"><button data-s="1" class="on">×1</button><button data-s="2">×2</button><button class="inv25x">退く</button></div>`;
+  wrap.innerHTML = `<div id="b3d25"><canvas class="b3cv"></canvas><canvas class="b3ov"></canvas><div class="b3tabs"></div><div class="b3info"></div></div><div class="inv25bar"><button data-s="1" class="on">×1</button><button data-s="2">×2</button><button class="inv25x">退く</button></div><div class="inv25drag">← 指で左右にずらせる →</div>`;
   document.body.appendChild(wrap);
   const box = wrap.querySelector("#b3d25"), cv = box.querySelector(".b3cv"), info = { set textContent(v){ const e = box.querySelector(".b3info"); if (e) e.textContent = v; } };
   B3 = { box, cv, ov: box.querySelector(".b3ov"), N, A: {}, fx: [], pops: [], tgt: {}, ang: {}, spots: {}, hi: 0, size: {}, room: 0, roomKey: null, pin: 0, follow: false, now: 0 };
@@ -11647,7 +11660,7 @@ function invStart25(list){
 function showEnd(win){ if (!invBox25) return; const st = INV25.st, dead = st.mons.filter(m => m.dead).length;
   const d = document.createElement("div"); d.className = "inv25end"; d.innerHTML = `<div class="inv25card"><h3>${win ? "🏴 村を落とした！" : "💀 退却…"}</h3><div class="inv25hint">倒れた魔物 ${dead}/${st.mons.length}体・門 ${st.gate.broken ? "破壊" : "残り" + Math.max(0, st.gate.hp)}</div>
     <div class="inv25btns"><button class="inv25go">もう一度</button><button class="inv25no">閉じる</button></div></div>`;
-  invBox25.appendChild(d); d.querySelector(".inv25no").onclick = invClose25; d.querySelector(".inv25go").onclick = () => { const L = st.mons.map(m => m.ref); invClose25(); invStart25(L); }; }
+  invBox25.appendChild(d); d.querySelector(".inv25no").onclick = invClose25; d.querySelector(".inv25go").onclick = () => { const L = st.mons.map(m => m.ref); invClose25(); invStart25(L, window.__invVT); }; }
 // 入口：URLに #invade があるとき、画面の左下に「侵略（試作）」ボタンを出す
 (function invEntry25(){ const put = () => { if (!/invade/.test(location.hash) || document.querySelector(".inv25btn")) return; const b = document.createElement("button"); b.className = "inv25btn"; b.textContent = "⚔ 侵略（試作）"; b.onclick = invOpenForm25; document.body.appendChild(b); };
   window.addEventListener("hashchange", put); setTimeout(put, 800); })();
