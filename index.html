@@ -7329,7 +7329,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.272（11/21 20:25）";
+const VER20 = "No.273（11/21 22:41）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -11424,7 +11424,7 @@ function targets25(i){ const L = lordIdx(S), sp = B3.spots[i] || (B3.spots[i] = 
       const tg = B3.tgt[id] && want[B3.tgt[id]] && !want[B3.tgt[id]].down ? want[B3.tgt[id]] : foes.length ? foes[(h.id) % foes.length][1] : null;
       if (h.flee) { x = tun25()[0]; z = tun25()[1]; leave = true; }
       else if (tg) { const me = B3.A[id], ang0 = me ? Math.atan2(me.z - tg.z, me.x - tg.x) : -Math.PI / 2, ang = (B3.ang[id] ?? (B3.ang[id] = ang0)) + 0;
-        const [sp0, ev0] = tg.key.split(":"), rr = HAI25.footR({ sp: sp0, evo: +ev0 }) + 0.75; x = tg.x + Math.cos(ang) * rr; z = tg.z + Math.sin(ang) * rr; }
+        const [sp0, ev0] = tg.key.split(":"), rr = HAI25.footR({ sp: sp0, evo: +ev0 }) + (/^(mage|priest|hunter)/.test(key) ? 4.5 : 0.75);   /* 魔法・弓・僧侶は離れて撃つ */ x = tg.x + Math.cos(ang) * rr; z = tg.z + Math.sin(ang) * rr; }
       else { x = (n - 1) * 1.8; z = -5 + (n % 2); } n++; }
     want[id] = { x, z, key, hp: Math.max(0, h.hp / h.max), down: h.st === "dead", name: h.name, hero: true, enter, leave }; });
   // 魔物も、自分をねらう勇者のほうへ出ていって迎え撃つ（その場から動かないと、だれが戦っているのか見えない）
@@ -11443,10 +11443,12 @@ function frame25(tm){
   // 新しい記録
   const H = N.hit25 || []; while (B3.hi < H.length) { const e = H[B3.hi++]; if (want[e.b] == null && e.b !== "lord") continue;
     const a = e.a && B3.A[e.a], b = B3.A[e.b];
-    if (e.a && e.a[0] === "h") { if (B3.tgt[e.a] !== e.b) delete B3.ang[e.a]; B3.tgt[e.a] = e.b; } if (e.a && e.a[0] === "m" && e.b) B3.tgt[e.b] = B3.tgt[e.b] || e.a;
+    if (e.a && e.a[0] === "h") { const cur = B3.tgt[e.a], me = B3.A[e.a], wc = cur && want[cur], wn = want[e.b], dd = w => me && w ? Math.hypot(w.x - me.x, w.z - me.z) : 0;
+      if (cur !== e.b && (!wc || wc.down || dd(wn) < dd(wc) + 2)) { delete B3.ang[e.a]; B3.tgt[e.a] = e.b; } }   /* 狙う相手はころころ変えない（部屋の端から端へ走り回って見えた） */ if (e.a && e.a[0] === "m" && e.b) B3.tgt[e.b] = B3.tgt[e.b] || e.a;
     const delay = a ? 0.18 : 0;
-    if (a) { const up = Math.max(0, -(a.sink || 0)); play25(a, "atk", 0.42); a.lunge = b && !up ? [b.x - a.x, b.z - a.z] : null; if (b) a.face = b.x >= a.x ? 1 : -1;
-      if (e.far || up) B3.fx.push({ k: "shot", from: [a.x, a.z, a.key, up], to: e.b, at: now, dur: up ? 0.4 : 0.25, kind: up ? (/^(mage|priest)/.test(a.key) ? "magic" : "arrow") : (e.shot || "arrow") }); }
+    if (a) { const up = Math.max(0, -(a.sink || 0)); play25(a, "atk", 0.42); const dAB = b ? Math.hypot(b.x - a.x, b.z - a.z) : 0, rng = /^(mage|priest|hunter)/.test(a.key || "");
+      a.lunge = b && !up && dAB < 4 ? [b.x - a.x, b.z - a.z] : null; if (b && Math.abs(b.x - a.x) > 0.4) a.face = b.x >= a.x ? 1 : -1;   /* 離れた相手に剣をふらない */
+      if (e.far || up || (b && dAB >= 4 && (rng || e.a[0] === "m"))) B3.fx.push({ k: "shot", from: [a.x, a.z, a.key, up], to: e.b, at: now, dur: up ? 0.4 : 0.25, kind: up || rng ? (/^(mage|priest)/.test(a.key) ? "magic" : "arrow") : (e.shot || "arrow") }); }
     B3.fx.push({ k: "hit", who: e.b, at: now + delay, d: e.d, kill: e.kill, big: e.big, hero: e.b[0] === "h" }); }
   // 主が叩かれた（記録の入口がないので、体力の差で見る）
   if (N.lord && B3.lordHp != null && N.lord.hp < B3.lordHp && want.lord) { const by = N.heroes.find(h => h.st === "in" && h.pos === B3.room && h.walk == null); const a = by && B3.A["h" + by.id];
@@ -11467,7 +11469,7 @@ function frame25(tm){
   Object.entries(want).forEach(([id, w]) => { const a = actor25(id); a.key = w.key; a.w = w;
     if (w.up != null && !a.dying) { const tu = -w.up; a.sink = a.sink == null ? tu : a.sink + (tu - a.sink) * Math.min(1, dt * 5); }
     if (!a.placed) { a.placed = true; if (!w.fixed && (w.enter || id[0] === "h")) { a.x = tun25()[0] + (Math.random() - 0.5); a.z = tun25()[1]; a.al = 0; } else { a.x = w.x; a.z = w.z; a.al = 0; } }
-    a.tx = w.x; a.tz = w.z; a.seen = now; });
+    a.tx = w.x; a.tz = w.enter && a.placed && a.al > 0 ? Math.max(w.z, Math.min(a.z, w.z + 3)) : w.z; a.seen = now; });
   const out = [];
   Object.values(B3.A).forEach(a => { if (!a.w) return;
     const vis = want[a.id] != null;
@@ -11480,7 +11482,8 @@ function frame25(tm){
     const busy = a.anim === "atk" && now - a.at < a.dur || a.anim === "hurt" && now - a.at < a.dur;
     if (!a.dying && dist > 0.15 && !busy) { const st2 = Math.min(dist, spd * dt); a.x += dx / dist * st2; a.z += dz / dist * st2; if (Math.abs(dx) > 0.2) a.face = dx > 0 ? 1 : -1; if (a.anim !== "walk") play25(a, "walk", 9); }
     else if (!busy && a.anim !== "idle" && !(dist > 0.15)) play25(a, "idle", 9);
-    if (!a.dying && !busy && dist < 0.15) { const fo = a.id[0] === "h" ? B3.A[B3.tgt[a.id]] : null; if (fo) a.face = fo.x >= a.x ? 1 : -1; else if (a.id[0] === "m" || a.id === "lord") { const h = Object.values(B3.A).find(o => o.id[0] === "h" && !o.dying); if (h) a.face = h.x >= a.x ? 1 : -1; } }
+    if (!a.dying && !busy && dist < 0.15) { const fo = a.id[0] === "h" ? B3.A[B3.tgt[a.id]] : null; const face = o => { if (o && Math.abs(o.x - a.x) > 0.6) a.face = o.x >= a.x ? 1 : -1; };   /* 向きは近い相手へ。少しの左右差では振り向かない */
+      if (fo) face(fo); else if (a.id[0] === "m" || a.id === "lord") { let h = null, bd = 1e9; Object.values(B3.A).forEach(o => { if (o.id[0] !== "h" || o.dying) return; const d = Math.hypot(o.x - a.x, o.z - a.z); if (d < bd) { bd = d; h = o; } }); face(h); } }
     // 見た目
     let ox = 0, oz = 0, oy = 0;
     if (a.anim === "atk" && a.lunge) { const p = Math.min(1, (now - a.at) / a.dur), k = Math.sin(p * Math.PI) * 0.45, L = Math.hypot(a.lunge[0], a.lunge[1]) || 1, reach = window.__INVADE25 ? Math.min(L * 0.3, 1.2) : Math.min(L * 0.45, 1.6); ox = a.lunge[0] / L * reach * k * 2; oz = a.lunge[1] / L * reach * k * 2; }
@@ -11563,7 +11566,7 @@ document.addEventListener("click", ev => { const b = ev.target.closest('[data-a=
 function b3Close25(){ const d0 = document.getElementById("dw"); if (d0) d0.classList.remove("b3on"); if (B3) { try { B3.C && B3.C.destroy(); } catch (e) {} B3.box && B3.box.remove(); B3 = null; } }
 function b3Mount25(){
   if (window.__INVADE25) return;
-  if (!bat3dOn25 || view !== "night" || !N || N.scout) { if (B3 && (!N || view !== "night")) b3Close25(); return; }
+  if (!bat3dOn25 || view !== "night" || !N) { if (B3 && (!N || view !== "night")) b3Close25(); return; }
   const dw = document.getElementById("dw"); if (!dw) return;
   if (B3 && B3.N !== N) b3Close25();
   if (!B3) { const box = document.createElement("div"); box.id = "b3d25"; box.innerHTML = `<canvas class="b3cv"></canvas><canvas class="b3ov"></canvas><div class="b3tabs"></div><div class="b3info"></div>`;
@@ -11583,7 +11586,7 @@ function b3Mount25(){
   dw.classList.add("b3on"); roomTabs25(); }
 { const _r = render; render = function (){ const v = _r.apply(this, arguments); try { b3Mount25(); } catch (e) { console.error(e); } return v; }; }
 // 3Dのときは1手をゆっくり（動きが見えるように）
-tick = (prev => function (){ if (!bat3dOn25 || !N || N.scout) return prev.apply(this, arguments);
+tick = (prev => function (){ if (!bat3dOn25 || !N) return prev.apply(this, arguments);
   clearTimeout(timer); if (!N) return;
   if (B3 && B3.C && !B3.C.bgReady()) { timer = setTimeout(() => tick(), 150); return; }
   // 勇者が部屋に入ってくる途中・敵に向かって歩いている途中は、戦いを少し待つ（入ってすぐ倒れて何も見えない、をなくす）
