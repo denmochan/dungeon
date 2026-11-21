@@ -4177,7 +4177,7 @@ function undo13(S) { if (!S.undo13) return false; S.undo13.forEach(([id, h, j]) 
 const TPL13 = {
   earn:  { name: "⛏ 稼ぐ部屋", facs: ["mine", "bed"], pol: "earn" },
   guard: { name: "🛡 守る部屋", facs: ["watch", "snipe"], pol: "guard" },
-  grow:  { name: "📚 育てる部屋", facs: ["train", "bed"], pol: "grow" },
+  grow:  { name: "📚 育てる部屋", facs: ["train"], pol: "grow" },
   free:  { name: "🔧 自分で決める", facs: [], pol: null },
 };
 const CORR_DIG13 = [0, 0, 60, 150];
@@ -7329,7 +7329,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.273（11/21 22:41）";
+const VER20 = "No.274（11/21 22:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
