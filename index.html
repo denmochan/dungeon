@@ -1163,6 +1163,10 @@ body:has(.modal) .inv25btn,body:has(.ntfull19) .inv25btn{display:none}
 .gh20 .hint{font-size:11.5px;color:#a8988a;margin-left:8px}
 .chip20.full{opacity:.45}
 .altab26{display:flex;gap:6px;justify-content:center;margin:4px 0 2px}.altab26 button{padding:6px 14px;border-radius:999px;border:1px solid #6a4a3a;background:#1c130e;color:#d8c4a8;font-size:14px}.altab26 button.on{border-color:#ffd06a;color:#ffd06a;box-shadow:0 0 8px #ffb04a66}
+.inv25ask{position:absolute;inset:0;z-index:30;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center}
+.inv25ask .inv25card{background:#241a14;border:1px solid #6a4a30;border-radius:14px;padding:14px 16px;color:#efe3cf;min-width:260px;text-align:center}
+.inv25ask .inv25btns{display:flex;gap:10px;margin-top:12px}.inv25ask .inv25btns button{flex:1;padding:12px 8px;border-radius:10px;font-weight:800;border:1px solid #6a4a30;background:#3a2a1e;color:#efe3cf}.inv25ask .inv25btns .go{background:#7a3a22;border-color:#c96a4a}
+.seal .snm26{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:2px;font-size:11px;font-style:normal;white-space:nowrap;color:#f0dcb8;text-shadow:0 1px 2px #000,0 0 4px #000;pointer-events:none}
 </style>
 </head>
 <body>
@@ -4505,7 +4509,7 @@ const SZ18 = { cap: [0, 4, 6, 8], slots: [0, 1, 1, 1] }, EXPCOST18 = [0, 0, 250,
 const szOf18 = r => (r && r.kind === "den" && r.sz) || 1;
 const facSlots18 = r => SZ18.slots[szOf18(r)];
 const expCost18 = (S, r) => { const s = szOf18(r); return s >= 3 ? null : Math.round(EXPCOST18[s + 1] * (1 + 0.5 * (((S.contract && S.contract.lv) || 1) - 1))); };
-capOfSlot7 = (S, i) => { const r = S.path[i]; return r && r.kind === "den" ? SZ18.cap[szOf18(r)] : capOfSlot(S, i); };
+capOfSlot7 = (S, i) => { const r = S.path[i]; return r && r.kind === "den" ? SZ18.cap[szOf18(r)] + ((S.meta && S.meta.book && S.meta.book.wide) || 0) : capOfSlot(S, i); };   // 広い巣穴の刻印で定員+
 function expand18(S, i) {
   const r = S.path[i]; if (!r || r.kind !== "den") return false; const c = expCost18(S, r); if (c == null || S.dp < c) return false;
   S.dp -= c; r.sz = szOf18(r) + 1; return true;   // 広げても地図は消えない（11/15）
@@ -7345,7 +7349,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.284（11/22 19:01）";
+const VER20 = "No.285（11/22 19:51）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -11904,7 +11908,9 @@ function invStart25(list, vt, node){ window.__invNode = node || null;
     if (typeof BACK25 !== "undefined" && BACK25[k.sp]) C.useStrip(k.key + "~b", "back/" + k.sp + "_" + Math.min(2, k.evo) + ".webp?v=" + BACK25[k.sp], (typeof BACKPPU25 !== "undefined" && BACKPPU25[k.sp + ":" + Math.min(2, k.evo)]) || (pp ? pp[0] : 36 * msc / scl), !bip); });
   wrap.querySelectorAll(".inv25bar [data-s]").forEach(b => b.onclick = () => { INV25.spd = +b.dataset.s; try { localStorage.setItem("inv25spd", b.dataset.s); } catch (e) {} wrap.querySelectorAll(".inv25bar [data-s]").forEach(x => x.classList.toggle("on", x === b)); });
   try { const sv = localStorage.getItem("inv25spd") || "2"; if (sv) { const b = wrap.querySelector(`.inv25bar [data-s="${sv}"]`); if (b) setTimeout(() => b.onclick(), 0); } } catch (e) {}
-  { const bx = wrap.querySelector(".inv25x"); let arm = 0; bx.onclick = () => { if (Date.now() - arm < 2500) { invClose25(); if (window.__invNode) invOpenMap25(); return; } arm = Date.now(); bx.textContent = "本当に退く？"; bx.classList.add("arm"); setTimeout(() => { if (bx.isConnected) { bx.textContent = "退く"; bx.classList.remove("arm"); } }, 2500); }; } }
+  { const bx = wrap.querySelector(".inv25x"); bx.onclick = () => { if (wrap.querySelector(".inv25ask")) return; const sp = INV25.st ? INV25.st.spd : 2; if (INV25.st) INV25.st.spd = 0;   /* 退く：戦いを止めて、大きな確認を出す（2回押す方式は押せていなかった） */
+    const d = document.createElement("div"); d.className = "inv25ask"; d.innerHTML = `<div class="inv25card"><h3>退きますか？</h3><div class="inv25hint">報酬はなし。連れてきた魔物はみんな迷宮に戻る</div><div class="inv25btns"><button class="go">🏳 退く</button><button class="no">⚔ 戦いを続ける</button></div></div>`;
+    d.querySelector(".go").onclick = () => { invClose25(); invOpenMap25(); }; d.querySelector(".no").onclick = () => { d.remove(); if (INV25.st) INV25.st.spd = sp; }; wrap.appendChild(d); }; } }
 // 負けたわけと次の一手（防衛の結果画面と同じ考え方）
 function invWhy25(st){ const al = v => !v.dead, V = st.vil, up = V.filter(v => v.up && al(v)).length, heal = V.filter(v => v.role === "healer" && al(v)).length, gen = V.filter(v => v.general && al(v)).length,
     ground = V.filter(v => !v.up && al(v)).length, ground0 = V.filter(v => !v.up).length, flyOrShot = st.mons.filter(m => m.fly || m.shot).length,
@@ -12734,29 +12740,30 @@ const maxPath26 = () => { try { return 10 + bookLv8(S, "rooms"); } catch (e) { r
 { const _r = render; render = function () { try { MAX_PATH = maxPath26(); } catch (e) {} return _r.apply(this, arguments); }; }
 { const _d = dig7; dig7 = function (S) { MAX_PATH = 10 + bookLv8(S, "rooms"); return _d.apply(this, arguments); }; }
 // 定員
-{ const _c = capOfSlot7; capOfSlot7 = function (S, i) { const v = _c(S, i), r = S.path[i]; return r && r.kind === "den" ? v + bookLv8(S, "wide") : v; }; }
-// はじめの部屋
-{ const _nr = newRun9; newRun9 = function (meta) {
-  const S = _nr(meta), L = bookLv8(S, "room0"); if (!L) return S;
-  const keep = S.dp, nl = window.__nolog19; window.__nolog19 = true; MAX_PATH = 10 + bookLv8(S, "rooms");
+/* 定員は logic18 の capOfSlot7 で足す（部屋ボードもそこを見ている） */
+// はじめの部屋：Lv1=育てる部屋、Lv2=＋稼ぐ部屋、Lv3=2つとも広さ2。from→to の差だけ足す
+function room0Apply26(S, from, to){ if (to <= from) return; const keep = S.dp, nl = window.__nolog19; window.__nolog19 = true; MAX_PATH = 10 + bookLv8(S, "rooms");
   try {
-    const add = (k, facs) => { S.dp = 99999; const i = digTpl13(S, k, 1); if (i === false || i == null) return; const r = S.path[i]; r.facs = facs.slice(); r.pol = TPL13[k].pol; r.start26 = 1; if (L >= 3) r.sz = 2; };
-    add("grow", ["train"]);
-    if (L >= 2) add("earn", ["mine", "bed"]);
-    if (L >= 3) { const r1 = S.path[1]; if (r1 && r1.kind === "den") r1.sz = 2; }
+    const add = (k, facs) => { S.dp = 99999; const i = digTpl13(S, k, 1); if (i === false || i == null) return; const r = S.path[i]; r.facs = facs.slice(); r.pol = TPL13[k].pol; r.start26 = 1; };
+    if (from < 1 && to >= 1) add("grow", ["train"]);
+    if (from < 2 && to >= 2) add("earn", ["mine", "bed"]);
+    if (to >= 3) S.path.forEach(r => { if (r.start26) r.sz = Math.max(2, r.sz || 1); });
   } catch (e) {}
-  S.dp = keep; window.__nolog19 = nl; S.digOpts = null; return S;
-}; }
+  S.dp = keep; window.__nolog19 = nl; S.digOpts = null; }
+{ const _nr = newRun9; newRun9 = function (meta) { const S = _nr(meta); room0Apply26(S, 0, bookLv8(S, "room0")); return S; }; }
+// まだ何も進めていない周回（1日目・襲撃0回・自分で掘っていない）なら、刻んだその場で足す
+const freshRun26 = S => S && S.day <= 1 && !S.raidsWon && ((S.contract && S.contract.lv) || 1) <= 1 && S.path.every(r => r.kind !== "den" || r.start26 || S.path.indexOf(r) === 0);
+{ const _b2 = buyBook8; buyBook8 = function (S, k) { const L0 = bookLv8(S, k), ok = _b2(S, k); if (ok && k === "room0" && freshRun26(S)) { room0Apply26(S, L0, bookLv8(S, k)); try { CV.sig = ""; } catch (e) {} } return ok; }; }
 // 祭壇：タブで「主の力／迷宮」
 let altarGrp26 = "l";
 altarScreen = function () {
   const M = metaOf8(S), ids = BOOK8_IDS.filter(k => (BOOK8[k].grp || "l") === altarGrp26);
   if (!ids.includes(altarSel)) altarSel = ids[0];
   const k0 = altarSel, B = BOOK8[k0], lv = bookLv8(S, k0), c = bookCost8(S, k0), mx = lv >= bookMax26(k0);
-  const seals = ids.map((k, i) => { const a = (-90 + i * 360 / ids.length) * Math.PI / 180, L = bookLv8(S, k); return `<button class="seal ${k === k0 ? "on" : ""} ${L ? "lit" : ""}" data-a="altarsel" data-v="${k}" style="left:${50 + Math.cos(a) * 41}%;top:${50 + Math.sin(a) * 41}%"><span>${BOOK8[k].icon}</span><b>${L}${BOOK8[k].max ? "/" + BOOK8[k].max : ""}</b></button>`; }).join("");
+  const seals = ids.map((k, i) => { const a = (-90 + i * 360 / ids.length) * Math.PI / 180, L = bookLv8(S, k); return `<button class="seal ${k === k0 ? "on" : ""} ${L ? "lit" : ""}" data-a="altarsel" data-v="${k}" style="left:${50 + Math.cos(a) * 41}%;top:${50 + Math.sin(a) * 41}%"><span>${BOOK8[k].icon}</span><b>${L}${BOOK8[k].max ? "/" + BOOK8[k].max : ""}</b><i class="snm26">${BOOK8[k].name.replace(/の刻印$/, "")}</i></button>`; }).join("");
   const tot = BOOK8_IDS.reduce((a, k) => a + bookLv8(S, k), 0);
   const tab = (g, t) => `<button class="${altarGrp26 === g ? "on" : ""}" data-a="altgrp26" data-v="${g}">${t}</button>`;
-  const now = k0 === "room0" ? (lv ? `いま：${B.text(lv)}` : "") : (lv ? B.text(lv) + " → " : "");
+  const now = k0 === "room0" ? (lv ? `いま：${B.text(lv)}` : "") : (lv || B.grp === "d" ? B.text(lv) + " → " : "");
   return `<div class="title altar">
     <div class="altop"><button data-a="altarback">← もどる</button><span class="gold">👻 魂 <b>${M.souls}</b></span></div>
     <div class="altab26">${tab("l", "👑 主の力")}${tab("d", "🏰 迷宮")}</div>
@@ -12764,9 +12771,12 @@ altarScreen = function () {
     <div class="aldesc"><div class="h2">${B.icon} ${B.name} <span class="gold">Lv${lv}${B.max ? "/" + B.max : ""}</span></div>
       ${mx ? `<div class="good">${k0 === "room0" ? B.text(lv) : B.text(lv)}（最大）</div>` : `<div>${k0 === "room0" ? (now ? now + "<br>" : "") + "次：" : now}<span class="good">${B.text(lv + 1)}</span></div>`}
       ${mx ? "" : `<button class="main" data-a="book" data-v="${k0}" ${M.souls >= c ? "" : "disabled"} style="width:100%;margin-top:8px">🔮 魂${c}で刻む</button>`}
-      <div class="hint">${altarGrp26 === "d" ? (k0 === "room0" ? "次に転生したときから効く" : "刻んだらすぐ効く。転生しても残る") : "刻印は転生しても残る。魂は主が倒れたとき（または転生したとき）、しのいだ襲撃の数だけもらえる"}</div></div></div>`;
+      <div class="hint">${altarGrp26 === "d" ? (k0 === "room0" ? (freshRun26(S) ? "いまの周回はまだ1日目なので、刻むとすぐ部屋が増える" : "次の周回から効く（1日目のうちに刻めば、その周回にも効く）") : "刻んだらすぐ効く。転生しても残る") : "刻印は転生しても残る。魂は主が倒れたとき（または転生したとき）、しのいだ襲撃の数だけもらえる"}</div></div></div>`;
 };
 document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="altgrp26"]'); if (!b) return; ev.stopImmediatePropagation(); altarGrp26 = b.dataset.v === "d" ? "d" : "l"; altarSel = null; render(); }, true);
+// 転生・契約の確認を外側タップで閉じても、行き止まりにしない：「次の日へ」で確認を出し直す
+document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="nextday"]'); if (!b || typeof S === "undefined" || !S) return;
+  if (S.ended || S.contractDone) { ev.stopImmediatePropagation(); modal = S.ended ? rebirthModal : contractModal; render(); } }, true);
 
 </script>
 </body>
