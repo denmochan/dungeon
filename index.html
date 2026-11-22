@@ -6822,6 +6822,8 @@ shopModal = function () {
 };
 // 保管庫：転生のとき1体えらぶ／新しい周回で連れていく子をえらぶ
 let VSEL18 = [];
+// 最初から新しい子順に枠いっぱいまで選んでおく（外したい子だけタップ）
+function vaultAutoPick18() { const V = vaultOf18(S), cap = vaultCap18(S), r = []; for (let n = V.length - 1; n >= 0 && r.length < cap; n--) r.push(n); return r; }
 function vaultSaveModal18() {
   const ms = S.mons.slice().sort((a, b) => (typeof rarI19 === "function" ? rarI19(b) - rarI19(a) : 0) || (b.shiny19 ? 1 : 0) - (a.shiny19 ? 1 : 0) || power13(b) - power13(a)), V = vaultOf18(S);   // 全員出す（レア度→色違い→強さの順）
   return `<h2>🏺 1体だけ保管庫へ</h2><div class="hint">残した子は<b>種族とスキル</b>だけ持って、進化前・Lv1にもどる。次の周回から連れていける（保管庫 ${V.length}/${VAULT_MAX18}${V.length >= VAULT_MAX18 ? "・いっぱいなので一番古い子と入れかわる" : ""}）</div>`
@@ -6835,7 +6837,7 @@ function vaultBringModal18() {
     + `<div class="pk"><button class="main" data-a="vgo">${VSEL18.length ? VSEL18.length + "体を連れて始める" : "連れていかずに始める"}</button></div>`;
 }
 { const _eg = enterGame; enterGame = function () { _eg();
-  if (S && !S.vaultAsked18 && (S.day || 1) <= 1 && !(S.raidNo) && !(S.contract && S.contract.lv > 1)) { S.vaultAsked18 = 1; if (vaultOf18(S).length && !modal) { VSEL18 = []; modal = vaultBringModal18; render(); } } }; }
+  if (S && !S.vaultAsked18 && (S.day || 1) <= 1 && !(S.raidNo) && !(S.contract && S.contract.lv > 1)) { S.vaultAsked18 = 1; if (vaultOf18(S).length && !modal) { VSEL18 = vaultAutoPick18(); modal = vaultBringModal18; render(); } } }; }
 // 配合：生まれる子の「生まれつき」のスキルは必ずつく。選ぶ枠を使わないので、選ぶ一覧からは外す
 function mixChildInn18(A, B) { try { const p = mixPreview7(S, A, B); return p && p.sp ? { sp: p.sp, k: INNATE10[p.sp], known: !p.special || S.dex.includes(p.sp) } : null; } catch (e) { return null; } }
 function mixPool18(A, B) { const c = mixChildInn18(A, B), pool = [...new Set([...Object.keys(skOf10(A)), ...Object.keys(skOf10(B))])]; return c && c.k ? pool.filter(k => k !== c.k) : pool; }
@@ -7713,7 +7715,7 @@ document.addEventListener("click", ev => { const b = ev.target.closest("[data-a]
   if (a === "vopen21") { ev.stopImmediatePropagation(); vdel21 = null; modal = vaultManage21; render(); }
   else if (a === "vdelask21") { ev.stopImmediatePropagation(); vdel21 = +b.dataset.v; render(); }
   else if (a === "vdelno21") { ev.stopImmediatePropagation(); vdel21 = null; render(); }
-  else if (a === "vdel21") { ev.stopImmediatePropagation(); const V = vaultOf18(S), n = +b.dataset.v, v = V[n]; if (v) { try { backup18("保管庫から手放す前"); } catch (e) {} V.splice(n, 1); VSEL18 = []; toast(`${v.nick}を手放した`); save(); } vdel21 = null; render(); }
+  else if (a === "vdel21") { ev.stopImmediatePropagation(); const V = vaultOf18(S), n = +b.dataset.v, v = V[n]; if (v) { try { backup18("保管庫から手放す前"); } catch (e) {} V.splice(n, 1); VSEL18 = vaultAutoPick18(); toast(`${v.nick}を手放した`); save(); } vdel21 = null; render(); }
 }, true);
 // タイトル画面と「連れていく」画面から開ける
 { const _r = render; render = function () { _r.apply(this, arguments); try {
