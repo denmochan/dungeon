@@ -1162,6 +1162,7 @@ body:has(.modal) .inv25btn,body:has(.ntfull19) .inv25btn{display:none}
 .bar20 button.main small{display:block;font-size:10.5px;opacity:.85}.bar20 button.main[disabled]{opacity:.55}
 .gh20 .hint{font-size:11.5px;color:#a8988a;margin-left:8px}
 .chip20.full{opacity:.45}
+.altab26{display:flex;gap:6px;justify-content:center;margin:4px 0 2px}.altab26 button{padding:6px 14px;border-radius:999px;border:1px solid #6a4a3a;background:#1c130e;color:#d8c4a8;font-size:14px}.altab26 button.on{border-color:#ffd06a;color:#ffd06a;box-shadow:0 0 8px #ffb04a66}
 </style>
 </head>
 <body>
@@ -2270,7 +2271,7 @@ const TRAP24IMG = {"spike": {"src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEU
 // 道は部屋の並び。並べ方（盾の後ろに弓、罠部屋のとなりに罠師…）で強さが変わる。
 
 const SAVE5 = "chika-proto5-v1";
-const COLS = 4, MAX_PATH = 10, GOAL5 = 15, DAILY5 = 80, MAX_T5 = 600;
+let COLS = 4, MAX_PATH = 10, GOAL5 = 15, DAILY5 = 80, MAX_T5 = 600;
 const DEN_CAP = 3, VAULT_CAP = 1, LORD_CAP = 2, TRAP_CAP = 2;
 const EVO_LV5 = [5, 10];
 const QUIRK = {
@@ -5839,7 +5840,7 @@ function bookModal(){
   const M = metaOf8(S);
   return `<h2>📕 魔王の書</h2><div class="box">👻 魂 <b class="gold">${M.souls}</b>　転生${M.runs}回・最高${Math.max(M.bestNight, S.best)}夜</div><div class="hint">転生しても残る強化。魂は主が倒れたとき・契約を達成したときに、守りきった夜の数でもらえる（契約の途中で自分から転生すると1/4）</div>`
     + BOOK8_IDS.map(k => { const B = BOOK8[k], lv = bookLv8(S, k), c = bookCost8(S, k);
-      return `<div class="row" style="cursor:default"><span style="font-size:24px">${B.icon}</span><div class="tx"><b>${B.name}</b> Lv${lv}<small>${lv ? B.text(lv) + " → " : ""}<span class="good">${B.text(lv + 1)}</span>${(() => { if (!S.mons.length || (k !== "atk" && k !== "hp")) return ""; const f = k === "atk" ? monAtk5 : monHp5, v = S.mons.reduce((a, m) => a + f(m), 0), v2 = Math.round(v * (1 + 0.08 * (lv + 1)) / (1 + 0.08 * lv)); return `<br>いまの魔物${S.mons.length}体の${k === "atk" ? "攻撃" : "体力"}の合計 ${v} → <b class="good">${v2}</b>`; })()}</small></div><div class="fb"><button class="main" data-a="book" data-v="${k}" ${M.souls < c ? "disabled" : ""}>👻${c}</button></div></div>`; }).join("")
+      return `<div class="row" style="cursor:default"><span style="font-size:24px">${B.icon}</span><div class="tx"><b>${B.name}</b> Lv${lv}<small>${typeof bookMax26 === "function" && lv >= bookMax26(k) ? `${B.text(lv)}（最大）` : `${lv ? B.text(lv) + " → " : ""}<span class="good">${B.text(lv + 1)}</span>`}${(() => { if (!S.mons.length || (k !== "atk" && k !== "hp")) return ""; const f = k === "atk" ? monAtk5 : monHp5, v = S.mons.reduce((a, m) => a + f(m), 0), v2 = Math.round(v * (1 + 0.08 * (lv + 1)) / (1 + 0.08 * lv)); return `<br>いまの魔物${S.mons.length}体の${k === "atk" ? "攻撃" : "体力"}の合計 ${v} → <b class="good">${v2}</b>`; })()}</small></div><div class="fb">${typeof bookMax26 === "function" && lv >= bookMax26(k) ? "" : `<button class="main" data-a="book" data-v="${k}" ${M.souls < c ? "disabled" : ""}>👻${c}</button>`}</div></div>`; }).join("")
     + `<button data-a="lord">← 主へ</button>`;
 }
 function rebirthModal(){
@@ -7344,7 +7345,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.279（11/22 13:23）";
+const VER20 = "No.280（11/22 17:22）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -12638,6 +12639,53 @@ if (typeof invOpenMap25 === "function") { const _om = invOpenMap25; invOpenMap25
     document.querySelectorAll('[data-a="cfl"]').forEach(b => { const v = +b.dataset.v; if (v >= 0) b.classList.toggle("on", v === f); }); } catch (e) {} };
   window.addEventListener("scroll", () => { if (!tq) tq = requestAnimationFrame(upd); }, { passive: true, capture: true });
   document.addEventListener("scroll", () => { if (!tq) tq = requestAnimationFrame(upd); }, { passive: true, capture: true }); }
+
+// ================= soul26：魂で迷宮を強くする（転生しても残る） =================
+// 祭壇に「迷宮」の刻印を3つ足す。主の力（いままでの7つ）と迷宮の3つは祭壇の上のタブで切りかえ
+BOOK8.room0 = { name: "はじめの部屋", icon: "🏚", base: 6, max: 3, grp: "d", text: lv => ["次の周回から部屋つきで始まる", "はじめから 📚育てる部屋（訓練台）", "はじめから 育てる部屋＋⛏稼ぐ部屋（採掘場・寝床）", "はじめの部屋が2つとも 広さ2"][lv] };
+BOOK8.rooms = { name: "迷宮の奥行き", icon: "🗺", base: 10, max: 3, grp: "d", text: lv => `掘れる部屋の上限 ${10 + lv}` };
+BOOK8.wide  = { name: "広い巣穴",   icon: "🏠", base: 8, max: 3, grp: "d", text: lv => `どの部屋も 定員+${lv}` };
+BOOK8_IDS.push("room0", "rooms", "wide");
+const bookMax26 = k => BOOK8[k].max || 99;
+{ const _b = buyBook8; buyBook8 = function (S, k) { if (bookLv8(S, k) >= bookMax26(k)) return false; return _b(S, k); }; }
+// 部屋の上限：いまのSで決まる
+const maxPath26 = () => { try { return 10 + bookLv8(S, "rooms"); } catch (e) { return 10; } };
+{ const _r = render; render = function () { try { MAX_PATH = maxPath26(); } catch (e) {} return _r.apply(this, arguments); }; }
+{ const _d = dig7; dig7 = function (S) { MAX_PATH = 10 + bookLv8(S, "rooms"); return _d.apply(this, arguments); }; }
+// 定員
+{ const _c = capOfSlot7; capOfSlot7 = function (S, i) { const v = _c(S, i), r = S.path[i]; return r && r.kind === "den" ? v + bookLv8(S, "wide") : v; }; }
+// はじめの部屋
+{ const _nr = newRun9; newRun9 = function (meta) {
+  const S = _nr(meta), L = bookLv8(S, "room0"); if (!L) return S;
+  const keep = S.dp, nl = window.__nolog19; window.__nolog19 = true; MAX_PATH = 10 + bookLv8(S, "rooms");
+  try {
+    const add = (k, facs) => { S.dp = 99999; const i = digTpl13(S, k, 1); if (i === false || i == null) return; const r = S.path[i]; r.facs = facs.slice(); r.pol = TPL13[k].pol; r.start26 = 1; if (L >= 3) r.sz = 2; };
+    add("grow", ["train"]);
+    if (L >= 2) add("earn", ["mine", "bed"]);
+    if (L >= 3) { const r1 = S.path[1]; if (r1 && r1.kind === "den") r1.sz = 2; }
+  } catch (e) {}
+  S.dp = keep; window.__nolog19 = nl; S.digOpts = null; return S;
+}; }
+// 祭壇：タブで「主の力／迷宮」
+let altarGrp26 = "l";
+altarScreen = function () {
+  const M = metaOf8(S), ids = BOOK8_IDS.filter(k => (BOOK8[k].grp || "l") === altarGrp26);
+  if (!ids.includes(altarSel)) altarSel = ids[0];
+  const k0 = altarSel, B = BOOK8[k0], lv = bookLv8(S, k0), c = bookCost8(S, k0), mx = lv >= bookMax26(k0);
+  const seals = ids.map((k, i) => { const a = (-90 + i * 360 / ids.length) * Math.PI / 180, L = bookLv8(S, k); return `<button class="seal ${k === k0 ? "on" : ""} ${L ? "lit" : ""}" data-a="altarsel" data-v="${k}" style="left:${50 + Math.cos(a) * 41}%;top:${50 + Math.sin(a) * 41}%"><span>${BOOK8[k].icon}</span><b>${L}${BOOK8[k].max ? "/" + BOOK8[k].max : ""}</b></button>`; }).join("");
+  const tot = BOOK8_IDS.reduce((a, k) => a + bookLv8(S, k), 0);
+  const tab = (g, t) => `<button class="${altarGrp26 === g ? "on" : ""}" data-a="altgrp26" data-v="${g}">${t}</button>`;
+  const now = k0 === "room0" ? (lv ? `いま：${B.text(lv)}` : "") : (lv ? B.text(lv) + " → " : "");
+  return `<div class="title altar">
+    <div class="altop"><button data-a="altarback">← もどる</button><span class="gold">👻 魂 <b>${M.souls}</b></span></div>
+    <div class="altab26">${tab("l", "👑 主の力")}${tab("d", "🏰 迷宮")}</div>
+    <div class="tlord big">${circleSvg("spin glow")}<div class="tl-sp">${img("lord", Math.min(2, Math.floor(tot / 4)), "sp", "width:130px;height:130px")}</div>${seals}</div>
+    <div class="aldesc"><div class="h2">${B.icon} ${B.name} <span class="gold">Lv${lv}${B.max ? "/" + B.max : ""}</span></div>
+      ${mx ? `<div class="good">${k0 === "room0" ? B.text(lv) : B.text(lv)}（最大）</div>` : `<div>${k0 === "room0" ? (now ? now + "<br>" : "") + "次：" : now}<span class="good">${B.text(lv + 1)}</span></div>`}
+      ${mx ? "" : `<button class="main" data-a="book" data-v="${k0}" ${M.souls >= c ? "" : "disabled"} style="width:100%;margin-top:8px">🔮 魂${c}で刻む</button>`}
+      <div class="hint">${altarGrp26 === "d" ? (k0 === "room0" ? "次に転生したときから効く" : "刻んだらすぐ効く。転生しても残る") : "刻印は転生しても残る。魂は主が倒れたとき（または転生したとき）、しのいだ襲撃の数だけもらえる"}</div></div></div>`;
+};
+document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="altgrp26"]'); if (!b) return; ev.stopImmediatePropagation(); altarGrp26 = b.dataset.v === "d" ? "d" : "l"; altarSel = null; render(); }, true);
 
 </script>
 </body>
