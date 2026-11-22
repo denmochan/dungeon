@@ -1167,9 +1167,9 @@ body:has(.modal) .inv25btn,body:has(.ntfull19) .inv25btn{display:none}
 .inv25ask .inv25card{background:#241a14;border:1px solid #6a4a30;border-radius:14px;padding:14px 16px;color:#efe3cf;min-width:260px;text-align:center}
 .inv25ask .inv25btns{display:flex;gap:10px;margin-top:12px}.inv25ask .inv25btns button{flex:1;padding:12px 8px;border-radius:10px;font-weight:800;border:1px solid #6a4a30;background:#3a2a1e;color:#efe3cf}.inv25ask .inv25btns .go{background:#7a3a22;border-color:#c96a4a}
 .seal .snm26{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:2px;font-size:11px;font-style:normal;white-space:nowrap;color:#f0dcb8;text-shadow:0 1px 2px #000,0 0 4px #000;pointer-events:none}
-#off26{position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:9998;background:rgba(20,14,10,.88);border:1px solid #6a4a30;color:#efe3cf;font-size:12px;padding:5px 10px;border-radius:999px;pointer-events:none;overflow:hidden}
+#off26{position:fixed;left:50%;transform:translateX(-50%);top:calc(6px + env(safe-area-inset-top,0px));z-index:9998;background:rgba(20,14,10,.88);border:1px solid #6a4a30;color:#efe3cf;font-size:12px;padding:5px 10px;border-radius:999px;pointer-events:none;overflow:hidden}
 #off26 i{position:absolute;left:0;bottom:0;height:2px;background:#ffd06a}
-#off26.ok{border-color:#5a9a5a;color:#bfe8bf}#off26.ok.small{opacity:.55;font-size:11px}#off26.ng{border-color:#a05a3a;color:#ffc9a8}
+#off26.ok{border-color:#5a9a5a;color:#bfe8bf}#off26.ok.small{display:none}#off26.ng{border-color:#a05a3a;color:#ffc9a8}
 </style>
 </head>
 <body>
@@ -7354,7 +7354,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.289（11/23 08:39）";
+const VER20 = "No.290（11/23 08:40）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
