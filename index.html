@@ -7236,7 +7236,11 @@ autoAll19 = function (S) {
   const STEP = {
     teach: () => {
   of("grow").forEach(i => { if (!slotsOf18(S, i).teach || work[i] <= 0 || S.mons.some(m => m.home === i && m.job === "teach")) return;
-    const t = pool.slice().sort((a, b) => (isApt18(b, "teach") - isApt18(a, "teach")) || b.lv - a.lv)[0];
+    // 先生は「実際の伸び（×いくつ）」がいちばん高い子。ただし全体で上位3体の強い子は、戦う・稼ぐ方が大事なので少し割り引く
+    const th0 = thrLv19(S), lr = pool.filter(m => m.lv <= th0).concat(S.mons.filter(m => m.home === i && m.job === "train")), lo = lr.length ? lr.reduce((a, m) => a.lv < m.lv ? a : m) : { lv: 1 };
+    const top3 = new Set(S.mons.slice().sort((a, b) => power13(b) - power13(a)).slice(0, 3).map(m => m.id));
+    const score = c => teachMul18(c, lo) - (top3.has(c.id) ? 0.3 : 0);
+    const t = pool.filter(c => !lr.includes(c) || pool.length > 1).sort((a, b) => score(b) - score(a))[0];
     // 鍛える子がいないなら先生はいらない
     const th = thrLv19(S), learners = S.mons.some(m => m !== t && m.home === i && (m.job === "train")) || pool.some(m => m !== t && m.lv <= th);
     if (t && learners) put(t, i, "teach"); });
@@ -7340,7 +7344,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.278（11/22 13:16）";
+const VER20 = "No.279（11/22 13:23）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
