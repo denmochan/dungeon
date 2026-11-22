@@ -7345,7 +7345,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.282（11/22 17:30）";
+const VER20 = "No.283（11/22 17:37）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -11553,6 +11553,7 @@ function overlay25(now){ const ov = B3.ov, r = ov.getBoundingClientRect(), dpr =
   const g = ov.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, r.width, r.height);
   g.textAlign = "center"; g.lineJoin = "round";
   const head = a => { const A = a.w; const sz = B3.size[a.key] || 1; return B3.C.toScreen([a.x, (a.id === "lord" ? 2.6 : 1.9) * sz + 0.2 + Math.max(0, -(a.sink || 0)), a.z]); };
+  if (window.__INVADE25 && typeof INV25 !== "undefined" && INV25.gate) INV25.gate(g, now);
   // 侵略：味方（青）と敵（赤）の足元の輪
   if (window.__INVADE25) Object.values(B3.A).forEach(a => { if (!a.w || !a.w.team || a.dying || a.al < 0.3 || a.w.nobar) return;   /* 輪は隊の1人目だけ */ const sz = B3.size[a.key] || 1, up = Math.max(0, -(a.sink || 0)), c = B3.C.toScreen([a.x, up + 0.02, a.z]), e = B3.C.toScreen([a.x + 0.5 * sz, up + 0.02, a.z]), rx = Math.max(6, Math.abs(e[0] - c[0]));
     g.strokeStyle = a.w.team === 1 ? "rgba(90,170,255,.9)" : "rgba(255,80,60,.85)"; g.fillStyle = a.w.team === 1 ? "rgba(90,170,255,.16)" : "rgba(255,80,60,.14)"; g.lineWidth = 2; g.beginPath(); g.ellipse(c[0], c[1], rx, rx * 0.42, 0, 0, 7); g.fill(); g.stroke(); });
@@ -11814,11 +11815,37 @@ const INV25 = (() => { let spd0 = 2;
       const bw = W2 - 16; g.fillStyle = "rgba(0,0,0,.7)"; g.fillRect(x0 + 8, y0 + 21, bw, 7); g.fillStyle = st.gate.broken ? "#777" : "#d9a441"; g.fillRect(x0 + 8, y0 + 22, bw * k, 5); }
     if (st.banner && st.t - st.banner.at < 2.4) { const k = (st.t - st.banner.at) / 2.4, y = 78; g.globalAlpha = Math.min(1, 3 * (1 - k)); g.font = "900 26px system-ui,sans-serif"; g.textAlign = "center"; g.lineWidth = 6; g.strokeStyle = "rgba(20,8,6,.9)"; g.strokeText(st.banner.txt, r.width / 2, y); g.fillStyle = "#ffe9a0"; g.fillText(st.banner.txt, r.width / 2, y); g.globalAlpha = 1; }
     // 門の場所の目印（地面の高さに小さく。門がどこか絵でわかるように）
-    if (!st.gate.broken) { const q = B3.C.toScreen([GATE.x, 0.4, GATE.z]); g.font = "800 11px system-ui,sans-serif"; g.textAlign = "center"; g.lineWidth = 3; g.strokeStyle = "rgba(0,0,0,.85)"; g.strokeText("▼ 門", q[0], q[1] - 34); g.fillStyle = "#f3e6c0"; g.fillText("▼ 門", q[0], q[1] - 34); }
+    if (false) { const q = B3.C.toScreen([GATE.x, 0.4, GATE.z]); g.font = "800 11px system-ui,sans-serif"; g.textAlign = "center"; g.lineWidth = 3; g.strokeStyle = "rgba(0,0,0,.85)"; g.strokeText("▼ 門", q[0], q[1] - 34); g.fillStyle = "#f3e6c0"; g.fillText("▼ 門", q[0], q[1] - 34); }
     st.pops = st.pops.filter(p => st.t - p.at < (p.big ? 2.2 : 1.0));
     st.pops.forEach(p => { const q = B3.C.toScreen([GATE.x, GATE.top - 0.6, p.z]), kk = (st.t - p.at) / (p.big ? 2.2 : 1.0); g.globalAlpha = Math.min(1, 2.5 * (1 - kk));
       g.font = `900 ${p.big ? 22 : 13}px system-ui,sans-serif`; g.lineWidth = 4; g.strokeStyle = "rgba(20,8,6,.9)"; const y = q[1] - 10 - kk * (p.big ? 30 : 22); g.strokeText(p.txt, q[0], y); g.fillStyle = p.col; g.fillText(p.txt, q[0], y); g.globalAlpha = 1; }); }
-  return { start, want, overlay, get st(){ return st; }, set spd(v){ spd0 = v; if (st) st.spd = v; } };
+  // 門：木の両開きの扉を、門の場所に描く（焼いた背景では塔と壁のかげで見えなかった）。叩かれると揺れ、ひびが入り、破れると木っ端が飛ぶ
+  function gate(g, now){ if (!st || !B3) return; const H = 2.9, k = Math.max(0, st.gate.hp) / st.gate.max, last = st.pops.length ? st.pops[st.pops.length - 1].at : -9, wob = st.t - last < 0.18 ? Math.sin((st.t - last) * 70) * 2.5 : 0;
+    const b = B3.C.toScreen([GATE.x - 0.3, 0, GATE.z]), t = B3.C.toScreen([GATE.x - 0.3, H, GATE.z]), h = b[1] - t[1], w = h * 0.9, x0 = b[0] - w / 2 + wob, y0 = t[1], u = h / 60;   /* 門は正面向きの絵で（壁の向きのままだと横から見て細い線になった） */
+    const door = (x, y, ww, hh, top) => { g.beginPath(); g.moveTo(x, y + hh); g.lineTo(x, y + top); g.quadraticCurveTo(x + ww / 2, y - top * 0.2, x + ww, y + top); g.lineTo(x + ww, y + hh); g.closePath(); };
+    g.save(); g.lineJoin = "round";
+    // 石のアーチ
+    g.fillStyle = "#4a4540"; door(x0 - 6 * u, y0 - 5 * u, w + 12 * u, h + 5 * u, 14 * u); g.fill(); g.strokeStyle = "#1c1a18"; g.lineWidth = 2; g.stroke();
+    g.strokeStyle = "rgba(20,18,16,.6)"; g.lineWidth = 1; for (let n = 0; n < 5; n++) { const yy = y0 + 10 * u + n * h / 5; g.beginPath(); g.moveTo(x0 - 6 * u, yy); g.lineTo(x0 - 1 * u, yy); g.moveTo(x0 + w + u, yy); g.lineTo(x0 + w + 6 * u, yy); g.stroke(); }
+    if (!st.gate.broken) {
+      const c = [Math.round(110 - 40 * (1 - k)), Math.round(72 - 28 * (1 - k)), Math.round(40 - 16 * (1 - k))];
+      g.fillStyle = `rgb(${c})`; door(x0, y0, w, h, 12 * u); g.fill(); g.strokeStyle = "#2a1a0e"; g.lineWidth = 2; g.stroke();
+      g.strokeStyle = "rgba(40,22,10,.8)"; g.lineWidth = 1.2; for (let n = 1; n < 6; n++) { const x = x0 + w * n / 6; g.beginPath(); g.moveTo(x, y0 + (n === 3 ? 0 : 6 * u)); g.lineTo(x, y0 + h); g.stroke(); }
+      g.strokeStyle = "#1a1208"; g.lineWidth = 2; g.beginPath(); g.moveTo(x0 + w / 2, y0 + 2 * u); g.lineTo(x0 + w / 2, y0 + h); g.stroke();
+      [0.32, 0.78].forEach(q => { const yy = y0 + h * q; g.fillStyle = "#34343a"; g.fillRect(x0 + 1, yy, w - 2, 5 * u); g.fillStyle = "#a0a0a8"; for (let n = 0; n < 6; n++) { g.beginPath(); g.arc(x0 + w * (n + 0.5) / 6, yy + 2.5 * u, 1.2 * u, 0, 7); g.fill(); } });
+      g.fillStyle = "#c9a24a"; [-1, 1].forEach(sd => { g.beginPath(); g.arc(x0 + w / 2 + sd * 4 * u, y0 + h * 0.55, 2 * u, 0, 7); g.fill(); });
+      if (k < 0.7) { g.strokeStyle = "rgba(15,8,3,.95)"; g.lineWidth = 1.6; const cr = [[0.2, 0.15, 0.32, 0.4, 0.22, 0.6], [0.7, 0.2, 0.62, 0.45, 0.8, 0.7], [0.45, 0.62, 0.36, 0.85, 0.48, 0.98], [0.86, 0.45, 0.72, 0.6, 0.9, 0.9]].slice(0, k < 0.35 ? 4 : 2);
+        cr.forEach(q => { g.beginPath(); g.moveTo(x0 + w * q[0], y0 + h * q[1]); g.lineTo(x0 + w * q[2], y0 + h * q[3]); g.lineTo(x0 + w * q[4], y0 + h * q[5]); g.stroke(); }); }
+      if (k < 0.35) { g.fillStyle = "rgba(10,6,3,.85)"; g.beginPath(); g.moveTo(x0 + w * 0.42, y0 + h * 0.5); g.lineTo(x0 + w * 0.55, y0 + h * 0.44); g.lineTo(x0 + w * 0.6, y0 + h * 0.6); g.lineTo(x0 + w * 0.47, y0 + h * 0.66); g.closePath(); g.fill(); }
+    } else {
+      g.fillStyle = "#120c08"; door(x0, y0, w, h, 12 * u); g.fill();
+      g.fillStyle = "#5a3a22"; g.strokeStyle = "#1e120a"; g.lineWidth = 2;
+      [[0, 0.3, 0.55], [0.72, 1, 0.4]].forEach(([a, z, top]) => { g.beginPath(); g.moveTo(x0 + w * a, y0 + h); g.lineTo(x0 + w * z, y0 + h); g.lineTo(x0 + w * z, y0 + h * (1 - top)); g.lineTo(x0 + w * (a + z) / 2, y0 + h * (1 - top * 0.6)); g.lineTo(x0 + w * a, y0 + h * (1 - top * 0.85)); g.closePath(); g.fill(); g.stroke(); });
+      const tt = st.t - (st.brokeAt || 0); if (tt < 1.6) { const cx = x0 + w / 2, cy = y0 + h * 0.5; if (!st.splint) { st.splint = Array.from({ length: 24 }, () => ({ vx: -(30 + Math.random() * 170), vy: -(50 + Math.random() * 150), r: Math.random() * 6, w: (3 + Math.random() * 8) * u })); if (B3) B3.shake = Math.max(B3.shake || 0, 0.6); }
+        st.splint.forEach(q => { g.save(); g.globalAlpha = Math.max(0, 1 - tt / 1.6); g.translate(cx + q.vx * tt, cy + q.vy * tt + 260 * tt * tt); g.rotate(q.r + tt * 9); g.fillStyle = "#7a5030"; g.fillRect(-q.w / 2, -1.5, q.w, 3); g.restore(); });
+        g.globalAlpha = Math.max(0, 0.6 * (1 - tt / 1.2)); g.fillStyle = "#b8a488"; for (let n = 0; n < 6; n++) { g.beginPath(); g.arc(x0 + w * n / 5 - tt * 30, y0 + h - tt * 10, (8 + tt * 30) * u, 0, 7); g.fill(); } g.globalAlpha = 1; } }
+    g.restore(); }
+  return { start, want, overlay, gate, get st(){ return st; }, set spd(v){ spd0 = v; if (st) st.spd = v; } };
 })();
 
 // ---- 入口・編成・戦闘の画面 ----
