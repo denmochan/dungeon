@@ -4942,7 +4942,9 @@ function misAdd19(S, k, v = 1) {
 { const _gx = gainXp9; gainXp9 = function (S, m, xp, rep) { const lv = m.lv; _gx(S, m, xp, rep); if (m.lv > lv) misAdd19(S, "lvup", m.lv - lv); }; }
 { const _b = buy5; buy5 = function (S, i) { const m = _b(S, i); if (m) misAdd19(S, "buy"); return m; }; }
 { const _br = breed5; breed5 = function (S, a, b) { const r = _br(S, a, b); if (r && r.m) misAdd19(S, "breed"); return r; }; }
-{ const _d = digTpl13; digTpl13 = function (S, k, c) { const r = _d(S, k, c); if (r !== false) misAdd19(S, "build"); return r; }; }
+// 掘ったら数える（おすすめの部屋でも「自分で決める」でも脇道でも。前はおすすめの部屋のときしか数えていなかった）
+{ const _d = dig9; dig9 = function () { const r = _d.apply(this, arguments); if (r) misAdd19(arguments[0], "build"); return r; }; }
+if (typeof digSide11 === "function") { const _s = digSide11; digSide11 = function () { const r = _s.apply(this, arguments); if (r) misAdd19(arguments[0], "build"); return r; }; }
 { const _e = expand18; expand18 = function (S, i) { const r = _e(S, i); if (r) misAdd19(S, "build"); return r; }; }
 { const _u = upgradeFac16; upgradeFac16 = function (S, i, k) { const r = _u(S, i, k); if (r) misAdd19(S, "build"); return r; }; }
 { const _f = buildFac12; buildFac12 = function (S, i, k) { const r = _f(S, i, k); if (r) misAdd19(S, "build"); return r; }; }
@@ -7338,7 +7340,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.277（11/22 09:49）";
+const VER20 = "No.278（11/22 13:16）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
