@@ -7338,7 +7338,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.276（11/22 03:49）";
+const VER20 = "No.277（11/22 09:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7413,7 +7413,7 @@ function growPage20() {
   h += `<div class="flow20">${col("grow")}${D.some(i => purpose19(S, i) === "grow") ? `<div class="ar20"><small>育ったら</small>▶</div>` : ""}${col("earn")}</div>${col("guard")}`;
   if (bench.length) h += `<div class="col20 c-bench"><h4>🪑 控え ${bench.length}</h4><div class="mrow20">${bench.map(mini).join("")}</div></div>`;
   // なれてからの設定は、たたんでおく
-  h += `<details class="adv20"><summary>⚙ 設定（なれてから）</summary>
+  h += `<details class="adv20"><summary>⚙ 設定</summary>
     <div class="lane20"><div class="lh"><b>🎓 卒業のきまり</b><span class="hint">このLvまでは、まず訓練</span></div><div class="chips20">${[3, 5, 7, 10].map(v => `<button class="chip20 ${C.gradLv === v ? "on" : ""}" data-a="gl20" data-v="${v}">Lv${v}</button>`).join("")}<button class="chip20 ${!C.gradLv ? "on" : ""}" data-a="gl20" data-v="0">おまかせ</button></div><div class="hint">いま：Lv${thr}までは訓練、Lv${thr + 1}から得意の部屋へ</div></div>
     <div class="chips20"><button class="chip20 ${C.daily ? "on" : ""}" data-a="af19d">🌅 毎朝おまかせ ${C.daily ? "ON" : "OFF"}</button><button class="chip20" data-a="af19open">⚙️ こまかい設定</button><button class="chip20" data-a="mons">👾 魔物の一覧</button></div></details>`;
   return h + `</div>${sheet20()}<div class="bar20"><button data-a="pgback">◀ ダンジョン</button><button class="main" data-a="af19go" ${moves ? "" : "disabled"}>🪄 おまかせで並べる${moves ? `<small>${moves}体が動く</small>` : "<small>いまがいちばん</small>"}</button></div>`;
