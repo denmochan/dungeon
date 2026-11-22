@@ -7345,7 +7345,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.283（11/22 17:37）";
+const VER20 = "No.284（11/22 19:01）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -10611,6 +10611,9 @@ SP3D24.gobx = 1; SP3D24.lich = 1;
   props += ` for(int i=0;i<16;i++){float fi=float(i);float a=fi*0.3927+0.2;vec2 c2=${SHP ? `vec2(${f(SHP.c[0] * WX)},${f(SHP.c[1] * WZ)})+` : ""}vec2(cos(a)*${f((SHP ? SHP.h[0] - 0.6 : 2.45) * WX)},sin(a)*${f((SHP ? SHP.h[1] - 0.6 : 1.45) * WZ)})*(0.86+0.12*sin(fi*3.7));if(abs(c2.x)<${f(0.6 * WX)}&&c2.y<0.0)continue;
   float h=0.4+0.55*fract(sin(fi*12.9)*43.7);vec3 sb=vec3(c2.x,0.0,c2.y);float sg=sTap(p,sb,sb+vec3(0.07,h,0.04),0.34+0.12*fract(fi*0.37),0.05);sg=min(sg,sTap(p,sb+vec3(0.3,0.0,0.14),sb+vec3(0.33,h*0.55,0.17),0.2,0.03));sg+=(vnoise(p*5.0)-0.5)*0.11+(vnoise(p*13.0)-0.5)*0.03;if(sg<r.x)r=vec2(sg*0.85,10.0);
   float rb=sEll(p-vec3(c2.x+0.45,0.05,c2.y+0.3),vec3(0.24,0.14,0.2))+(vnoise(p*9.0)-0.5)*0.04;if(rb<r.x)r=vec2(rb,10.0);}\n`;
+  // 柱（部屋の形ごと）：床から立つ岩の柱。根もとと頭は太く
+  if (SHP && SHP.pil) SHP.pil.forEach(([px, pz, pr], i) => { const H = Math.min(SHP.top, 4.6), R = pr * WX * 0.62;
+    props = ` {vec3 q=p-vec3(${f(px * WX)},0.0,${f(pz * WZ)});float rad=${f(R)}*(1.0+0.45*smoothstep(0.9,0.0,q.y)+0.3*smoothstep(${f(H - 0.9)},${f(H)},q.y))+(vnoise(q*2.3+${i}.0)-0.5)*0.25;float cl=max(length(q.xz)-rad,q.y-${f(H)})+(vnoise(q*6.0)-0.5)*0.08;if(cl<r.x)r=vec2(cl*0.7,10.0);}\n` + props; });
   { const RA = (ROOMS24[room] || {}).stalAvoid; if (RA && RA.length) props = props.replace("if(abs(c2.x)<", RA.map(([x, z, r]) => `if(length(c2-vec2(${f(x)},${f(z)}))<${f(r + 0.6)})continue;`).join("") + "if(abs(c2.x)<"); }   // 施設の上には床の岩を置かない
   const RR = ROOMS24[room] || {}; if (RR.noTorch) { props = props.split("\n").filter(l => !l.includes("r=vec2(st,18.0)") && !l.includes("r=vec2(fla,17.0)")).join("\n"); lights = ""; }
   if (RR.noStal) { const k = props.indexOf(" for(int i=0;i<16;i++)"); if (k >= 0) props = props.slice(0, k); }
@@ -11011,24 +11014,42 @@ const DOJO25 = (x, z) => { const X = (+x).toFixed(2), Z = (+z).toFixed(2);
 // ---- 部屋の形（属性ごと）：洞窟の単位（x÷6.336, z÷5.76）。c=中心, h=半分の大きさ, r=角の丸み(ell=だ円), top=天井, cut=手前の壁を下げる位置 ----
 const SHAPE25 = {
   base:   { c: [0, 0], h: [3.05, 2.05], r: 1.0, top: 5.6 },
-  tunnel: { c: [0, -0.5], h: [3.35, 1.55], r: 0.55, top: 4.4 },        // 鉱脈：横長の坑道
-  arena:  { c: [0, -0.05], h: [2.75, 1.98], ell: 1, top: 5.6 },        // 訓練所：まるい闘技場
-  den:    { c: [0, -0.25], h: [2.45, 1.8], r: 1.0, top: 4.4 },          // 寝床：低くて小さいほら穴
-  cavern: { c: [0, 0.05], h: [3.3, 2.2], r: 1.5, top: 7.5 },            // 巣：大きな空洞
-  shaft:  { c: [0, 0], h: [2.95, 2.05], r: 1.4, top: 7.0 },
-  open:   { open: 1, c: [0, 0], h: [3.05, 2.05], r: 1.0, top: 0.3 } };           // 見張り：上に抜けた縦穴
+  // 鉱脈：横に長い坑道。奥の右に掘り進んだくぼみ、手前の左に小さな横穴
+  tunnel: { c: [0, -0.45], h: [3.4, 1.3], r: 0.5, top: 4.4, add: [[1.75, -1.35, 1.05, 0.85, 0.5], [-2.35, 0.75, 0.85, 0.7, 0.6]] },
+  // 訓練所：まるい闘技場。ふちに石の柱が4本
+  arena:  { c: [0, -0.05], h: [2.85, 2.0], ell: 1, top: 5.6, pil: [[-2.3, -0.7, 0.2], [2.3, -0.7, 0.2], [-0.95, -1.8, 0.17], [0.95, -1.8, 0.17]] },
+  // 寝床：低いほら穴。左右の手前に小部屋のようなふくらみ
+  den:    { c: [0, -0.25], h: [2.45, 1.8], r: 1.0, top: 4.4, add: [[-2.45, 0.75, 0.8, 0.75, 0.7], [2.4, 0.55, 0.8, 0.8, 0.7]] },
+  // 巣：大きな空洞。太い岩の柱が2本
+  cavern: { c: [0, 0.05], h: [3.35, 2.25], r: 1.6, top: 7.5, pil: [[-1.75, -0.8, 0.36], [1.8, -0.5, 0.3]] },
+  // 見張り：細い縦穴。左奥に足場へのくぼみ
+  shaft:  { c: [0.25, 0], h: [2.55, 2.05], r: 1.3, top: 7.0, add: [[-2.3, -1.2, 0.8, 0.7, 0.6]] },
+  // 主の間：まっすぐな壁の広間。柱が2列
+  hall:   { c: [0, 0], h: [3.0, 2.1], r: 0.35, top: 5.6, pil: [[-1.95, -1.25, 0.17], [1.95, -1.25, 0.17], [-2.45, -0.15, 0.17], [2.45, -0.15, 0.17]] },
+  // 入口：手前に向かってひらく、ななめの広間
+  gatehall: { c: [0, -0.2], h: [2.75, 1.8], r: 0.9, top: 5.6, add: [[-1.9, 0.95, 1.25, 0.8, 0.7], [2.5, -1.15, 0.7, 0.65, 0.6]] },
+  // 守る部屋：角ばった砦の広間。手前の両すみに太い柱
+  fort:   { c: [0, -0.15], h: [3.0, 1.95], r: 0.55, top: 5.6, pil: [[-2.35, -1.2, 0.27], [2.35, -1.2, 0.27]], add: [[0, -1.95, 1.1, 0.5, 0.3]] },
+  open:   { open: 1, c: [0, 0], h: [3.05, 2.05], r: 1.0, top: 0.3 } };
 const SW25 = [6.336, 5.76];
-// 形の距離（外がプラス）
-const shapeSd25 = (S, qx, qz) => { qx -= S.c[0]; qz -= S.c[1];
-  if (S.ell) return (Math.hypot(qx / S.h[0], qz / S.h[1]) - 1) * Math.min(S.h[0], S.h[1]);
-  const dx = Math.abs(qx) - S.h[0] + S.r, dz = Math.abs(qz) - S.h[1] + S.r; return Math.hypot(Math.max(dx, 0), Math.max(dz, 0)) + Math.min(Math.max(dx, dz), 0) - S.r; };
+// 形の距離（外がプラス）。add=くっつける角丸の四角 [cx,cz,hx,hz,r]、pil=柱 [x,z,半径]（柱の中は岩）
+const sdRR25 = (qx, qz, hx, hz, r) => { const dx = Math.abs(qx) - hx + r, dz = Math.abs(qz) - hz + r; return Math.hypot(Math.max(dx, 0), Math.max(dz, 0)) + Math.min(Math.max(dx, dz), 0) - r; };
+const sminJ25 = (a, b, k) => { const h = Math.max(k - Math.abs(a - b), 0) / k; return Math.min(a, b) - h * h * k * 0.25; };
+const shapeSd25 = (S, qx, qz, noPil) => { const x0 = qx, z0 = qz; qx -= S.c[0]; qz -= S.c[1]; let r;
+  if (S.ell) r = (Math.hypot(qx / S.h[0], qz / S.h[1]) - 1) * Math.min(S.h[0], S.h[1]); else r = sdRR25(qx, qz, S.h[0], S.h[1], S.r);
+  (S.add || []).forEach(([cx, cz, hx, hz, rr]) => { r = sminJ25(r, sdRR25(x0 - cx, z0 - cz, hx, hz, rr), 0.6); });
+  if (!noPil) (S.pil || []).forEach(([px, pz, pr]) => { r = Math.max(r, pr - Math.hypot(x0 - px, z0 - pz)); });
+  return r; };
 const shapeGl25 = S => { const f = v => (+v).toFixed(3); const c = `q-=vec2(${f(S.c[0])},${f(S.c[1])});`;
   if (S.open) return `float caveIn(vec2 q){float r=-9.0;`;
-  return S.ell ? `float caveIn(vec2 q){${c}float r=(length(q/vec2(${f(S.h[0])},${f(S.h[1])}))-1.0)*${f(Math.min(S.h[0], S.h[1]))};`
-    : `float caveIn(vec2 q){${c}vec2 d=abs(q)-vec2(${f(S.h[0])},${f(S.h[1])})+${f(S.r)};float r=length(max(d,0.0))+min(max(d.x,d.y),0.0)-${f(S.r)};`; };
+  let body = `vec2 q0=q;${c}`;
+  body += S.ell ? `float r=(length(q/vec2(${f(S.h[0])},${f(S.h[1])}))-1.0)*${f(Math.min(S.h[0], S.h[1]))};`
+    : `vec2 d=abs(q)-vec2(${f(S.h[0])},${f(S.h[1])})+${f(S.r)};float r=length(max(d,0.0))+min(max(d.x,d.y),0.0)-${f(S.r)};`;
+  (S.add || []).forEach(([cx, cz, hx, hz, rr]) => { body += `{vec2 e=abs(q0-vec2(${f(cx)},${f(cz)}))-vec2(${f(hx)},${f(hz)})+${f(rr)};float a=length(max(e,0.0))+min(max(e.x,e.y),0.0)-${f(rr)};float h=max(0.6-abs(r-a),0.0)/0.6;r=min(r,a)-h*h*0.15;}`; });
+  return `float caveIn(vec2 q){${body}`; };
 // 壁の上の点（中心から dir の方向へ、壁より inset 内側）
 const shapeWall25 = (S, x, z, inset) => { const dx = x - S.c[0], dz = z - S.c[1], L = Math.hypot(dx, dz) || 1; let a = 0, b = 6;
-  for (let i = 0; i < 30; i++) { const m = (a + b) / 2; if (shapeSd25(S, S.c[0] + dx / L * m, S.c[1] + dz / L * m) < -inset) a = m; else b = m; } return [S.c[0] + dx / L * a, S.c[1] + dz / L * a]; };
+  for (let i = 0; i < 30; i++) { const m = (a + b) / 2; if (shapeSd25(S, S.c[0] + dx / L * m, S.c[1] + dz / L * m, 1) < -inset) a = m; else b = m; } return [S.c[0] + dx / L * a, S.c[1] + dz / L * a]; };
 // 寝床のほら穴：壁にほった横穴（世界の座標）
 const BURROWS25 = [[-5.6, -1], [5.6, -1], [-1, -3.4], [1, -3.4]];   // [x, 向き(-1=奥の壁)] / [向き(±1=左右の壁), z]
 const burrowAt25 = () => { const S = SHAPE25.den, L = [];
@@ -11207,7 +11228,7 @@ const HAI25 = (() => {
     { id: "villageSB", name: "草原の村・横（門が壊れた後）", g: "none", txt: VILLAGE25(1, 1), outdoor: 2, light: `LIGHT(${VLTS25(-3.8,0.9,4.2)},1.0,0.6,0.28,8.0) LIGHT(${VLTS25(3.8,0.9,4.2)},1.0,0.6,0.28,8.0) LIGHT(${VLTS25(-2.2,2.9,-0.4)},1.0,0.6,0.28,5.5) LIGHT(${VLTS25(2.4,2.9,-0.6)},1.0,0.6,0.28,5.5) LIGHT(${VLTS25(-10.0,6.2,-12.6)},1.0,0.55,0.25,4.5) LIGHT(${VLTS25(0.4,3.0,-6.5)},1.0,0.7,0.35,4.0) LIGHT(-14.0,6.5,-2.0,0.42,0.52,0.78,38.0) LIGHT(-4.0,6.5,3.0,0.42,0.52,0.78,38.0) LIGHT(-9.0,6.5,8.0,0.42,0.52,0.78,30.0)`, foot: [] },
     { id: "shOpen", shell: 1, shape: "open", foot: [] },
     { id: "shTunnel", shell: 1, shape: "tunnel", foot: [] }, { id: "shArena", shell: 1, shape: "arena", foot: [] }, { id: "shDen", shell: 1, shape: "den", foot: [] },
-    { id: "shCavern", shell: 1, shape: "cavern", foot: [] }, { id: "shShaft", shell: 1, shape: "shaft", foot: [] },
+    { id: "shCavern", shell: 1, shape: "cavern", foot: [] }, { id: "shShaft", shell: 1, shape: "shaft", foot: [] }, { id: "shHall", shell: 1, shape: "hall", foot: [] }, { id: "shGate", shell: 1, shape: "gatehall", foot: [] }, { id: "shFort", shell: 1, shape: "fort", foot: [] },
     { id: "dummy", name: "わら人形", shell: 1, foot: [[-2.05 * 6.34, 0.55 * 5.76, 0.8]] },
     { id: "rack", name: "武器立て", shell: 1, foot: [[-1.35 * 6.34, -1.65 * 5.76, 0.8]] },
     { id: "torch", name: "壁の松明", shell: 1, foot: [[-14.6, 3.4, 1.1], [14.8, 2.4, 1.1]] },
@@ -11227,7 +11248,7 @@ const HAI25 = (() => {
       ROOMS24[key] = { props: "\n" + ms.map(wrap).join("\n"), lights: ms.filter(m => m.light).map(lightOf).join(" "), keepDummy: !!on.dummy, noRack: !on.rack, noTorch: !on.torch, noStal: !on.stal, noBeam: true, seam: on.seam ? [6.0, -10.5, 4.2] : null, stalAvoid: foots(on).filter(f => f[2] >= 1.2), shape: (MS.find(m => m.shape) || {}).shape, outdoor: (MS.find(m => m.outdoor) || {}).outdoor || 0, carve: MS.some(m => m.carve) ? BURROWCARVE25() : "" }; }
     return key; }
   // 施設の場所（ぶつからないように）
-  function foots(on){ const F = [];
+  function foots(on){ const F = []; { const S = shapeOf(on); if (S) (S.pil || []).forEach(([x, z, r]) => F.push([x * SW25[0], z * SW25[1], r * 6 + 0.3])); }
     modsOf(on).forEach(m => { const [dx, dz] = off(m); m.foot.forEach(([x, z, r]) => F.push([x + dx, z + dz, r])); });
     if (on.rail) { const [dx, dz] = off(MODS.find(m => m.id === "rail")); for (let z = -6; z <= 2.2; z += 1) F.push([dx, z + dz, 0.6]); }
     if (on.ring) { const [dx, dz] = off(MODS.find(m => m.id === "ring")); }
@@ -11363,17 +11384,17 @@ let B3 = null;   // { cv, ov, C, ...状態 }
     return r; }; }
 // ---- 部屋の見た目（施設から） ----
 const ROOMSET25 = {
-  train: ["dojo", "torch", "stal", "gate", "shArena"],
-  mine: ["orerock@-16,0.3", "oreT", "timber", "torch", "stal", "gate", "shTunnel"],
+  train: ["dojo", "rack", "torch", "stal", "gate", "shArena"],
+  mine: ["orerock@-16,0.3", "oreT", "timber", "pick", "pebble", "torch", "stal", "gate", "shTunnel"],
   bed: ["burrow", "pot@1,-5.5", "torch", "stal", "gate", "shDen"],
-  lord: ["throneD", "gate", "torch"],
-  lordday: ["throneD", "gate", "torch"],
-  nest: ["nest", "crate", "torch", "stal", "gate", "shCavern"],
+  lord: ["throneD", "gate", "torch", "shHall"],
+  lordday: ["throneD", "gate", "torch", "shHall"],
+  nest: ["nest", "torch", "stal", "gate", "shCavern"],
   watch: ["ladder", "watch2", "moon", "crate", "torch", "stal", "gate", "shShaft"],
-  entry: ["barr", "crate", "lamp", "rack", "torch", "stal", "gate"],
+  entry: ["barr", "crate", "lamp", "rack", "torch", "stal", "gate", "shGate"],
   plain: ["crate", "torch", "stal", "gate"],
-  guard: ["barr", "rack", "ladder", "crate", "torch", "stal", "gate"],
-  entry_mine: ["oreT", "barr", "lamp", "crate", "torch", "stal", "gate"],   // 採掘場つきの入口：入口らしさ（柵・ランプ）を残し、鉱脈は奥の壁だけ   // 守る部屋：とげの柵・武器だな・見張りの足場（狙撃台）
+  guard: ["barr", "rack", "ladder", "crate", "torch", "stal", "gate", "shFort"],
+  entry_mine: ["oreT", "barr", "lamp", "crate", "torch", "stal", "gate", "shGate"],   // 採掘場つきの入口：入口らしさ（柵・ランプ）を残し、鉱脈は奥の壁だけ   // 守る部屋：とげの柵・武器だな・見張りの足場（狙撃台）
   v_grass: ["village", "shOpen"],
   v_grass_b: ["villageB", "shOpen"],
   v_side: ["villageS", "shOpen"],
@@ -11400,7 +11421,7 @@ function roomKind25(i){ if (window.__INVADE25) return typeof window.__INVADE25 =
   return F.includes("train") ? "train" : F.includes("mine") ? "mine" : F.includes("bed") ? "bed" : R.fac === "mine" ? "mine" : R.fac === "bed" ? "bed" : R.fac === "train" ? "train" : F.includes("nest") || R.fac === "nest" ? "nest" : F.includes("watch") || R.fac === "watch" ? "watch" : F.includes("gate") || R.fac === "gate" ? "entry" : (typeof polOf13 === "function" && polOf13(R) === "guard") ? "guard" : "plain"; }
 // 配った洞窟の絵（bg25/部屋の種類_c.png・_d.png）があれば、それを読み込む
 function setRoom25(i){ const C = B3.C; C.setRoom(B3.roomKey); const k = roomKind25(i); if (!BGSHIP25[k]) return; C.putBgImages(`bg25/${k}_c.webp?v=${BGSHIP25[k]}`, `bg25/${k}_d.webp?v=${BGSHIP25[k]}`, C.st.bgKey); }
-const BGSHIP25 = { entry_mine: "701550de", guard: "917f8f8a", v_side: "c40f25a4", v_side_b: "59c7db12", v_grass: "bde48e94", v_grass_b: "26495de2", train: "177c07dc", mine: "93e6d2c5", bed: "a3af377b", lord: "8300d46a", plain: "6683282a", nest: "e3d92db3", watch: "22cc5774", entry: "52e41f17", train_mine: "e6d09ae2", train_bed: "06723853", train_nest: "d516a146", train_watch: "e1ad46e7", mine_bed: "373f048c", mine_nest: "ff6e8e1f", mine_watch: "72754dcf", bed_nest: "6754c89d", bed_watch: "50cdec00", nest_watch: "61532936", lordday: "8300d46a" };
+const BGSHIP25 = { entry_mine: "2a7addd3", guard: "f6ac9ffd", v_side: "c40f25a4", v_side_b: "59c7db12", v_grass: "bde48e94", v_grass_b: "26495de2", train: "df03303b", mine: "23a4cb35", bed: "6c03e672", lord: "add01677", plain: "6683282a", nest: "44d9d864", watch: "876874b0", entry: "708faf9d", train_mine: "6e57a31e", train_bed: "0f21ef38", train_nest: "fa57118c", train_watch: "f7e50180", mine_bed: "59cf70c7", mine_nest: "cc899594", mine_watch: "8611219e", bed_nest: "5dd06338", bed_watch: "d3f9f44d", nest_watch: "4c607a9a", lordday: "add01677" };
 function roomKey25(i){ const on = {}; ROOMSET25[roomKind25(i)].forEach(k => on[k] = true); return HAI25.room(on); }
 // ---- 3Dのキャラの種類 ----
 const heroSp25 = h => (typeof heroId === "function" ? String(heroId(h)).replace(/\d+$/, "") : h.job) || "warrior";
@@ -12259,7 +12280,7 @@ function droom25(i){ const kind = roomKind25(i), on = {}; ROOMSET25[kind].forEac
   return D3.act[i] = { sig, kind, acts, OB, beds: BEDS, nests: NESTS, fl: HAI25.floorIn(on) }; }
 // ---- 手前に立つ物（岩・柱・たいまつ・壁）のうしろに入った子を隠す ----
 // bg25/<部屋>_o.webp：半分の大きさ、明るさ＝カメラからの距離（255は床で、隠さない）
-const OCCV25 = {"entry_mine":"85d124","guard":"e9155c","bed":"36315e","bed_nest":"b13fef","bed_watch":"5f78f4","entry":"02e63e","lord":"33c3e1","lordday":"33c3e1","mine":"e49c6f","mine_bed":"810f17","mine_nest":"a4afc8","mine_watch":"aa6931","nest":"c49743","nest_watch":"a85f90","plain":"d8547b","train":"dd2817","train_bed":"3ec288","train_mine":"0ab48c","train_nest":"8f5d0a","train_watch":"f9466e","watch":"64b739"};
+const OCCV25 = {"entry_mine":"de86d8","guard":"a9e3c4","bed":"bc5086","bed_nest":"4fc534","bed_watch":"30b190","entry":"0f8fc8","lord":"cd63af","lordday":"cd63af","mine":"130710","mine_bed":"149b6a","mine_nest":"fbb865","mine_watch":"318cdc","nest":"60e489","nest_watch":"ec9bda","plain":"d8547b","train":"27fc86","train_bed":"ac3a29","train_mine":"87191c","train_nest":"c72422","train_watch":"6baed6","watch":"a55a51"};
 function docc25(bk){ const k = "occ:" + bk; if (D3.img[k]) return D3.img[k]; const o = D3.img[k] = { ok: 0 }; if (!OCCV25[bk]) return o;
   const im = new Image(); im.onload = () => { try { const c = document.createElement("canvas"); c.width = im.width; c.height = im.height; const g = c.getContext("2d"); g.drawImage(im, 0, 0);
     const d = g.getImageData(0, 0, im.width, im.height).data, q = new Uint8Array(im.width * im.height); for (let j = 0; j < q.length; j++) q[j] = d[j * 4];
