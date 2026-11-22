@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="apple-mobile-web-app-title" content="ダンジョン"><meta name="theme-color" content="#120d0a"><link rel="apple-touch-icon" href="icon.png">
+<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="apple-mobile-web-app-title" content="ダンジョン"><meta name="theme-color" content="#120d0a"><link rel="apple-touch-icon" href="icon.png">
 <title>ダンジョンマスター（仮）</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Noto+Sans+JP:wght@400;700&family=Shippori+Mincho+B1:wght@500&family=Zen+Antique&display=swap" rel="stylesheet">
 <style>
@@ -1167,6 +1167,9 @@ body:has(.modal) .inv25btn,body:has(.ntfull19) .inv25btn{display:none}
 .inv25ask .inv25card{background:#241a14;border:1px solid #6a4a30;border-radius:14px;padding:14px 16px;color:#efe3cf;min-width:260px;text-align:center}
 .inv25ask .inv25btns{display:flex;gap:10px;margin-top:12px}.inv25ask .inv25btns button{flex:1;padding:12px 8px;border-radius:10px;font-weight:800;border:1px solid #6a4a30;background:#3a2a1e;color:#efe3cf}.inv25ask .inv25btns .go{background:#7a3a22;border-color:#c96a4a}
 .seal .snm26{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:2px;font-size:11px;font-style:normal;white-space:nowrap;color:#f0dcb8;text-shadow:0 1px 2px #000,0 0 4px #000;pointer-events:none}
+#off26{position:fixed;left:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:9998;background:rgba(20,14,10,.88);border:1px solid #6a4a30;color:#efe3cf;font-size:12px;padding:5px 10px;border-radius:999px;pointer-events:none;overflow:hidden}
+#off26 i{position:absolute;left:0;bottom:0;height:2px;background:#ffd06a}
+#off26.ok{border-color:#5a9a5a;color:#bfe8bf}#off26.ok.small{opacity:.55;font-size:11px}#off26.ng{border-color:#a05a3a;color:#ffc9a8}
 </style>
 </head>
 <body>
@@ -7351,7 +7354,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.288（11/22 21:35）";
+const VER20 = "No.289（11/23 08:39）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -12805,6 +12808,19 @@ const invOpen26 = () => { try { return /invade/.test(location.hash) || !!metaOf8
 document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="inv26"]'); if (!b) return; ev.stopImmediatePropagation(); modal = null; title = false; render(); if (typeof invOpenMap25 === "function") invOpenMap25(); }, true);
 // 契約達成の画面にひとこと
 { const _cm = contractModal; contractModal = function () { const h = _cm(); return h + (metaOf8(S).invOpen ? '<div class="hint">🗺 侵略が解放された（タイトルと「主」の画面から）</div>' : ""); }; }
+
+// ================= off26：オフライン（Wi-Fiなし）で遊べるように、絵と本体をスマホに保存 =================
+const OFF26 = { done: 0, N: 0, fin: false, fail: 0 };
+function offBadge26(){ let el = document.getElementById("off26"); if (!el) { el = document.createElement("div"); el.id = "off26"; document.body.appendChild(el); }
+  const p = OFF26.N ? Math.floor(OFF26.done / OFF26.N * 100) : 0;
+  if (OFF26.fin && !OFF26.fail) { el.innerHTML = "✈ オフラインで遊べます"; el.className = "ok"; clearTimeout(OFF26.t); OFF26.t = setTimeout(() => { el.className = "ok small"; }, 5000); }
+  else if (OFF26.fin) { el.innerHTML = `⚠ 保存できなかった絵が${OFF26.fail}こ（電波のよい所で開き直すと続きから）`; el.className = "ng"; }
+  else el.innerHTML = `📥 オフライン用に保存中 ${p}%<i style="width:${p}%"></i>`; }
+if ("serviceWorker" in navigator && /^https?:/.test(location.protocol)) {
+  navigator.serviceWorker.addEventListener("message", e => { const d = e.data || {}; if (d.t !== "sw26") return; Object.assign(OFF26, { done: d.done, N: d.N, fin: d.fin, fail: d.fail }); offBadge26(); });
+  navigator.serviceWorker.register("sw.js").then(reg => { const go = () => { const w = reg.active || reg.waiting || reg.installing; if (w) w.postMessage("precache26"); };
+    if (reg.active) go(); else navigator.serviceWorker.ready.then(go); }).catch(() => {});
+}
 
 </script>
 <script>// ================= 3Dの子を、今のコマアニメと同じ並び（17コマ）の絵に焼く（開発用・ページ内で実行） =================

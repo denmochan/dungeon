@@ -1,0 +1,1 @@
+{"name": "ダンジョンマスター（仮）", "short_name": "ダンジョン", "start_url": "./", "display": "standalone", "background_color": "#120c0a", "theme_color": "#120c0a", "icons": [{"src": "icon.png", "sizes": "512x512", "type": "image/png"}]}
