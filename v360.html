@@ -6822,6 +6822,8 @@ shopModal = function () {
 };
 // 保管庫：転生のとき1体えらぶ／新しい周回で連れていく子をえらぶ
 let VSEL18 = [];
+// 最初から新しい子順に枠いっぱいまで選んでおく（外したい子だけタップ）
+function vaultAutoPick18() { const V = vaultOf18(S), cap = vaultCap18(S), r = []; for (let n = V.length - 1; n >= 0 && r.length < cap; n--) r.push(n); return r; }
 function vaultSaveModal18() {
   const ms = S.mons.slice().sort((a, b) => (typeof rarI19 === "function" ? rarI19(b) - rarI19(a) : 0) || (b.shiny19 ? 1 : 0) - (a.shiny19 ? 1 : 0) || power13(b) - power13(a)), V = vaultOf18(S);   // 全員出す（レア度→色違い→強さの順）
   return `<h2>🏺 1体だけ保管庫へ</h2><div class="hint">残した子は<b>種族とスキル</b>だけ持って、進化前・Lv1にもどる。次の周回から連れていける（保管庫 ${V.length}/${VAULT_MAX18}${V.length >= VAULT_MAX18 ? "・いっぱいなので一番古い子と入れかわる" : ""}）</div>`
@@ -6835,7 +6837,7 @@ function vaultBringModal18() {
     + `<div class="pk"><button class="main" data-a="vgo">${VSEL18.length ? VSEL18.length + "体を連れて始める" : "連れていかずに始める"}</button></div>`;
 }
 { const _eg = enterGame; enterGame = function () { _eg();
-  if (S && !S.vaultAsked18 && (S.day || 1) <= 1 && !(S.raidNo) && !(S.contract && S.contract.lv > 1)) { S.vaultAsked18 = 1; if (vaultOf18(S).length && !modal) { VSEL18 = []; modal = vaultBringModal18; render(); } } }; }
+  if (S && !S.vaultAsked18 && (S.day || 1) <= 1 && !(S.raidNo) && !(S.contract && S.contract.lv > 1)) { S.vaultAsked18 = 1; if (vaultOf18(S).length && !modal) { VSEL18 = vaultAutoPick18(); modal = vaultBringModal18; render(); } } }; }
 // 配合：生まれる子の「生まれつき」のスキルは必ずつく。選ぶ枠を使わないので、選ぶ一覧からは外す
 function mixChildInn18(A, B) { try { const p = mixPreview7(S, A, B); return p && p.sp ? { sp: p.sp, k: INNATE10[p.sp], known: !p.special || S.dex.includes(p.sp) } : null; } catch (e) { return null; } }
 function mixPool18(A, B) { const c = mixChildInn18(A, B), pool = [...new Set([...Object.keys(skOf10(A)), ...Object.keys(skOf10(B))])]; return c && c.k ? pool.filter(k => k !== c.k) : pool; }
@@ -7349,7 +7351,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.286（11/22 20:35）";
+const VER20 = "No.288（11/22 21:35）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -12792,6 +12794,17 @@ document.addEventListener("click", ev => { const b = ev.target.closest && ev.tar
 // 転生・契約の確認を外側タップで閉じても、行き止まりにしない：「次の日へ」で確認を出し直す
 document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="nextday"]'); if (!b || typeof S === "undefined" || !S) return;
   if (S.ended || S.contractDone) { ev.stopImmediatePropagation(); modal = S.ended ? rebirthModal : contractModal; render(); } }, true);
+
+// ================= open26：侵略は最初の契約（30日）を終えたら解放 =================
+const invOpen26 = () => { try { return /invade/.test(location.hash) || !!metaOf8(S).invOpen; } catch (e) { return false; } };
+// 契約を終えた瞬間に解放（転生しても残る）
+{ const _r = render; render = function () { try { if (S && S.contractDone && !metaOf8(S).invOpen) { metaOf8(S).invOpen = 1; save(); setTimeout(() => { try { banner19("<small>🗺 新しい遊び</small><i>侵略が解放された！</i>", "wipe", 2200); } catch (e) {} }, 600); } } catch (e) {} return _r.apply(this, arguments); }; }
+// タイトルと「主」の画面に入口（浮いたボタンはほかのボタンに重なっていた）
+{ const _ts = titleScreen; titleScreen = function () { const h = _ts(); if (altar || diffScr || !invOpen26()) return h; return h.replace('<button data-a="dex">', '<button data-a="inv26" class="inv26">⚔ 侵略<small>魔物を連れて人間の村を攻める（スマホを横に）</small></button><button data-a="dex">'); }; }
+{ const _lm = lordModal; lordModal = function () { const h = _lm(); return invOpen26() ? h + '<button class="main" data-a="inv26" style="width:100%;margin-top:8px">⚔ 侵略へ（人間の村を攻める）</button>' : h; }; }
+document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="inv26"]'); if (!b) return; ev.stopImmediatePropagation(); modal = null; title = false; render(); if (typeof invOpenMap25 === "function") invOpenMap25(); }, true);
+// 契約達成の画面にひとこと
+{ const _cm = contractModal; contractModal = function () { const h = _cm(); return h + (metaOf8(S).invOpen ? '<div class="hint">🗺 侵略が解放された（タイトルと「主」の画面から）</div>' : ""); }; }
 
 </script>
 <script>// ================= 3Dの子を、今のコマアニメと同じ並び（17コマ）の絵に焼く（開発用・ページ内で実行） =================
