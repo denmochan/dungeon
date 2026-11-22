@@ -7345,7 +7345,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.280（11/22 17:22）";
+const VER20 = "No.281（11/22 17:28）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -11471,9 +11471,13 @@ function frame25(tm){
   if (!B3 || !N) return [];
   if (!B3.zset && B3.cv.height > 10) { B3.zset = 1; const st0 = B3.C.st; if (window.__INVADE25) { st0.zoom = Math.max(B3.cv.width / B3.C.VRES[0], B3.cv.height / B3.C.VRES[1]) * 1.25; const q = B3.C.proj([-1.5, 0.8, 0.5]); st0.cx = q[0]; st0.cy = q[1]; } else st0.zoom = Math.max(B3.C.minZoom(), B3.cv.height / B3.C.VRES[1] * 0.95) * (B3.cv.height > B3.cv.width * 1.2 ? 1.15 : 1); }   // 縦画面は寄せて、上下の暗い空きを減らしキャラを大きく
   const now = B3.now = tm, dt = Math.min(0.1, now - (B3.last || now)); B3.last = now;
+  if (B3.hs && now < B3.hs) { Object.values(B3.A).forEach(a => { a.at += dt; if (a.pounce) a.pounce.t0 += dt; if (a.dying) a.dying += dt; }); B3.fx.forEach(f => { if (f.k === "shot") f.at += dt; }); B3.frz = 1; } else B3.frz = 0;   /* 強い一撃・とどめで一瞬止める */
   const i = window.__INVADE25 ? 0 : focus25();
   if (i !== B3.room && (now - (B3.switchAt || -9)) > 1.5) { B3.room = i; B3.switchAt = now; B3.A = {}; B3.fx = []; const key = roomKey25(i); if (key !== B3.roomKey) { B3.roomKey = key; setRoom25(i); } roomTabs25(); }
   const want = window.__INVADE25 && typeof INV25 !== "undefined" ? INV25.want(now, dt) : targets25(B3.room);
+  // 主の間の決戦：勇者が主の間に入ったら、札を出して少し寄せる
+  if (!window.__INVADE25) { const on = B3.room === lordIdx(S) && Object.keys(want).some(k => k[0] === "h") && N.lord && !N.lord.down; if (on && B3.duelN !== N && B3.A.lord && B3.A.lord.al > 0.9 && B3.C.st.bake >= B3.C.st.bakeN * 2 && !(B3.C.st.pend > 0)) { B3.duelN = N; B3.duelAt = now + 0.4; B3.shake = Math.max(B3.shake || 0, 0.3); } B3.duel = on;
+    const st = B3.C.st; if (B3.z0 == null) B3.z0 = st.zoom; const zt = B3.z0 * (on ? 1.12 : 1); st.zoom += (zt - st.zoom) * Math.min(1, dt * 1.5); }
   // 新しい記録
   const H = N.hit25 || []; while (B3.hi < H.length) { const e = H[B3.hi++]; if (want[e.b] == null && e.b !== "lord") continue;
     const a = e.a && B3.A[e.a], b = B3.A[e.b];
@@ -11494,6 +11498,12 @@ function frame25(tm){
   // 当たった瞬間
   B3.fx.forEach(f => { if (f.k !== "hit" || f.done || now < f.at) return; f.done = true; const b = B3.A[f.who]; if (!b) return;
     play25(b, "hurt", 0.35); b.fl = 1; b.kb = 0.5; b.shake = f.big ? 0.25 : 0.12; if (f.kill) { b.dying = now + 0.35; }
+    { const P = B3.pt || (B3.pt = []), sz = B3.size[b.key] || 1, hy = 0.9 * sz + Math.max(0, -(b.sink || 0)) + (FLYB25[(b.key || "").split(":")[0]] ? 0.9 : 0);   /* 当たった所に火花。とどめは魂が抜ける */
+      if (f.d > 0) P.push({ k: "spark", x: b.x, y: hy, z: b.z, at: now, big: !!(f.big || f.kill), col: f.hero ? "255,210,120" : "255,120,90", r0: Math.random() * 6 });
+      if (f.kill) { for (let q = 0; q < 14; q++) { const an = Math.random() * 6.28, v = 40 + Math.random() * 70; P.push({ k: "bit", x: b.x, y: hy, z: b.z, at: now + 0.05, vx: Math.cos(an) * v, vy: Math.sin(an) * v - 50, col: f.hero ? "255,225,150" : "190,150,255", life: 0.6 + Math.random() * 0.3 }); }
+        P.push({ k: "soul", x: b.x, y: hy, z: b.z, at: now + 0.25, col: f.hero ? "255,236,170" : "200,160,255" }); P.push({ k: "ring", x: b.x, y: 0.05, z: b.z, at: now + 0.3, col: f.hero ? "255,220,140" : "170,120,255", sz }); }
+      if (P.length > 120) P.splice(0, P.length - 120);
+      B3.hs = Math.max(B3.hs || 0, now + (f.kill ? (f.hero ? 0.13 : 0.09) : f.big ? 0.06 : 0)); }
     { const old = B3.pops.find(q => q.who === f.who && !q.banner && now - q.at < 0.6 && q.sum != null);   // 同じ相手への続けざまの数字は1つにまとめて足す
       if (old && f.d > 0) { old.sum += f.d; old.txt = old.sum + ""; old.at = now; old.big = old.big || f.big || f.kill; old.pos = null; }
       else { B3.pops = B3.pops.filter(q => !(q.who === f.who && !q.banner)); B3.pops.push({ who: f.who, txt: (f.d > 0 ? f.d : "MISS") + "", sum: f.d > 0 ? f.d : null, at: now, col: f.hero ? "#ffd27a" : "#ff6a5a", big: f.big || f.kill }); }
@@ -11516,7 +11526,7 @@ function frame25(tm){
     // 歩く
     const dx = a.tx - a.x, dz = a.tz - a.z, dist = Math.hypot(dx, dz), spd = (a.id[0] === "h" ? 4.2 : 3.2) * (B3.size[a.key] || 1) ** 0.3;
     const busy = a.anim === "atk" && now - a.at < a.dur || a.anim === "hurt" && now - a.at < a.dur;
-    if (!a.dying && dist > 0.15 && !busy) { const st2 = Math.min(dist, spd * dt); a.x += dx / dist * st2; a.z += dz / dist * st2; if (Math.abs(dx) > 0.2) a.face = dx > 0 ? 1 : -1; if (a.anim !== "walk") play25(a, "walk", 9); }
+    if (!a.dying && dist > 0.15 && !busy) { const st2 = Math.min(dist, spd * (B3.frz ? 0 : dt)); a.x += dx / dist * st2; a.z += dz / dist * st2; if (Math.abs(dx) > 0.2) a.face = dx > 0 ? 1 : -1; if (a.anim !== "walk") play25(a, "walk", 9); }
     else if (!busy && a.anim !== "idle" && !(dist > 0.15)) play25(a, "idle", 9);
     if (!a.dying && !busy && dist < 0.15) { const fo = a.id[0] === "h" ? B3.A[B3.tgt[a.id]] : null; const face = o => { if (o && Math.abs(o.x - a.x) > 0.6) a.face = o.x >= a.x ? 1 : -1; };   /* 向きは近い相手へ。少しの左右差では振り向かない */
       if (fo) face(fo); else if (a.id[0] === "m" || a.id === "lord") { let h = null, bd = 1e9; Object.values(B3.A).forEach(o => { if (o.id[0] !== "h" || o.dying) return; const d = Math.hypot(o.x - a.x, o.z - a.z); if (d < bd) { bd = d; h = o; } }); face(h); } }
@@ -11577,6 +11587,17 @@ function overlay25(now){ const ov = B3.ov, r = ov.getBoundingClientRect(), dpr =
   Object.values(B3.A).forEach(a => { if (a.anim !== "atk" || !a.lunge) return; const p = (now - a.at) / (a.dur || 0.42); if (p < 0.3 || p > 0.7) return; const b = B3.A[B3.tgt[a.id]] || null; if (Math.hypot(a.lunge[0], a.lunge[1]) > 4.5) return;   // 遠い相手への弧は出さない（宙に浮いて見えた）
     const L = Math.hypot(a.lunge[0], a.lunge[1]) || 1; const c = B3.C.toScreen([a.x + a.lunge[0] * 0.6, 1.0, a.z + a.lunge[1] * 0.6]); const k = (p - 0.3) / 0.4;
     g.strokeStyle = `rgba(255,245,220,${1 - k})`; g.lineWidth = 3; g.beginPath(); g.arc(c[0], c[1], 10 + 8 * k, -2.4 + k * 1.2, -0.6 + k * 1.2); g.stroke(); });
+  // 火花・とどめ
+  if (B3.pt) { B3.pt = B3.pt.filter(q => now - q.at < (q.k === "soul" ? 1.3 : q.k === "bit" ? q.life : q.k === "ring" ? 0.6 : 0.28));
+    g.save(); g.globalCompositeOperation = "lighter";
+    B3.pt.forEach(q => { const t = now - q.at; if (t < 0) return; const c = B3.C.toScreen([q.x, q.y, q.z]);
+      if (q.k === "spark") { const k = t / 0.28, R = (q.big ? 26 : 15) * (0.4 + k), al = 1 - k; g.fillStyle = `rgba(255,255,240,${al * 0.9})`; g.beginPath(); g.arc(c[0], c[1], (q.big ? 9 : 5) * (1 - k * 0.6), 0, 7); g.fill();
+        g.strokeStyle = `rgba(${q.col},${al})`; g.lineWidth = q.big ? 3 : 2; g.beginPath(); for (let n = 0; n < (q.big ? 8 : 5); n++) { const an = q.r0 + n * 6.28 / (q.big ? 8 : 5); g.moveTo(c[0] + Math.cos(an) * R * 0.45, c[1] + Math.sin(an) * R * 0.45); g.lineTo(c[0] + Math.cos(an) * R, c[1] + Math.sin(an) * R); } g.stroke(); return; }
+      if (q.k === "bit") { const k = t / q.life; g.fillStyle = `rgba(${q.col},${1 - k})`; g.beginPath(); g.arc(c[0] + q.vx * t, c[1] + q.vy * t + 120 * t * t, 2.6 * (1 - k * 0.5), 0, 7); g.fill(); return; }
+      if (q.k === "ring") { const k = t / 0.6, e = B3.C.toScreen([q.x + 1.6 * q.sz * k + 0.3, q.y, q.z]), rx = Math.abs(e[0] - c[0]); g.strokeStyle = `rgba(${q.col},${0.8 * (1 - k)})`; g.lineWidth = 3 * (1 - k) + 1; g.beginPath(); g.ellipse(c[0], c[1], rx, rx * 0.4, 0, 0, 7); g.stroke(); return; }
+      if (q.k === "soul") { const k = t / 1.3, y = c[1] - k * 90, x = c[0] + Math.sin(k * 9) * 6; const gr = g.createRadialGradient(x, y, 0, x, y, 14); gr.addColorStop(0, `rgba(255,255,255,${0.9 * (1 - k)})`); gr.addColorStop(0.4, `rgba(${q.col},${0.6 * (1 - k)})`); gr.addColorStop(1, `rgba(${q.col},0)`); g.fillStyle = gr; g.beginPath(); g.arc(x, y, 14, 0, 7); g.fill();
+        for (let n = 1; n < 5; n++) { g.fillStyle = `rgba(${q.col},${0.35 * (1 - k) * (1 - n / 5)})`; g.beginPath(); g.arc(c[0] + Math.sin((k - n * 0.04) * 9) * 6, y + n * 7, 5 - n, 0, 7); g.fill(); } } });
+    g.restore(); }
   // 数字
   B3.pops = B3.pops.filter(p => now - p.at < 1.1).sort((a, b) => (a.banner ? 1 : 0) - (b.banner ? 1 : 0));
   B3.pops.forEach(p => { if (now < p.at) return; const a = B3.A[p.who]; if (!a && !p.pos) return; if (!a && !p.banner && now - p.at > 0.35) return;   /* 相手が消えたあとの数字は早めに消す */ if (!p.pos) p.pos = [a.x, a.z, a.key]; const s = head({ id: p.who, x: p.pos[0], z: p.pos[1], key: p.pos[2], w: {} });
@@ -11586,6 +11607,12 @@ function overlay25(now){ const ov = B3.ov, r = ov.getBoundingClientRect(), dpr =
     const X = Math.max(22, Math.min(r.width - 22, sxl)), Y = Math.max(p.banner ? 70 : 52, y);   // 画面の外に出さない（上は部屋の札の下まで）
     if (p.banner) { g.font = "900 18px system-ui,sans-serif"; const bw = g.measureText(p.txt).width + 16; g.fillStyle = "rgba(20,8,6,0.75)"; g.fillRect(X - bw / 2, Y - 18, bw, 24); g.strokeStyle = p.col; g.lineWidth = 1.5; g.strokeRect(X - bw / 2, Y - 18, bw, 24); g.fillStyle = p.col; g.fillText(p.txt, X, Y); g.globalAlpha = 1; return; }
     g.font = `900 ${p.big ? 17 : 13}px system-ui,sans-serif`; g.lineWidth = 4; g.strokeStyle = "rgba(20,8,6,0.9)"; g.strokeText(p.txt, X, Y); g.fillStyle = p.col; g.fillText(p.txt, X, Y); g.globalAlpha = 1; });
+  if (B3.duel || (B3.duelAt && now - B3.duelAt < 2.4)) { const pul = 0.5 + 0.5 * Math.sin(now * 3), vg = g.createRadialGradient(r.width / 2, r.height / 2, Math.min(r.width, r.height) * 0.35, r.width / 2, r.height / 2, Math.max(r.width, r.height) * 0.75);
+    vg.addColorStop(0, "rgba(120,0,0,0)"); vg.addColorStop(1, `rgba(120,10,0,${B3.duel ? 0.28 + 0.12 * pul : 0})`); g.fillStyle = vg; g.fillRect(0, 0, r.width, r.height);
+    const L = B3.A.lord; if (L && B3.duel) { const c = B3.C.toScreen([L.x, 0.05, L.z]), e = B3.C.toScreen([L.x + 1.4 * (B3.size[L.key] || 1), 0.05, L.z]), rx = Math.abs(e[0] - c[0]); g.save(); g.globalCompositeOperation = "lighter"; g.strokeStyle = `rgba(255,70,40,${0.5 + 0.3 * pul})`; g.lineWidth = 3; g.beginPath(); g.ellipse(c[0], c[1], rx, rx * 0.4, 0, 0, 7); g.stroke(); g.restore(); }
+    const t = now - (B3.duelAt || -9); if (t > 0 && t < 2.4) { const al = t < 0.3 ? t / 0.3 : t > 1.9 ? (2.4 - t) / 0.5 : 1, sc = t < 0.3 ? 1.4 - t / 0.3 * 0.4 : 1, Y = r.height * 0.3;
+      g.save(); g.globalAlpha = al; g.fillStyle = "rgba(20,4,2,.78)"; g.fillRect(0, Y - 30, r.width, 52); g.fillStyle = "#c83a24"; g.fillRect(0, Y - 30, r.width, 2); g.fillRect(0, Y + 20, r.width, 2);
+      g.translate(r.width / 2, Y); g.scale(sc, sc); g.font = "900 26px 'Zen Antique','Shippori Mincho B1',serif"; g.lineWidth = 5; g.strokeStyle = "#2a0804"; g.strokeText("主の間の決戦", 0, 6); g.fillStyle = "#ffd27a"; g.fillText("主の間の決戦", 0, 6); g.restore(); } }
   if (window.__INVADE25 && typeof INV25 !== "undefined") INV25.overlay(g, now, r);
   else if (r.height > r.width * 1.2 && N && N.heroes) hud25(g, r); }
 // 縦画面：下の空いたところに、主と勇者の体力の一覧（2Dの画面と同じ情報）
