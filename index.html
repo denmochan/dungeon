@@ -7263,9 +7263,9 @@ autoAll19 = function (S) {
   dens.forEach(i => { cap[i] = capOfSlot7(S, i) - S.mons.filter(m => m.home === i && fixed(m)).length; });
   const before = new Map(S.mons.map(m => [m.id, m.home]));
   const mine0 = S.mons.filter(m => m.home != null && !restLeft9(S, m) && jobOf12(S, m) === "mine").length;
-  const resting = S.mons.filter(m => !fixed(m) && restLeft9(S, m) && (m.home == null || dens.includes(m.home)));
+  const resting = S.mons.filter(m => !fixed(m) && (m.rest || 0) > 0 && (m.home == null || dens.includes(m.home)));   /* 27：寝床の部屋にいるけが人は restLeft9 が0になり、元気な子あつかいで寝床から追い出されていた */
   const beds = dens.filter(i => hasFac12(S.path[i], "bed"));
-  resting.sort((a, b) => b.lv - a.lv).forEach(m => { const i = beds.find(i => cap[i] > 0) ?? (m.home != null && cap[m.home] > 0 ? m.home : dens.find(i => cap[i] > 0));
+  resting.sort((a, b) => b.lv - a.lv).forEach(m => { const i = (m.home != null && beds.includes(m.home) && cap[m.home] > 0 ? m.home : null) ?? beds.find(i => cap[i] > 0) ?? (m.home != null && cap[m.home] > 0 ? m.home : dens.find(i => cap[i] > 0));
     if (i != null) { m.home = i; m.job19 = null; m.job19h = i; cap[i]--; } else m.home = null; });
   dens.forEach(i => { const fx = S.mons.filter(m => m.home === i && fixed(m));
     fight[i] = Math.max(0, Math.min(cap[i], nFight19(S, i) - fx.filter(m => m.job === "guard").length)); work[i] = Math.max(0, cap[i] - fight[i]); });
@@ -7386,7 +7386,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.305（11/23 14:37）";
+const VER20 = "No.306（11/23 14:46）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -13187,12 +13187,12 @@ function dngRun27(opt) {
       if (opt.grow) N2.heroes.forEach(h => { h.max = Math.round(h.max * opt.grow.hp); h.hp = h.max; h.atk = Math.round(h.atk * opt.grow.atk); });
       const gr = t ? rng23(seed0 + t * 7919) : g0; Math.random = gr; N2.rnd = gr; let g = 0; while (!N2.done && g++ < 4000) stepNight5(S, N2); Math.random = R0;
       const li = S.path.findIndex(r => r.kind === "lord");
-      res.push({ md: N2.mons.filter(b => b.down || b.hp <= 0).length, deep: Math.max(0, ...N2.heroes.map(h => h.maxPos || h.pos || 0)), li, lordLoss: N2.lord ? Math.max(0, (N2.lord.max || 0) - N2.lord.hp) / Math.max(1, N2.lord.max || 1) : 0, lordLeft: N2.lord ? Math.max(0, N2.lord.hp) / Math.max(1, N2.lord.max || 1) : 1, down: N2.lord && N2.lord.hp <= 0, esc: N2.heroes.filter(h => h.st === "escaped").length }); }
+      res.push({ md: N2.mons.filter(b => b.down || b.hp <= 0).length, deep: Math.max(0, ...N2.heroes.map(h => h.maxPos || h.pos || 0)), li, lordLoss: N2.lord ? Math.max(0, (N2.lord.max || 0) - N2.lord.hp) / Math.max(1, N2.lord.max || 1) : 0, lordLeft: N2.lord ? Math.max(0, N2.lord.hp) / Math.max(1, N2.lord.max || 1) : 1, down: N2.lord && N2.lord.hp <= 0, esc: N2.heroes.filter(h => h.st === "escaped").length, stolen: N2.stolen || 0, lossHP: N2.lord ? Math.max(0, (N2.lord.max || 0) - Math.max(0, N2.lord.hp)) * ((N2.lord.floor27 ? N2.lord.floor27.max : N2.lord.max) / Math.max(1, N2.lord.max)) : 0 }); }
   } catch (e) { console.error(e); } finally { Math.random = R0; S = S0; UID5 = U0; }
   if (!res.length) return null;
   const li = res[0].li, N = res.length, nm = Math.max(1, S.mons.filter(m => m.home != null).length);
   const v = { n: N, li, downs: res.filter(o => o.down).length, lord: res.filter(o => o.lordLoss > 0.05).length, deep: Math.round(res.reduce((a, o) => a + Math.min(o.deep, li), 0) / N * 10) / 10,
-    esc: res.reduce((a, o) => a + o.esc, 0) / N, md: res.reduce((a, o) => a + o.md, 0) / N, left: res.reduce((a, o) => a + o.lordLeft, 0) / N, minLeft: Math.min(...res.map(o => o.lordLeft)) };
+    esc: res.reduce((a, o) => a + o.esc, 0) / N, md: res.reduce((a, o) => a + o.md, 0) / N, left: res.reduce((a, o) => a + o.lordLeft, 0) / N, minLeft: Math.min(...res.map(o => o.lordLeft)), stolen: res.reduce((a, o) => a + o.stolen, 0) / N, lossHP: res.reduce((a, o) => a + o.lossHP, 0) / N };
   /* 🔴 半分以上で主が倒れる／🟠 主が倒れることがある・主が大きく削られる・魔物が多く倒れる／🟡 主まで届く・逃げられる・魔物が倒れる／🟢 それ以外 */
   v.lv = v.downs >= N * 0.5 ? 3 : v.downs >= 1 || v.left < 0.55 || v.md >= nm * 0.6 || v.esc >= 2 ? 2 : v.lord >= N * 0.25 || v.esc >= 0.6 || v.md >= Math.max(2, nm * 0.3) ? 1 : 0;
   const R = S.path[Math.min(li, Math.max(0, Math.round(v.deep)))];
@@ -13271,6 +13271,94 @@ document.addEventListener("click", ev => { const b = ev.target.closest && ev.tar
   const rep = newRep9(); gainXp9(S, m, Math.max(1, expNext5(m) - (m.exp || 0)), rep); sfx16 && sfx16("lvup"); toast(`🔥 ${m.nick} が Lv${m.lv} になった`);
   try { dng23 = { key: "", v: null }; } catch (e) {}
   save(); const id = m.id; if (rep.evos.length) { modal = null; rep.evos.forEach(e => queue.push({ k: "evo", ...e })); if (!stage) nextStage(); else render(); } else { modal = () => monCard(id); render(); } }, true);
+// ================= 寝床は「休む部屋」として別に（稼ぐ部屋に寝床がセットで付いていて分かりにくかった） =================
+POL13.rest = { icon: "💤", name: "休む", text: "けがをした子が寝床で休む部屋。ひと晩で治る。元気な子は入れない（おまかせでも入れない）" };
+TPL13.earn.facs = ["mine"];
+TPL13.rest = { name: "💤 休む部屋", facs: ["bed"], pol: "rest" };
+{ const _d = digTpl13; digTpl13 = function (S2, k, corr) { const i = _d.apply(this, arguments);
+  try { if (i !== false && i != null && k === "rest") { const r = S2.path[i]; r.fac = "none"; r.facs = ["bed"]; r.flv = r.flv || {}; r.flv.bed = Math.max(r.flv.bed || 1, 3); r.pol = "rest"; } } catch (e) {} return i; }; }
+const restRooms27 = S2 => S2.path.map((r, i) => r && r.kind === "den" && hasFac12(r, "bed") && (r.pol === "rest" || facsOf12(r).length === 1) ? i : -1).filter(i => i >= 0);
+const freeBeds27 = (S2, i) => bedCap21(S2.path[i]) - S2.mons.filter(m => m.home === i && (m.rest || 0) > 0).length;
+// 襲撃のあと：けがをした子（📌固定以外）を休む部屋の寝床へ。治ったら次の朝、元の部屋へもどる
+function toBed27(S2) { const R = restRooms27(S2); if (!R.length) return [];
+  const moved = []; S2.mons.filter(m => (m.rest || 0) > 0 && !m.job && m.home != null && !R.includes(m.home)).sort((a, b) => (b.rest || 0) - (a.rest || 0) || b.lv - a.lv).forEach(m => {
+    const i = R.find(i => freeBeds27(S2, i) > 0); if (i == null) return; m.back27 = m.home; m.home = i; m.job19 = null; m.job19h = i; moved.push(m); });
+  return moved; }
+function fromBed27(S2) { const back = []; S2.mons.filter(m => m.back27 != null && !(m.rest > 0)).forEach(m => { const j = m.back27; delete m.back27;
+  if (S2.path[j] && S2.path[j].kind === "den" && S2.mons.filter(o => o.home === j).length < capOfSlot7(S2, j)) { m.home = j; m.job19h = j; back.push(m); } else m.home = null; }); return back; }
+{ const _er = endRaid; endRaid = function () { const r = _er.apply(this, arguments); try { const mv = toBed27(S); if (mv.length) { save(); setTimeout(() => toast(`💤 ${mv.map(m => m.nick).join("・")} を休む部屋の寝床へ`), 1200); } } catch (e) {} return r; }; }
+{ const _cd = closeDay; closeDay = function () { const r = _cd.apply(this, arguments); try { const b = fromBed27(S); if (b.length) { save(); setTimeout(() => toast(`☀ 元気になった ${b.map(m => m.nick).join("・")} がもとの部屋へ`), 900); } } catch (e) {} return r; }; }
+// おまかせ：けが人は先に休む部屋へ（寝床の数まで）。元気な子は休む部屋に入れない
+autoAll19 = (prev => function (S2) { const R = restRooms27(S2); if (!R.length) return prev.apply(this, arguments);
+  const tmp = []; S2.mons.filter(m => (m.rest || 0) > 0 && !m.job).sort((a, b) => (b.rest || 0) - (a.rest || 0) || b.lv - a.lv).forEach(m => { const i = R.includes(m.home) ? m.home : R.find(i => freeBeds27(S2, i) > 0); if (i == null) return; if (m.home !== i && m.back27 == null && m.home != null) m.back27 = m.home; m.home = i; m.job = "bed21"; tmp.push(m); });
+  try { return prev.apply(this, arguments); } finally { tmp.forEach(m => { if (m.job === "bed21") m.job = null; }); } })(autoAll19);
+// ================= スキルの書：持ち物にして、覚える子を自分で選ぶ（全員4つ埋まっていると💎300に化けていた） =================
+{ const _oc = openChest19; openChest19 = function (S2, c) { if (!c || c.kind !== "skill") return _oc.apply(this, arguments);
+  S2.books27 = (S2.books27 || 0) + 1; return { text: "📜 スキルの書", sub: "魔物の画面の「📜 スキルの書を使う」で、覚えさせる子を選べる", sp: null, evos: [] }; }; }
+const bookSk27 = m => { S.bookPick27 = S.bookPick27 || {}; let k = S.bookPick27[m.id]; if (k && SK11[k] && !(m.sk || {})[k]) return k;
+  k = pickSkill11(MON[m.sp].fam, m.sk || {}) || Object.keys(SK11).find(x => !(m.sk || {})[x]); if (k) { S.bookPick27[m.id] = k; save(); } return k; };
+function bookModal27(id) { const m = S.mons.find(o => o.id === id); if (!m) return `<button data-a="close">閉じる</button>`; const k = bookSk27(m); if (!k) return `<h2>📜 スキルの書</h2><div class="hint">この子が覚えられるスキルはもうない</div><button data-a="close">閉じる</button>`;
+  const L = skStar11(m), have = Object.keys(m.sk || {}), full = have.length >= 4;
+  let h = `<h2>📜 スキルの書（のこり${S.books27 || 0}冊）</h2><div class="box">${esc(m.nick)} が覚えるのは：<br>${skChip10(k, L)}<div class="hint">${skText11(k, L)}</div></div>`;
+  if (!full) return h + `<div class="mixbtn18"><button data-a="mcard27" data-v="${m.id}">やめる</button><button class="main" data-a="book27go" data-v="${m.id}">📜 覚える</button></div>`;
+  h += `<div class="lab2">スキルは4つまで。かわりに忘れるのは？</div>` + have.map(x => `<button class="row" style="width:100%;text-align:left;margin:4px 0" data-a="book27go" data-v="${m.id}:${x}">✖ ${skChip10(x, L)}<span class="hint">　${skText11(x, L)}</span></button>`).join("");
+  return h + `<button data-a="mcard27" data-v="${m.id}" style="width:100%;margin-top:8px">やめる（書は取っておく）</button>`; }
+monCard = (prev => function (id) { let h = prev(id); try { const m = S.mons.find(o => o.id === id); if (!m || N || !(S.books27 > 0)) return h;
+  const line = `<div class="tok27"><button data-a="book27" data-v="${m.id}" style="background:#24304a;border-color:#6a8ad0;color:#cfe0ff">📜 スキルの書を使う（${S.books27}冊）</button></div>`;
+  const i = h.indexOf('<div class="tok27"'); if (i >= 0) return h.slice(0, i) + line + h.slice(i); const j = h.indexOf('<div class="xp"'); if (j < 0) return h + line; const e = h.indexOf("</div>", j) + 6; return h.slice(0, e) + line + h.slice(e); } catch (e) { return h; } })(monCard);
+document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="book27"],[data-a="book27go"],[data-a="mcard27"]'); if (!b || !S) return; ev.stopImmediatePropagation(); ev.preventDefault();
+  const a = b.dataset.a, [id0, forget] = String(b.dataset.v).split(":"), id = +id0, m = S.mons.find(o => o.id === id); if (!m) return;
+  if (a === "mcard27") { modal = () => monCard(id); render(); return; }
+  if (a === "book27") { modal = () => bookModal27(id); render(); return; }
+  if (!(S.books27 > 0)) return; const k = bookSk27(m); if (!k) return; m.sk = m.sk || {};
+  if (Object.keys(m.sk).length >= 4) { if (!forget || !m.sk[forget]) return; delete m.sk[forget]; }
+  m.sk[k] = 1; S.books27--; delete S.bookPick27[m.id]; try { dng23 = { key: "", v: null }; } catch (e) {}
+  save(); sfx16 && sfx16("lvup"); toast(`📜 ${m.nick} が「${SK11[k].name}」を覚えた${forget && SK11[forget] ? `（「${SK11[forget].name}」を忘れた）` : ""}`); modal = () => monCard(id); render(); }, true);
+// ================= おまかせ（試算で一番よい並びを探す） =================
+// 点数はすべて💎に換算して足す：
+//   稼ぎ＝次の襲撃までの日数 ×（1日に掘れる💎 ＋ 1日に上がるLv × そのLvを特訓で買う値段）
+//   守り＝次の襲撃を試した平均で「主が倒れる確率×(4000＋いまの💎)＋主の体力の減り（1体力＝💎1で回復）＋倒れる魔物×60＋逃げられる勇者×(30＋💎の5%)＋盗まれる💎」
+//   点数＝稼ぎ − 守りの損
+// 今までのおまかせの並びを出発点に、「空いている部屋へ移す」「2体を入れかえる」を全部ためして、点数が上がる手を順に採る
+const lvPrice27 = lv => 10 * lv + 3 * lv * lv;
+function econ27() { const S0 = S, R0 = Math.random, U0 = UID5; let out = { dp: 0, lv: 0, val: 0 };
+  try { S = JSON.parse(JSON.stringify(S0)); S.sim23 = 1; Math.random = rng23(777 + (S.day || 0)); const before = new Map(S.mons.map(m => [m.id, m.lv + (m.exp || 0) / Math.max(1, expNext5(m))]));
+    const rep = newRep9(); dayJobs9(S, rep); out.dp = (rep.dp || 0) - (rep.base || 0);
+    S.mons.forEach(m => { const b = before.get(m.id), a = m.lv + (m.exp || 0) / Math.max(1, expNext5(m)), g = Math.max(0, a - b); out.lv += g; out.val += g * lvPrice27(Math.floor(b)); });
+  } catch (e) { console.error(e); } finally { S = S0; Math.random = R0; UID5 = U0; }
+  return out; }
+function score27(n) { const d = dngRun27({ morning: 1, n: n || 4 }), e = econ27(), H = Math.max(1, (daysToRaid9(S) ?? 2) + 1);
+  if (!d) return { total: H * (e.dp + e.val), d: null, e, H };
+  const loss = d.downs / d.n * (4000 + S.dp) + d.lossHP + d.md * 60 + d.esc * (30 + 0.05 * S.dp) + d.stolen;
+  return { total: H * (e.dp + e.val) - loss, loss, d, e, H }; }
+function optimize27(budget) { const t0 = performance.now(), dens = S.path.map((r, i) => r && r.kind === "den" && r.pol !== "rest" && !(hasFac12(r, "bed") && facsOf12(r).length === 1) ? i : -1).filter(i => i >= 0);
+  const mov = () => S.mons.filter(m => !m.job && !(m.rest > 0) && (m.home == null || dens.includes(m.home)));
+  const res = i => S.mons.filter(m => m.home === i).length, free = i => res(i) < capOfSlot7(S, i);
+  let cur = score27(), evals = 1, rounds = 0;
+  while (performance.now() - t0 < budget && rounds < 8) { rounds++; let best = null; const M = mov();
+    const tryIt = (apply, undo, label) => { if (performance.now() - t0 > budget) return; apply(); try { dng23 = { key: "", v: null }; const sc = score27(); evals++; if (sc.total > (best ? best.sc.total : cur.total) + 5) best = { sc, apply, label }; } finally { undo(); } };
+    M.forEach(m => dens.forEach(i => { if (m.home === i || !free(i)) return; const h0 = m.home; tryIt(() => { m.home = i; }, () => { m.home = h0; }); }));
+    for (let a = 0; a < M.length; a++) for (let b = a + 1; b < M.length; b++) { const x = M[a], y = M[b]; if (x.home === y.home) continue; const hx = x.home, hy = y.home; tryIt(() => { x.home = hy; y.home = hx; }, () => { x.home = hx; y.home = hy; }); }
+    if (!best) break; best.apply(); cur = best.sc; }
+  S.mons.forEach(m => { if (m.home != null && !m.job) m.job19h = m.home; });
+  dng23 = { key: "", v: null };
+  return { cur, evals, rounds, ms: Math.round(performance.now() - t0) }; }
+// 「おまかせ」ボタン：今までの並べ方 → 試算で詰める → 前と後をくらべて見せる
+function smartAuto27() {
+  const prevH = new Map(S.mons.map(m => [m.id, m.home])); S.undo13 = S.mons.map(m => [m.id, m.home, m.job]);
+  dng23 = { key: "", v: null }; const sc0 = score27(6);
+  autoAll19(S); const r = optimize27(2500); dng23 = { key: "", v: null }; const sc1 = score27(6);
+  if (sc1.total < sc0.total) { S.mons.forEach(m => { m.home = prevH.get(m.id); }); dng23 = { key: "", v: null }; }   /* 前より悪くなるなら動かさない */
+  const fin = sc1.total < sc0.total ? sc0 : sc1, moved = S.mons.filter(m => prevH.get(m.id) !== m.home);
+  const nm = i => i == null ? "控え" : roomTitle(S, i), lvTag = d => d ? `${DNG23[d.lv][0]}${DNG23[d.lv][1]}` : "—";
+  modal = () => `<h2>🪄 おまかせ</h2><div class="hint">守り（次の襲撃を試す）・稼ぎ・育ちを💎に換算して、いちばん点の高い並びを探した（${r.evals}通り）</div>
+    <div class="rs-grid"><div><small>次の襲撃</small><b>${lvTag(sc0.d)} → ${lvTag(fin.d)}</b></div><div><small>掘る💎/日</small><b>${Math.round(sc0.e.dp)} → ${Math.round(fin.e.dp)}</b></div><div><small>育ち Lv/日</small><b>${sc0.e.lv.toFixed(1)} → ${fin.e.lv.toFixed(1)}</b></div><div><small>守りの損（💎）</small><b>${Math.round(sc0.loss || 0)} → ${Math.round(fin.loss || 0)}</b></div></div>
+    ${moved.length ? `<div class="lab2">動いた子（${moved.length}体）</div>` + moved.map(m => `<div class="hint">${esc(m.nick)}：${esc(nm(prevH.get(m.id)))} → <b>${esc(nm(m.home))}</b></div>`).join("") : `<div class="box">いまの並びがいちばん</div>`}
+    <div class="mixbtn18">${moved.length ? `<button data-a="undo13">↩ 戻す</button>` : ""}<button class="main" data-a="close">OK</button></div>`;
+  CV.sig = ""; save(); render(); }
+document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="af19go"],[data-a="rebal"]'); if (!b || !S || N) return; ev.stopImmediatePropagation(); ev.preventDefault();
+  modal = () => `<h2>🪄 おまかせ</h2><div class="box">いろいろな並びで勇者と戦わせて、くらべています…</div>`; render();
+  setTimeout(() => { try { smartAuto27(); } catch (e) { console.error(e); modal = null; render(); } }, 60); }, true);
 
 </script>
 </body>
