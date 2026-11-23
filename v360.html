@@ -7363,7 +7363,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.292（11/23 10:40）";
+const VER20 = "No.293（11/23 10:55）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -12831,72 +12831,103 @@ if ("serviceWorker" in navigator && /^https?:/.test(location.protocol)) {
     if (reg.active) go(); else navigator.serviceWorker.ready.then(go); }).catch(() => {});
 }
 
-// ================= orbit26：部屋をその場で描いて、指で360°回して見る（試作） =================
-// 焼いた背景（いつも同じ向き）ではなく、部屋と魔物の式をそのつど描く。重いので解像度は自動で下げる
-const ORBMODE26 = { idle: 1, sleep: 1, mine: 1, slash: 1, lift: 1, walk: 1, cast: 1, hurt: 1 };
+const MESHV26 = {"bed": "62c58618", "bed_nest": "9b3fdd5b", "bed_watch": "42ab0b64", "entry": "71647803", "entry_mine": "941244b6", "guard": "2255180b", "lord": "80e1c5e6", "mine": "d74dc806", "mine_bed": "76a13863", "mine_nest": "d9816b53", "mine_watch": "984c00b3", "nest": "98c1b911", "nest_watch": "87648926", "plain": "19f9c004", "train": "3fd855b8", "train_bed": "7ea1ea82", "train_mine": "a2d544da", "train_nest": "12e9524b", "train_watch": "ff4248a4", "watch": "b95906a0"};
+
+// ================= orbit26：部屋をポリゴンで描いて、指で360°回して見る（試作） =================
+// 部屋の形と色は、こちらで前もって式からポリゴンに直したもの（bg26/<部屋>.m26.gz）。魔物は13方向の歩く絵を、見る向きに合わせて立てる
+// CSSの filter（階の色）を色の行列にする
+function cssMat26(str){ let M = [1, 0, 0, 0, 1, 0, 0, 0, 1], O = [0, 0, 0];
+  const mul = (A, Oa) => { const R = []; for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) R[i * 3 + j] = A[i * 3] * M[j] + A[i * 3 + 1] * M[3 + j] + A[i * 3 + 2] * M[6 + j];
+    const RO = [0, 1, 2].map(i => A[i * 3] * O[0] + A[i * 3 + 1] * O[1] + A[i * 3 + 2] * O[2] + (Oa ? Oa[i] : 0)); M = R; O = RO; };
+  (str || "").replace(/([a-z-]+)\(([-\d.]+)(deg)?\)/g, (m, f, v) => { v = +v;
+    if (f === "saturate") mul([0.213 + 0.787 * v, 0.715 - 0.715 * v, 0.072 - 0.072 * v, 0.213 - 0.213 * v, 0.715 + 0.285 * v, 0.072 - 0.072 * v, 0.213 - 0.213 * v, 0.715 - 0.715 * v, 0.072 + 0.928 * v]);
+    else if (f === "hue-rotate") { const c = Math.cos(v * Math.PI / 180), s = Math.sin(v * Math.PI / 180); mul([0.213 + c * 0.787 - s * 0.213, 0.715 - c * 0.715 - s * 0.715, 0.072 - c * 0.072 + s * 0.928, 0.213 - c * 0.213 + s * 0.143, 0.715 + c * 0.285 + s * 0.14, 0.072 - c * 0.072 - s * 0.283, 0.213 - c * 0.213 - s * 0.787, 0.715 - c * 0.715 + s * 0.715, 0.072 + c * 0.928 + s * 0.072]); }
+    else if (f === "sepia") { const a = v, S = [.393, .769, .189, .349, .686, .168, .272, .534, .131]; mul([0, 1, 2, 3, 4, 5, 6, 7, 8].map(i => (i % 4 === 0 ? 1 - a : 0) + a * S[i])); }
+    else if (f === "brightness") mul([v, 0, 0, 0, v, 0, 0, 0, v]);
+    else if (f === "contrast") mul([v, 0, 0, 0, v, 0, 0, 0, v], [0.5 - 0.5 * v, 0.5 - 0.5 * v, 0.5 - 0.5 * v]); return m; });
+  return { M, O }; }
+const MESH26 = {};
+async function meshLoad26(kind){ if (kind === "lordday") kind = "lord"; if (MESH26[kind]) return MESH26[kind];
+  const r = await fetch(`bg26/${kind}.m26.gz?v=${(typeof MESHV26 !== "undefined" && MESHV26[kind]) || 1}`); if (!r.ok) throw new Error("部屋の形が読めない " + r.status);
+  const ds = r.body.pipeThrough(new DecompressionStream("gzip")), buf = await new Response(ds).arrayBuffer(), dv = new DataView(buf);
+  const N = dv.getUint32(4, true), T = dv.getUint32(8, true); let o = 16; const pos = new Int16Array(buf.slice(o, o + N * 6)); o += N * 6; const col = new Uint8Array(buf.slice(o, o + N * 3)); o += N * 3; const idx = new Uint32Array(buf.slice(o, o + T * 12));
+  return MESH26[kind] = { N, T, pos, col, idx }; }
 function orbit26(i){
   if (document.getElementById("orb26")) return;
-  const kind = roomKind25(i), on = {}; ROOMSET25[kind].forEach(k => on[k] = true); const room = HAI25.room(on);
-  const ms = S.mons.filter(m => m.home === i).slice(0, 4);
-  let cast = [];
-  try { cast = HAI25.place(on, ms.map(m => { let j = "idle"; try { j = restLeft7(S, m) ? "sleep" : (peekMon24(m, i).job || "idle"); } catch (e) {} return { sp: m.sp, evo: m.evos || 0, n: 1, act: j === "bed" ? "sleep" : j }; }), 11 + i * 17); } catch (e) {}
-  cast = cast.filter(c => SP3D24[kitOf24(c.sp)]).slice(0, 4).map((c, k) => ({ sp: c.sp, evo: c.evo || 0, mode: ORBMODE26[c.mode] ? c.mode : "idle", t: k * 0.37, o: [c.o[0], c.mode === "sleep" ? 0.12 : 0, c.o[2]], r: c.look ? Math.atan2(c.look[0] - c.o[0], c.look[1] - c.o[2]) : (c.r || 0), lie: c.mode === "sleep" && ["goblin", "skeleton", "imp", "kobold", "orc", "golem", "human", "demon"].includes(kitOf24(c.sp)) ? 1 : 0 }));
+  const kind = roomKind25(i), on = {}; ROOMSET25[kind].forEach(k => on[k] = true);
+  const ms = S.mons.filter(m => m.home === i).slice(0, 8);
+  let cast = []; try { cast = HAI25.place(on, ms.map(m => ({ sp: m.sp, evo: m.evos || 0, n: 1, act: "idle" })), 11 + i * 17); } catch (e) {}
+  const acts = cast.map((c, k) => ({ sp: c.sp, evo: c.evo || 0, x: c.o[0], z: c.o[2], r: Math.random() * 6.28, hx: c.o[0], hz: c.o[2], tx: c.o[0], tz: c.o[2], wait: 1 + Math.random() * 3, ph: Math.random() * 6, walking: false }));
+  acts.forEach(a => { try { drtWarm25(a.sp, a.evo); } catch (e) {} });
+  const th = (() => { try { return (S.floors[floorOf(S, i)] || {}).theme; } catch (e) { return ""; } })(), CM = cssMat26((typeof THF25 !== "undefined" && THF25[th]) || "");
   const wrap = document.createElement("div"); wrap.id = "orb26";
   wrap.innerHTML = `<canvas></canvas><div class="o26top"><b>${S.path[i].kind === "lord" ? "主の間" : i === 0 ? "入口" : "第" + i + "の間"}</b><span class="o26fps"></span><button data-o="x">✕ とじる</button></div>
-    <div class="o26msg">部屋を組み立てています…</div><div class="o26bar"><button data-o="auto" class="on">⟲ 自動で回す</button><button data-o="q">画質：自動</button></div><div class="o26hint">ドラッグで回す・2本指で寄る</div>`;
+    <div class="o26msg">部屋を読みこんでいます…</div><div class="o26bar"><button data-o="auto" class="on">⟲ 自動で回す</button></div><div class="o26hint">ドラッグで回す・2本指で寄る</div>`;
   document.body.appendChild(wrap);
   const cv = wrap.querySelector("canvas"), msg = wrap.querySelector(".o26msg"), fpsEl = wrap.querySelector(".o26fps");
-  const gl = cv.getContext("webgl", { antialias: false, alpha: false, powerPreference: "high-performance" });
-  let alive = true; const close = () => { alive = false; wrap.remove(); try { const x = gl.getExtension("WEBGL_lose_context"); x && x.loseContext(); } catch (e) {} };
+  const gl = cv.getContext("webgl", { antialias: true, alpha: false }); let alive = true;
+  const close = () => { alive = false; wrap.remove(); try { const x = gl.getExtension("WEBGL_lose_context"); x && x.loseContext(); } catch (e) {} };
   wrap.querySelector('[data-o="x"]').onclick = close;
-  if (!gl) { msg.textContent = "この端末ではWebGLが使えない"; return; }
-  let P = null;
-  setTimeout(() => { try {   // 組み立て（コンパイル）は重いので、表示を出してから
-    let fs = makeFS24(room, cast.length ? cast.map(c => ({ sp: c.sp })) : [{ sp: "goblin" }]);
-    fs = fs.replace("uniform float PASS;", "uniform float PASS;uniform float CUTH;").replace("float t=0.0,hit=0.0;", "float t=max(0.0,(ro.y-CUTH)/max(-rd.y,0.001)),hit=0.0;").replace("float tmax=110.0;", "float tmax=190.0;");
-    const sh = (ty, s) => { const o = gl.createShader(ty); gl.shaderSource(o, s); gl.compileShader(o); if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(o)); return o; };
-    const p = gl.createProgram(); gl.attachShader(p, sh(gl.VERTEX_SHADER, SDF_VS)); gl.attachShader(p, sh(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(p); if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
-    const U = {}; P = { p, U: n => U[n] !== undefined ? U[n] : (U[n] = gl.getUniformLocation(p, n)) };
-    msg.remove(); requestAnimationFrame(loop);
-  } catch (e) { msg.textContent = "この部屋は組み立てられなかった：" + String(e.message || e).slice(0, 80); } }, 60);
-  const quad = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, quad); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-  const faceT = faceAtlas24(gl);
-  // カメラ：部屋のまん中を中心にぐるっと
-  const TG = [0, 0.6, -1.4]; let yaw = 0.1, pit = 0.7, dist = 74, auto = true, qmode = 0, scale = 0.9, lastT = performance.now(), ft = [], t0 = performance.now();
-  const camOf = () => { const e = [TG[0] + Math.sin(yaw) * dist * Math.cos(pit), TG[1] + dist * Math.sin(pit), TG[2] + Math.cos(yaw) * dist * Math.cos(pit)]; const fw = V3.n(V3.s(TG, e)), rt = V3.n(V3.x(fw, [0, 1, 0])), up = V3.x(rt, fw); return { e, M: [...rt, ...up, ...fw] }; };
-  // 指
+  if (!gl || !gl.getExtension("OES_element_index_uint")) { msg.textContent = "この端末では使えない"; return; }
+  const sh = (ty, s) => { const o = gl.createShader(ty); gl.shaderSource(o, s); gl.compileShader(o); if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(o)); return o; };
+  const prog = (vs, fs) => { const p = gl.createProgram(); gl.attachShader(p, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(p, sh(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(p); const U = {}; return { p, U: n => U[n] !== undefined ? U[n] : (U[n] = gl.getUniformLocation(p, n)), A: n => gl.getAttribLocation(p, n) }; };
+  const PM = prog(`attribute vec3 ap;attribute vec3 ac;uniform mat4 VP;uniform mat3 CM;uniform vec3 CO;varying vec3 vc;varying float vd;void main(){vec3 p=ap*0.01;gl_Position=VP*vec4(p,1.0);vc=clamp(CM*ac+CO,0.0,1.0);vd=gl_Position.w;}`,
+    `precision mediump float;varying vec3 vc;varying float vd;void main(){float f=clamp((vd-60.0)/70.0,0.0,0.7);gl_FragColor=vec4(mix(vc,vec3(0.04,0.03,0.03),f),1.0);}`);
+  const PB = prog(`attribute vec2 aq;uniform mat4 VP;uniform vec3 C;uniform vec3 R;uniform vec4 Q;varying vec2 uv;void main(){uv=vec2(aq.x,1.0-aq.y);vec3 p=C+R*(Q.x+aq.x*Q.z)+vec3(0.0,1.0,0.0)*(Q.y+aq.y*Q.w);gl_Position=VP*vec4(p,1.0);}`,
+    `precision mediump float;uniform sampler2D tx;uniform float FL;uniform vec2 UR;varying vec2 uv;void main(){vec4 c=texture2D(tx,vec2(UR.x+(FL>0.5?1.0-uv.x:uv.x)*UR.y,uv.y));if(c.a<0.5)discard;gl_FragColor=c;}`);
+  const qb = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, qb); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]), gl.STATIC_DRAW);
+  let MB = null;
+  meshLoad26(kind).then(m => { const pb = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, pb); gl.bufferData(gl.ARRAY_BUFFER, m.pos, gl.STATIC_DRAW);
+    const cb = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, cb); gl.bufferData(gl.ARRAY_BUFFER, m.col, gl.STATIC_DRAW);
+    const ib = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, m.idx, gl.STATIC_DRAW); MB = { pb, cb, ib, n: m.T * 3 }; msg.remove(); }).catch(e => { msg.textContent = String(e.message || e); });
+  // 絵（キャンバス）→ テクスチャ。同じ絵は使いまわす
+  const TX = new Map(); const texOf = im => { let t = TX.get(im); if (t) return t; t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, im);
+    [gl.TEXTURE_MIN_FILTER, gl.TEXTURE_MAG_FILTER].forEach(k => gl.texParameteri(gl.TEXTURE_2D, k, gl.NEAREST)); [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T].forEach(k => gl.texParameteri(gl.TEXTURE_2D, k, gl.CLAMP_TO_EDGE)); if (TX.size > 400) TX.clear(); TX.set(im, t); return t; };
+  // カメラ
+  const TG = [0, 0.5, -1.2]; let yaw = 0.1, pit = 0.66, dist = 62, auto = true, lastT = performance.now(), ft = [];
   const pts = new Map(); let pd = 0;
   cv.addEventListener("pointerdown", e => { cv.setPointerCapture(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]); auto = false; wrap.querySelector('[data-o="auto"]').classList.remove("on"); if (pts.size === 2) { const [a, b] = [...pts.values()]; pd = Math.hypot(a[0] - b[0], a[1] - b[1]); } });
   cv.addEventListener("pointermove", e => { if (!pts.has(e.pointerId)) return; const o = pts.get(e.pointerId), n = [e.clientX, e.clientY];
-    if (pts.size === 1) { yaw -= (n[0] - o[0]) * 0.008; pit = Math.max(0.22, Math.min(1.35, pit + (n[1] - o[1]) * 0.006)); }
-    pts.set(e.pointerId, n); if (pts.size === 2) { const [a, b] = [...pts.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]); if (pd) dist = Math.max(22, Math.min(110, dist * pd / d)); pd = d; } });
+    if (pts.size === 1) { yaw -= (n[0] - o[0]) * 0.008; pit = Math.max(0.2, Math.min(1.4, pit + (n[1] - o[1]) * 0.006)); }
+    pts.set(e.pointerId, n); if (pts.size === 2) { const [a, b] = [...pts.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]); if (pd) dist = Math.max(14, Math.min(110, dist * pd / d)); pd = d; } });
   const up = e => { pts.delete(e.pointerId); pd = 0; }; cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up);
-  cv.addEventListener("wheel", e => { e.preventDefault(); dist = Math.max(22, Math.min(110, dist * (1 + e.deltaY * 0.001))); }, { passive: false });
+  cv.addEventListener("wheel", e => { e.preventDefault(); dist = Math.max(14, Math.min(110, dist * (1 + e.deltaY * 0.001))); }, { passive: false });
   wrap.querySelector('[data-o="auto"]').onclick = ev => { auto = !auto; ev.target.classList.toggle("on", auto); };
-  const QL = ["自動", "低", "中", "高"], QS = [0, 0.6, 0.9, 1.4];
-  wrap.querySelector('[data-o="q"]').onclick = ev => { qmode = (qmode + 1) % 4; if (qmode) scale = QS[qmode]; ev.target.textContent = "画質：" + QL[qmode]; };
+  const persp = (fy, as, n, f) => { const t = 1 / Math.tan(fy / 2); return [t / as, 0, 0, 0, 0, t, 0, 0, 0, 0, (f + n) / (n - f), -1, 0, 0, 2 * f * n / (n - f), 0]; };
+  const look = (e, c) => { const f = V3.n(V3.s(c, e)), s = V3.n(V3.x(f, [0, 1, 0])), u = V3.x(s, f); return [s[0], u[0], -f[0], 0, s[1], u[1], -f[1], 0, s[2], u[2], -f[2], 0, -V3.d(s, e), -V3.d(u, e), V3.d(f, e), 1]; };
+  const mm = (a, b) => { const r = new Array(16).fill(0); for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) for (let k = 0; k < 4; k++) r[j * 4 + i] += a[k * 4 + i] * b[j * 4 + k]; return r; };
+  // 魔物の暮らし（軽く）：ときどき近くへ歩いて、また立ち止まる
+  const SH = SHAPE25[(ROOMS24[HAI25.room(on)] || {}).shape] || SHAPE25.base, OBS = (() => { try { return HAI25.foots(on).filter(o => o[2] >= 0.5); } catch (e) { return []; } })();
+  const fl = (x, z) => shapeSd25(SH, x / SW25[0], z / SW25[1]) < -0.25 && !OBS.some(([ox, oz, or]) => Math.hypot(x - ox, z - oz) < or + 0.6);
+  function stepActs(dt){ acts.forEach(a => { if (!a.walking) { a.wait -= dt; if (a.wait <= 0) { for (let k = 0; k < 8; k++) { const ang = Math.random() * 6.28, d = 2 + Math.random() * 5, x = a.hx + Math.cos(ang) * d, z = a.hz + Math.sin(ang) * d; if (fl(x, z)) { a.tx = x; a.tz = z; a.walking = true; break; } } a.wait = 2 + Math.random() * 4; } return; }
+    const dx = a.tx - a.x, dz = a.tz - a.z, L = Math.hypot(dx, dz); if (L < 0.1) { a.walking = false; return; } const s = Math.min(L, 2.2 * dt); a.x += dx / L * s; a.z += dz / L * s; a.r = Math.atan2(dx, dz); a.ph = (a.ph + dt * 7.5) % 6; }); }
   function loop(now){ if (!alive) return; requestAnimationFrame(loop);
-    const dt = Math.min(0.1, (now - lastT) / 1000); lastT = now; ft.push(dt); if (ft.length > 12) ft.shift();
-    if (auto) yaw += dt * 0.25;
-    if (!qmode && ft.length >= 12) { const a = ft.reduce((x, y) => x + y, 0) / ft.length; if (a > 0.055 && scale > 0.35) { scale *= 0.85; ft = []; } else if (a < 0.022 && scale < 1.4) { scale *= 1.1; ft = []; } }
-    fpsEl.textContent = ft.length ? Math.round(ft.length / ft.reduce((x, y) => x + y, 0)) + "fps" : "";
-    const r = cv.getBoundingClientRect(), h = Math.max(90, Math.round(200 * scale)), w = Math.round(h * r.width / Math.max(1, r.height));
-    if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
-    const C = camOf(), U = P.U, tm = (now - t0) / 1000;
-    gl.viewport(0, 0, w, h); gl.useProgram(P.p); gl.bindBuffer(gl.ARRAY_BUFFER, quad); const a = gl.getAttribLocation(P.p, "a"); gl.enableVertexAttribArray(a); gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
-    gl.uniform2f(U("res"), w, h); gl.uniform3fv(U("cam"), C.e); gl.uniformMatrix3fv(U("camM"), false, new Float32Array(C.M)); gl.uniform1f(U("fl"), 1.6);
-    gl.uniform1f(U("PASS"), 0); gl.uniform2f(U("vres"), w, h); gl.uniform2f(U("crop"), 0, 0); gl.uniform1f(U("zoom"), 1); gl.uniform1f(U("CUTH"), 3.4);
-    const list = cast.length ? cast : [{ sp: "goblin", mode: "idle", t: 0, o: [0, -50, 0], r: 0 }];
-    list.forEach((c, k) => { const R = rigSp24(c.sp, c.mode, tm + c.t), s2 = SLOTS24[k]; gl.uniform3fv(U("J" + s2), new Float32Array(R.J.flat())); gl.uniformMatrix3fv(U("HR" + s2), false, new Float32Array(R.HR)); gl.uniformMatrix3fv(U("TR" + s2), false, new Float32Array(R.TR)); gl.uniform1f(U("tool" + s2), R.tool);
-      const f = new Float32Array(24); (R.deb || []).forEach((d, j) => f.set(d, j * 4)); gl.uniform4fv(U("deb" + s2), f); });
-    gl.uniform3fv(U("OC"), new Float32Array(list.flatMap(c => c.o))); gl.uniform1fv(U("RC"), new Float32Array(list.map(c => c.r))); gl.uniform1fv(U("LIE"), new Float32Array(list.map(c => c.lie ? 1 : 0)));
-    gl.uniform3fv(U("SKIN"), new Float32Array(list.flatMap(c => spCol24(c.sp)[0]))); gl.uniform3fv(U("CLOTH"), new Float32Array(list.flatMap(c => spCol24(c.sp)[1]))); gl.uniform1fv(U("FI"), new Float32Array(list.map(c => FACEIDX24[kitOf24(c.sp)] ?? -1)));
-    gl.uniform1fv(U("EV"), new Float32Array(list.map(c => c.evo || 0))); gl.uniform1fv(U("SCL"), new Float32Array(list.map(c => sclOf24(c)))); gl.uniform4fv(U("VAR"), new Float32Array(list.flatMap(c => (typeof varOf24 !== "undefined" ? varOf24(c.sp, c.evo) : spVar24(c.sp))[0]))); gl.uniform3fv(U("ACC"), new Float32Array(list.flatMap(c => spVar24(c.sp)[1])));
-    gl.uniform1f(U("tm"), tm); gl.uniform1f(U("CS"), 1.0); gl.uniform1f(U("idm"), 0); gl.uniform1f(U("hasFace"), 2);
-    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, faceT); gl.uniform1i(U("face"), 0);
-    gl.drawArrays(gl.TRIANGLES, 0, 3); }
+    const dt = Math.min(0.1, (now - lastT) / 1000); lastT = now; ft.push(dt); if (ft.length > 20) ft.shift(); fpsEl.textContent = Math.round(ft.length / ft.reduce((x, y) => x + y, 0)) + "fps";
+    if (auto) yaw += dt * 0.2; stepActs(dt);
+    const dpr = Math.min(2, window.devicePixelRatio || 1), r = cv.getBoundingClientRect(), W = Math.round(r.width * dpr), H = Math.round(r.height * dpr); if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+    gl.viewport(0, 0, W, H); gl.clearColor(0.03, 0.025, 0.025, 1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); if (!MB) return;
+    const e = [TG[0] + Math.sin(yaw) * dist * Math.cos(pit), TG[1] + dist * Math.sin(pit), TG[2] + Math.cos(yaw) * dist * Math.cos(pit)];
+    const VP = mm(persp(0.62, W / H, 1, 300), look(e, TG));
+    gl.enable(gl.DEPTH_TEST); gl.enable(gl.CULL_FACE); gl.cullFace(gl.BACK);
+    gl.useProgram(PM.p); gl.uniformMatrix4fv(PM.U("VP"), false, new Float32Array(VP)); gl.uniformMatrix3fv(PM.U("CM"), false, new Float32Array([0, 3, 6, 1, 4, 7, 2, 5, 8].map(j => CM.M[j]))); gl.uniform3fv(PM.U("CO"), CM.O);
+    let l = PM.A("ap"); gl.bindBuffer(gl.ARRAY_BUFFER, MB.pb); gl.enableVertexAttribArray(l); gl.vertexAttribPointer(l, 3, gl.SHORT, false, 0, 0);
+    l = PM.A("ac"); gl.bindBuffer(gl.ARRAY_BUFFER, MB.cb); gl.enableVertexAttribArray(l); gl.vertexAttribPointer(l, 3, gl.UNSIGNED_BYTE, true, 0, 0);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, MB.ib); gl.drawElements(gl.TRIANGLES, MB.n, gl.UNSIGNED_INT, 0);
+    gl.disableVertexAttribArray(PM.A("ac")); gl.disable(gl.CULL_FACE);
+    // 魔物：カメラに向けて立てた板。向きは「魔物の向き − 見る向き」で13方向から選ぶ
+    gl.useProgram(PB.p); gl.uniformMatrix4fv(PB.U("VP"), false, new Float32Array(VP)); l = PB.A("aq"); gl.bindBuffer(gl.ARRAY_BUFFER, qb); gl.enableVertexAttribArray(l); gl.vertexAttribPointer(l, 2, gl.FLOAT, false, 0, 0);
+    const Rr = V3.n([Math.cos(yaw), 0, -Math.sin(yaw)]);
+    acts.forEach(a => { const o = dspr25(a.sp, a.evo); if (!o) return; const view = Math.atan2(e[0] - a.x, e[2] - a.z); let rel = ((a.r - view) % 6.2832 + 9.4248) % 6.2832 - 3.1416;
+      const ai = Math.round(Math.abs(rel) / Math.PI * 12), flip = rel < 0; let F = null; try { if (!DRT25.bad) F = drt25(a.sp, a.evo, ai, a.walking ? Math.floor(a.ph) : 0); } catch (er) {}
+      const ppu = o.ppu || 36, foot = 122; let im, ox, oy, w, h; if (F) { im = F.im; ox = F.ox; oy = F.oy; w = im.width; h = im.height; } else if (o.ok) { im = o.im; ox = 0; oy = 0; w = Math.round(128 * (o.hs || 1)); h = w; } else return;
+      const fr = F ? 0 : (a.walking ? 0 : Math.floor((now / 1000 + a.ph) / 0.4) % 4), UR = F ? [0, 1] : [fr * w / im.width, w / im.width];   /* 前向きの絵は横に並んだコマ */
+      const k = 1 / ppu / (F ? 1 : (o.hs || 1)), fx = F ? 64 : 64 * (o.hs || 1), fy = F ? foot : o.foot * (o.hs || 1);
+      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, texOf(im)); gl.uniform1i(PB.U("tx"), 0); gl.uniform1f(PB.U("FL"), flip ? 1 : 0); gl.uniform2f(PB.U("UR"), UR[0], UR[1]);
+      gl.uniform3f(PB.U("C"), a.x, (DHOV25[a.sp] ? 0.9 : 0), a.z); gl.uniform3fv(PB.U("R"), Rr);
+      const qx = flip ? (fx - (ox + w)) * k : (ox - fx) * k; gl.uniform4f(PB.U("Q"), qx, (fy - (oy + h)) * k, w * k, h * k); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); });
+  }
+  requestAnimationFrame(loop);
 }
-// 昼の3Dの部屋に「🔄」ボタン
 document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest(".o26go"); if (!b) return; ev.stopImmediatePropagation(); ev.preventDefault(); orbit26(+b.dataset.room); }, true);
 
 </script>
