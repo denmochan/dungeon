@@ -7363,7 +7363,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.291（11/23 10:39）";
+const VER20 = "No.292（11/23 10:40）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -12862,16 +12862,16 @@ function orbit26(i){
   const quad = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, quad); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
   const faceT = faceAtlas24(gl);
   // カメラ：部屋のまん中を中心にぐるっと
-  const TG = [0, 0.6, -1.4]; let yaw = 0.1, pit = 0.62, dist = 58, auto = true, qmode = 0, scale = 0.9, lastT = performance.now(), ft = [], t0 = performance.now();
+  const TG = [0, 0.6, -1.4]; let yaw = 0.1, pit = 0.7, dist = 74, auto = true, qmode = 0, scale = 0.9, lastT = performance.now(), ft = [], t0 = performance.now();
   const camOf = () => { const e = [TG[0] + Math.sin(yaw) * dist * Math.cos(pit), TG[1] + dist * Math.sin(pit), TG[2] + Math.cos(yaw) * dist * Math.cos(pit)]; const fw = V3.n(V3.s(TG, e)), rt = V3.n(V3.x(fw, [0, 1, 0])), up = V3.x(rt, fw); return { e, M: [...rt, ...up, ...fw] }; };
   // 指
   const pts = new Map(); let pd = 0;
   cv.addEventListener("pointerdown", e => { cv.setPointerCapture(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]); auto = false; wrap.querySelector('[data-o="auto"]').classList.remove("on"); if (pts.size === 2) { const [a, b] = [...pts.values()]; pd = Math.hypot(a[0] - b[0], a[1] - b[1]); } });
   cv.addEventListener("pointermove", e => { if (!pts.has(e.pointerId)) return; const o = pts.get(e.pointerId), n = [e.clientX, e.clientY];
     if (pts.size === 1) { yaw -= (n[0] - o[0]) * 0.008; pit = Math.max(0.22, Math.min(1.35, pit + (n[1] - o[1]) * 0.006)); }
-    pts.set(e.pointerId, n); if (pts.size === 2) { const [a, b] = [...pts.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]); if (pd) dist = Math.max(22, Math.min(90, dist * pd / d)); pd = d; } });
+    pts.set(e.pointerId, n); if (pts.size === 2) { const [a, b] = [...pts.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]); if (pd) dist = Math.max(22, Math.min(110, dist * pd / d)); pd = d; } });
   const up = e => { pts.delete(e.pointerId); pd = 0; }; cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up);
-  cv.addEventListener("wheel", e => { e.preventDefault(); dist = Math.max(22, Math.min(90, dist * (1 + e.deltaY * 0.001))); }, { passive: false });
+  cv.addEventListener("wheel", e => { e.preventDefault(); dist = Math.max(22, Math.min(110, dist * (1 + e.deltaY * 0.001))); }, { passive: false });
   wrap.querySelector('[data-o="auto"]').onclick = ev => { auto = !auto; ev.target.classList.toggle("on", auto); };
   const QL = ["自動", "低", "中", "高"], QS = [0, 0.6, 0.9, 1.4];
   wrap.querySelector('[data-o="q"]').onclick = ev => { qmode = (qmode + 1) % 4; if (qmode) scale = QS[qmode]; ev.target.textContent = "画質：" + QL[qmode]; };
@@ -12884,7 +12884,7 @@ function orbit26(i){
     if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
     const C = camOf(), U = P.U, tm = (now - t0) / 1000;
     gl.viewport(0, 0, w, h); gl.useProgram(P.p); gl.bindBuffer(gl.ARRAY_BUFFER, quad); const a = gl.getAttribLocation(P.p, "a"); gl.enableVertexAttribArray(a); gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
-    gl.uniform2f(U("res"), w, h); gl.uniform3fv(U("cam"), C.e); gl.uniformMatrix3fv(U("camM"), false, new Float32Array(C.M)); gl.uniform1f(U("fl"), 1.9);
+    gl.uniform2f(U("res"), w, h); gl.uniform3fv(U("cam"), C.e); gl.uniformMatrix3fv(U("camM"), false, new Float32Array(C.M)); gl.uniform1f(U("fl"), 1.6);
     gl.uniform1f(U("PASS"), 0); gl.uniform2f(U("vres"), w, h); gl.uniform2f(U("crop"), 0, 0); gl.uniform1f(U("zoom"), 1); gl.uniform1f(U("CUTH"), 3.4);
     const list = cast.length ? cast : [{ sp: "goblin", mode: "idle", t: 0, o: [0, -50, 0], r: 0 }];
     list.forEach((c, k) => { const R = rigSp24(c.sp, c.mode, tm + c.t), s2 = SLOTS24[k]; gl.uniform3fv(U("J" + s2), new Float32Array(R.J.flat())); gl.uniformMatrix3fv(U("HR" + s2), false, new Float32Array(R.HR)); gl.uniformMatrix3fv(U("TR" + s2), false, new Float32Array(R.TR)); gl.uniform1f(U("tool" + s2), R.tool);
