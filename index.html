@@ -7400,7 +7400,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.318（11/23 21:16）";
+const VER20 = "No.319（11/23 21:32）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -13467,8 +13467,8 @@ function optimize27(budget) { const t0 = performance.now(), dens = S.path.map((r
   let cur = score27(), evals = 1, rounds = 0;
   while (performance.now() - t0 < budget && rounds < 8) { rounds++; let best = null; const M = mov();
     const tryIt = (apply, undo, label) => { if (performance.now() - t0 > budget) return; apply(); try { dng23 = { key: "", v: null }; const sc = score27(); evals++; if (sc.total > (best ? best.sc.total : cur.total) + 5) best = { sc, apply, label }; } finally { undo(); } };
-    M.forEach(m => dens.forEach(i => { if (m.home === i || !free(i)) return; const h0 = m.home; tryIt(() => { m.home = i; }, () => { m.home = h0; }); }));
-    for (let a = 0; a < M.length; a++) for (let b = a + 1; b < M.length; b++) { const x = M[a], y = M[b]; if (x.home === y.home) continue; const hx = x.home, hy = y.home; tryIt(() => { x.home = hy; y.home = hx; }, () => { x.home = hx; y.home = hy; }); }
+    M.forEach(m => dens.forEach(i => { if (m.home === i || !free(i)) return; const h0 = m.home; const j0 = m.job19, jh0 = m.job19h; tryIt(() => { m.home = i; m.job19 = null; m.job19h = i; }, () => { m.home = h0; m.job19 = j0; m.job19h = jh0; }); }));
+    for (let a = 0; a < M.length; a++) for (let b = a + 1; b < M.length; b++) { const x = M[a], y = M[b]; if (x.home === y.home) continue; const hx = x.home, hy = y.home; const xj = [x.job19, x.job19h], yj = [y.job19, y.job19h]; tryIt(() => { x.home = hy; y.home = hx; x.job19 = y.job19 = null; x.job19h = hy; y.job19h = hx; }, () => { x.home = hx; y.home = hy; [x.job19, x.job19h] = xj; [y.job19, y.job19h] = yj; }); }
     if (!best) break; best.apply(); cur = best.sc; }
   S.mons.forEach(m => { if (m.home != null && !m.job) m.job19h = m.home; });
   dng23 = { key: "", v: null };
@@ -13476,10 +13476,13 @@ function optimize27(budget) { const t0 = performance.now(), dens = S.path.map((r
 // 「おまかせ」ボタン：今までの並べ方 → 試算で詰める → 前と後をくらべて見せる
 function smartAuto27() {
   const prevH = new Map(S.mons.map(m => [m.id, m.home])); S.undo13 = S.mons.map(m => [m.id, m.home, m.job]);
+  /* 並びだけでなく、仕事の希望・部屋の方針もまとめて覚えておく（前は「悪くなったら戻す」で部屋だけ戻り、方針や仕事は変わったまま→全部の値が下がっていた） */
+  const snap = { m: S.mons.map(m => [m, m.home, m.job, m.job19, m.job19h]), p: S.path.map(r => [r, r && r.pol]) }, restore = () => { snap.m.forEach(([m, h, j, j9, jh]) => { m.home = h; m.job = j; m.job19 = j9; m.job19h = jh; }); snap.p.forEach(([r, p]) => { if (r) r.pol = p; }); dng23 = { key: "", v: null }; };
   dng23 = { key: "", v: null }; const sc0 = score27(6);
   autoAll19(S); const r = optimize27(2500); dng23 = { key: "", v: null }; const sc1 = score27(6);
-  if (sc1.total < sc0.total) { S.mons.forEach(m => { m.home = prevH.get(m.id); }); dng23 = { key: "", v: null }; }   /* 前より悪くなるなら動かさない */
-  const fin = sc1.total < sc0.total ? sc0 : sc1, moved = S.mons.filter(m => prevH.get(m.id) !== m.home);
+  const keep = sc1.total > sc0.total + Math.max(20, Math.abs(sc0.total) * 0.03);   /* はっきり良くなるときだけ変える（押すたびに並びが変わらないように） */
+  if (!keep) restore(); else window.__undo27 = restore;
+  const fin = keep ? sc1 : sc0, moved = S.mons.filter(m => prevH.get(m.id) !== m.home);
   const nm = i => i == null ? "控え" : roomTitle(S, i), lvTag = d => d ? `${DNG23[d.lv][0]}${DNG23[d.lv][1]}` : "—";
   modal = () => `<h2>🪄 おまかせ</h2><div class="hint">守り（次の襲撃を試す）・稼ぎ・育ちを💎に換算して、いちばん点の高い並びを探した（${r.evals}通り）</div>
     <div class="rs-grid"><div><small>次の襲撃</small><b>${lvTag(sc0.d)} → ${lvTag(fin.d)}</b></div><div><small>掘る💎/日</small><b>${Math.round(sc0.e.dp)} → ${Math.round(fin.e.dp)}</b></div><div><small>育ち Lv/日</small><b>${sc0.e.lv.toFixed(1)} → ${fin.e.lv.toFixed(1)}</b></div><div><small>守りの損（💎）</small><b>${Math.round(sc0.loss || 0)} → ${Math.round(fin.loss || 0)}</b></div></div>
@@ -13489,6 +13492,9 @@ function smartAuto27() {
 document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="af19go"],[data-a="rebal"]'); if (!b || !S || N) return; ev.stopImmediatePropagation(); ev.preventDefault();
   modal = () => `<h2>🪄 おまかせ</h2><div class="box">いろいろな並びで勇者と戦わせて、くらべています…</div>`; render();
   setTimeout(() => { try { smartAuto27(); } catch (e) { console.error(e); modal = null; render(); } }, 60); }, true);
+
+/* 「戻す」は仕事の希望・部屋の方針もまとめて戻す */
+{ const _u = undo13; undo13 = function (S0) { if (window.__undo27) { window.__undo27(); window.__undo27 = null; return true; } return _u.apply(this, arguments); }; }
 
 </script>
 </body>
