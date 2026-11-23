@@ -1193,6 +1193,7 @@ body:has(.modal) .inv25btn,body:has(.ntfull19) .inv25btn{display:none}
 #fp26 .f26mh small{opacity:.7}#fp26 .f26say{margin:6px 0 8px;font-size:13px;color:#e8d6b8}#fp26 .f26mb{display:flex;gap:6px}#fp26 .f26mb button{flex:1;padding:8px 4px;font-size:12px}
 #fp26 .f26rooms{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}#fp26 .f26rooms button{font-size:12px;padding:6px 8px}#fp26 .f26rooms button:disabled{opacity:.4}
 #fp26 .f26toast{position:absolute;left:50%;top:30%;transform:translateX(-50%);background:rgba(20,14,10,.9);border:1px solid #8a6a40;border-radius:999px;padding:8px 14px;font-size:13px}
+#fp26 .f26lab{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 </style>
 </head>
 <body>
@@ -7377,7 +7378,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.295（11/23 11:41）";
+const VER20 = "No.296（11/23 12:37）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -12822,6 +12823,11 @@ document.addEventListener("click", ev => { const b = ev.target.closest && ev.tar
 // 転生・契約の確認を外側タップで閉じても、行き止まりにしない：「次の日へ」で確認を出し直す
 document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="nextday"]'); if (!b || typeof S === "undefined" || !S) return;
   if (S.ended || S.contractDone) { ev.stopImmediatePropagation(); modal = S.ended ? rebirthModal : contractModal; render(); } }, true);
+// 名前がかぶらないように（同じ「ヌル」が2体いて、名札でもMVPでも区別できなかった）
+{ const _nm = newMon5; newMon5 = function (sp, lv, plus, rnd) { const m = _nm.apply(this, arguments); try { if (typeof S !== "undefined" && S && S.mons) { const used = new Set(S.mons.map(x => x.nick)); if (used.has(m.nick)) { const free = NICK5.filter(n => !used.has(n)); if (free.length) m.nick = free[Math.floor(Math.random() * free.length)]; } } } catch (e) {} return m; }; }
+// 勇者の人数は1回の襲撃で1人ずつしか増やさない（3人で完勝した次が5人になって🔴にはね上がっていた）
+{ const _ps = partySize5; partySize5 = S => { const v = _ps(S); return S && S.psLast26 ? Math.min(v, S.psLast26 + 1) : v; }; }
+{ const _sr = startRaid9; startRaid9 = function (S, rnd) { const N = _sr.apply(this, arguments); try { if (N && !N.scout && !S.sim23) S.psLast26 = N.heroes.filter(h => !h.boss).length; } catch (e) {} return N; }; }
 
 // ================= open26：侵略は最初の契約（30日）を終えたら解放 =================
 const invOpen26 = () => { try { return /invade/.test(location.hash) || !!metaOf8(S).invOpen; } catch (e) { return false; } };
@@ -12968,7 +12974,7 @@ function fpOpen26(){
     rooms.push({ i, kind, on, Z, Y, f, th, SH, OBS, CM: cssMat26((typeof THF25 !== "undefined" && THF25[th]) || ""), name: S.path[i].kind === "lord" ? "主の間" : i === 0 ? "入口" : "第" + i + "の間" }); } }
   const wrap = document.createElement("div"); wrap.id = "fp26";
   wrap.innerHTML = `<canvas></canvas><div class="f26top"><div class="f26where"><b></b><small></small></div><span class="f26fps"></span><button data-f="x">🗺 見下ろしへ</button></div>
-    <div class="f26msg">ダンジョンを組み立てています…</div><div class="f26stick"><i></i></div><div class="f26hint">左で歩く・右をなぞって見回す・魔物や看板をタップ</div><div class="f26menu" hidden></div>`;
+    <div class="f26msg">ダンジョンを組み立てています…</div><div class="f26stick"><i></i></div><div class="f26hint">左で歩く・右をなぞって見回す・魔物や看板をタップ</div><div class="f26menu" hidden></div><canvas class="f26lab"></canvas>`;
   document.body.appendChild(wrap);
   const cv = wrap.querySelector("canvas"), msg = wrap.querySelector(".f26msg"), fpsEl = wrap.querySelector(".f26fps"), menu = wrap.querySelector(".f26menu"), whereB = wrap.querySelector(".f26where b"), whereS = wrap.querySelector(".f26where small");
   const gl = cv.getContext("webgl", { antialias: true, alpha: false }); let alive = true;
@@ -13007,16 +13013,17 @@ function fpOpen26(){
     const cb = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, cb); gl.bufferData(gl.ARRAY_BUFFER, m.col, gl.STATIC_DRAW);
     const ib = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, m.idx, gl.STATIC_DRAW); R.mb = { pb, cb, ib, n: m.T * 3 }; }).catch(e => { R.err = String(e.message || e); }); };
   // 魔物（部屋ごと）
-  const mkActs = R => { const ms = S.mons.filter(m => m.home === R.i).slice(0, 10); let cast = []; try { cast = HAI25.place(R.on, ms.map(m => ({ sp: m.sp, evo: m.evos || 0, n: 1, act: "idle" })), 11 + R.i * 17); } catch (e) {}
-    R.acts = cast.map((c, k) => ({ m: ms[k], sp: c.sp, evo: c.evo || 0, x: c.o[0], z: c.o[2], r: Math.random() * 6.28, hx: c.o[0], hz: c.o[2], tx: c.o[0], tz: c.o[2], wait: 1 + Math.random() * 3, ph: Math.random() * 6, walking: false, dist: 0 })); };
+  const mkActs = R => { const ms = S.mons.filter(m => m.home === R.i).slice(0, 10); let cast = []; try { cast = HAI25.place(R.on, ms.map(m => ({ sp: m.sp, evo: m.evos || 0, n: 1, act: "idle", id: m.id })), 11 + R.i * 17); } catch (e) {}
+    R.acts = cast.map((c, k) => ({ m: ms.find(x => x.id === c.id) || ms.find(x => x.sp === c.sp) || ms[k],   /* 並べると順番が変わる：名前がちがう子に出ていた */ sp: c.sp, evo: c.evo || 0, x: c.o[0], z: c.o[2], r: Math.random() * 6.28, hx: c.o[0], hz: c.o[2], tx: c.o[0], tz: c.o[2], wait: 1 + Math.random() * 3, ph: Math.random() * 6, walking: false, dist: 0 })); };
   rooms.forEach(mkActs);
   // 看板（部屋の入口の右）
   const signCv = R => { const c = document.createElement("canvas"); c.width = 128; c.height = 96; const g = c.getContext("2d"); g.fillStyle = "#5a3a22"; g.fillRect(58, 40, 12, 56); g.fillStyle = "#7a5432"; g.fillRect(6, 6, 116, 46); g.strokeStyle = "#2a1a0e"; g.lineWidth = 4; g.strokeRect(6, 6, 116, 46);
     g.fillStyle = "#f3e2c0"; g.font = "bold 20px sans-serif"; g.textAlign = "center"; g.fillText(R.name, 64, 37); return c; };
   rooms.forEach(R => { R.sign = signCv(R); R.sx = 4.4; R.sz = 10.5; });
   // 主（プレイヤー）
-  const P = { x: 0, y: 0, z: rooms[0].Z + 12.5, yaw: 0, pit: -0.12, eye: 3.3, seg: "r0" }; window.__fp26 = { P, where: (x, z) => where(x, z), rooms };
-  const floorOK = (R, x, zl, me) => { const sd = shapeSd25(R.SH, x / SW25[0], zl / SW25[1]); return sd < -0.09 && (!R.OBS.some(([ox, oz, or]) => Math.hypot(x - ox, zl - oz) < or + 0.55)); };   /* 主は真ん中の道（入口→奥の坑道）なら柵もまたいで通れる */
+  const r0 = (typeof roomSel === "number" && rooms[roomSel]) ? roomSel : 0, P = (window.__fpLast26 && window.__fpLast26.n === n && roomSel === window.__fpLast26.sel) ? window.__fpLast26.P : { x: 0, y: rooms[r0].Y, z: rooms[r0].Z + 3, yaw: 0, pit: -0.18, eye: 3.3, seg: "r0" }; window.__fpLast26 = { n, sel: roomSel, P };   /* 前に歩いていた所から。選んだ部屋があればそこから */   /* 部屋の中ほどから。入口の穴の中から始まって、壁しか見えなかった */
+  if (!P.set) { P.set = 1; const A = []; if (A.length) {   /* 奥（次の部屋の方）を向いて始める */ const cx = A.reduce((s, a) => s + a.x, 0) / A.length, cz = A.reduce((s, a) => s + a.z, 0) / A.length - 3; P.yaw = Math.atan2(cx - P.x, -(cz)); } } window.__fp26 = { P, where: (x, z) => where(x, z), rooms };
+  const floorOK = (R, x, zl, me) => { const sd = shapeSd25(R.SH, x / SW25[0], zl / SW25[1]); return sd < -0.2 && (!R.OBS.some(([ox, oz, or]) => Math.hypot(x - ox, zl - oz) < or + 0.55)); };   /* 主は真ん中の道（入口→奥の坑道）なら柵もまたいで通れる */
   // ある場所が歩けるか。どこにいるか（部屋 i ／ 通路 i）と床の高さを返す
   function where(x, z){ for (let i = 0; i < n; i++) { const R = rooms[i], zl = z - R.Z; if (zl > FPK26.RZ0 - 0.01 && zl <= FPK26.RZ1) {
         const door = Math.abs(x) < 1.9 && ((zl > 7.5 && i > 0) || (zl > 7.5 && zl < 15.5) || (zl < -7 && i < n - 1));
@@ -13069,7 +13076,7 @@ function fpOpen26(){
     const dt = Math.min(0.1, (now - lastT) / 1000); lastT = now; ft.push(dt); if (ft.length > 20) ft.shift(); fpsEl.textContent = Math.round(ft.length / ft.reduce((x, y) => x + y, 0)) + "fps";
     const busy = !!document.querySelector("#peek24[style*='flex'], .modal") ; if (busy) return;
     // 歩く（壁で止まったら、横すべり）
-    const sp = 6.5 * dt, fx = Math.sin(P.yaw), fz = -Math.cos(P.yaw), rx = Math.cos(P.yaw), rz = Math.sin(P.yaw);
+    const sp = 8 * dt, fx = Math.sin(P.yaw), fz = -Math.cos(P.yaw), rx = Math.cos(P.yaw), rz = Math.sin(P.yaw);
     if (mv.x || mv.y) { const dx = (-mv.y * fx + mv.x * rx) * sp, dz = (-mv.y * fz + mv.x * rz) * sp;
       let ok = false; for (const an of [0, 0.5, -0.5, 1.0, -1.0]) { const c = Math.cos(an), sn = Math.sin(an), ex = dx * c - dz * sn, ez = dx * sn + dz * c; if (where(P.x + ex, P.z + ez)) { P.x += ex; P.z += ez; ok = true; break; } }   /* ぶつかったら少し向きを変えて回りこむ */
       if (!ok) { if (where(P.x + dx, P.z)) P.x += dx; else if (where(P.x, P.z + dz)) P.z += dz; } }
@@ -13102,6 +13109,14 @@ function fpOpen26(){
         const k = 1 / ppu, w = cw / hs, h = ch / hs, x0 = flip ? 64 - ox - w : ox - 64, d = Math.hypot(wx - P.x, wz - P.z);
         gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, texOf(im)); gl.uniform1i(PB.U("tx"), 0); gl.uniform1f(PB.U("FL"), flip ? 1 : 0); gl.uniform4f(PB.U("UR"), cx / im.width, cy / im.height, cw / im.width, ch / im.height); gl.uniform1f(PB.U("LB"), 0.5 + 0.7 * Math.exp(-d / 7));
         gl.uniform3f(PB.U("C"), wx, R.Y + (DHOV25[a.sp] ? 0.9 : 0) + bob, wz); gl.uniform3fv(PB.U("R"), Rr); gl.uniform4f(PB.U("Q"), x0 * k, (foot - (oy + h)) * k, w * k, h * k); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); }); }
+    // 名前の札（近くの子）。画面の外にいる子は、端に矢印
+    { const lc = wrap.querySelector(".f26lab"), dp = Math.min(2, window.devicePixelRatio || 1); if (lc.width !== Math.round(innerWidth * dp)) { lc.width = Math.round(innerWidth * dp); lc.height = Math.round(innerHeight * dp); } const g = lc.getContext("2d"); g.setTransform(dp, 0, 0, dp, 0, 0); g.clearRect(0, 0, innerWidth, innerHeight); g.textAlign = "center"; g.font = "bold 12px system-ui,sans-serif";
+      const R = rooms[curRoom];
+      [[0, -14.5, curRoom < n - 1 ? "▼ 次の部屋へ" : ""], [0, 14.5, curRoom > 0 ? "▲ 前の部屋へ" : ""]].forEach(([ex, ez, t]) => { if (!t) return; const s = toScr(ex, R.Y + 1.4, R.Z + ez); if (s && s[0] > 0 && s[0] < innerWidth && s[1] > 40 && s[1] < innerHeight) { g.fillStyle = "rgba(255,200,110,.85)"; g.font = "bold 13px system-ui,sans-serif"; g.fillText(t, s[0], s[1]); } });   /* 出口の場所 */
+      (R.acts || []).forEach(a => { if (!a.m) return; const wx = a.x, wz = R.Z + a.z, d = Math.hypot(wx - P.x, wz - P.z); const s = toScr(wx, R.Y + 2.4, wz);
+        if (s && s[0] > 0 && s[0] < innerWidth && s[1] > 40 && s[1] < innerHeight) { if (d > 22) return; const t = a.m.nick || "", w = g.measureText(t).width + 10; g.globalAlpha = Math.max(0.35, 1 - d / 22); g.fillStyle = "rgba(14,10,8,.7)"; g.fillRect(s[0] - w / 2, s[1] - 15, w, 18); g.fillStyle = "#e8f5d8"; g.fillText(t, s[0], s[1] - 2); g.globalAlpha = 1; }
+        else { const ang = Math.atan2(wx - P.x, -(wz - P.z)) - P.yaw, a2 = Math.atan2(Math.sin(ang), Math.cos(ang)), x = innerWidth / 2 + Math.sin(a2) * innerWidth * 0.42, y = innerHeight * 0.5 - Math.cos(a2) * innerHeight * 0.3;
+          g.save(); g.globalAlpha = 0.8; g.translate(Math.max(18, Math.min(innerWidth - 18, x)), Math.max(70, Math.min(innerHeight - 140, y))); g.rotate(a2); g.fillStyle = "#e8f5d8"; g.beginPath(); g.moveTo(0, -10); g.lineTo(7, 4); g.lineTo(-7, 4); g.closePath(); g.fill(); g.rotate(-a2); g.font = "10px system-ui,sans-serif"; g.fillText(a.m.nick || "", 0, 16); g.restore(); } }); }
   }
   requestAnimationFrame(loop);
 }
