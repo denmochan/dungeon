@@ -1226,8 +1226,8 @@ body:has(.modal) .inv25btn,body:has(.ntfull19) .inv25btn{display:none}
 .dh28{font-weight:700;color:#f1c76a;text-align:center;letter-spacing:.1em;margin-bottom:6px}
 .dr28{display:flex;align-items:center;gap:10px;padding:6px 4px;border-top:1px solid #3a2a1a;position:relative;animation:dw28in .5s ease-out both}
 .dr28:nth-child(3){animation-delay:.25s}.dr28:nth-child(4){animation-delay:.5s}.dr28:nth-child(5){animation-delay:.75s}.dr28:nth-child(n+6){animation-delay:1s}
-.dr28>img,.dr28>.ic28{flex:0 0 52px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;font-size:30px;border-radius:10px;background:radial-gradient(circle,#ffffff14,transparent 70%)}
-.dr28.ch>img,.dr28.ch>.ic28{background:radial-gradient(circle,var(--cc) -40%,transparent 70%)}
+.dr28>img{flex:0 0 52px;width:52px!important;height:52px!important}.dr28>.ic28{flex:0 0 52px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;font-size:30px;border-radius:10px;background:radial-gradient(circle,#ffffff14,transparent 70%)}
+.dr28.ch>.ic28{background:radial-gradient(circle,var(--cc) -40%,transparent 70%)}.dr28.ch>img{filter:drop-shadow(0 0 6px var(--cc))}
 .dr28.ch.t2>img,.dr28.ch.t3>img,.dr28.ch.t2>.ic28,.dr28.ch.t3>.ic28{animation:dr28glow 1.6s ease-in-out infinite}
 @keyframes dr28glow{50%{filter:drop-shadow(0 0 8px var(--cc)) brightness(1.15)}}
 .ic28.kk{color:#c7a6ff;text-shadow:0 0 10px #a77bff}
@@ -1258,6 +1258,7 @@ body:has(.modal) .inv25btn,body:has(.ntfull19) .inv25btn{display:none}
 .tkr28 .tx{flex:1;min-width:0;display:flex;flex-direction:column}.tkr28 .tx small{opacity:.7}.tkr28 button{display:flex;flex-direction:column;align-items:center;padding:6px 10px;min-width:84px}.tkr28 button small{font-size:12px;opacity:.85}
 .res28{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 70px);transform:translateX(-50%);z-index:95;background:#1b120cee;border:1px solid #e8b84a;border-radius:12px;padding:10px 16px;text-align:center;color:#f6e3c0;box-shadow:0 6px 20px #000a;display:flex;flex-direction:column;gap:2px;transition:opacity .5s;pointer-events:none;max-width:calc(100vw - 32px)}
 .res28 b{font-size:16px;color:#ffd56a;white-space:nowrap}.res28 small{font-size:12px;opacity:.85}.res28.out{opacity:0}
+.dm28h{display:flex;flex-direction:column;align-items:center;gap:2px;margin-bottom:6px}.dm28h small{opacity:.7}.dm28h b{font-size:24px;color:#ffd56a;text-shadow:0 0 12px #e8b84a88}.dm28h i{font-style:normal;font-size:13px;opacity:.9}
 </style>
 </head>
 <body>
@@ -7443,7 +7444,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.333（11/24 08:19）";
+const VER20 = "No.334（11/24 08:21）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -13640,22 +13641,45 @@ const CHN28 = ["銅の宝箱", "銀の宝箱", "金の宝箱", "虹の宝箱"];
 { const _oc = openChest19; openChest19 = function (S2, c) { const o = _oc.apply(this, arguments); try { if (DAWN28 && o) DCH28.push({ c, o }); } catch (e) {} return o; }; }
 /* 宝箱の中身は結果の1枚に出すので、あとから出る宝箱の見出しは出さない */
 { const _b = banner19; banner19 = function (text, cls) { if (DBAN28 > 0 && cls === "mis" && /宝箱/.test(String(text))) { DBAN28--; return; } return _b.apply(this, arguments); }; }
-function dawnFold28() {
-  if (!stage || stage.k !== "result" || S.ended) { DCH28.length = 0; return; }
+/* 朝にたまった演出（宝箱・進化・かけら・記憶・書）を1つにまとめる。何もなければ null */
+function gather28(withPlain) {
   const D = { ch: DCH28.splice(0), evo: [], kk: [], mem: [], book: 0 };
-  DBAN28 = D.ch.length;
+  const plain = D.ch.length;
   // 卵の宝箱（ふつうは「タップで開ける」画面）も、ここで開けておく
-  const eggs = queue.filter(q => q.k === "chest" && !q.keep23); queue = queue.filter(q => !(q.k === "chest" && !q.keep23));
+  const eggs = queue.filter(q => q.k === "chest" && !q.keep23);
+  const evq = queue.filter(q => q.k === "evo"); let kq = 0, memN = 0;
+  try { const K = kk25(S); if (K.pro) { kq = K.q.length; memN = Math.max(0, Math.min(MEM25.length, Math.floor(kkN25(S) / 4)) - K.seen); } } catch (e) {}
+  if (!withPlain && !eggs.length && !evq.length && !kq && !memN) { D.ch.length = 0; return null; }   /* ふつうの宝箱だけなら、今までどおり見出しで */
+  queue = queue.filter(q => !(q.k === "chest" && !q.keep23));
   eggs.forEach(q => { const o = openChest19(S, q.c); (o.evos || []).forEach(e => queue.push({ k: "evo", ...e })); D.ch.push({ c: q.c, o }); });
   D.evo = queue.filter(q => q.k === "evo"); queue = queue.filter(q => q.k !== "evo");
   try { const K = kk25(S); if (K.pro) { D.kk = K.q.splice(0); const to = Math.min(MEM25.length, Math.floor(kkN25(S) / 4)); for (let i = K.seen; i < to; i++) D.mem.push(i); } } catch (e) {}
   D.book = D.ch.some(x => x.c && x.c.kind === "skill") || (S.bookNew27 && bkList27().length) ? 1 : 0;
+  if (!D.ch.length && !D.evo.length && !D.kk.length && !D.mem.length && !D.book) return null;
   if (D.book) delete S.bookNew27;   /* 書の一覧は勝手に出さない（この1枚のボタンから） */
-  if (!D.ch.length && !D.evo.length && !D.kk.length && !D.mem.length) return;
-  stage.d28 = D; save(); render();
-  const big = D.ch.some(x => (x.c.tier || 0) >= 2) || D.evo.length || D.kk.length;
-  if (big) setTimeout(() => { try { if (stage && stage.d28 === D) { sfx16("hatch"); setTimeout(() => sfx16("win"), 250); } } catch (e) {} }, 700);
+  DBAN28 = plain;
+  return D;
 }
+function fanfare28(D) { const big = D.ch.some(x => (x.c.tier || 0) >= 2) || D.evo.length || D.kk.length;
+  if (big) setTimeout(() => { try { if (stage && stage.d28 === D) { sfx16("hatch"); setTimeout(() => sfx16("win"), 250); } } catch (e) {} }, 700); }
+function dawnFold28() {
+  if (!stage || stage.k !== "result" || S.ended) { DCH28.length = 0; return; }
+  const D = gather28(true); if (!D) return;
+  stage.d28 = D; save(); render(); fanfare28(D);
+}
+/* ふつうの朝：卵の宝箱・進化・かけらが重なったら、「朝の収穫」1枚に */
+function morning28() {
+  if (stage || modal || S.ended || S.contractDone || (typeof tutOn === "function" && tutOn())) { DCH28.length = 0; return; }
+  const D = gather28(false); if (!D) return;
+  const r = lastRep || {}; stage = { k: "result", step: 0, dawnOnly: 1, d28: D, day: S.day, dp: (r.dp || 0) - (r.food || 0), lv: new Set(r.lvups || []).size };
+  save(); render(); fanfare28(D);
+}
+{ const _cd = closeDay; closeDay = function () {
+  if (DAWN28) return _cd.apply(this, arguments);
+  DCH28.length = 0; DAWN28 = 2; let r;
+  try { r = _cd.apply(this, arguments); } finally { DAWN28 = 0; }
+  try { morning28(); } catch (e) { console.error(e); }
+  return r; }; }
 { const _er = endRaid; endRaid = function () {
   if (N && N.scout) return _er.apply(this, arguments);
   DAWN28 = 1; DCH28.length = 0; let r;
@@ -13678,7 +13702,7 @@ function dawnHtml28(D) {
   return `<div class="dw28"><div class="dh28">☀ 朝の収穫</div>${rows.join("")}${btn ? `<div class="db28">${btn}</div>` : ""}</div>`;
 }
 /* 見落とさないよう、MVPのすぐ下（「次の一手」より上）に出す */
-resultStage15 = (prev => function (r) { let h = prev(r); try { if (r.d28) { const x = dawnHtml28(r.d28), at = ['<div class="tip23">', '<div class="dmg23">', '<div class="rs-grid">', '<button class="main big" data-a="stagenext"'].map(k => h.indexOf(k)).find(i => i > 0); h = at > 0 ? h.slice(0, at) + x + h.slice(at) : h + x; } } catch (e) { console.error(e); } return h; })(resultStage15);
+resultStage15 = (prev => function (r) { if (r.dawnOnly) { try { return `<div class="dm28h"><small>${Math.min(r.day || S.day, CONTRACT_LEN9)}日目の朝</small><b>☀ 朝の収穫</b>${r.dp ? `<i>今日の稼ぎ 💎${r.dp > 0 ? "+" : ""}${fmt8(r.dp)}${r.lv ? `・⬆ ${r.lv}体レベルアップ` : ""}</i>` : ""}</div>` + (r.d28 ? dawnHtml28(r.d28).replace('<div class="dh28">☀ 朝の収穫</div>', "") : "") + '<button class="main big" data-a="stagenext" style="width:100%;max-width:360px">つづける</button>'; } catch (e) { console.error(e); } } let h = prev(r); try { if (r.d28) { const x = dawnHtml28(r.d28), at = ['<div class="tip23">', '<div class="dmg23">', '<div class="rs-grid">', '<button class="main big" data-a="stagenext"'].map(k => h.indexOf(k)).find(i => i > 0); h = at > 0 ? h.slice(0, at) + x + h.slice(at) : h + x; } } catch (e) { console.error(e); } return h; })(resultStage15);
 /* 閉じたら：記憶は読んだことに（タイトルの「記憶とかけら」でいつでも読める）、書の案内は出さない */
 function dawnDone28() { try { const D = stage && stage.d28; if (!D) return; const K = kk25(S); if (D.mem.length) K.seen = Math.max(K.seen, D.mem[D.mem.length - 1] + 1); delete S.bookNew27; if (modal && /bookListModal27\(\)/.test(String(modal))) modal = null; stage.d28 = null; save(); } catch (e) {} }
 function dawnMem28(list) { const ov = document.createElement("div"); ov.className = "kk25ov"; document.body.appendChild(ov); let i = 0, until = 0;
