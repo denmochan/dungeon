@@ -1170,6 +1170,15 @@ body:has(.modal) .inv25btn,body:has(.ntfull19) .inv25btn{display:none}
 #off26{position:fixed;left:50%;transform:translateX(-50%);top:calc(6px + env(safe-area-inset-top,0px));z-index:9998;background:rgba(20,14,10,.88);border:1px solid #6a4a30;color:#efe3cf;font-size:12px;padding:5px 10px;border-radius:999px;pointer-events:none;overflow:hidden}
 #off26 i{position:absolute;left:0;bottom:0;height:2px;background:#ffd06a}
 #off26.ok{border-color:#5a9a5a;color:#bfe8bf}#off26.ok.small{display:none}#off26.ng{border-color:#a05a3a;color:#ffc9a8}
+.d3card .o26go{position:absolute;right:6px;top:6px;z-index:3;font-size:12px;padding:4px 8px;border-radius:999px;background:rgba(20,14,10,.75);border:1px solid #8a6a40;color:#ffe2a8}
+#orb26{position:fixed;inset:0;z-index:99990;background:#0b0908;touch-action:none;color:#f3e6cf}
+#orb26 canvas{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated}
+#orb26 .o26top{position:absolute;left:10px;right:10px;top:calc(env(safe-area-inset-top,0px) + 8px);display:flex;gap:8px;align-items:center;text-shadow:0 1px 2px #000}
+#orb26 .o26top b{flex:1}#orb26 .o26fps{font-size:12px;opacity:.6}
+#orb26 button{background:#2a211c;color:#f3e6cf;border:1px solid #6b5440;border-radius:8px;padding:8px 11px;font-size:13px}#orb26 button.on{background:#7a4a24}
+#orb26 .o26bar{position:absolute;left:8px;right:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);display:flex;gap:8px;justify-content:center}
+#orb26 .o26hint{position:absolute;top:calc(env(safe-area-inset-top,0px) + 46px);left:12px;font-size:12px;opacity:.65}
+#orb26 .o26msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:14px;opacity:.85}
 </style>
 </head>
 <body>
@@ -7354,7 +7363,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.290（11/23 08:40）";
+const VER20 = "No.291（11/23 10:39）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -12537,7 +12546,7 @@ function dstack25(){
       if (f !== lastF) { if (lastF >= 0 || f > 0) h += `<div class="d3floor">▼ B${f + 1}　${THEME7[(S.floors[f] || {}).theme] ? THEME7[S.floors[f].theme].name : ""}</div>`; if (lastF >= 0) h += `<div class="d3tun"><canvas width="370" height="70" data-s="${i}"></canvas></div>`; lastF = f; }
       else h += `<div class="d3tun"><canvas width="370" height="70" data-s="${i}"></canvas></div>`;
       const name = r.kind === "lord" ? "👑 主の間" : esc(roomTitle(S, i));
-      h += `<div class="chall d3card${roomSel === i ? " sel" : ""}" data-room="${i}" data-th="${(S.floors[f] || {}).theme || "soil"}"><img class="d3bg" alt=""><div class="d3edge"></div><canvas></canvas><span class="cname">${name}</span></div>`; });
+      h += `<div class="chall d3card${roomSel === i ? " sel" : ""}" data-room="${i}" data-th="${(S.floors[f] || {}).theme || "soil"}"><img class="d3bg" alt=""><div class="d3edge"></div><canvas></canvas><span class="cname">${name}</span><button class="o26go" data-room="${i}">🔄 回して見る</button></div>`; });
     st.innerHTML = h; }
   // 階のボタン（B1・B2…）を押したら、その階の部屋のところへ動かす
   if (D3.fl25 === undefined) D3.fl25 = caveFloor; if (D3.fl25 !== caveFloor) { D3.fl25 = caveFloor; const tgt = caveFloor > 0 ? st.querySelectorAll(".d3floor")[caveFloor - 1] : st.firstElementChild; if (tgt) setTimeout(() => { try { tgt.scrollIntoView({ block: "start" }); } catch (e) {} }, 30); }
@@ -12821,6 +12830,74 @@ if ("serviceWorker" in navigator && /^https?:/.test(location.protocol)) {
   navigator.serviceWorker.register("sw.js").then(reg => { const go = () => { const w = reg.active || reg.waiting || reg.installing; if (w) w.postMessage("precache26"); };
     if (reg.active) go(); else navigator.serviceWorker.ready.then(go); }).catch(() => {});
 }
+
+// ================= orbit26：部屋をその場で描いて、指で360°回して見る（試作） =================
+// 焼いた背景（いつも同じ向き）ではなく、部屋と魔物の式をそのつど描く。重いので解像度は自動で下げる
+const ORBMODE26 = { idle: 1, sleep: 1, mine: 1, slash: 1, lift: 1, walk: 1, cast: 1, hurt: 1 };
+function orbit26(i){
+  if (document.getElementById("orb26")) return;
+  const kind = roomKind25(i), on = {}; ROOMSET25[kind].forEach(k => on[k] = true); const room = HAI25.room(on);
+  const ms = S.mons.filter(m => m.home === i).slice(0, 4);
+  let cast = [];
+  try { cast = HAI25.place(on, ms.map(m => { let j = "idle"; try { j = restLeft7(S, m) ? "sleep" : (peekMon24(m, i).job || "idle"); } catch (e) {} return { sp: m.sp, evo: m.evos || 0, n: 1, act: j === "bed" ? "sleep" : j }; }), 11 + i * 17); } catch (e) {}
+  cast = cast.filter(c => SP3D24[kitOf24(c.sp)]).slice(0, 4).map((c, k) => ({ sp: c.sp, evo: c.evo || 0, mode: ORBMODE26[c.mode] ? c.mode : "idle", t: k * 0.37, o: [c.o[0], c.mode === "sleep" ? 0.12 : 0, c.o[2]], r: c.look ? Math.atan2(c.look[0] - c.o[0], c.look[1] - c.o[2]) : (c.r || 0), lie: c.mode === "sleep" && ["goblin", "skeleton", "imp", "kobold", "orc", "golem", "human", "demon"].includes(kitOf24(c.sp)) ? 1 : 0 }));
+  const wrap = document.createElement("div"); wrap.id = "orb26";
+  wrap.innerHTML = `<canvas></canvas><div class="o26top"><b>${S.path[i].kind === "lord" ? "主の間" : i === 0 ? "入口" : "第" + i + "の間"}</b><span class="o26fps"></span><button data-o="x">✕ とじる</button></div>
+    <div class="o26msg">部屋を組み立てています…</div><div class="o26bar"><button data-o="auto" class="on">⟲ 自動で回す</button><button data-o="q">画質：自動</button></div><div class="o26hint">ドラッグで回す・2本指で寄る</div>`;
+  document.body.appendChild(wrap);
+  const cv = wrap.querySelector("canvas"), msg = wrap.querySelector(".o26msg"), fpsEl = wrap.querySelector(".o26fps");
+  const gl = cv.getContext("webgl", { antialias: false, alpha: false, powerPreference: "high-performance" });
+  let alive = true; const close = () => { alive = false; wrap.remove(); try { const x = gl.getExtension("WEBGL_lose_context"); x && x.loseContext(); } catch (e) {} };
+  wrap.querySelector('[data-o="x"]').onclick = close;
+  if (!gl) { msg.textContent = "この端末ではWebGLが使えない"; return; }
+  let P = null;
+  setTimeout(() => { try {   // 組み立て（コンパイル）は重いので、表示を出してから
+    let fs = makeFS24(room, cast.length ? cast.map(c => ({ sp: c.sp })) : [{ sp: "goblin" }]);
+    fs = fs.replace("uniform float PASS;", "uniform float PASS;uniform float CUTH;").replace("float t=0.0,hit=0.0;", "float t=max(0.0,(ro.y-CUTH)/max(-rd.y,0.001)),hit=0.0;").replace("float tmax=110.0;", "float tmax=190.0;");
+    const sh = (ty, s) => { const o = gl.createShader(ty); gl.shaderSource(o, s); gl.compileShader(o); if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(o)); return o; };
+    const p = gl.createProgram(); gl.attachShader(p, sh(gl.VERTEX_SHADER, SDF_VS)); gl.attachShader(p, sh(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(p); if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+    const U = {}; P = { p, U: n => U[n] !== undefined ? U[n] : (U[n] = gl.getUniformLocation(p, n)) };
+    msg.remove(); requestAnimationFrame(loop);
+  } catch (e) { msg.textContent = "この部屋は組み立てられなかった：" + String(e.message || e).slice(0, 80); } }, 60);
+  const quad = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, quad); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+  const faceT = faceAtlas24(gl);
+  // カメラ：部屋のまん中を中心にぐるっと
+  const TG = [0, 0.6, -1.4]; let yaw = 0.1, pit = 0.62, dist = 58, auto = true, qmode = 0, scale = 0.9, lastT = performance.now(), ft = [], t0 = performance.now();
+  const camOf = () => { const e = [TG[0] + Math.sin(yaw) * dist * Math.cos(pit), TG[1] + dist * Math.sin(pit), TG[2] + Math.cos(yaw) * dist * Math.cos(pit)]; const fw = V3.n(V3.s(TG, e)), rt = V3.n(V3.x(fw, [0, 1, 0])), up = V3.x(rt, fw); return { e, M: [...rt, ...up, ...fw] }; };
+  // 指
+  const pts = new Map(); let pd = 0;
+  cv.addEventListener("pointerdown", e => { cv.setPointerCapture(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]); auto = false; wrap.querySelector('[data-o="auto"]').classList.remove("on"); if (pts.size === 2) { const [a, b] = [...pts.values()]; pd = Math.hypot(a[0] - b[0], a[1] - b[1]); } });
+  cv.addEventListener("pointermove", e => { if (!pts.has(e.pointerId)) return; const o = pts.get(e.pointerId), n = [e.clientX, e.clientY];
+    if (pts.size === 1) { yaw -= (n[0] - o[0]) * 0.008; pit = Math.max(0.22, Math.min(1.35, pit + (n[1] - o[1]) * 0.006)); }
+    pts.set(e.pointerId, n); if (pts.size === 2) { const [a, b] = [...pts.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]); if (pd) dist = Math.max(22, Math.min(90, dist * pd / d)); pd = d; } });
+  const up = e => { pts.delete(e.pointerId); pd = 0; }; cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up);
+  cv.addEventListener("wheel", e => { e.preventDefault(); dist = Math.max(22, Math.min(90, dist * (1 + e.deltaY * 0.001))); }, { passive: false });
+  wrap.querySelector('[data-o="auto"]').onclick = ev => { auto = !auto; ev.target.classList.toggle("on", auto); };
+  const QL = ["自動", "低", "中", "高"], QS = [0, 0.6, 0.9, 1.4];
+  wrap.querySelector('[data-o="q"]').onclick = ev => { qmode = (qmode + 1) % 4; if (qmode) scale = QS[qmode]; ev.target.textContent = "画質：" + QL[qmode]; };
+  function loop(now){ if (!alive) return; requestAnimationFrame(loop);
+    const dt = Math.min(0.1, (now - lastT) / 1000); lastT = now; ft.push(dt); if (ft.length > 12) ft.shift();
+    if (auto) yaw += dt * 0.25;
+    if (!qmode && ft.length >= 12) { const a = ft.reduce((x, y) => x + y, 0) / ft.length; if (a > 0.055 && scale > 0.35) { scale *= 0.85; ft = []; } else if (a < 0.022 && scale < 1.4) { scale *= 1.1; ft = []; } }
+    fpsEl.textContent = ft.length ? Math.round(ft.length / ft.reduce((x, y) => x + y, 0)) + "fps" : "";
+    const r = cv.getBoundingClientRect(), h = Math.max(90, Math.round(200 * scale)), w = Math.round(h * r.width / Math.max(1, r.height));
+    if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+    const C = camOf(), U = P.U, tm = (now - t0) / 1000;
+    gl.viewport(0, 0, w, h); gl.useProgram(P.p); gl.bindBuffer(gl.ARRAY_BUFFER, quad); const a = gl.getAttribLocation(P.p, "a"); gl.enableVertexAttribArray(a); gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
+    gl.uniform2f(U("res"), w, h); gl.uniform3fv(U("cam"), C.e); gl.uniformMatrix3fv(U("camM"), false, new Float32Array(C.M)); gl.uniform1f(U("fl"), 1.9);
+    gl.uniform1f(U("PASS"), 0); gl.uniform2f(U("vres"), w, h); gl.uniform2f(U("crop"), 0, 0); gl.uniform1f(U("zoom"), 1); gl.uniform1f(U("CUTH"), 3.4);
+    const list = cast.length ? cast : [{ sp: "goblin", mode: "idle", t: 0, o: [0, -50, 0], r: 0 }];
+    list.forEach((c, k) => { const R = rigSp24(c.sp, c.mode, tm + c.t), s2 = SLOTS24[k]; gl.uniform3fv(U("J" + s2), new Float32Array(R.J.flat())); gl.uniformMatrix3fv(U("HR" + s2), false, new Float32Array(R.HR)); gl.uniformMatrix3fv(U("TR" + s2), false, new Float32Array(R.TR)); gl.uniform1f(U("tool" + s2), R.tool);
+      const f = new Float32Array(24); (R.deb || []).forEach((d, j) => f.set(d, j * 4)); gl.uniform4fv(U("deb" + s2), f); });
+    gl.uniform3fv(U("OC"), new Float32Array(list.flatMap(c => c.o))); gl.uniform1fv(U("RC"), new Float32Array(list.map(c => c.r))); gl.uniform1fv(U("LIE"), new Float32Array(list.map(c => c.lie ? 1 : 0)));
+    gl.uniform3fv(U("SKIN"), new Float32Array(list.flatMap(c => spCol24(c.sp)[0]))); gl.uniform3fv(U("CLOTH"), new Float32Array(list.flatMap(c => spCol24(c.sp)[1]))); gl.uniform1fv(U("FI"), new Float32Array(list.map(c => FACEIDX24[kitOf24(c.sp)] ?? -1)));
+    gl.uniform1fv(U("EV"), new Float32Array(list.map(c => c.evo || 0))); gl.uniform1fv(U("SCL"), new Float32Array(list.map(c => sclOf24(c)))); gl.uniform4fv(U("VAR"), new Float32Array(list.flatMap(c => (typeof varOf24 !== "undefined" ? varOf24(c.sp, c.evo) : spVar24(c.sp))[0]))); gl.uniform3fv(U("ACC"), new Float32Array(list.flatMap(c => spVar24(c.sp)[1])));
+    gl.uniform1f(U("tm"), tm); gl.uniform1f(U("CS"), 1.0); gl.uniform1f(U("idm"), 0); gl.uniform1f(U("hasFace"), 2);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, faceT); gl.uniform1i(U("face"), 0);
+    gl.drawArrays(gl.TRIANGLES, 0, 3); }
+}
+// 昼の3Dの部屋に「🔄」ボタン
+document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest(".o26go"); if (!b) return; ev.stopImmediatePropagation(); ev.preventDefault(); orbit26(+b.dataset.room); }, true);
 
 </script>
 <script>// ================= 3Dの子を、今のコマアニメと同じ並び（17コマ）の絵に焼く（開発用・ページ内で実行） =================
