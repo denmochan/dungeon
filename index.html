@@ -1240,6 +1240,12 @@ body:has(.modal) .inv25btn,body:has(.ntfull19) .inv25btn{display:none}
 #fp26 .f26nav{display:flex;gap:6px}#fp26 .f26nav button{padding:7px 9px;font-size:12px}
 #fp26 .f26nav button.day{background:#5a3a18;border-color:#c08a3a}#fp26 .f26nav button.raid{background:#6a1e18;border-color:#e2614f}
 .fpret28{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 74px);z-index:70;padding:9px 16px;border-radius:999px;border:1px solid #c08a3a;background:#3a2814ee;color:#f6e3c0;font-weight:700;font-size:14px;box-shadow:0 4px 14px #0008}
+/* proto28：話す */
+#fp26 .f26say{position:relative;min-height:3.2em;font-size:14px;line-height:1.5;padding:8px 10px;border-radius:10px;background:#1a120cdd;border:1px solid #5a4330}
+#fp26 .f26say .f26ico{position:absolute;right:-6px;top:-10px;font-size:16px;filter:drop-shadow(0 1px 2px #000)}
+#fp26 .f26say.pop28{animation:say28 .25s ease-out}@keyframes say28{from{opacity:.2;transform:translateY(4px)}to{opacity:1;transform:none}}
+#fp26 .f26mb{flex-wrap:wrap}#fp26 .f26mb button[data-m="more"]{flex:1 0 100%;background:#3a2814;border-color:#c08a3a}
+#fp26 .f26menu:not([hidden]) ~ .f26map{display:none}
 </style>
 </head>
 <body>
@@ -7425,7 +7431,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.331（11/24 07:59）";
+const VER20 = "No.332（11/24 08:13）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -13170,10 +13176,12 @@ function fpOpen26(){
     monMenu(best.a, best.R, sx, sy); }
   const SAY = ["主さま！", "今日も掘ってます", "勇者なんか怖くない", "腹へった…", "訓練がんばります", "ここ、住みやすいです", "眠いです…", "次の夜も任せて"];
   function monMenu(a, R, sx, sy){ const m = a.m; if (!m) return; a.walking = false; a.wait = 6; a.r = Math.atan2(P.x - a.x, P.z - (R.Z + a.z));
-    const lv = m.lv || 1, nm = (typeof esc === "function" ? esc(m.nick || "") : (m.nick || "")), line = SAY[(m.id || 0) % SAY.length];
-    menu.innerHTML = `<div class="f26mh"><b>${nm}</b> <small>Lv${lv}</small></div><div class="f26say">「${line}」</div><div class="f26mb"><button data-m="card">📋 詳しく</button><button data-m="move">🏠 部屋を変える</button><button data-m="x">✕</button></div><div class="f26rooms" hidden></div>`;
-    menu.style.left = Math.max(8, Math.min(VW() - 248, sx - 120)) + "px"; menu.style.top = Math.max(70, Math.min(VH() - 220, sy - 170)) + "px"; menu.hidden = false;
+    const lv = m.lv || 1, nm = (typeof esc === "function" ? esc(m.nick || "") : (m.nick || "")), T0 = typeof talk28 === "function" ? talk28(m) : { line: SAY[(m.id || 0) % SAY.length], top: "idle" }, ico = t => (typeof TKICON28 !== "undefined" && TKICON28[t]) || "", qn = (typeof QUIRK !== "undefined" && QUIRK[m.quirk]) ? QUIRK[m.quirk].name : "";
+    const sayH = o => `<span class="f26ico">${ico(o.top)}</span>「${typeof esc === "function" ? esc(o.line) : o.line}」`;
+    menu.innerHTML = `<div class="f26mh"><b>${nm}</b> <small>Lv${lv}${qn ? "・" + qn : ""}</small></div><div class="f26say">${sayH(T0)}</div><div class="f26mb"><button data-m="more">💬 もっと話す</button><button data-m="card">📋 詳しく</button><button data-m="move">🏠 部屋を変える</button><button data-m="x">✕</button></div><div class="f26rooms" hidden></div>`;
+    /* 話している子の顔を隠さないよう、画面の右側に出す */ menu.style.left = Math.max(8, VW() - 262) + "px"; menu.style.top = Math.max(70, VH() - 262) + "px"; menu.hidden = false;
     menu.querySelector('[data-m="x"]').onclick = () => { menu.hidden = true; };
+    menu.querySelector('[data-m="more"]').onclick = () => { a.wait = 6; const o = typeof talk28 === "function" ? talk28(m) : T0, el = menu.querySelector(".f26say"); el.classList.remove("pop28"); void el.offsetWidth; el.classList.add("pop28"); el.innerHTML = sayH(o); try { tone16(520 + Math.random() * 200, 0, 0.05, "square", 0.03); tone16(700 + Math.random() * 200, 0.06, 0.05, "square", 0.03); } catch (e) {} };
     menu.querySelector('[data-m="card"]').onclick = () => { menu.hidden = true; try { modal = () => monCard(m.id) + ""; render(); } catch (e) {} };
     menu.querySelector('[data-m="move"]').onclick = () => { const L = menu.querySelector(".f26rooms"); L.hidden = !L.hidden;
       L.innerHTML = rooms.filter(Q => Q.i !== m.home && S.path[Q.i].kind !== "lord").map(Q => { const full = residents5(S, Q.i).length >= capOfSlot7(S, Q.i); return `<button data-r="${Q.i}" ${full ? "disabled" : ""}>${Q.name}${full ? "（満）" : ""}</button>`; }).join("") || "<small>行ける部屋がない</small>";
@@ -13701,6 +13709,161 @@ function fpAct28(a) { const b = document.createElement("button"); b.dataset.a = 
   if (!b) { b = document.createElement("button"); b.className = "fpret28"; b.innerHTML = "🚶 歩く画面にもどる"; document.body.appendChild(b);
     b.addEventListener("click", ev => { ev.stopPropagation(); const s = FPRET28 || { sel: null }; FPRET28 = null; b.remove(); page20 = null; roomSel = roomOpen = s.sel; modal = null; addPick = null; render(); fpOpen26(); }); }
 } catch (e) {} }; }
+
+// ================= proto28：魔物と話す（状況で変わるセリフ） =================
+// 性格（6種）ごとの話し方 × いまの状況（けが・空腹・襲撃前・仕事・仲間・倒した数・進化・好きなもの…）。
+// 同じ子に続けて話すと、ちがう話題になる。役に立つ一言（けが・空腹・守りが手薄）を優先して混ぜる。
+const TK28 = {
+  brave: { me: "主殿",
+    idle: ["{me}、今日も持ち場は守っておりますぞ", "勇者などいつでも来いという気分です", "この迷宮は、自分が守ります", "背中は任せてください、{me}"],
+    hurt: ["かすり傷です…と言いたいところですが、少し休ませてください", "この傷は、次の勇者に倍にして返します", "{me}…面目ない。すぐ戻ります"],
+    hungry: ["腹が減っては戦ができぬ、と申します…💎が足りておりません", "{me}、食事が少なく力が出ません。💎を稼がねば"],
+    raid0: ["今夜ですな。腕が鳴ります！", "勇者が来ると聞いて、眠れませんでした", "{me}は奥でどっしり構えていてください"],
+    raid1: ["明日の夜は襲撃。剣を研いでおきます", "あと一日。並びを見直すなら今のうちですぞ"],
+    mine: ["掘るのも鍛錬のうちです", "つるはしも剣も、振れば強くなる", "今日は良い石が出ました"],
+    train: ["一太刀でも多く振る。それが勇者に勝つ近道です", "相手が強いほど燃えます", "訓練の相手がもっと欲しいところです"],
+    fight: ["一番前は自分の場所です", "最初の一撃は、自分が入れます"],
+    bench: ["{me}、出番はまだですか…？", "控えも大事な役目…と自分に言い聞かせています"],
+    kills: ["これで{k}人目。まだまだ足りません", "倒した勇者の顔は、全部覚えています"],
+    mate: ["{mate}とは良い稽古相手です", "{mate}の背中は、自分が守ります"],
+    alone: ["この部屋は自分ひとり。少し静かすぎますな"],
+    like: ["{like}…ですか？ 嫌いではありません", "{like}があると、気が引き締まります"],
+    lord: ["{me}、お体は大丈夫ですか。自分が盾になります", "主の間まで勇者を通したのは、自分の落ち度です"],
+    again: ["まだ何か？ 何なりとお申し付けを", "{me}と話していると、士気が上がります"],
+    master: ["この仕事には自信があります", "腕が上がったのを感じます"],
+    rare: ["自分は特別な生まれだと聞きました。期待に応えます"] },
+  sturdy: { me: "主さま",
+    idle: ["主さま。今日も変わりなしです", "ここは、ゆっくり、しっかり守ります", "壁みたいに立っていれば、勇者は通れません", "…（うなずいている）"],
+    hurt: ["ちょっと、効きました…", "これくらいなら、一日寝れば治ります", "痛いけど、大丈夫…たぶん"],
+    hungry: ["…お腹が鳴ってます", "ごはん、少ないです。💎が足りないのかも"],
+    raid0: ["今夜。ここで止めます", "どっしり構えます"],
+    raid1: ["明日ですね。…ちゃんと寝ておきます", "あした来るなら、きょうは休む"],
+    mine: ["こつこつ掘るの、好きです", "重い石も運べます", "掘った分だけ、💎になります"],
+    train: ["ゆっくりでも、強くなります", "受けるのは得意です"],
+    fight: ["前に立つのは、ぼくの仕事", "盾になります"],
+    bench: ["…呼ばれるまで、待ってます", "控えの部屋、けっこう落ち着きます"],
+    kills: ["{k}人、倒しました。…数えてました", "倒したの、{k}人です"],
+    mate: ["{mate}と一緒だと、安心します", "{mate}はよくしゃべります。ぼくは聞いてます"],
+    alone: ["ひとりの部屋も、悪くないです"],
+    like: ["{like}…好きです", "{like}の近くにいると、落ち着く"],
+    lord: ["主さま、けがしてる…ぼくが前に立ちます", "主さまのところには、行かせません"],
+    again: ["…まだいる", "主さまと話すの、きらいじゃないです"],
+    master: ["だいぶ、慣れました", "この仕事なら、まかせてください"],
+    rare: ["めずらしいって言われます。…よくわかりません"] },
+  quick: { me: "主！",
+    idle: ["主！ なんか用？ 早く早く", "じっとしてるの苦手なんだよね", "次は何する？ もう決まった？", "勇者まだ？ 待ちくたびれた！"],
+    hurt: ["いってて…先に突っこみすぎた", "休むのヒマ！ でも動けない…", "次はもっと速く避けるから！"],
+    hungry: ["腹へった！ ごはんまだ？", "💎が足りないって、ごはん減ってるじゃん！"],
+    raid0: ["今夜！ 今夜だよね！ 一番に殴るのはオレ！", "早く夜にならないかな！"],
+    raid1: ["明日の夜！ 待ちきれない！", "あと一日とか長すぎ！"],
+    mine: ["掘るの速さなら負けない！", "ほら、もう一山掘った！", "つるはし振るの楽しい！"],
+    train: ["打ち合い！ もう一本！", "相手が遅すぎてつまんない！"],
+    fight: ["一番前！ 最高！", "最初の一撃は1.3倍だからね！"],
+    bench: ["なんで控えなの！？ 出して出して！", "ヒマ！ ヒマすぎる！"],
+    kills: ["{k}人倒した！ 次の目標は{k2}人！", "数えるの早いんだ。{k}人！"],
+    mate: ["{mate}、動きが遅いんだよなー", "{mate}と競争してる！ 今のところオレの勝ち"],
+    alone: ["ひとりの部屋つまんない！ だれか呼んで！"],
+    like: ["{like}！ あれいいよね！", "{like}があるとテンション上がる！"],
+    lord: ["主、やられてるじゃん！ 次はオレが止める！", "主の間まで来させるなんて、くやしい！"],
+    again: ["まだ話す？ いいよ、ヒマだし！", "主、今日よく来るね！"],
+    master: ["オレ、これ得意になった！", "もう誰より速いよ！"],
+    rare: ["オレ、レアなんだって！ すごくない？"] },
+  lucky: { me: "主さま〜",
+    idle: ["主さま〜、今日はいいことありそう", "なんだか運が向いてる気がします♪", "えへへ、呼びました？", "今日の占い、大吉でした〜"],
+    hurt: ["いたた…でも死ななかったからラッキー♪", "けがしちゃいました。運がよければすぐ治ります", "包帯、かわいく巻いてもらいました"],
+    hungry: ["おなかすきました〜。💎、どこかに落ちてないかな", "ごはん少なめ…ツイてないです"],
+    raid0: ["今夜ですね〜。お宝持ってる勇者が来ますように♪", "勝ったら宝箱、いいのが出る気がします！"],
+    raid1: ["明日の夜は襲撃〜。いい勇者が来ますように", "あした、運試しですね！"],
+    mine: ["ここ掘ったら、いい石が出そうな予感♪", "あっ、光るの出た！ …ただの石でした", "掘れば掘るほど運がたまる気がします"],
+    train: ["当たればラッキー、当たらなくてもラッキー♪", "練習でも、まぐれ勝ちしました！"],
+    fight: ["前に出ると、なぜか攻撃が当たらないんです♪"],
+    bench: ["控えも、たまにはいいですね〜", "出番がくるまで、四つ葉さがしてます"],
+    kills: ["{k}人倒しました！ 勇者の財布、重かったです♪", "倒した勇者からの💎、ちょっと多めです"],
+    mate: ["{mate}と一緒だと、いいことが起きるんです", "{mate}に幸運のおすそわけしてます♪"],
+    alone: ["ひとり部屋、広くてラッキー♪"],
+    like: ["{like}、大好きです〜！", "{like}って、縁起がいいんですよ"],
+    lord: ["主さま、だいじょうぶですか…お守りあげます", "主さまがやられそうになったら、わたしの運をぜんぶあげます"],
+    again: ["また来てくれた！ ラッキー♪", "主さまとお話しできる日は、いい日です"],
+    master: ["これ、上手になりました！ 運じゃないです、実力です♪"],
+    rare: ["わたし、レアなんです〜。生まれつきツイてます♪"] },
+  lazy: { me: "あるじ〜",
+    idle: ["ふぁ…あるじ〜、なに〜？", "きょうも、のんびりいこ〜", "…ねむい", "あと五分…いや、あと一日…"],
+    hurt: ["いたいから、ねる…", "けがしたし、きょうはお休みってことで", "治るまで、ずっと寝てていい…？"],
+    hungry: ["おなかすいて、ねむれない…", "ごはん、すくな〜い…💎たりてない〜？"],
+    raid0: ["え〜今夜〜？ …まあ、がんばる", "勇者、こなくていいのに〜"],
+    raid1: ["あした襲撃かぁ…じゃあ、きょうは寝とく", "あしたのぶんまで、いま休んどく〜"],
+    mine: ["ほる…ほる…ほ…zzz", "掘るの、ゆっくりでいい？", "石、おもい〜"],
+    train: ["訓練〜？ 見てるだけでいい？", "一回振ったら、休憩〜"],
+    fight: ["前…？ うしろがいい〜", "体力だけはあるから、まかせて〜"],
+    bench: ["控え、さいこ〜", "このまま、ずっと控えでいいよ〜"],
+    kills: ["{k}人…？ そんなに倒したっけ〜", "気づいたら{k}人倒してた〜"],
+    mate: ["{mate}がうるさくて寝れない〜", "{mate}の横、あったかい〜"],
+    alone: ["ひとり部屋、静かでいい〜。ずっとここで寝る"],
+    like: ["{like}…いいよね〜…zzz", "{like}の上で寝るのがすき〜"],
+    lord: ["あるじ、けがしてる…？ …ちょっとだけ本気だす", "あるじがいなくなったら、寝る場所なくなる…守る"],
+    again: ["まだいる〜…？", "あるじ、ひま〜？ いっしょに寝る〜？"],
+    master: ["これ、寝ながらでもできるようになった〜"],
+    rare: ["めずらしいらしい〜。…寝ててもいい〜？"] },
+  hot: { me: "主ぃ！",
+    idle: ["主ぃ！ 燃えてるか！ オレは燃えてる！", "勇者どもをぶっ飛ばしてぇ！", "今日も全力だ！", "体があっつい！"],
+    hurt: ["くそっ…まだ燃え足りねぇのに！", "この傷は勲章だ！ …いてぇ", "次は倍返しだ！ 倍返し！"],
+    hungry: ["腹へった！ 力が出ねぇ！ 💎稼ごうぜ主ぃ！", "メシが足りねぇと、燃料切れだ！"],
+    raid0: ["今夜だな！ 血がたぎる！", "勇者ども、全員まとめてかかってこい！"],
+    raid1: ["明日だ！ 今から燃えてきた！", "あと一日！ 拳を温めとく！"],
+    mine: ["うおおお！ 掘る！ 掘りまくる！", "岩を砕くのも、修行だ！", "汗かいた分だけ💎になる！"],
+    train: ["もう一本！ もう一本だ！", "訓練で手加減なんかしねぇ！", "相手が倒れるまでやるぞ！"],
+    fight: ["一番前、最高だ！", "最初に殴るのはオレだ！"],
+    bench: ["控えなんて冷めちまう！ 出してくれ！", "ここでくすぶってられねぇ！"],
+    kills: ["{k}人ぶっ倒した！ まだまだいくぞ！", "{k}人じゃ足りねぇ！"],
+    mate: ["{mate}、気合いが足りねぇ！", "{mate}とはライバルだ！"],
+    alone: ["ひとりか！ 上等だ、全員オレが相手する！"],
+    like: ["{like}！ 燃えるぜ！", "{like}があると、力が湧いてくる！"],
+    lord: ["主ぃ！ やられっぱなしでいいのか！ 次は通さねぇ！", "主の間まで来た勇者は、オレが燃やす！"],
+    again: ["何度でも来い主ぃ！ 話すたびに燃えてくる！", "まだ話すか！ いいぞ！"],
+    master: ["腕が上がった！ もっと上がる！"],
+    rare: ["オレは特別製だ！ 燃え方がちがう！"] },
+};
+const TKHIST28 = {};   // その子に最後に言ったセリフ（同じことを続けて言わない）
+function talk28(m) {
+  try {
+    const V = TK28[m.quirk] || TK28.brave, D = MON[m.sp] || {}, f = (() => { try { return formOf(m); } catch (e) { return null; } })();
+    const H = TKHIST28[m.id] = TKHIST28[m.id] || { n: 0, last: "", lastT: "", rec: [] }; H.n++;
+    const room = m.home != null && S.path[m.home], mates = room ? residents5(S, m.home).filter(o => o !== m) : [], mate = mates.length ? mates[Math.floor(Math.random() * mates.length)] : null;
+    const job = (() => { try { return jobOf12(S, m); } catch (e) { return null; } })(), dr = (() => { try { return daysToRaid9(S); } catch (e) { return null; } })();
+    const lordLow = (() => { try { return S.lord.hp < lordMax5(S) * 0.6; } catch (e) { return false; } })();
+    const k = m.kt19 || 0, likes = String(D.likes || "").split("・").filter(Boolean), mas = Math.max(0, ...Object.values(m.mas || {}));
+    // 話題の候補：[話題, 重み]。役に立つ話（けが・空腹・襲撃前）は重く
+    const T = [];
+    if (m.rest || m.wound) T.push(["hurt", 6]);
+    if (S.hungry) T.push(["hungry", 5]);
+    if (dr === 0) T.push(["raid0", 4]); else if (dr === 1) T.push(["raid1", 2]);
+    if (lordLow) T.push(["lord", 3]);
+    if (m.home == null) T.push(["bench", 4]);
+    else if (job === "mine") T.push(["mine", 3]); else if (job === "train" || job === "teach") T.push(["train", 3]); else if (job === "fight") T.push(["fight", 2]);
+    if (mate) T.push(["mate", 2]); else if (room && room.kind === "den") T.push(["alone", 1]);
+    if (k > 0) T.push(["kills", 2]);
+    if (likes.length) T.push(["like", 1]);
+    if (mas >= 20) T.push(["master", 1]);
+    if (m.rar19 === "SSR" || m.rar19 === "SR" || m.shiny19) T.push(["rare", 1]);
+    if (H.n >= 3) T.push(["again", 2]);
+    if (f && f[2] && (f[2].up || f[2].go)) T.push(["voice", 1]);
+    if (D.bio) T.push(["bio", 1]);
+    T.push(["idle", 2]);
+    const cand = T.filter(t => t[0] !== H.lastT || T.length === 1), sum = cand.reduce((a, t) => a + t[1], 0); let r = Math.random() * sum, top = cand[0][0];
+    for (const t of cand) { r -= t[1]; if (r <= 0) { top = t[0]; break; } }
+    H.lastT = top;
+    let line; H.tpl = null;
+    if (top === "voice") line = (m.evos && f[2].up) ? f[2].up : f[2].go;
+    else if (top === "bio") { const b = String(D.bio).split("。").filter(Boolean); line = `（${b[Math.floor(Math.random() * b.length)]}。）`; }
+    else { const A = V[top] || V.idle, L0 = A.filter(x => !H.rec.includes(x)), L = L0.length ? L0 : A.filter(x => x !== H.last); line = L[Math.floor(Math.random() * L.length)] || V.idle[0]; H.tpl = line; }
+    line = line.replace(/\{me\}/g, V.me.replace(/[！〜]$/, "")).replace(/\{mate\}/g, mate ? mate.nick : "").replace(/\{k\}/g, k).replace(/\{k2\}/g, Math.floor(k / 5) * 5 + 5).replace(/\{like\}/g, likes[Math.floor(Math.random() * likes.length)] || "");
+    // ことばを話さない子（最初の姿の鳴き声が短い）は、鳴き声を頭につける
+    try { const cry = D.forms && D.forms[0] && D.forms[0][2] && D.forms[0][2].go; if (!m.evos && cry && cry.length <= 6 && top !== "voice" && top !== "bio") line = `${cry}（${line}）`; } catch (e) {}
+    H.last = line; H.rec.push(H.tpl || line); if (H.rec.length > 6) H.rec.shift(); return { line, top };
+  } catch (e) { console.error(e); return { line: "……", top: "idle" }; }
+}
+// 話題ごとの小さな印（会話窓の右上に出す）
+const TKICON28 = { hurt: "🩹", hungry: "🍖", raid0: "⚔️", raid1: "⚔️", lord: "👑", bench: "🪑", mine: "⛏", train: "📚", fight: "🛡", mate: "👥", alone: "🌙", kills: "💀", like: "💗", master: "⭐", rare: "✨", again: "💬", voice: "🗨", bio: "📖", idle: "" };
 
 </script>
 </body>
