@@ -1,0 +1,67 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>第6回テスト報告</title>
+<style>
+:root{--bg:#1a1410;--card:#261d17;--fg:#efe3d3;--mut:#a8988a;--red:#e2614f;--yel:#e8b84a;--grn:#7cc68a;--line:#3b2f26}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.65 system-ui,"Hiragino Sans",sans-serif;padding:16px max(16px,env(safe-area-inset-right)) 40px max(16px,env(safe-area-inset-left));max-width:640px;margin-inline:auto}
+h1{font-size:20px;margin:4px 0}h2{font-size:16px;margin:22px 0 8px}p.s{color:var(--mut);margin:0 0 14px;font-size:13px}
+.big{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}.big div{flex:1 1 120px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px}
+.big b{font-size:26px;display:block;color:var(--yel)}
+table{width:100%;border-collapse:collapse;font-size:14px}td{border-bottom:1px solid var(--line);padding:6px 4px;vertical-align:top}td:nth-child(2){color:var(--yel);white-space:nowrap}
+ul{margin:4px 0 10px;padding-left:18px}li{margin:4px 0}
+.ok{color:var(--grn)}.ng{color:var(--red)}.m{color:var(--mut);font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 14px;margin:0 0 10px}
+</style></head><body>
+<h1>第6回テスト（10人）</h1>
+<p class="s">2026-11-23・飛行機のあいだに実施。点は10点満点。</p>
+
+<div class="big"><div><b>4.3</b>平均点</div><div><b>10/10人</b>「歩く」の始まりが壁の中</div><div><b>0人</b>入口から迷わず次の部屋へ</div></div>
+
+<h2>きびしく言うと</h2>
+<div class="card">「👁 歩く」は<b class="ng">まだデフォルトにできる出来ではない</b>。始まった瞬間に茶色いモヤ、道が分からない、魔物に会えない、の3つで全員つまずいた。ローグライト好きの人は「デフォルトは見下ろしのまま、歩くはご褒美で眺めるもの」とはっきり言った。<br>一方で<span class="ok">夜の名札・侵略の「門を壊す」・回して見る</span>は好評。</div>
+
+<h2>点数</h2>
+<table>
+<tr><td>3Dダンジョン好き（歩く）</td><td>3</td></tr>
+<tr><td>アクション苦手（歩くの操作）</td><td>3</td></tr>
+<tr><td>3Dにうるさいデザイナー</td><td>4</td></tr>
+<tr><td>QA（壊れる所さがし）</td><td>4</td></tr>
+<tr><td>ローグライト周回（デフォルト化）</td><td>4</td></tr>
+<tr><td>経営ゲーム好き（30日通し）</td><td>4</td></tr>
+<tr><td>やりこみ（予報の当たり）</td><td>5</td></tr>
+<tr><td>育成好き（名札）</td><td>5</td></tr>
+<tr><td>ゲームしない人（最初の30分）</td><td>5</td></tr>
+<tr><td>戦略好き（侵略）</td><td>6</td></tr>
+</table>
+
+<h2>もう直したもの</h2>
+<ul>
+<li class="ok">歩く：壁の中から始まる → 部屋の中で門の方を向いて始まる</li>
+<li class="ok">歩く：押した子と出るメニューの名前がちがう／「部屋を変える」で別の子が動く</li>
+<li class="ok">歩く：fpsがマイナス表示になる</li>
+<li class="ok">配合画面の表示くずれ</li>
+<li class="ok">侵略：報酬を選ばずに閉じると仲間がもらえない → 次に地図を開いたとき受け取れる</li>
+<li class="ok">侵略：★5が1.9倍も7.7倍も同じ → ★を細かく、「守りはいまの○倍」を攻める前に表示</li>
+</ul>
+
+<h2>まだ残っている大きいもの</h2>
+<ul>
+<li><b>歩く：道が分からない</b>（地図・光る通路の口がない。看板は誰も見つけられず）★3</li>
+<li><b>歩く：壁や柵・玉座にめりこむ、後ろ歩きで外に抜ける</b> ★3</li>
+<li><b>歩く：通路の口が真っ黒</b>、名札が壁を透ける、足もとに影がない ★2</li>
+<li><b>難しさの崖</b>：15日目まで完勝続き → 18日目に全滅。予報が🟢から急に🔴（🟡が出ない）★3</li>
+<li><b>予報が悲観側に外れる</b>（「主の間まで来る」→入口で完勝）。主を鍛えても予報が動かない ★3</li>
+<li><b>💎の使い道がない</b>。準備の値段が持っている💎に比例 ★2</li>
+<li>日が勝手に1→3日目に飛ぶ（3人が見た）★2</li>
+<li>夜の途中で開き直すと、その夜が最初から ★2</li>
+<li>昼に部屋をタップすると即2D画面になり、足もとの名札が見られない ★1</li>
+<li>回して見る：主の間に主がいない、壁の外に床の板・灰色の箱 ★2</li>
+</ul>
+<p class="m">ほか：勝利画面の実績帯がボタンに隠れる／吹き出しが「回して見る」に重なる／キキが光らせた店ボタンが押せない／「全部消して最初から」が鍛えるボタンの近くで怖い。</p>
+
+<h2>次に決めてほしいこと</h2>
+<div class="card">
+<b>A.</b> 歩くを先に仕上げる（小さな地図＋光る通路＋当たり判定）<br>
+<b>B.</b> 難しさの崖と予報を先に直す（🟡を出す・18日目をなだらかに・💎の使い道）<br>
+<b>C.</b> 日が飛ぶ・夜のやり直しなど壊れを先に<br>
+<span class="m">おすすめは C→B→A。遊びの土台が壊れていると、歩くを良くしても続けて遊べないため。</span>
+</div>
+</body></html>
