@@ -1259,6 +1259,7 @@ body:has(.modal) .inv25btn,body:has(.ntfull19) .inv25btn{display:none}
 .res28{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 70px);transform:translateX(-50%);z-index:95;background:#1b120cee;border:1px solid #e8b84a;border-radius:12px;padding:10px 16px;text-align:center;color:#f6e3c0;box-shadow:0 6px 20px #000a;display:flex;flex-direction:column;gap:2px;transition:opacity .5s;pointer-events:none;max-width:calc(100vw - 32px)}
 .res28 b{font-size:16px;color:#ffd56a;white-space:nowrap}.res28 small{font-size:12px;opacity:.85}.res28.out{opacity:0}
 .dm28h{display:flex;flex-direction:column;align-items:center;gap:2px;margin-bottom:6px}.dm28h small{opacity:.7}.dm28h b{font-size:24px;color:#ffd56a;text-shadow:0 0 12px #e8b84a88}.dm28h i{font-style:normal;font-size:13px;opacity:.9}
+.rel28{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.rel28 span{font-size:12px;padding:2px 8px;border-radius:999px;background:#2a1f18}.rel28 .g{color:#ffb3c8}.rel28 .b{color:#ff9a7a}
 </style>
 </head>
 <body>
@@ -7444,7 +7445,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.334（11/24 08:21）";
+const VER20 = "No.335（11/24 08:24）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -13900,6 +13901,105 @@ function talk28(m) {
 }
 // 話題ごとの小さな印（会話窓の右上に出す）
 const TKICON28 = { hurt: "🩹", hungry: "🍖", raid0: "⚔️", raid1: "⚔️", lord: "👑", bench: "🪑", mine: "⛏", train: "📚", fight: "🛡", mate: "👥", alone: "🌙", kills: "💀", like: "💗", master: "⭐", rare: "✨", again: "💬", voice: "🗨", bio: "📖", idle: "" };
+
+// ---------- 2) 種族の話（一族ごと＋目立つ種族は専用） ----------
+const TKFAM28 = {
+  slime: ["体がぷるぷるするのは、元気なしるし", "床のしめりけで、だれが通ったか分かる", "分かれても、また一つにもどれる", "溶かしたものの味は、だいたい覚えてる"],
+  demon: ["角は毎朝みがいてる", "人間の村の話？ 子どものころ、よくおどかしに行った", "火の匂いを嗅ぐと、故郷を思い出す", "悪魔にも、礼儀ってもんがある"],
+  beast: ["鼻がきくから、勇者が来る前に分かる", "くんくん…この部屋、だれかの匂いがする", "群れでいると、強くなった気がする", "なわばりの印、つけておいた"],
+  undead: ["もう死んでるから、死ぬのは怖くない", "昔のことは、ほとんど覚えていない", "夜は、体が軽くなる", "骨が鳴るのは、寒いからじゃない"],
+  nature: ["胞子をまくと、部屋がちょっと明るくなる", "ここの土、栄養があって好き", "糸を張るのは、待つのが好きだから", "根っこは、迷宮のずっと下まで伸びてる"],
+  matter: ["……（じっとこちらを見ている）", "動かないのが、いちばんの得意", "石の中は、静かで落ち着く", "……（ゴトリ、と少しだけ動いた）"],
+  dragon: ["熱いのは平気。寒いのは苦手", "うろこは一枚ずつ数えてる", "いつか、空を飛んでみたい", "宝の匂いには、つい反応してしまう"],
+};
+const TKSP28 = {
+  dragon: ["竜の誇りにかけて、ここは通さぬ", "主殿に仕える竜など、ほかにおらぬぞ"],
+  elderdragon: ["……ほう。小さき主よ、何用だ", "千年眠っていたが、ここは悪くない"],
+  maou: ["…ふん。かけらの主よ。わしの力、使いこなしてみせよ", "かつての城に比べれば狭いが、悪くない"],
+  mimic: ["……（ふたが少し開いて、また閉じた）", "……（中から金貨の音がする）"],
+  ghost: ["ば〜っ！ …おどろかない？ つまんない", "すり抜けるの、けっこう疲れるんだよ"],
+  goblin: ["へっへっへ、勇者の財布は全部いただきだ", "ゴブリンは数が多いのが取り柄よ"],
+  slime: ["ゴポッ（ぷるん）", "ゴポポ…（うれしそうに揺れている）"],
+  skeleton: ["カタカタ…（骨を鳴らしてあいさつしている）", "盾は、生きてたころから使ってた気がする"],
+  vampire: ["ごきげんよう。今宵の勇者は、血の気が多いといいね", "日の光の届かないここは、楽園だ"],
+  golem: ["……ゴゴ（うなずいた）", "……（肩に苔が生えている）"],
+  kobold: ["ガウ！ この石はおれのだ！", "掘るのは得意。地面の声が聞こえる"],
+  myconid: ["ふぁ…はくしょん！ …胞子が出ちゃった", "じめじめしてて、いい部屋"],
+};
+
+// ---------- 3) 仲間の好き嫌い（2体の組み合わせで決まる。同じ一族は仲良くなりやすい） ----------
+function rel28(a, b) { if (!a || !b) return 0; const x = Math.min(a.id, b.id), y = Math.max(a.id, b.id); let h = (x * 73856093) ^ (y * 19349663); h = Math.abs(h) % 100;
+  const fa = (MON[a.sp] || {}).fam, fb = (MON[b.sp] || {}).fam; if (fa && fa === fb) h += 25; if (a.quirk === b.quirk) h += 10; if ((a.quirk === "hot" && b.quirk === "lazy") || (a.quirk === "lazy" && b.quirk === "hot") || (a.quirk === "quick" && b.quirk === "sturdy") || (a.quirk === "sturdy" && b.quirk === "quick")) h -= 25;
+  return h >= 70 ? 1 : h < 22 ? -1 : 0; }
+const TKREL28 = {
+  brave: { good: ["{mate}は信頼できる戦友です", "{mate}となら、どんな勇者にも勝てます"], bad: ["{mate}とは…意見が合いません", "{mate}の戦い方は、どうも好かんのです"] },
+  sturdy: { good: ["{mate}、好きです", "{mate}がいると、ほっとします"], bad: ["{mate}は…ちょっと苦手です", "{mate}、うるさいです"] },
+  quick: { good: ["{mate}とはウマが合う！", "{mate}といると退屈しない！"], bad: ["{mate}、遅すぎてイライラする！", "{mate}と同じ部屋、やだ！"] },
+  lucky: { good: ["{mate}とは運命の出会いです♪", "{mate}が大好きです〜"], bad: ["{mate}といると、なぜかツイてないんです…", "{mate}、ちょっとこわいです"] },
+  lazy: { good: ["{mate}のとなり、ねやすい〜", "{mate}すき〜"], bad: ["{mate}、ねてると起こしてくる〜", "{mate}、にがて〜"] },
+  hot: { good: ["{mate}は熱いやつだ！ 気に入った！", "{mate}とは魂で通じ合ってる！"], bad: ["{mate}、気合いが足りねぇ！ 見てるとイライラする！", "{mate}とはいつか決着をつける！"] },
+};
+
+// ---------- 4) 出来事を覚えて話す（昨夜の活躍・倒れた・進化・特訓・引っ越し・書） ----------
+const TKEV28 = {
+  brave: { kill: ["昨夜は{v}人仕留めました。まだやれます", "昨夜の{v}人、主殿に捧げます"], down: ["昨夜は不覚をとりました…次こそは", "倒れるとは情けない。鍛え直します"], mvp: ["昨夜の一番手柄、自分でよいのですか！", "MVPとは光栄です、主殿"], evo: ["姿が変わりました。力があふれてきます", "進化したこの力、主殿のために"], tok: ["特訓のおかげで、体が軽いです", "💎を使ってまで鍛えていただき…感謝します"], moved: ["新しい持ち場、気に入りました", "部屋が変わっても、やることは同じです"], book: ["「{v}」を覚えました。使いこなしてみせます", "書のおかげで、新しい技が身につきました"] },
+  sturdy: { kill: ["昨夜、{v}人…たおしました", "{v}人。…がんばりました"], down: ["昨夜、たおれちゃいました…", "…もっと、かたくなります"], mvp: ["ぼくが一番…？ ほんとに？", "…うれしいです"], evo: ["からだ、大きくなりました", "前より、かたくなった気がします"], tok: ["特訓、きつかったけど…強くなりました"], moved: ["新しい部屋、まだ慣れません", "引っ越し…ちょっと疲れました"], book: ["「{v}」、覚えました。…たぶん"] },
+  quick: { kill: ["昨夜{v}人！ 見てた？ 見てた！？", "{v}人倒した！ 新記録かも！"], down: ["昨夜やられた！ くやしい！", "突っこみすぎた…次は避ける！"], mvp: ["MVP！ オレが一番！ 当然！", "一番手柄！ もっとほめて！"], evo: ["進化した！ 速くなった！ たぶん！", "見て見て、この姿！"], tok: ["特訓あっという間に終わった！ もう一回！"], moved: ["引っ越し完了！ 次はどこ行く？", "新しい部屋、もう全部見てきた！"], book: ["「{v}」覚えた！ 早く使いたい！"] },
+  lucky: { kill: ["昨夜は{v}人♪ ツイてました", "{v}人倒しました〜。まぐれじゃないですよ"], down: ["昨夜はツイてなかったです…", "やられちゃいました〜。でも生きててラッキー"], mvp: ["MVPなんて、今日はいい日です♪", "一番手柄！ 宝くじに当たった気分です"], evo: ["進化しました〜！ 運命ですね♪", "新しい姿、かわいいですか？"], tok: ["特訓してもらっちゃいました♪ ありがとうございます"], moved: ["新しいお部屋、日当たり…はないですけど好きです♪"], book: ["「{v}」覚えました〜！ お守りにします"] },
+  lazy: { kill: ["きのう{v}人…？ 寝ぼけてたかも〜", "{v}人たおしたらしい〜"], down: ["きのう、たおれた〜。ついでに寝てた〜", "いたかった〜…もう寝る〜"], mvp: ["え〜、ぼくがいちばん〜？ 寝てたのに〜？"], evo: ["なんか姿かわった〜。ねむいのはかわらない〜", "進化しても、ねむい〜"], tok: ["特訓…つかれた〜…あと三日寝る〜"], moved: ["ひっこし、めんどくさかった〜", "あたらしいベッド、まあまあ〜"], book: ["「{v}」…おぼえた…はず〜"] },
+  hot: { kill: ["昨夜{v}人ぶっ飛ばした！ まだまだぁ！", "{v}人じゃ燃え足りねぇ！"], down: ["くそっ、昨夜はやられた！ この借りは返す！", "倒れたのは油断だ！ 二度とねぇ！"], mvp: ["MVPだ！ うおおお！", "一番は当然オレだ！"], evo: ["進化したぞ！ 体中が燃えてる！", "この姿なら、誰にも負けねぇ！"], tok: ["特訓、最高だった！ もっとやらせろ！"], moved: ["新しい部屋か！ 燃えてきた！", "どこでも暴れてやる！"], book: ["「{v}」を覚えた！ 早くぶちかましたい！"] },
+};
+function ev28(m, k, v) { try { if (!m) return; m.ev28 = (m.ev28 || []).filter(e => e.k !== k); m.ev28.push({ k, v, d: S.day }); if (m.ev28.length > 6) m.ev28.shift(); } catch (e) {} }
+// 襲撃：倒した数・倒れた・MVP を覚える
+{ const _sr = startRaid9; startRaid9 = function (S2) { const n = _sr.apply(this, arguments); try { if (n && S2 === S && !S2.sim23) n.kt28 = S2.mons.map(m => [m.id, m.kt19 || 0]); } catch (e) {} return n; }; }
+{ const _er = endRaid; endRaid = function () { let pre = null, n0 = N;
+  try { if (N && !N.scout) pre = new Map(N.kt28 || S.mons.map(m => [m.id, m.kt19 || 0])); } catch (e) {}
+  const r = _er.apply(this, arguments);
+  try { if (pre && n0) { (n0.mons || []).forEach(bm => { const m = bm.ref; if (!m || !S.mons.includes(m)) return; const d = (m.kt19 || 0) - (pre.get(m.id) || 0); if (d > 0) ev28(m, "kill", d); if (bm.down || bm.hp <= 0) ev28(m, "down", 1); });
+      const mv = stage && stage.mvp; if (mv) { const m = S.mons.find(o => o === mv || o === mv.ref || (mv.id != null && o.id === mv.id)) || S.mons.find(o => o.nick === mv.nick && o.sp === mv.sp); if (m) ev28(m, "mvp", 1); } } } catch (e) { console.error(e); }
+  return r; }; }
+// 進化：朝の1枚・進化の画面に出たら覚える
+{ const _g = gather28; gather28 = function () { const D = _g.apply(this, arguments); try { if (D) D.evo.forEach(e => ev28(e.m, "evo", 1)); } catch (e) {} return D; }; }
+{ const _ns = nextStage; nextStage = function () { try { queue.filter(q => q.k === "evo").forEach(q => ev28(q.m, "evo", 1)); } catch (e) {} return _ns.apply(this, arguments); }; }
+// 特訓・書：出てくるお知らせから
+{ const _t = toast; toast = function (t) { try { const s = String(t); let x;
+  if ((x = /^🔥 (.+?) が Lv\d+ になった/.exec(s))) ev28(S.mons.find(m => m.nick === x[1]), "tok", 1);
+  if ((x = /^📜 (.+?) が「(.+?)」を覚えた/.exec(s))) ev28(S.mons.find(m => m.nick === x[1]), "book", x[2]);
+} catch (e) {} return _t.apply(this, arguments); }; }
+
+// ---------- 5) 話題に足す ----------
+{ const _tk = talk28; talk28 = function (m) {
+  try {
+    const V = TK28[m.quirk] ? m.quirk : "brave", H = TKHIST28[m.id] = TKHIST28[m.id] || { n: 0, last: "", lastT: "", rec: [] };
+    // 引っ越し：前に話したときと部屋がちがう
+    if (m.h28 !== undefined && m.h28 !== m.home && m.home != null) ev28(m, "moved", 1); m.h28 = m.home;
+    const extra = [];
+    const evs = (m.ev28 || []).filter(e => S.day - e.d <= 2 && !(H.usedEv || []).includes(e.k + e.d));
+    if (evs.length) extra.push(["ev", 7]);
+    const room = m.home != null && S.path[m.home], mates = room ? residents5(S, m.home).filter(o => o !== m) : [], rm = mates.map(o => [o, rel28(m, o)]).filter(x => x[1] !== 0);
+    if (rm.length) extra.push(["rel", 2]);
+    const fam = (MON[m.sp] || {}).fam; if (TKFAM28[fam]) extra.push(["fam", 1.5]); if (TKSP28[m.sp]) extra.push(["sp", 1.5]);
+    // 半分くらいは、もとの話題から（役に立つ話はそちらが優先）。出来事があれば、そちらを強めに
+    const wE = extra.reduce((a, t) => a + t[1], 0), pick = Math.random() * (wE + 6);
+    if (extra.length && pick < wE && extra.map(t => t[0]).some(t => t !== H.lastT)) {
+      let r = pick, top = extra[0][0]; for (const t of extra) { r -= t[1]; if (r <= 0) { top = t[0]; break; } }
+      if (top === H.lastT && extra.length > 1) top = extra.find(t => t[0] !== H.lastT)[0];
+      let line, icon = "";
+      if (top === "ev") { const e = evs[evs.length - 1]; H.usedEv = (H.usedEv || []).concat(e.k + e.d).slice(-12); const L = TKEV28[V][e.k] || ["……"]; line = L[Math.floor(Math.random() * L.length)].replace(/\{v\}/g, e.v); icon = { kill: "⚔️", down: "🩹", mvp: "🏆", evo: "✨", tok: "🔥", moved: "🏠", book: "📜" }[e.k] || "💬"; }
+      else if (top === "rel") { const [o, s] = rm[Math.floor(Math.random() * rm.length)]; const L = TKREL28[V][s > 0 ? "good" : "bad"]; line = L[Math.floor(Math.random() * L.length)].replace(/\{mate\}/g, o.nick); icon = s > 0 ? "💕" : "💢"; }
+      else if (top === "fam") { const L = TKFAM28[fam].filter(x => !H.rec.includes(x)); line = (L.length ? L : TKFAM28[fam])[Math.floor(Math.random() * (L.length || TKFAM28[fam].length))]; icon = "🗨"; }
+      else { const L = TKSP28[m.sp].filter(x => !H.rec.includes(x)); line = (L.length ? L : TKSP28[m.sp])[Math.floor(Math.random() * (L.length || TKSP28[m.sp].length))]; icon = "🗨"; }
+      H.n++; H.lastT = top; H.last = line; H.rec.push(line); if (H.rec.length > 6) H.rec.shift();
+      return { line, top: top === "ev" ? "ev_" + icon : top === "rel" ? (icon === "💕" ? "relg" : "relb") : "voice" };
+    }
+  } catch (e) { console.error(e); }
+  return _tk.apply(this, arguments); }; }
+TKICON28.relg = "💕"; TKICON28.relb = "💢"; ["⚔️", "🩹", "🏆", "✨", "🔥", "🏠", "📜", "💬"].forEach(i => TKICON28["ev_" + i] = i);
+// 部屋の画面などで「仲が良い・悪い」を見られるように：魔物カードに一言
+monCard = (prev => function (id) { let h = prev(id); try { const m = S.mons.find(o => o.id === id); if (!m || m.home == null) return h;
+  const ms = residents5(S, m.home).filter(o => o !== m).map(o => [o, rel28(m, o)]).filter(x => x[1] !== 0); if (!ms.length) return h;
+  const t = `<div class="rel28">${ms.map(([o, s]) => `<span class="${s > 0 ? "g" : "b"}">${s > 0 ? "💕" : "💢"} ${esc(o.nick)}${s > 0 ? "と仲良し" : "が苦手"}</span>`).join("")}</div>`;
+  const i = h.indexOf('<div class="xp"'); return i < 0 ? h + t : h.slice(0, i) + t + h.slice(i); } catch (e) { return h; } })(monCard);
 
 // ================= proto28：第7回テストの残り =================
 // ---------- 1) 結果の「地図 +1部屋」が何のことか分からなかった ----------
