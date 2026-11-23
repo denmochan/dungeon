@@ -6597,8 +6597,8 @@ function mixScreen(){
     const face = (sp, m) => m ? simg23(m, m.evos, "sp", "width:36px;height:36px") : `<span class="ghost">${img(sp, 0, "sp", "width:36px;height:36px")}</span>`;
     const res = o.special && !known(child) ? `<span class="q">？</span>` : img(child, 0, "sp", "width:40px;height:40px");
     const name = o.special ? (known(child) ? MON[child].forms[0][0] : "？？？") : `${MON[child].forms[0][0]}+${Math.floor(((A.plus || 0) + (B.plus || 0)) / 2) + 1}`;
-    const risk = [A, B].some(m => m && (m.evos || 0) > 0), tag = o.st === "ok" ? `${risk ? '<small class="bad">⚠ 進化した子が消える</small>' : ""}<button class="${risk ? "" : "main"}" data-a="mixdo" data-v="${o.special ? "h:" + o.k : "s:" + o.x}">🥚 配合</button>` : o.st === "lv" ? `<span class="hint" style="white-space:nowrap">両方Lv${o.need}で作れる<br>${[A, B].filter(Boolean).map(m => m.lv >= o.need ? `<span class="good">Lv${m.lv}✔</span>` : `Lv${m.lv}（あと${o.need - m.lv}）`).join("・")}</span>` : `<span class="hint">あと<b>${MON[A ? o.y : o.x].forms[0][0]}</b>がいれば</span>`;
-    return `<div class="mixrow ${o.st}">${face(o.x, A)}<b>＋</b>${face(o.y, B)}<b>→</b>${res}<div class="tx"><b>${name}</b>${o.special ? '<small class="gold">新しい種族</small>' : '<small>同じ種族で強く</small>'}</div>${tag}</div>`; };
+    const risk = [A, B].some(m => m && (m.evos || 0) > 0), tag = o.st === "ok" ? `<button class="${risk ? "" : "main"}" data-a="mixdo" data-v="${o.special ? "h:" + o.k : "s:" + o.x}">🥚 配合</button>` : o.st === "lv" ? `<span class="hint" style="white-space:nowrap">両方Lv${o.need}で作れる<br>${[A, B].filter(Boolean).map(m => m.lv >= o.need ? `<span class="good">Lv${m.lv}✔</span>` : `Lv${m.lv}（あと${o.need - m.lv}）`).join("・")}</span>` : `<span class="hint">あと<b>${MON[A ? o.y : o.x].forms[0][0]}</b>がいれば</span>`;
+    return `<div class="mixrow ${o.st}">${face(o.x, A)}<b>＋</b>${face(o.y, B)}<b>→</b>${res}<div class="tx"><b>${name}</b>${o.special ? '<small class="gold">新しい種族</small>' : '<small>同じ種族で強く</small>'}${risk && o.st === "ok" ? '<small class="bad">⚠ 進化した子が消える</small>' : ""}</div>${tag}</div>`; };   /* ⚠ は名前の下に（ボタンの横に置いたら名前が縦1列に潰れた） */
   const rk = o => [o.a, o.b].some(m => m && (m.evos || 0) > 0) ? 1 : 0, ok = L.filter(o => o.st === "ok").sort((a, b) => rk(a) - rk(b)), rest = L.filter(o => o.st !== "ok");
   return `<h2>🥚 配合</h2><div class="hint">2体がいなくなり、1体の子が生まれる。子は親のスキルを受け継ぎ（おまかせ）、新しく1つ増える</div>
     ${ok.length ? `<div class="lab2">いま作れる</div>${ok.map(row).join("")}` : `<div class="box hint">いま作れる組み合わせはない</div>`}
@@ -7377,7 +7377,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.294（11/23 11:24）";
+const VER20 = "No.295（11/23 11:41）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
