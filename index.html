@@ -1215,6 +1215,9 @@ body:has(.modal) .inv25btn,body:has(.ntfull19) .inv25btn{display:none}
 #fp26 .f26map{position:absolute;left:auto;bottom:auto;right:12px;top:56px;width:150px;height:110px;border-radius:10px;border:1px solid rgba(220,180,120,.45);pointer-events:none}
 #fp26.rot .f26map{right:calc(env(safe-area-inset-bottom,0px) + 12px)}
 #fp26:not(.rot) .f26map{right:max(12px,env(safe-area-inset-right,0px))}
+.ghb27{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 8px}
+.ghb27 button{padding:6px 12px;font-size:13px}
+.bk27{background:#24304a !important;border-color:#6a8ad0 !important;color:#cfe0ff !important}
 </style>
 </head>
 <body>
@@ -7400,7 +7403,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.321（11/23 21:51）";
+const VER20 = "No.322（11/23 22:28）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7472,13 +7475,13 @@ function growPage20() {
   const guardEmpty = D.filter(i => purpose19(S, i) === "guard" && !residents5(S, i).length);
   const notes = [];
   if (guardEmpty.length) notes.push(`<div class="note20 bad">🛡 守る部屋に誰もいない。今夜、勇者が素通りする${S.mons.some(m => plan[m.id] != null && guardEmpty.includes(plan[m.id])) ? "（おまかせで入る）" : ""}</div>`);
-  let h = `<div class="pg20" id="pg20"><div class="gh20"><b>🧭 育成</b><span class="hint">カードを押すと、部屋を移す・手放す</span></div>${notes.join("")}`;
+  let h = `<div class="pg20" id="pg20"><div class="gh20"><b>🧭 育成</b><span class="hint">カードを押すと、部屋を移す・手放す</span></div><div class="ghb27"><button data-a="mons">👾 魔物の一覧</button>${S.books27 > 0 ? `<button class="bk27" data-a="bookpick27">📜 スキルの書 ${S.books27}冊</button>` : ""}</div>${notes.join("")}`;
   h += `<div class="flow20">${col("grow")}${D.some(i => purpose19(S, i) === "grow") ? `<div class="ar20"><small>育ったら</small>▶</div>` : ""}${col("earn")}</div>${col("guard")}`;
   if (bench.length) h += `<div class="col20 c-bench"><h4>🪑 控え ${bench.length}</h4><div class="mrow20">${bench.map(mini).join("")}</div></div>`;
   // なれてからの設定は、たたんでおく
   h += `<details class="adv20"><summary>⚙ 設定</summary>
     <div class="lane20"><div class="lh"><b>🎓 卒業のきまり</b><span class="hint">このLvまでは、まず訓練</span></div><div class="chips20">${[3, 5, 7, 10].map(v => `<button class="chip20 ${C.gradLv === v ? "on" : ""}" data-a="gl20" data-v="${v}">Lv${v}</button>`).join("")}<button class="chip20 ${!C.gradLv ? "on" : ""}" data-a="gl20" data-v="0">おまかせ</button></div><div class="hint">いま：Lv${thr}までは訓練、Lv${thr + 1}から得意の部屋へ</div></div>
-    <div class="chips20"><button class="chip20 ${C.daily ? "on" : ""}" data-a="af19d">🌅 毎朝おまかせ ${C.daily ? "ON" : "OFF"}</button><button class="chip20" data-a="af19open">⚙️ こまかい設定</button><button class="chip20" data-a="mons">👾 魔物の一覧</button></div></details>`;
+    <div class="chips20"><button class="chip20 ${C.daily ? "on" : ""}" data-a="af19d">🌅 毎朝おまかせ ${C.daily ? "ON" : "OFF"}</button><button class="chip20" data-a="af19open">⚙️ こまかい設定</button></div></details>`;
   return h + `</div>${sheet20()}<div class="bar20"><button data-a="pgback">◀ ダンジョン</button><button class="main" data-a="af19go" ${moves || busy ? "" : "disabled"}>🪄 おまかせで並べる${busy ? "<small>試算中…</small>" : moves ? `<small>${moves}体が動く</small>` : "<small>いまがいちばん</small>"}</button></div>`;
 }
 // 部屋の設備タブでは、役目の枠を出さない
@@ -13425,7 +13428,7 @@ autoAll19 = (prev => function (S2) { const R = restRooms27(S2); if (!R.length) r
   try { return prev.apply(this, arguments); } finally { tmp.forEach(m => { if (m.job === "bed21") m.job = null; }); } })(autoAll19);
 // ================= スキルの書：持ち物にして、覚える子を自分で選ぶ（全員4つ埋まっていると💎300に化けていた） =================
 { const _oc = openChest19; openChest19 = function (S2, c) { if (!c || c.kind !== "skill") return _oc.apply(this, arguments);
-  S2.books27 = (S2.books27 || 0) + 1; return { text: "📜 スキルの書", sub: "魔物の画面の「📜 スキルの書を使う」で、覚えさせる子を選べる", sp: null, evos: [] }; }; }
+  S2.books27 = (S2.books27 || 0) + 1; S2.bookNew27 = 1; return { text: "📜 スキルの書", sub: "このあと覚えさせる子を選べる（あとでも、育成・魔物の一覧の「📜 スキルの書」から使える）", sp: null, evos: [] }; }; }
 const bookSk27 = m => { S.bookPick27 = S.bookPick27 || {}; let k = S.bookPick27[m.id]; if (k && SK11[k] && !(m.sk || {})[k]) return k;
   k = pickSkill11(MON[m.sp].fam, m.sk || {}) || Object.keys(SK11).find(x => !(m.sk || {})[x]); if (k) { S.bookPick27[m.id] = k; save(); } return k; };
 function bookModal27(id) { const m = S.mons.find(o => o.id === id); if (!m) return `<button data-a="close">閉じる</button>`; const k = bookSk27(m); if (!k) return `<h2>📜 スキルの書</h2><div class="hint">この子が覚えられるスキルはもうない</div><button data-a="close">閉じる</button>`;
@@ -13525,6 +13528,16 @@ document.addEventListener("click", ev => { const b = ev.target.closest && ev.tar
 
 /* 「戻す」は仕事の希望・部屋の方針もまとめて戻す */
 { const _u = undo13; undo13 = function (S0) { if (window.__undo27) { window.__undo27(); window.__undo27 = null; return true; } return _u.apply(this, arguments); }; }
+
+/* スキルの書：だれに覚えさせるかを一覧で選ぶ（育成の画面・魔物の一覧・手に入れた直後から開く） */
+function bookPickModal27() { const L = S.mons.filter(m => m.home !== undefined).map(m => { const k = bookSk27(m); return { m, k }; }).filter(o => o.k).sort((a, b) => b.m.lv - a.m.lv);
+  return `<h2>📜 スキルの書（${S.books27 || 0}冊）</h2><div class="hint">覚えさせる子を選ぶ。覚えるスキルは子ごとに決まっている</div>` +
+    (L.length ? L.map(({ m, k }) => { const full = Object.keys(m.sk || {}).length >= 4; return `<button class="row" style="width:100%;text-align:left;margin:4px 0;display:flex;gap:8px;align-items:center" data-a="book27" data-v="${m.id}">${simg23(m, m.evos, "sp", "width:34px !important;height:34px !important;flex:0 0 auto")}<span style="flex:1"><b>${esc(m.nick)}</b> <small>Lv${m.lv}${full ? "・4つ埋まっている" : ""}</small><br>${skChip10(k, skStar11(m))}</span></button>`; }).join("") : `<div class="box">覚えられる子がいない</div>`) +
+    `<button data-a="close" style="width:100%;margin-top:8px">あとで（書は取っておく）</button>`; }
+document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="bookpick27"]'); if (!b || !S) return; ev.stopImmediatePropagation(); ev.preventDefault(); S.bookNew27 = 0; modal = bookPickModal27; render(); }, true);
+monsModal = (prev => function () { const h = prev(); if (!(S.books27 > 0)) return h; return h.replace('<div class="pk">', `<div class="pk"><button class="bk27" data-a="bookpick27">📜 スキルの書 ${S.books27}冊</button>`); })(monsModal);
+/* 手に入れた直後：画面が落ち着いたら（ほかの表示が閉じたら）選ぶ画面を出す */
+setInterval(() => { try { if (S && S.bookNew27 && S.books27 > 0 && !modal && !N && !(typeof stage !== "undefined" && stage) && !document.querySelector(".kk25ov,#fp26")) { S.bookNew27 = 0; modal = bookPickModal27; render(); } } catch (e) {} }, 700);
 
 </script>
 </body>
