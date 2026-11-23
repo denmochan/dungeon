@@ -6071,13 +6071,13 @@ function moveModal(){
 }
 
 // ---------- 店 ----------
-function shopFit(sp){
-  const b = bestRoom9(S, sp);
+function shopFit(sp, o){
+  const b = bestRoom9(S, sp, o ? { sp, sk: o.sk || {}, lv: 1, evos: 0, plus: 0, quirk: "brave", exp: 0 } : undefined);   /* 買ったときと同じ見積もりで（スキル込み） */
   return `<div class="fits">${S.floors.map((F, f) => `<span class="fit">B${f + 1}${MOOD_FACE(moodTheme7(sp, F.theme))}</span>`).join("")}</div><div class="hint fitto">${b == null ? '<span class="bad">空きなし→控え</span>' : `→ ${esc(roomTitle(S, b))} B${floorOf(S, b) + 1} ${MOOD_FACE(moodAt(S, sp, b))}`}</div><div class="hint">${prefText(sp)}</div>`;
 }
 function shopModal(){
   return `<h2>🛒 魔物を呼ぶ</h2><div class="hint">毎朝入れかわる。同じ種族でもスキルが違う。買った子はおまかせで空いている部屋に住む</div>
-    <div class="grid3">${S.shop.map((o, i) => { const D = MON[o.sp]; return `<div class="shopc" ${o.sold ? 'style="opacity:.35"' : ""}>${img(o.sp)}<b>${D.forms[0][0]}</b><div>★${D.star}${roleTag(o.sp)}</div>${shopWhy13(o)}<div class="sks">${Object.keys(o.sk || {}).map(k => skChip10(k, 1)).join("")}</div><div class="hint">🍖食費 ${FOOD16({ sp: o.sp, lv: 1 })}/日〜</div>${shopFit(o.sp)}<button data-a="dexsp" data-v="${o.sp}" style="min-height:28px;font-size:11px">くわしく</button>${o.sold ? "<b>済</b>" : `<button class="main" data-a="buy" data-v="${i}" ${S.dp < price5(o.sp, o) ? "disabled" : ""}>DP ${price5(o.sp, o)}</button>`}</div>`; }).join("")}</div>
+    <div class="grid3">${S.shop.map((o, i) => { const D = MON[o.sp]; return `<div class="shopc" ${o.sold ? 'style="opacity:.35"' : ""}>${img(o.sp)}<b>${D.forms[0][0]}</b><div>★${D.star}${roleTag(o.sp)}</div>${shopWhy13(o)}<div class="sks">${Object.keys(o.sk || {}).map(k => skChip10(k, 1)).join("")}</div><div class="hint">🍖食費 ${FOOD16({ sp: o.sp, lv: 1 })}/日〜</div>${shopFit(o.sp, o)}<button data-a="dexsp" data-v="${o.sp}" style="min-height:28px;font-size:11px">くわしく</button>${o.sold ? "<b>済</b>" : `<button class="main" data-a="buy" data-v="${i}" ${S.dp < price5(o.sp, o) ? "disabled" : ""}>DP ${price5(o.sp, o)}</button>`}</div>`; }).join("")}</div>
     <div class="pk"><button data-a="reroll" ${S.dp < reroll5Cost(S) ? "disabled" : ""}>入れかえ ${reroll5Cost(S)}</button><button data-a="mixsel">🥚 配合の早見表</button></div>
     <button data-a="close">閉じる</button>`;
 }
@@ -6553,7 +6553,7 @@ function monCard(id){
     <div class="quote">「${esc(f[2].go)}」</div>
     <div class="box"><div class="lab" style="margin:0 0 4px">スキル ${list.length}/${SK_MAX11}<span class="hint">　スキルはLvで強くなる（Lv10でⅡ・Lv20でⅢ）</span></div>
       ${list.map(([k]) => `<div class="skrow">${skChip10(k, L)}<span class="hint">${skText11(k, L)}</span></div>`).join("")}
-      <div class="hint">スキルは生まれた時に決まる。配合すると親から選んで受け継ぎ、1つ増える</div></div>
+      <div class="hint">スキルは生まれた時に決まる。あとから増やすには、配合（親から受け継いで1つ増える）か📜スキルの書</div></div>
     <div class="box"><b>${ROLES[D.role].icon}${ROLES[D.role].name}</b>：${ROLES[D.role].text}<br><span class="gold">${fxLine(fx)}</span></div>
     <div class="forms">${D.forms.map((F, k) => `<div class="f ${k === m.evos ? "now" : ""}">${img(m.sp, k)}<div>${F[0]}</div><div>${k === 0 ? "" : "Lv" + EVO_LV5[k - 1]}</div></div>`).join("")}</div>
     <div class="hint">${esc(D.bio)}</div>
@@ -6870,7 +6870,7 @@ shopModal = function () {
           <div class="sline"><b>${R.icon}${R.name}</b></div>
           <div class="sline"><span class="apt18 a-${k}">得意 ${ROLEI18[k][0]}${ROLEI18[k][1]}</span></div>
           ${sks.length ? `<details class="sk23"><summary>${sks.map(s => skChip10(s, 1)).join("")}</summary>${sks.map(s => `<div class="skrow">${skChip10(s, 1)}<span class="hint">${skText11(s, 1)}</span></div>`).join("")}</details>` : `<div class="hint">スキルなし</div>`}
-          ${shopWhy13(o)}${shopFit(o.sp)}
+          ${shopWhy13(o)}${shopFit(o.sp, o)}
           <div class="sb">${o.sold ? "<b>買った</b>" : `<button class="main" data-a="buy" data-v="${i}" ${S.dp < price5(o.sp, o) ? "disabled" : ""}>DP ${price5(o.sp, o)} で呼ぶ</button>`}</div></div></div>`; }).join("")}</div>
     <button data-a="close">閉じる</button>`;
 };
@@ -7229,7 +7229,7 @@ mixSkillModal = function () { return mixConfirm(); };
 // 全体おまかせの画面
 let autoAllModal19 = function () {
   const F = afOf19(S);
-  return `<h2>🪄 ダンジョン全体おまかせ</h2><div class="hint">部屋をまたいで、住む場所と役目を決め直す。<b>📌自分で決めた子と、休んでいる子は動かさない</b></div>`
+  return `<h2>⚙ おまかせの方針</h2><div class="hint">部屋をまたいで、住む場所と役目を決め直す。<b>📌自分で決めた子と、休んでいる子は動かさない</b></div>`
     + Object.keys(AF19).map(k => `<div class="row pick18 ${F[k] ? "on" : ""}" data-a="af19t" data-v="${k}"><span class="pn18">${F[k] ? "✓" : ""}</span><div class="tx"><b>${AF19[k][0]} ${AF19[k][1]}</b><small>${AF19[k][2]}</small></div></div>`).join("")
     + `<div class="mixbtn18"><button data-a="close">やめる</button><button class="main" data-a="af19go">🪄 この方針で並べる</button></div>`;
 }
@@ -7341,7 +7341,7 @@ autoAll19 = function (S) {
 autoAllModal19 = function () {
   const C = afc19(S), dens = S.path.map((r, i) => r && r.kind === "den" ? i : -1).filter(i => i >= 0);
   const fx = i => facsOf12(S.path[i]).map(k => FAC9[k] ? FAC9[k].icon : "").join("");
-  let h = `<h2>🪄 ダンジョン全体おまかせ</h2><div class="hint">目的と優先を決めて、一発で並べ直す。<b>📌固定した子と、休んでいる子は動かさない</b></div>`;
+  let h = `<h2>⚙ おまかせの方針</h2><div class="hint">部屋ごとの目的と優先を決める。「🪄 おまかせ」はこの方針で試算して並べる。<b>📌固定した子と、休んでいる子は動かさない</b></div>`;
   h += `<div class="lab2">部屋の目的と、戦う割合</div>` + dens.map(i => { const p = purpose19(S, i), r = S.path[i], cap = capOfSlot7(S, i), nf = Math.min(cap, nFight19(S, i));
     return `<div class="afr19"><div class="tx"><b>${esc(roomTitle(S, i))}</b><small>${fx(i)}　定員${cap} → ⚔戦う${nf}・働く${cap - nf}</small></div><div class="afb19">${["grow", "earn", "guard"].map(k => `<button class="mini ${p === k ? "on" : ""}" data-a="af19p" data-v="${i}:${k}">${POL13[k].icon}${POL13[k].name}</button>`).join("")}</div>
       <div class="afp19">⚔戦う割合 ${FPCT19.map(v => `<button class="mini ${r.fpct19 === v || (v == null && r.fpct19 == null) ? "on" : ""}" data-a="af19f" data-v="${i}:${v == null ? "a" : v}">${v == null ? "おまかせ" : v + "%"}</button>`).join("")}</div></div>`; }).join("");
@@ -7405,7 +7405,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.325（11/24 00:54）";
+const VER20 = "No.326（11/24 02:16）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7887,7 +7887,7 @@ monsModal = (prev => function () {
 })(monsModal);
 document.addEventListener("click", ev => { const b = ev.target.closest('[data-a="mf21"]'); if (!b) return; ev.stopImmediatePropagation(); mf21[b.dataset.k] = b.dataset.v; try { localStorage.setItem("chika-mf21", JSON.stringify(mf21)); } catch (e) {} render(); }, true);
 // 一覧の上のボタンは短く（はみ出さない）
-monsModal = (prev => function () { return prev().replace(">🪄 全体おまかせ<", ">🪄 おまかせ<").replace(">🪑 全員控えへ<", ">🪑 全員控え<").replace(">👋 まとめて手放す<", ">👋 手放す<"); })(monsModal);
+monsModal = (prev => function () { return prev().replace(">🪄 全体おまかせ<", ">⚙ おまかせの方針<").replace(">🪑 全員控えへ<", ">🪑 全員控え<").replace(">👋 まとめて手放す<", ">👋 手放す<"); })(monsModal);
 
 // ---------- 17) 名前がかぶらないように（同じ名前が何体もいると見分けられない） ----------
 newMon5 = (prev => function () { const m = prev.apply(this, arguments); try { if (typeof S !== "undefined" && S && S.mons) { const used = new Set(S.mons.map(o => o.nick));
@@ -13079,7 +13079,7 @@ function fpOpen26(){
     const ib = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint32Array(I), gl.STATIC_DRAW); return { pb, cb, ib, n: I.length, z0, z1, y0, y1 }; }
   const CORR = []; for (let i = 0; i + 1 < n; i++) CORR.push(corridor(rooms[i], rooms[i + 1]));
   // たいまつ：部屋の出入口の両わきと、通路に6歩ごと（通路が真っ暗だった）
-  const TORCH = []; rooms.forEach((Rm, i) => { if (i > 0) TORCH.push([-3.1, Rm.Y + 2.3, Rm.Z + 7.6, i, 1], [3.1, Rm.Y + 2.3, Rm.Z + 7.6, i, 1]); if (i < n - 1) TORCH.push([-3.1, Rm.Y + 2.3, Rm.Z - 7.6, i, -1], [3.1, Rm.Y + 2.3, Rm.Z - 7.6, i, -1]); });
+  const TORCH = []; rooms.forEach((Rm, i) => { if (i > 0) TORCH.push([-3.35, Rm.Y + 2.3, Rm.Z + 7.6, i, 1], [3.35, Rm.Y + 2.3, Rm.Z + 7.6, i, 1]); if (i < n - 1) TORCH.push([-3.35, Rm.Y + 2.3, Rm.Z - 7.6, i, -1], [3.35, Rm.Y + 2.3, Rm.Z - 7.6, i, -1]); });
   CORR.forEach(C => { const L = C.z0 - C.z1, k = Math.max(1, Math.round(L / 6)); for (let j = 1; j < k; j++) { const t = j / k, z = C.z0 - L * t, y = C.y0 + (C.y1 - C.y0) * t; TORCH.push([(j % 2 ? -2.2 : 2.2), y + 2.0, z]); } });
   const mkTex = (w, h, f) => { const c = document.createElement("canvas"); c.width = w; c.height = h; f(c.getContext("2d"), w, h); return c; };
   const FLAME = mkTex(32, 64, (g, w, h) => { const gr = g.createRadialGradient(16, 44, 1, 16, 40, 22); gr.addColorStop(0, "rgba(255,250,210,1)"); gr.addColorStop(0.3, "rgba(255,190,80,.9)"); gr.addColorStop(0.7, "rgba(230,90,20,.35)"); gr.addColorStop(1, "rgba(120,30,0,0)"); g.fillStyle = gr; g.beginPath(); g.ellipse(16, 40, 11, 24, 0, 0, 6.3); g.fill(); });
@@ -13111,7 +13111,7 @@ function fpOpen26(){
   const gFree = (G, x, zl, rad, h) => { for (let k = 0; k < 9; k++) { const an = k * 0.785, rr = k === 8 ? 0 : rad, j = gAt(G, x + Math.cos(an) * rr, zl + Math.sin(an) * rr); if (j < 0 || G.fl[j] === 255 || G.cl[j] / 20 < h) return false; } return true; };
   const floorY = (R, x, zl) => { const G = R.G; if (!G) return 0; const j = gAt(G, x, zl); return j < 0 || G.fl[j] === 255 ? 0 : Math.max(-0.3, Math.min(0.5, G.fl[j] / 100 - 0.5)); };
   const sepOK = (R, a, x, zl, useT) => (R.acts || []).every(b => b === a || b === a.pt || Math.hypot((useT ? b.tx : b.x) - x, (useT ? b.tz : b.z) - zl) >= 0.45 + ((a.H || 1.6) + (b.H || 1.6)) * 0.22);   /* ほかの子と重ならない */
-  const fitsM = (R, a, x, zl) => { const G = R.G; if (!G) return floorOK(R, x, zl); return gFree(G, x, zl, Math.max(0.3, (a.H || 1.6) * 0.3), (a.H || 1.6) * 0.9 + (DHOV25[a.sp] ? 0.9 : 0)); };
+  const fitsM = (R, a, x, zl) => { if (Math.abs(x) < 2.9 && (zl < -2.2 || zl > 7.0)) return false;   /* 出入口のトンネルには入らない（通り道をふさいで進めなかった） */ const G = R.G; if (!G) return floorOK(R, x, zl); return gFree(G, x, zl, Math.max(0.3, (a.H || 1.6) * 0.3), (a.H || 1.6) * 0.9 + (DHOV25[a.sp] ? 0.9 : 0)); };
   const floorOK = (R, x, zl, me) => { if (R.G) return gFree(R.G, x, zl, me ? 0.3 : 0.5, me ? P.eye + 0.2 : 1.5); const sd = shapeSd25(R.SH, x / SW25[0], -zl / SW25[1]); return sd < -0.2 && (!R.OBS.some(([ox, oz, or]) => Math.hypot(x - ox, -zl - oz) < or + 0.55)); };   /* 部屋の形の前後は、主が進む向きと逆（門が手前・玉座が奥） */   /* 主は真ん中の道（入口→奥の坑道）なら柵もまたいで通れる */
   // ある場所が歩けるか。どこにいるか（部屋 i ／ 通路 i）と床の高さを返す
   function where(x, z){ for (let i = 0; i < n; i++) { const R = rooms[i], zl = z - R.Z; if (zl > FPK26.RZ0 - 0.01 && zl <= FPK26.RZ1) {
@@ -13123,12 +13123,12 @@ function fpOpen26(){
   // 指：左は歩く（スティック）、右は見回す。動かさずに離したらタップ
   const stick = wrap.querySelector(".f26stick"), knob = stick.querySelector("i"); const mv = { x: 0, y: 0 }; const touches = new Map();
   cv.style.touchAction = "none";
-  wrap.addEventListener("pointerdown", e => { if (e.target.closest(".f26menu,.f26top,button")) return; const [ex, ey] = loc(e), left = ex < VW() * 0.42 && ey > VH() * 0.45;
+  wrap.addEventListener("pointerdown", e => { if (e.target.closest(".f26menu,.f26top,button")) return; const [ex, ey] = loc(e), left = ex < VW() * 0.42 && ey > VH() * 0.45; if (left) P.auto = null;
     touches.set(e.pointerId, { left, x0: ex, y0: ey, x: ex, y: ey, t0: performance.now(), moved: 0 }); try { wrap.setPointerCapture(e.pointerId); } catch (er) {}
     if (left) { stick.style.left = (ex - 60) + "px"; stick.style.top = (ey - 60) + "px"; stick.classList.add("on"); } });
   wrap.addEventListener("pointermove", e => { const T = touches.get(e.pointerId); if (!T) return; const [ex, ey] = loc(e), dx = ex - T.x, dy = ey - T.y; T.moved += Math.abs(dx) + Math.abs(dy); T.x = ex; T.y = ey;
     if (T.left) { let ax = T.x - T.x0, ay = T.y - T.y0; const L = Math.hypot(ax, ay), m = 50; if (L > m) { ax *= m / L; ay *= m / L; } mv.x = ax / m; mv.y = ay / m; knob.style.transform = `translate(${ax}px,${ay}px)`; }
-    else { P.yaw += dx * 0.0035; P.pit = Math.max(-0.9, Math.min(0.6, P.pit - dy * 0.003)); } });   /* 見回しはゆっくり */
+    else { P.yaw += dx * 0.0022; P.pit = Math.max(-0.9, Math.min(0.6, P.pit - dy * 0.002)); } });   /* 見回しはゆっくり */
   const up = e => { const T = touches.get(e.pointerId); if (!T) return; touches.delete(e.pointerId);
     if (T.left) { mv.x = mv.y = 0; knob.style.transform = ""; stick.classList.remove("on"); stick.style.left = stick.style.top = ""; }
     if (T.moved < 10 && performance.now() - T.t0 < 400) { const [ex, ey] = loc(e); tap(ex, ey); } };
@@ -13141,6 +13141,7 @@ function fpOpen26(){
   const toScr = (x, y, z) => { const v = [x, y, z, 1], o = [0, 0, 0, 0]; for (let i = 0; i < 4; i++) for (let k = 0; k < 4; k++) o[i] += VP[k * 4 + i] * v[k]; if (o[3] <= 0.1) return null; return [(o[0] / o[3] * 0.5 + 0.5) * VW(), (0.5 - o[1] / o[3] * 0.5) * VH(), o[3]]; };
   // タップ：近くの魔物 → その場のメニュー、看板 → 部屋の画面
   function tap(sx, sy){ if (!VP) return; let best = null;
+    /* 「▼次の部屋へ／▲前の部屋へ」の札を押すと、そこまで自動で歩く */ { const D = (window.__fpDoor26 || []).find(d => Math.abs(sx - d.x) < 70 && Math.abs(sy - d.y) < 26); if (D) { P.auto = { to: curRoom + D.dir }; toast(D.dir > 0 ? "▼ 次の部屋へ歩く（スティックで止まる）" : "▲ 前の部屋へ歩く（スティックで止まる）"); return; } }
     rooms.forEach(R => { if (Math.abs(R.i - curRoom) > 1) return;
       (R.acts || []).forEach(a => { const s = toScr(a.x, R.Y + (a.H || 2) * 0.5, R.Z + a.z); if (!s) return; const d = Math.hypot(s[0] - sx, s[1] - sy), wd = Math.hypot(a.x - P.x, R.Z + a.z - P.z); if (wd < 15 + (a.H || 0) && d < 70 + (a.H || 0) * 18 && (!best || d < best.d)) best = { d, a, R }; });
       const s = toScr(R.sx, R.Y + 1.8, R.Z + R.sz); if (s) { const d = Math.hypot(s[0] - sx, s[1] - sy), wd = Math.hypot(R.sx - P.x, R.Z + R.sz - P.z); if (wd < 14 && d < 60 && (!best || d < best.d)) best = { d, sign: R }; } });
@@ -13168,12 +13169,16 @@ function fpOpen26(){
     const dt = Math.max(0.001, Math.min(0.1, (now - lastT) / 1000)); lastT = now; ft.push(dt); if (ft.length > 20) ft.shift(); fpsEl.textContent = Math.round(ft.length / ft.reduce((x, y) => x + y, 0)) + "fps";
     const busy = !!document.querySelector("#peek24[style*='flex'], .modal") ; if (busy) return;
     // 歩く（壁で止まったら、横すべり）
-    const sp = 8 * dt, fx = Math.sin(P.yaw), fz = -Math.cos(P.yaw), rx = Math.cos(P.yaw), rz = Math.sin(P.yaw);
+    /* 重い端末でも同じ速さで歩けるように、1コマで進む量は細かく分けて当たりを見る（前は10fps以下だとほとんど進まなかった） */
+    if (P.auto) { const T = rooms[P.auto.to]; if (!T) P.auto = null; else { const dir = Math.sign(T.Z - rooms[curRoom].Z) || -1, zl = P.z - T.Z;
+        if (curRoom === P.auto.to && (dir < 0 ? zl < 4 : zl > -1)) { P.auto = null; mv.x = mv.y = 0; } else { const tz = P.z + dir * 5, tx = Math.abs(P.z - rooms[curRoom].Z) < 12 && curRoom !== P.auto.to ? 0 : 0, want = Math.atan2(tx - P.x, -(tz - P.z)), dy = Math.atan2(Math.sin(want - P.yaw), Math.cos(want - P.yaw)); P.yaw += dy * Math.min(1, dt * 4); mv.x = 0; mv.y = -1; } } }
+    const dtw = Math.min(0.3, Math.max(0.001, (now - (P.lastW || now)) / 1000)); P.lastW = now; const nSub = Math.max(1, Math.ceil(8 * dtw / 0.3));
+    for (let sub = 0; sub < nSub; sub++) { const sp = 8 * dtw / nSub, fx = Math.sin(P.yaw), fz = -Math.cos(P.yaw), rx = Math.cos(P.yaw), rz = Math.sin(P.yaw);
     if (mv.x || mv.y) { const dx = (-mv.y * fx + mv.x * rx) * sp, dz = (-mv.y * fz + mv.x * rz) * sp;
       const hitM = (x, z) => { const R = rooms[curRoom]; return (R.acts || []).some(a => Math.hypot(R.Z + a.z - z, a.x - x) < Math.max(1.5, (a.H || 0) * 0.4) && Math.hypot(R.Z + a.z - z, a.x - x) < Math.hypot(R.Z + a.z - P.z, a.x - P.x)); };   /* 魔物に重ならない */
       if (!where(P.x, P.z)) { for (let r = 0.25; r < 6; r += 0.25) { let f = 0; for (let k = 0; k < 16; k++) { const an = k / 16 * 6.2832; if (where(P.x + Math.cos(an) * r, P.z + Math.sin(an) * r)) { P.x += Math.cos(an) * r; P.z += Math.sin(an) * r; f = 1; break; } } if (f) break; } }   /* 岩の中に立っていたら外へ出す */
       let ok = false; for (const an of [0, 0.5, -0.5, 1.0, -1.0]) { const c = Math.cos(an), sn = Math.sin(an), ex = dx * c - dz * sn, ez = dx * sn + dz * c; if (where(P.x + ex, P.z + ez) && !hitM(P.x + ex, P.z + ez)) { P.x += ex; P.z += ez; ok = true; break; } }   /* ぶつかったら少し向きを変えて回りこむ */
-      if (!ok) { if (where(P.x + dx, P.z)) P.x += dx; else if (where(P.x, P.z + dz)) P.z += dz; } }
+      if (!ok) { if (where(P.x + dx, P.z)) P.x += dx; else if (where(P.x, P.z + dz)) P.z += dz; } } }
     if (mv.x || mv.y) { const W1 = where(P.x, P.z); if (W1 && W1.tight) P.x *= Math.max(0, 1 - dt * 2.5); }   /* 坑道・通路では真ん中へ寄せる（ふちで引っかかって進めなかった） */
     const W0 = where(P.x, P.z) || { k: "r", i: curRoom, y: rooms[curRoom].Y, tight: false }; P.y += (W0.y - P.y) * Math.min(1, dt * 10); P.eye += ((W0.tight ? 1.75 : 2.35) - P.eye) * Math.min(1, dt * 4);
     if (W0.k === "r") curRoom = W0.i; const R0 = rooms[curRoom]; whereB.textContent = W0.k === "c" || W0.tight ? "通路" : R0.name; whereS.textContent = `B${R0.f + 1}`;
@@ -13184,7 +13189,7 @@ function fpOpen26(){
     P.walk = (P.walk || 0) + ((mv.x || mv.y) ? Math.hypot(mv.x, mv.y) * dt * 8 : 0); const bob = (mv.x || mv.y) ? Math.sin(P.walk * 1.9) * 0.07 : 0; EYE = [P.x, P.y + P.eye + bob + SHK * Math.sin(now / 1000 * 47), P.z]; SHK *= Math.pow(0.02, dt); const dir = [Math.sin(P.yaw) * Math.cos(P.pit), Math.sin(P.pit), -Math.cos(P.yaw) * Math.cos(P.pit)];
     VP = mm(persp(1.15, W / H, 0.15, 120), look(EYE, [EYE[0] + dir[0], EYE[1] + dir[1], EYE[2] + dir[2]]));
     gl.enable(gl.DEPTH_TEST); gl.useProgram(PM.p); gl.uniformMatrix4fv(PM.U("VP"), false, new Float32Array(VP)); gl.uniform3fv(PM.U("EYE"), EYE);
-    /* 出入口のたいまつは、地図が読めたら本当の壁の位置へ（宙に浮いていた） */ TORCH.forEach(t => { if (t[3] == null || t[5]) return; const R = rooms[t[3]]; if (!R.G) return; t[5] = 1; const sg = t[4], z0 = sg < 0 ? -2.8 : 7.3; for (let k = 0; k < 60; k++) { const zl = z0 + sg * k * 0.25, j = gAt(R.G, t[0], zl); if (j < 0 || R.G.fl[j] === 255 || R.G.cl[j] / 20 < 2.6) { t[2] = R.Z + zl - sg * 0.35; return; } } });
+    /* 出入口のたいまつは、地図が読めたら本当の壁の位置へ（宙に浮いていた） */ TORCH.forEach(t => { if (t[3] == null || t[5]) return; const R = rooms[t[3]]; if (!R.G) return; t[5] = 1; const sg = t[4], z0 = sg < 0 ? -2.8 : 7.3; for (let k = 0; k < 60; k++) { const zl = z0 + sg * k * 0.25, j = gAt(R.G, t[0], zl); if (j < 0 || R.G.fl[j] === 255 || R.G.cl[j] / 20 < 2.6) { t[2] = R.Z + zl - sg * 0.55; return; } } });
     const LT6 = TORCH.map(t => [t, (t[0] - EYE[0]) ** 2 + (t[1] - EYE[1]) ** 2 + (t[2] - EYE[2]) ** 2]).sort((a, b) => a[1] - b[1]).slice(0, 6); while (LT6.length < 6) LT6.push([[0, -999, 0], 1e9]);
     gl.uniform3fv(PM.U("LT"), new Float32Array(LT6.flatMap(o => o[0]))); gl.uniform1fv(PM.U("LF"), new Float32Array(LT6.map((o, j) => o[0][1] < -900 ? 0 : 1.0 * (0.86 + 0.1 * Math.sin(now / 1000 * 11 + j * 2.1) + 0.04 * Math.sin(now / 1000 * 27 + j)))));
     const la = PM.A("ap"), lc = PM.A("ac"); gl.enableVertexAttribArray(la); gl.enableVertexAttribArray(lc);
@@ -13215,6 +13220,7 @@ function fpOpen26(){
           for (let r = 0; r < 6 && !got; r += 0.5) for (let k = 0; k < 12 && !got; k++) { const an = k / 12 * 6.2832, cx = A.x + Math.cos(an * 1.7) * r, cz = A.z + Math.sin(an * 1.7) * r, dx = Math.cos(an) * gap / 2, dz = Math.sin(an) * gap / 2;
             if (fitsM(R, A, cx - dx, cz - dz) && fitsM(R, B, cx + dx, cz + dz) && sepOK(R, A, cx - dx, cz - dz) && sepOK(R, B, cx + dx, cz + dz)) got = [cx - dx, cz - dz, cx + dx, cz + dz]; }
           if (got) { A.x = A.hx = A.tx = got[0]; A.z = A.hz = A.tz = got[1]; B.x = B.hx = B.tx = got[2]; B.z = B.hz = B.tz = got[3]; } A.duelSet = B.duelSet = A.fixd = B.fixd = 1; }
+        if (a.mode === "mine" && a.rk && !a.rkSet && !o.bip && a.mult) { a.rkSet = 1; const [cx, cz, hw, hz] = a.rk, dx = a.x - cx, dz = a.z - cz, e = Math.hypot(dx / hw, dz / hz) || 1, L = Math.hypot(dx, dz) || 1, off = 0.35 + (a.H || 1) * 0.25; a.x = cx + dx / e * 1.25 + dx / L * off; a.z = cz + dz / e * 1.25 + dz / L * off; a.look = [cx, cz]; }   /* 手のない子も岩のそばへ */
         if (a.mode === "duel" && a.pt) a.look = [a.pt.x, a.pt.z];
         if (a.look && !a.walking && a.mode !== "idle") a.r = Math.atan2(a.look[0] - a.x, a.look[1] - a.z);   /* 仕事の相手の方を向く（13方向の絵で正しく見えるように） */
         const gy = floorY(R, a.x, a.z); const wx = a.x, wz = R.Z + a.z, WS = dwalk25(a.sp, a.evo), view = Math.atan2(EYE[0] - wx, EYE[2] - wz); let rel = ((a.r - view) % 6.2832 + 9.4248) % 6.2832 - 3.1416;
@@ -13231,7 +13237,7 @@ function fpOpen26(){
         else if (WS && WS.ok && WS.im.height >= WS.ch * 13) { const ph = a.walking ? Math.floor(a.dist / 0.9 * 6) % 6 : 0; im = WS.im; hs = WS.hs || 1; cw = WS.cw; ch = WS.ch; cx = ph * cw; cy = ai * ch; foot = WS.foot != null ? WS.foot : o.foot; ox = WS.ox / hs; oy = WS.oy / hs; if (!a.walking) bob = Math.sin(now / 1000 * 2.2 + a.ph) * 0.03; }
         else { hs = o.hs || 1; cw = ch = Math.round(128 * hs); im = o.im; cx = (Math.floor((now / 1000 + a.ph) / 0.4) % 4) * cw; cy = 0; foot = o.foot; if (a.walking) bob = Math.abs(Math.sin(a.dist * 7)) * 0.18; }
         { const JB = djob27(a.sp, a.evo); a.dir13 = 0; if (JB && JB.ok && !a.walking) { let col;
-            if (a.mode === "mine" && JB.bip) col = 8 + Math.floor(T / 1.1 * 4) % 4; else if (/^(slash|lift|train)$/.test(a.mode)) col = 4 + Math.floor(T / 0.55 * 4) % 4;
+            if (a.mode === "mine" && JB.bip) col = 8 + Math.floor(T / 1.1 * 4) % 4; else if (a.mode === "mine") col = 4 + Math.floor(T / 0.8 * 4) % 4;   /* 手のない子は岩にかじりつく */ else if (/^(slash|lift|train)$/.test(a.mode)) col = 4 + Math.floor(T / 0.55 * 4) % 4;
             else if (a.mode === "duel" && a.dq) col = a.dq.mine ? 4 + Math.min(3, Math.floor(a.dq.lq * 4)) : Math.floor(T / 0.4) % 4; else if (a.mode === "spar" && a.sq != null) col = a.sq < 0.34 ? 4 + Math.floor(a.sq / 0.34 * 4) % 4 : Math.floor(T / 0.4) % 4;
             else if (a.mode === "sleep") col = JB.bip ? 12 : 0; else col = Math.floor(T / 0.4) % 4; if (col >= JB.n) col = 0;
             im = JB.im; hs = JB.hs; cw = JB.cw; ch = JB.ch; cx = col * cw; cy = ai * ch; foot = JB.foot; ox = JB.ox / hs; oy = JB.oy / hs; a.dir13 = 1; } }   /* 13方向の仕事の絵があれば、それを使う（横向きの絵の左右反転だけだと、正面や背中から見ると変だった） */
@@ -13249,9 +13255,9 @@ function fpOpen26(){
     { const R = rooms[curRoom], fx = Math.sin(P.yaw), fz = -Math.cos(P.yaw); let best = null; (R.acts || []).forEach(a => { if (!a.m) return; const dx = a.x - P.x, dz = R.Z + a.z - P.z, d = Math.hypot(dx, dz); if (d < 5.5 + (a.H || 0) * 0.6 && (dx * fx + dz * fz) / (d || 1) > 0.3 && (!best || d < best.d)) best = { a, d }; });
       const tb = wrap.querySelector(".f26talk"); if (best && menu.hidden) { tb.hidden = false; if (tb.dataset.id != best.a.m.id) { tb.dataset.id = best.a.m.id; tb.textContent = `💬 ${best.a.m.nick || ""}に話しかける`; tb.onclick = () => monMenu(best.a, R, VW() / 2, VH() * 0.55); } } else tb.hidden = true; }
     // 名前の札（近くの子）。画面の外にいる子は、端に矢印
-    { const lc = wrap.querySelector(".f26lab"), dp = Math.min(2, window.devicePixelRatio || 1); if (lc.width !== Math.round(VW() * dp)) { lc.width = Math.round(VW() * dp); lc.height = Math.round(VH() * dp); } const g = lc.getContext("2d"); g.setTransform(dp, 0, 0, dp, 0, 0); g.clearRect(0, 0, VW(), VH()); g.textAlign = "center"; g.font = "bold 12px system-ui,sans-serif";
+    { const lc = wrap.querySelector(".f26lab"), dp = Math.min(2, window.devicePixelRatio || 1); if (lc.width !== Math.round(VW() * dp)) { lc.width = Math.round(VW() * dp); lc.height = Math.round(VH() * dp); } const g = lc.getContext("2d"); g.setTransform(dp, 0, 0, dp, 0, 0); g.clearRect(0, 0, VW(), VH()); g.textAlign = "center"; g.font = "bold 12px system-ui,sans-serif"; const DOORS = window.__fpDoor26 = [], LBL = [], lfree = (x, y, w, h) => !LBL.some(r => x < r[0] + r[2] && x + w > r[0] && y < r[1] + r[3] && y + h > r[1]);   /* 名札どうしが重ならないように */
       const R = rooms[curRoom];
-      [[0, fpBZ26(R.kind) - 2.5, curRoom < n - 1 ? "▼ 次の部屋へ" : ""], [0, 13, curRoom > 0 ? "▲ 前の部屋へ" : ""]].forEach(([ex, ez, t]) => { if (!t) return; const pz = P.z - R.Z; if (t[0] === "▼" ? pz < ez + 1 : pz > ez - 1) return;   /* 通り過ぎた札は出さない（通路でふり返ると2枚重なった） */ const s = toScr(ex, R.Y + 1.4, R.Z + ez); if (s && s[0] > 0 && s[0] < VW() && s[1] > 40 && s[1] < VH()) { g.fillStyle = "rgba(255,200,110,.85)"; g.font = "bold 13px system-ui,sans-serif"; g.fillText(t, s[0], s[1]); } });   /* 出口の場所 */
+      [[0, fpBZ26(R.kind) - 2.5, curRoom < n - 1 ? "▼ 次の部屋へ" : ""], [0, 13, curRoom > 0 ? "▲ 前の部屋へ" : ""]].forEach(([ex, ez, t]) => { if (!t) return; const pz = P.z - R.Z; if (t[0] === "▼" ? pz < ez + 1 : pz > ez - 1) return;   /* 通り過ぎた札は出さない（通路でふり返ると2枚重なった） */ const s = toScr(ex, R.Y + 1.4, R.Z + ez); if (s && s[0] > 0 && s[0] < VW() && s[1] > 40 && s[1] < VH()) { g.fillStyle = "rgba(255,200,110,.85)"; g.font = "bold 13px system-ui,sans-serif"; g.fillText(t, s[0], s[1]); LBL.push([s[0] - 50, s[1] - 14, 100, 18]); DOORS.push({ x: s[0], y: s[1] - 5, dir: t[0] === "▼" ? 1 : -1 }); } });   /* 出口の場所 */
       /* 仕事の手ごたえ：つるはしが当たると石のかけらと光、打ちこむと火花、寝ている子は Zz */
       (R.acts || []).forEach(a => { const wx = a.x, wz = R.Z + a.z, d = Math.hypot(wx - P.x, wz - P.z); if (d > 18 || !los(wx, wz)) return; const u = Math.max(0.7, Math.min(2.2, 7 / Math.max(2, d))), T = now / 1000 + a.ph;
         if (a.mode === "sleep" && !a.walking) { const s = toScr(wx, R.Y + (a.y || 0) + (a.H || 1.8) * 0.72, wz); if (!s) return; g.save(); g.fillStyle = "#d8e4ff"; for (let j = 0; j < 3; j++) { const q = (T * 0.35 + j / 3) % 1; g.globalAlpha = Math.sin(q * Math.PI) * 0.85; g.font = `bold ${Math.round((9 + 7 * q) * u)}px system-ui`; g.fillText(j % 2 ? "z" : "Z", s[0] + (6 + q * 16) * u, s[1] - q * 26 * u); } g.restore(); return; }
@@ -13282,10 +13288,11 @@ function fpOpen26(){
           let lt = 0; TORCH.forEach(t => { const d2 = (t[0] - q.x) ** 2 + (t[1] - q.y) ** 2 + (t[2] - q.z) ** 2; if (d2 < 30) lt = Math.max(lt, 1 - d2 / 30); }); const s = toScr(q.x, q.y, q.z); if (!s) return; const dd = Math.hypot(q.x - EYE[0], q.y - EYE[1], q.z - EYE[2]);
           g.globalAlpha = (0.12 + 0.55 * lt) * (0.6 + 0.4 * Math.sin(T * 2 + q.p * 5)); g.fillStyle = lt > 0.2 ? "#ffd9a0" : "#c8bba8"; const r = Math.max(0.6, 2.2 / Math.max(1, dd)); g.beginPath(); g.arc(s[0], s[1], r, 0, 7); g.fill(); }); g.restore(); }
       g.font = "bold 12px system-ui,sans-serif";
-      (R.acts || []).forEach(a => { if (!a.m) return; const wx = a.x, wz = R.Z + a.z, d = Math.hypot(wx - P.x, wz - P.z); const s = toScr(wx, R.Y + (a.y || 0) + (a.H || 2) + 0.45, wz);
-        if (s && s[0] > 0 && s[0] < VW() && s[1] > 40 && s[1] < VH()) { if (d > 22 || !los(wx, wz)) return; const t = a.m.nick || "", w = g.measureText(t).width + 10; g.globalAlpha = Math.max(0.35, 1 - d / 22); g.fillStyle = "rgba(14,10,8,.7)"; g.fillRect(s[0] - w / 2, s[1] - 15, w, 18); g.fillStyle = "#e8f5d8"; g.fillText(t, s[0], s[1] - 2); g.globalAlpha = 1; }
-        else { const ang = Math.atan2(wx - P.x, -(wz - P.z)) - P.yaw, a2 = Math.atan2(Math.sin(ang), Math.cos(ang)), x = VW() / 2 + Math.sin(a2) * VW() * 0.42, y = VH() * 0.5 - Math.cos(a2) * VH() * 0.3;
-          g.save(); g.globalAlpha = 0.8; g.translate(Math.max(18, Math.min(VW() - 18, x)), Math.max(70, Math.min(VH() - 140, y))); g.rotate(a2); g.fillStyle = "#e8f5d8"; g.beginPath(); g.moveTo(0, -10); g.lineTo(7, 4); g.lineTo(-7, 4); g.closePath(); g.fill(); g.rotate(-a2); g.font = "10px system-ui,sans-serif"; g.fillText(a.m.nick || "", 0, 16); g.restore(); } }); }
+      (R.acts || []).slice().sort((p, q) => Math.hypot(p.x - P.x, R.Z + p.z - P.z) - Math.hypot(q.x - P.x, R.Z + q.z - P.z)).forEach(a => { if (!a.m) return; const wx = a.x, wz = R.Z + a.z, d = Math.hypot(wx - P.x, wz - P.z); const s = toScr(wx, R.Y + (a.y || 0) + (a.H || 2) + 0.45, wz);
+        if (s && s[0] > 0 && s[0] < VW() && s[1] > 40 && s[1] < VH()) { if (d > 22 || !los(wx, wz)) return; const t = a.m.nick || "", w = g.measureText(t).width + 10; let ly = s[1]; for (let k = 0; k < 3 && !lfree(s[0] - w / 2, ly - 15, w, 18); k++) ly -= 19; if (!lfree(s[0] - w / 2, ly - 15, w, 18)) return; LBL.push([s[0] - w / 2, ly - 15, w, 18]); s[1] = ly; g.globalAlpha = Math.max(0.35, 1 - d / 22); g.fillStyle = "rgba(14,10,8,.7)"; g.fillRect(s[0] - w / 2, s[1] - 15, w, 18); g.fillStyle = "#e8f5d8"; g.fillText(t, s[0], s[1] - 2); g.globalAlpha = 1; }
+        else { const ang = Math.atan2(wx - P.x, -(wz - P.z)) - P.yaw, a2 = Math.atan2(Math.sin(ang), Math.cos(ang)), sx0 = Math.sin(a2), sy0 = -Math.cos(a2), kk = Math.min((VW() / 2 - 26) / Math.max(0.01, Math.abs(sx0)), (VH() / 2 - 70) / Math.max(0.01, Math.abs(sy0))), x = VW() / 2 + sx0 * kk, y = VH() * 0.5 + sy0 * kk;   /* 画面のふちに寄せる（床の真ん中に浮いて見えた） */
+          const mx = Math.max(22, Math.min(VW() - 22, x)); let my = Math.max(70, Math.min(VH() - 140, y)); for (let k = 0; k < 4 && !lfree(mx - 22, my - 12, 44, 32); k++) my += 30; const showN = lfree(mx - 22, my - 12, 44, 32); LBL.push([mx - 22, my - 12, 44, 32]);   /* 画面の外の子の印も、重なったらずらす */
+          g.save(); g.globalAlpha = 0.8; g.translate(mx, my); g.rotate(a2); g.fillStyle = "#e8f5d8"; g.beginPath(); g.moveTo(0, -10); g.lineTo(7, 4); g.lineTo(-7, 4); g.closePath(); g.fill(); g.rotate(-a2); g.font = "10px system-ui,sans-serif"; if (showN) g.fillText(a.m.nick || "", 0, 16); g.restore(); } }); }
     // 小さな地図（右上）：部屋と通路、自分の位置と向き、魔物
     { const mc = wrap.querySelector(".f26map"), g = mc.getContext("2d"), MW = mc.width, MH = mc.height, sc = 2.2, cx = MW / 2, cz = MH / 2, X = x => cx + (x - P.x) * sc, Z = z => cz + (z - P.z) * sc;
       g.clearRect(0, 0, MW, MH); g.fillStyle = "rgba(10,7,5,.72)"; g.fillRect(0, 0, MW, MH);
@@ -13521,6 +13528,12 @@ function* optSteps27(out) { const dens = S.path.map((r, i) => r && r.kind === "d
     for (const [ap, un] of C) { ap(); let sc; try { sc = sc3(); } finally { un(); } if (sc.total > (best ? best.sc.total : cur.total) + 5) best = { sc, ap }; yield; }
     if (!best) break; best.ap(); cur = best.sc; }
   out.cur = cur; }
+/* 2つの出発点から探して良いほうを採る：①いまの並び ②方針どおりに並べ直した並び（片方だけだと、出発点しだいで見落としがあった）。点がほぼ同じなら守りの損が少ないほう */
+function* optMulti27(out) { const snap = () => ({ m: S.mons.map(m => [m.id, m.home, m.job, m.job19, m.job19h]), p: S.path.map(r => r && r.pol) }), load = sn => { const M = new Map(sn.m.map(v => [v[0], v])); S.mons.forEach(m => { const v = M.get(m.id); if (v) [, m.home, m.job, m.job19, m.job19h] = v; }); S.path.forEach((r, i) => { if (r) r.pol = sn.p[i]; }); dng23 = { key: "", v: null }; };
+  const base = snap(), res = []; out.evals = 0;
+  for (const start of [0, 1]) { load(base); if (start) autoAll19(S); const o = {}; yield* optSteps27(o); out.evals += o.evals || 0; S.mons.forEach(m => { if (m.home != null && !m.job) m.job19h = m.home; }); dng23 = { key: "", v: null }; const sc = score27(6); res.push({ sc, sn: snap() }); yield; }
+  res.sort((a, b) => Math.abs(a.sc.total - b.sc.total) <= Math.max(10, Math.abs(a.sc.total) * 0.01) ? (a.sc.loss || 0) - (b.sc.loss || 0) : b.sc.total - a.sc.total);
+  load(res[0].sn); out.best = res[0].sc; }
 function optimize27(budget) { const t0 = performance.now(), out = {}, g = optSteps27(out); while (!g.next().done) if (performance.now() - t0 > budget) break;
   S.mons.forEach(m => { if (m.home != null && !m.job) m.job19h = m.home; }); dng23 = { key: "", v: null };
   return { evals: out.evals, rounds: out.rounds, ms: Math.round(performance.now() - t0) }; }
@@ -13535,7 +13548,7 @@ function preStep27(slice) { try {
   if (PRE27.done) return;
   const real = S, d0 = dng23, sv = save, t0 = performance.now(); S = PRE27.clone; save = () => {};
   try {
-    if (PRE27.phase === 0) { dng23 = { key: "", v: null }; PRE27.sc0 = score27(6); autoAll19(S); PRE27.gen = optSteps27(PRE27.out); PRE27.phase = 1; }
+    if (PRE27.phase === 0) { dng23 = { key: "", v: null }; PRE27.sc0 = score27(6); PRE27.gen = optMulti27(PRE27.out); PRE27.phase = 1; }
     else if (PRE27.phase === 1) { while (performance.now() - t0 < slice) if (PRE27.gen.next().done) { PRE27.phase = 2; break; } }
     else { S.mons.forEach(m => { if (m.home != null && !m.job) m.job19h = m.home; }); dng23 = { key: "", v: null }; PRE27.sc1 = score27(6);
       PRE27.res = { m: new Map(S.mons.map(m => [m.id, [m.home, m.job, m.job19, m.job19h]])), p: S.path.map(r => r && r.pol) }; PRE27.keep = keep27(PRE27.sc0, PRE27.sc1); PRE27.done = true; PRE27.fresh = 1; }
@@ -13553,14 +13566,14 @@ function smartAuto27() {
   const snap = { m: S.mons.map(m => [m, m.home, m.job, m.job19, m.job19h]), p: S.path.map(r => [r, r && r.pol]) }, restore = () => { snap.m.forEach(([m, h, j, j9, jh]) => { m.home = h; m.job = j; m.job19 = j9; m.job19h = jh; }); snap.p.forEach(([r, p]) => { if (r) r.pol = p; }); dng23 = { key: "", v: null }; };
   let sc0, sc1, r; const pre = PRE27.done && PRE27.res && PRE27.key === key27() ? PRE27 : null;
   if (pre) { sc0 = pre.sc0; sc1 = pre.sc1; r = pre.out; S.mons.forEach(m => { const v = pre.res.m.get(m.id); if (v) [m.home, m.job, m.job19, m.job19h] = v; }); S.path.forEach((rm, i) => { if (rm) rm.pol = pre.res.p[i]; }); dng23 = { key: "", v: null }; }   /* 先回りで出ていた答え：すぐ見せる */
-  else { dng23 = { key: "", v: null }; sc0 = score27(6); autoAll19(S); r = optimize27(1200); dng23 = { key: "", v: null }; sc1 = score27(6); }
+  else { dng23 = { key: "", v: null }; sc0 = score27(6); r = {}; const g = optMulti27(r), t0 = performance.now(); while (!g.next().done) if (performance.now() - t0 > 2500) break; dng23 = { key: "", v: null }; sc1 = score27(6); }
   const keep = keep27(sc0, sc1);   /* 予報が悪くなる並びは選ばない */   /* はっきり良くなるときだけ変える（押すたびに並びが変わらないように） */
   if (!keep) restore(); else window.__undo27 = restore;
   const fin = keep ? sc1 : sc0, moved = S.mons.filter(m => prevH.get(m.id) !== m.home);
   const nm = i => i == null ? "控え" : roomTitle(S, i), lvTag = d => d ? `${DNG23[d.lv][0]}${DNG23[d.lv][1]}` : "—";
-  modal = () => `<h2>🪄 おまかせ</h2><div class="hint">守り（次の襲撃を試す）・稼ぎ・育ちを💎に換算して、いちばん点の高い並びを探した（${r.evals}通り）</div>
+  modal = () => `<h2>🪄 おまかせ</h2><div class="hint">${(r.evals || 0) <= 1 ? "動かして試せる並びがなかった（移せる部屋が1つだけ、または全員📌固定・休み中）。部屋を掘って増やすと、ためせる並びが増える" : `守り（次の襲撃を試す）・稼ぎ・育ちを💎に換算して、${r.evals}通りの並びを試した`}</div>
     <div class="rs-grid"><div><small>次の襲撃</small><b>${lvTag(sc0.d)} → ${lvTag(fin.d)}</b></div><div><small>掘る💎/日</small><b>${Math.round(sc0.e.dp)} → ${Math.round(fin.e.dp)}</b></div><div><small>育ち Lv/日</small><b>${sc0.e.lv.toFixed(1)} → ${fin.e.lv.toFixed(1)}</b></div><div><small>守りの損（💎）</small><b>${Math.round(sc0.loss || 0)} → ${Math.round(fin.loss || 0)}</b></div></div>
-    ${moved.length ? `<div class="lab2">動いた子（${moved.length}体）</div>` + moved.map(m => `<div class="hint">${esc(m.nick)}：${esc(nm(prevH.get(m.id)))} → <b>${esc(nm(m.home))}</b></div>`).join("") : `<div class="box">いまの並びがいちばん</div>`}
+    ${moved.length ? `<div class="lab2">並べ替えた（${moved.length}体）<small>　気に入らなければ ↩ 戻す</small></div>` + moved.map(m => `<div class="hint">${esc(m.nick)}：${esc(nm(prevH.get(m.id)))} → <b>${esc(nm(m.home))}</b></div>`).join("") : `<div class="box">いまの並びがいちばん</div>`}
     <div class="mixbtn18">${moved.length ? `<button data-a="undo13">↩ 戻す</button>` : ""}<button class="main" data-a="close">OK</button></div>`;
   CV.sig = ""; save(); render(); }
 document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="af19go"],[data-a="rebal"]'); if (!b || !S || N) return; ev.stopImmediatePropagation(); ev.preventDefault();
@@ -13573,7 +13586,7 @@ document.addEventListener("click", ev => { const b = ev.target.closest && ev.tar
 
 monsModal = (prev => function () { const h = prev(); if (!(bkList27().length > 0)) return h; return h.replace('<div class="pk">', `<div class="pk"><button class="bk27" data-a="bookpick27">📜 スキルの書 ${S.bk27.length}冊</button>`); })(monsModal);
 /* 手に入れた直後：画面が落ち着いたら（ほかの表示が閉じたら）書の一覧を出す */
-setInterval(() => { try { if (S && S.bookNew27 && bkList27().length > 0 && !modal && !N && !(typeof stage !== "undefined" && stage) && !document.querySelector(".kk25ov,#fp26")) { S.bookNew27 = 0; modal = () => bookListModal27(); render(); } } catch (e) {} }, 700);
+setInterval(() => { try { if (S && S.bookNew27 && !(typeof title !== "undefined" && title) && bkList27().length > 0 && !modal && !N && !(typeof stage !== "undefined" && stage) && !document.querySelector(".kk25ov,#fp26"))   /* タイトルの上には出さない（つづきからが押せなくなった） */ { S.bookNew27 = 0; modal = () => bookListModal27(); render(); } } catch (e) {} }, 700);
 
 </script>
 </body>
