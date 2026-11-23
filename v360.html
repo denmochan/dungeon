@@ -7385,7 +7385,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.303（11/23 14:28）";
+const VER20 = "No.304（11/23 14:32）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -13222,6 +13222,41 @@ danger23 = function () {
   return r; }; }
 // 迎え撃つ準備の値段：持っている💎に比例しない（ためるほど高い、が納得できなかった）
 prepCost23 = (S, k) => { const P = S.prep23 || {}; if (P[k]) return P[k]; return Math.round(Math.max(60, 30 + 7 * S.day) * (1 + 0.6 * (((S.contract && S.contract.lv) || 1) - 1)) * PREP23[k][3] / 10) * 10; };
+// ================= 戦いを「ほどほど」に：入口で全滅→主ひとりで倒れる、をなくす =================
+const V27 = () => (typeof window !== "undefined" && window.__v27) || { rout: 1, rage: 1, throne: 1, sweep: 1, floor: 1 };
+function mid27(S2, N2) {
+  const L = lordIdx(S2), v = V27(), rnd = N2.rnd || Math.random;
+  // 勇者：深手（体力3割未満）を負うと、逃げ帰ることがある（ボスは逃げない）。逃げ帰った勇者は何も持ち帰らない
+  if (v.rout) N2.heroes.forEach(h => { if (h.st !== "in" || h.flee || h.boss || h.hp >= h.max * 0.3 || h.walk != null) return;
+    if (rnd() < v.rout * 0.3) { h.flee = true; h.rout27 = 1; h.loot = 0; say5(N2, h.name, "深手だ…退くぞ！", h.pos); } });
+  // 逃げ帰った深手の勇者は「追い払った」あつかい（盗み・逃げられた、には数えない）
+  N2.heroes.forEach(h => { if (h.rout27 && h.st === "escaped") { h.st = "dead"; h.routed27 = 1; h.loot = 0; } });
+  // 主：追いつめられると本気を出す（体力半分から、攻撃が上がる）
+  if (v.rage && N2.lord && !N2.lord.down && N2.lord.hp < N2.lord.max * 0.5 && !N2.rage27) { N2.rage27 = 1; N2.lord.atk = Math.round(N2.lord.atk * (1 + 0.6 * v.rage)); say5(N2, "主", "……図に乗るな！", L); }
+}
+{ const _sn = stepNight5; stepNight5 = function (S2, N2) {
+  const on = N2 && !N2.done && !N2.scout && !(typeof window !== "undefined" && window.__no27), v = V27(), L = on ? lordIdx(S2) : -1;
+  let w0 = null;
+  // 玉座の間はせまい：一度に主へ届くのは2人まで（5人がかりで1手で倒される、をなくす）。3人目からの分は届かない
+  try { if (on && v.throne && N2.lord && !N2.lord.down) { const at = N2.heroes.filter(h => h.st === "in" && h.walk == null && h.pos === L && !h.flee && !(h.stuck > 0)); if (at.length > 2) { const ex = at.map(h => h.atk).sort((a, b) => b - a).slice(2).reduce((a, b) => a + b, 0) * 1.2; w0 = N2.lord.ward || 0; N2.lord.ward = w0 + Math.round(ex); } } } catch (e) {}
+  const r = _sn.apply(this, arguments);
+  try { if (w0 != null && N2.lord) N2.lord.ward = Math.min(N2.lord.ward || 0, w0); } catch (e) {}
+  try { if (on && N2.lord && !N2.lord.down) {
+    const at = N2.heroes.filter(h => h.st === "in" && h.walk == null && h.pos === L);
+    // 主のなぎ払い：主の間にいる勇者みんなに少しずつ
+    if (v.sweep && at.length > 1 && !N2.lord.down && N2.lord.hp > 0) at.forEach(h => { if (h.st === "in") hurtHero5(S2, N2, h, Math.round(N2.lord.atk * 0.35 * v.sweep), null); });
+    mid27(S2, N2);
+  } else if (on) mid27(S2, N2); } catch (e) {} return r; }; }
+// 主の底力：勇者が強くなっても、主の間が「一瞬で終わる」場所にならないように、主の体力・攻撃に下限をつける
+// （勇者の平均の体力×1.2・攻撃×0.7。主を鍛えればそれより上に伸びる）
+{ const _sr = startRaid9; startRaid9 = function (S2, rnd) { const N2 = _sr.apply(this, arguments);
+  try { const v = V27(); if (v.floor && N2 && !N2.scout && N2.lord && N2.heroes.length && !(typeof window !== "undefined" && window.__no27)) {
+    const hs = N2.heroes, mh = hs.reduce((a, h) => a + h.max, 0) / hs.length, ma = hs.reduce((a, h) => a + h.atk, 0) / hs.length;
+    const want = Math.round(mh * 1.2 * v.floor), ratio = N2.lord.max ? N2.lord.hp / N2.lord.max : 1;
+    if (N2.lord.max < want) { N2.lord.floor27 = { max: N2.lord.max }; N2.lord.max = want; N2.lord.hp = Math.round(want * ratio); }
+    const wa = Math.round(ma * 0.7 * v.floor); if (N2.lord.atk < wa) N2.lord.atk = wa; } } catch (e) {}
+  return N2; }; }
+{ const _er = endRaid9; endRaid9 = function (S2, N2) { const r = _er.apply(this, arguments); try { const f = N2 && N2.lord && N2.lord.floor27; if (f && S2.lord) S2.lord.hp = Math.max(0, Math.round(N2.lord.hp / N2.lord.max * f.max)); } catch (e) {} return r; }; }
 
 </script>
 <script>// ================= 3Dの子を、今のコマアニメと同じ並び（17コマ）の絵に焼く（開発用・ページ内で実行） =================
