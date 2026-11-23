@@ -1199,6 +1199,7 @@ body:has(.modal) .inv25btn,body:has(.ntfull19) .inv25btn{display:none}
 .d3card .o26go{z-index:40}
 .raidban .achpop{margin-bottom:40px!important}
 .dz27{margin-top:22px;border-top:1px dashed #5a4632;padding-top:8px;color:var(--dim)}.dz27 summary{font-size:12px;cursor:pointer;padding:6px 0}.dz27 button{display:block;width:100%;margin-top:6px}
+#off26{top:auto;bottom:calc(64px + env(safe-area-inset-bottom,0px));font-size:12px;opacity:.9}
 </style>
 </head>
 <body>
@@ -7384,7 +7385,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.302（11/23 14:15）";
+const VER20 = "No.303（11/23 14:28）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -8079,7 +8080,7 @@ const DNG23 = [["🟢", "余裕", "入口で止まりそう"], ["🟡", "注意"
 // 主まで届かれたら少し冷める。4回目の襲撃から。これで「9日目から先は何もしなくても勝てる」をなくす
 const heat23 = S => S.heat23 || 0;
 { const _sr = startRaid9; startRaid9 = function (S, rnd) { const N = _sr.apply(this, arguments);
-  try { const k = heat23(S) * (N && N.heroes && N.heroes.some(h => h.boss) && S.day < CONTRACT_LEN9 ? 0.6 : 1); if (N && !N.scout && k > 0) { N.heroes.forEach(h => { h.max = Math.round(h.max * (1 + k)); h.hp = h.max; h.atk = Math.round(h.atk * (1 + k * 0.7)); }); N.heat23 = k; } } catch (e) {}
+  try { const k0 = heat23(S); if (N && !N.scout && k0 > 0) { N.heroes.forEach(h => { const k = k0 * (h.boss && S.day < CONTRACT_LEN9 ? 0.6 : 1); h.max = Math.round(h.max * (1 + k)); h.hp = h.max; h.atk = Math.round(h.atk * (1 + k * 0.7)); }); N.heat23 = k0; } } catch (e) {}   /* 27：ボスの夜は全員の熱を4割引き→ボスだけ4割引き（ボスの夜だけ楽で、次の夜に急にきつくなる崖をなくす） */
   // 26：回を重ねるほど勇者を少しずつ強く（テストで30日・10回の襲撃が考えなしで全勝できたため）
   try { if (N && !N.scout && S.day < CONTRACT_LEN9) { const rn = Math.max(0, (S.raidNo || 0) - 1), bm = 1 + 0.035 * rn, ba = 1 + 0.025 * rn; N.heroes.forEach(h => { h.max = Math.round(h.max * bm); h.hp = h.max; h.atk = Math.round(h.atk * ba); }); } } catch (e) {}
   return N; }; }
@@ -8193,7 +8194,7 @@ function dpFix23(root) { if (!root) return; const w = document.createTreeWalker(
 // 危ない度にもすぐ反映される（買うと🟠→🟡のように下がる）。襲撃が終わると消える
 const PREP23 = { feast: ["🍖", "前夜のごちそう", "全員の体力+20%", 1.5], arrow: ["🏹", "矢の補充", "狙う子の攻撃+40%", 1], trap: ["🪤", "罠の追加", "罠の威力+60%", 1], ward: ["🔮", "主の結界", "主の結界が大きく増える（日ごとに強く）", 1.2] };
 // 値段は日数と、いま持っているDPで上がる（ため込むほど高くつく＝ためずに使う理由）
-const prepCost23 = (S, k) => { const P = S.prep23 || {}; if (P[k]) return P[k]; return Math.round(Math.max(60, 20 + 6 * S.day, S.dp * 0.15) * (1 + 0.6 * (((S.contract && S.contract.lv) || 1) - 1)) * PREP23[k][3] / 10) * 10; };
+let prepCost23 = (S, k) => { const P = S.prep23 || {}; if (P[k]) return P[k]; return Math.round(Math.max(60, 20 + 6 * S.day, S.dp * 0.15) * (1 + 0.6 * (((S.contract && S.contract.lv) || 1) - 1)) * PREP23[k][3] / 10) * 10; };
 const prepOf23 = S => S.prep23 || (S.prep23 = {});
 { const _sr = startRaid9; startRaid9 = function (S, rnd) { const N = _sr.apply(this, arguments);
   try { const P = S.prep23 || {}; if (N && !N.scout) {
@@ -13166,6 +13167,61 @@ document.addEventListener("click", ev => { try {
   if (typeof tutNext === "function") tutNext();
   if (el && el !== ov && !ov.contains(el)) el.click();
 } catch (e) {} }, true);
+// ================= 難しさの崖と予報（第6回：予報が悲観側に外れる／前ぶれなく🔴になる） =================
+// 予報は「朝の仕事（けがの回復・主の回復・経験・毎朝の並べ直し）」をすませた後の並びで試す。
+// 前は朝の仕事の前の、けがのまま・主の体力が減ったままで試していたので、悲観側に外れていた
+const HEAT27 = [0.12, 0.06, 0.02, 0], HEATCAP27 = 0.9;
+function dngRun27(opt) {
+  if (S && !S.raidSeed23) S.raidSeed23 = seed23(S);
+  const S0 = S, base = JSON.stringify(S0), U0 = UID5, res = [], R0 = Math.random, seed0 = S0.raidSeed23 || (S0.seed || 1) * 31 + S0.day, n = opt.n || 8;
+  try { for (let t = 0; t < n; t++) { S = JSON.parse(base); S.sim23 = 1; S.fc = S0.fc ? JSON.parse(JSON.stringify(S0.fc)) : null;
+      const g0 = rng23(seed0); Math.random = g0;
+      if (opt.morning && daysToRaid9(S) === 0) { try { if (afc19(S).daily) autoAll19(S); } catch (e) {} try { dayJobs9(S, newRep9()); } catch (e) {} }
+      const N2 = startRaid9(S, g0);
+      if (opt.nextRaid) { /* 同じ顔ぶれを、次の襲撃のぶんだけ強くする（Lv・うわさの熱・回数）。人数が増える見込みなら1人足す */
+        const L0 = raidLevel9(S), L1 = raidLevel9({ ...S, raidNo: (S.raidNo || 0) + 1 }), lr = heroMul5(L1) / heroMul5(L0), h0 = S.heat23 || 0, h1 = opt.nextRaid.heat;
+        const fh = lr * (1 + h1) / (1 + h0) * 1.035, fa = lr * (1 + 0.7 * h1) / (1 + 0.7 * h0) * 1.025;
+        N2.heroes.forEach(h => { h.max = Math.round(h.max * fh); h.hp = h.max; h.atk = Math.round(h.atk * fa); });
+        const reg = N2.heroes.filter(h => !h.boss); if (reg.length && reg.length < Math.min(8, partySize5({ ...S, psLast26: reg.length, raidNo: (S.raidNo || 0) + 1, night: L1 }))) { const src = reg[reg.length - 1]; N2.heroes.push({ ...src, id: Math.max(...N2.heroes.map(h => h.id)) + 1, delay: Math.max(...N2.heroes.map(h => h.delay || 0)) + 2, off: {} }); } }
+      if (opt.grow) N2.heroes.forEach(h => { h.max = Math.round(h.max * opt.grow.hp); h.hp = h.max; h.atk = Math.round(h.atk * opt.grow.atk); });
+      const gr = t ? rng23(seed0 + t * 7919) : g0; Math.random = gr; N2.rnd = gr; let g = 0; while (!N2.done && g++ < 4000) stepNight5(S, N2); Math.random = R0;
+      const li = S.path.findIndex(r => r.kind === "lord");
+      res.push({ md: N2.mons.filter(b => b.down || b.hp <= 0).length, deep: Math.max(0, ...N2.heroes.map(h => h.maxPos || h.pos || 0)), li, lordLoss: N2.lord ? Math.max(0, (N2.lord.max || 0) - N2.lord.hp) / Math.max(1, N2.lord.max || 1) : 0, lordLeft: N2.lord ? Math.max(0, N2.lord.hp) / Math.max(1, N2.lord.max || 1) : 1, down: N2.lord && N2.lord.hp <= 0, esc: N2.heroes.filter(h => h.st === "escaped").length }); }
+  } catch (e) { console.error(e); } finally { Math.random = R0; S = S0; UID5 = U0; }
+  if (!res.length) return null;
+  const li = res[0].li, N = res.length, nm = Math.max(1, S.mons.filter(m => m.home != null).length);
+  const v = { n: N, li, downs: res.filter(o => o.down).length, lord: res.filter(o => o.lordLoss > 0.05).length, deep: Math.round(res.reduce((a, o) => a + Math.min(o.deep, li), 0) / N * 10) / 10,
+    esc: res.reduce((a, o) => a + o.esc, 0) / N, md: res.reduce((a, o) => a + o.md, 0) / N, left: res.reduce((a, o) => a + o.lordLeft, 0) / N, minLeft: Math.min(...res.map(o => o.lordLeft)) };
+  /* 🔴 半分以上で主が倒れる／🟠 主が倒れることがある・主が大きく削られる・魔物が多く倒れる／🟡 主まで届く・逃げられる・魔物が倒れる／🟢 それ以外 */
+  v.lv = v.downs >= N * 0.5 ? 3 : v.downs >= 1 || v.left < 0.55 || v.md >= nm * 0.6 || v.esc >= 2 ? 2 : v.lord >= N * 0.25 || v.esc >= 0.6 || v.md >= Math.max(2, nm * 0.3) ? 1 : 0;
+  const R = S.path[Math.min(li, Math.max(0, Math.round(v.deep)))];
+  v.why = v.lv === 0 ? "" : v.downs ? "主が倒れることがある" : v.lord ? `主の間まで来て、主の体力が約${Math.max(1, Math.round(v.left * 10))}割まで減りそう` : v.esc >= 0.6 ? `平均${v.esc.toFixed(1)}人に逃げられそう` : v.md >= 2 ? `魔物が${Math.round(v.md)}体ほどやられそう` : `${R ? roomTitle(S, S.path.indexOf(R)) : "奥"}まで来られそう`;
+  return v;
+}
+danger23 = function () {
+  const key = JSON.stringify([S.prep23 || {}, S.heat23 || 0, S.day, S.lord && S.lord.hp, S.path.length, S.path.map(r => facsOf12(r).join()), S.mons.map(m => [m.id, m.home, m.job, m.job19, m.rest, m.lv, m.evos, m.hp, (m.sk || []).length]), (() => { try { return [lordMax5(S), lordAtk5(S), JSON.stringify(S.lord || 0), JSON.stringify((S.meta && S.meta.book) || 0), (S.meta && S.meta.k25 && S.meta.k25.got || []).length, JSON.stringify(S.fc && S.fc.heroes ? S.fc.heroes.map(h => [h.job, h.lv]) : 0)]; } catch (e) { return 0; } })()]);
+  if (dng23.key === key) return dng23.v;
+  const v = dngRun27({ morning: 1, n: 8 }); if (!v) return null;
+  /* 次の襲撃の目安：熱・回数・人数ぶん強くなった勇者で同じ並びを試す（前ぶれなく🔴、をなくす） */
+  try { if (!S.prep23 || !Object.keys(S.prep23).length) {
+    const h0 = S.heat23 || 0, h1 = Math.min(HEATCAP27, h0 + HEAT27[v.lv]);
+    if (RAID_DAYS9.some(d => d > S.day)) { const w = dngRun27({ morning: 1, n: 6, nextRaid: { heat: h1 } }); if (w) v.next = w; } } } catch (e) { console.error(e); }
+  dng23 = { key, v }; return v;
+};
+// 予報の文：主の体力の残りの目安と、次の襲撃の目安を足す
+{ const _rb = raidBox; raidBox = function () { let h = _rb(); try { const v = dng23.v; if (!v || !h || h.indexOf('class="dng23') < 0 || N) return h;
+  const add = [];
+  if (v.lord && !v.downs) add.push(`<span>主の体力：平均で残り約${Math.max(1, Math.round(v.left * 10))}割</span>`);
+  if (S.lord && lordMax5(S) && S.lord.hp < lordMax5(S) * 0.7) add.push(`<span class="bad">主の体力が${Math.round(S.lord.hp / lordMax5(S) * 10)}割しかない（朝に1割ずつ戻る）</span>`);
+  if (v.next) { const nx = nextRaid9({ ...S, day: S.day + 1 }); add.push(`<span class="nx27 l${v.next.lv}">つぎの襲撃${nx ? `（${nx}日目）` : ""}は、いまの並びのままだと ${DNG23[v.next.lv][0]}${DNG23[v.next.lv][1]}${v.next.lv > v.lv ? "　→ 今のうちに強くしておく" : ""}</span>`); }
+  if (add.length) h = h.replace(/(<div class="dng23[^"]*">[\s\S]*?)(<span class="hint">並べかえ)/, `$1${add.join("")}$2`);
+  } catch (e) { console.error(e); } return h; }; }
+// 楽勝が続いたときの熱の上がり方をゆるく（🟢で+18%→+12%、上限120%→90%）。次の襲撃の目安で前もって見える
+{ const _er = endRaid9; endRaid9 = function (S2, N2) { const h0 = S2 && S2.heat23 || 0; const r = _er.apply(this, arguments);
+  try { if (N2 && !N2.scout && N2.heatD23 > 0) { const fl = S2.dlv23 && S2.dlv23.day === S2.day ? S2.dlv23.lv : 0; S2.heat23 = Math.max(0, Math.min(HEATCAP27, h0 + (HEAT27[fl] || 0))); N2.heatD23 = HEAT27[fl] || 0; } else if (S2 && S2.heat23 > HEATCAP27) S2.heat23 = HEATCAP27; } catch (e) {}
+  return r; }; }
+// 迎え撃つ準備の値段：持っている💎に比例しない（ためるほど高い、が納得できなかった）
+prepCost23 = (S, k) => { const P = S.prep23 || {}; if (P[k]) return P[k]; return Math.round(Math.max(60, 30 + 7 * S.day) * (1 + 0.6 * (((S.contract && S.contract.lv) || 1) - 1)) * PREP23[k][3] / 10) * 10; };
 
 </script>
 <script>// ================= 3Dの子を、今のコマアニメと同じ並び（17コマ）の絵に焼く（開発用・ページ内で実行） =================
