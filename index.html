@@ -7405,7 +7405,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.324（11/24 00:51）";
+const VER20 = "No.325（11/24 00:54）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -13261,6 +13261,18 @@ function fpOpen26(){
         if (a.mode === "duel" && a.dq && a.dq.mine && a.dq.lq > 0.42 && a.dq.lq < 0.72 && a.pt) { const q = (a.dq.lq - 0.42) / 0.3, s = toScr(a.x + (a.pt.x - a.x) * 0.55, R.Y + Math.min(a.H || 1.6, a.pt.H || 1.6) * 0.55, R.Z + a.z + (a.pt.z - a.z) * 0.55); if (s) { g.save(); g.globalAlpha = 1 - q; g.strokeStyle = "rgba(255,236,190,.95)"; g.lineWidth = 2.2 * u; g.beginPath(); for (let j = 0; j < 7; j++) { const an = j * 0.9 + a.dph; g.moveTo(s[0] + Math.cos(an) * 3 * u, s[1] + Math.sin(an) * 3 * u); g.lineTo(s[0] + Math.cos(an) * (8 + 12 * q) * u, s[1] + Math.sin(an) * (8 + 12 * q) * u); } g.stroke(); g.restore(); } }
         if ((a.mode === "slash" || a.mode === "lift") && a.fr === 7) { const q = (T / 0.55 * 4) % 1, s = toScr(wx + dx / L * 1.0, R.Y + 0.9, wz + dz / L * 1.0); if (!s) return; g.save(); g.globalAlpha = 1 - q; g.strokeStyle = "rgba(255,240,200,.95)"; g.lineWidth = 2 * u; g.beginPath(); for (let j = 0; j < 6; j++) { const an = j * 1.05 + a.ph; g.moveTo(s[0] + Math.cos(an) * 3 * u, s[1] + Math.sin(an) * 3 * u); g.lineTo(s[0] + Math.cos(an) * (7 + 9 * q) * u, s[1] + Math.sin(an) * (7 + 9 * q) * u); } g.stroke(); g.restore(); }
         if (a.mode === "spar" && a.sq != null && a.sq >= 0.3 && a.sq < 0.5) { const q = (a.sq - 0.3) / 0.2, s = toScr(wx + dx / L * 0.9, R.Y + 0.1, wz + dz / L * 0.9); if (!s) return; g.save(); g.globalAlpha = 0.5 * (1 - q); g.fillStyle = "#b89a78"; for (let j = 0; j < 4; j++) { g.beginPath(); g.arc(s[0] + (j - 1.5) * (7 + 8 * q) * u, s[1] - q * 4 * u, (3 + 3 * q) * u, 0, 7); g.fill(); } g.restore(); } });
+      /* 音：足音・つるはしのカン・打ち合いのキン・大きい子のドスン・しずく。近いほど大きい */
+      if (typeof SFXON16 !== "undefined" && SFXON16 && typeof tone16 === "function") { const Tn = now / 1000;
+        { const st = Math.floor((P.walk || 0) * 1.9 / Math.PI); if (st !== P.stp) { if (P.stp != null && (mv.x || mv.y)) { noise16(0, 0.05, 0.035, 220); tone16(70 + Math.random() * 20, 0, 0.05, "triangle", 0.025); } P.stp = st; } }
+        (R.acts || []).forEach(a => { const d = Math.hypot(a.x - P.x, R.Z + a.z - P.z), vol = Math.max(0, 1 - d / 16); if (vol <= 0.02) return; const T = Tn + a.ph;
+          let ev = null; if (a.mode === "mine" && !a.walking) { const f = Math.floor(T / 1.1 * 4) % 4; if (f !== a.sf) { if (f === 2) ev = "mine"; a.sf = f; } }
+          else if (/^(slash|lift|train)$/.test(a.mode) && !a.walking) { const f = Math.floor(T / 0.55 * 4) % 4; if (f !== a.sf) { if (f === 2) ev = "clash"; a.sf = f; } }
+          else if (a.mode === "duel" && a.dq) { const hit = a.dq.mine && a.dq.lq > 0.45; if (hit && !a.sf) ev = "clash"; a.sf = hit ? 1 : 0; }
+          if (a.walking && (a.H || 0) > 3.6) { const f = Math.floor(a.dist * 1.4 / Math.PI); if (f !== a.sf2) { a.sf2 = f; ev = ev || "thud"; } }
+          if (ev === "mine") { tone16(2100 + Math.random() * 300, 0, 0.05, "triangle", 0.035 * vol); tone16(1500, 0.012, 0.08, "triangle", 0.02 * vol); noise16(0, 0.04, 0.03 * vol, 1500); }
+          if (ev === "clash") { noise16(0, 0.05, 0.04 * vol, 2200); tone16(1250 + Math.random() * 200, 0, 0.06, "square", 0.015 * vol, 0.7); }
+          if (ev === "thud") { tone16(55, 0, 0.18, "triangle", 0.09 * vol, 0.7); noise16(0, 0.1, 0.05 * vol, 120); } });
+        if (!P.drip || Tn > P.drip) { if (P.drip) { const f = 1500 + Math.random() * 900; tone16(f, 0, 0.05, "sine", 0.018, 0.55); tone16(f * 0.8, 0.09, 0.05, "sine", 0.008, 0.55); } P.drip = Tn + 5 + Math.random() * 9; } }
       /* 気づいた子の頭に ♪（1.6秒） */
       (R.acts || []).forEach(a => { if (!a.nt || !a.m) return; const t = (performance.now() - a.nt) / 1600; if (t > 1) return; const wx = a.x, wz = R.Z + a.z; if (!los(wx, wz)) return; const s = toScr(wx, R.Y + (a.y || 0) + (a.H || 2) + 0.2, wz); if (!s) return; g.save(); g.globalAlpha = Math.min(1, (1 - t) * 3); g.font = "bold 20px system-ui"; g.fillStyle = "#ffd98a"; g.strokeStyle = "rgba(40,20,10,.8)"; g.lineWidth = 3; const yy = s[1] - 18 - Math.sin(Math.min(1, t * 4) * Math.PI) * 10; g.strokeText("♪", s[0] + 12, yy); g.fillText("♪", s[0] + 12, yy); g.restore(); });
       /* 宙をただようほこり（明かりのまわりで光る）。部屋の空気が見えるように */
