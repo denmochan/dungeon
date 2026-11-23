@@ -1193,7 +1193,7 @@ body:has(.modal) .inv25btn,body:has(.ntfull19) .inv25btn{display:none}
 #fp26 .f26mh small{opacity:.7}#fp26 .f26say{margin:6px 0 8px;font-size:13px;color:#e8d6b8}#fp26 .f26mb{display:flex;gap:6px}#fp26 .f26mb button{flex:1;padding:8px 4px;font-size:12px}
 #fp26 .f26rooms{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}#fp26 .f26rooms button{font-size:12px;padding:6px 8px}#fp26 .f26rooms button:disabled{opacity:.4}
 #fp26 .f26toast{position:absolute;left:50%;top:30%;transform:translateX(-50%);background:rgba(20,14,10,.9);border:1px solid #8a6a40;border-radius:999px;padding:8px 14px;font-size:13px}
-#fp26 .f26lab{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#fp26 .f26lab{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;background:radial-gradient(ellipse at 50% 55%,transparent 52%,rgba(8,4,2,.5) 100%)}
 #fp26 .f26talk{position:absolute;right:16px;bottom:calc(env(safe-area-inset-bottom,0px) + 60px);padding:12px 16px;font-size:14px;font-weight:700;background:#5a3a22;border-color:#c9a06a;border-radius:999px}
 /* 第6回のあと：吹き出しが「回して見る」をふさがない／実績の帯が「つづける」に隠れない */
 .d3card .o26go{z-index:40}
@@ -7400,7 +7400,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.309（11/23 17:02）";
+const VER20 = "No.310（11/23 18:42）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -12989,6 +12989,7 @@ async function fpMesh26(kind){ if (kind === "lordday") kind = "lord"; if (FPMESH
   const N = dv.getUint32(4, true), T = dv.getUint32(8, true); let o = 16; const pos = new Int16Array(buf.slice(o, o + N * 6)); o += N * 6; const col = new Uint8Array(buf.slice(o, o + N * 3)); o += N * 3; const idx = new Uint32Array(buf.slice(o, o + T * 12));
   return FPMESH26[kind] = { N, T, pos, col, idx }; }
 /* 出口の穴をあける深さ（部屋のローカル、奥が−）。採掘場・稽古場は奥の壁が手前にあり、穴が壁の向こうにかくれて「道が空いてない」に見えていた */
+const FPYS26 = 2.0;   /* 天井 4.4 → 6.6。ドラゴンが頭をぶつけない高さ */
 const FPBZ26 = { mine: -3, mine_bed: -3, mine_nest: -3, mine_watch: -3, train_mine: -3, train: -2.6, train_watch: -2.6 }, fpBZ26 = k => FPBZ26[k] != null ? FPBZ26[k] : -7;
 const FPK26 = { RZ0: -16, RZ1: 17, CH: 2.55, CW: 2.6 };   // 部屋の格子の前後のはし（ローカル）・通路の半分の幅
 function fpOpen26(){
@@ -13018,8 +13019,8 @@ function fpOpen26(){
   const sh = (ty, s) => { const o = gl.createShader(ty); gl.shaderSource(o, s); gl.compileShader(o); if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(o)); return o; };
   const prog = (vs, fs) => { const p = gl.createProgram(); gl.attachShader(p, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(p, sh(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(p); const U = {}; return { p, U: k => U[k] !== undefined ? U[k] : (U[k] = gl.getUniformLocation(p, k)), A: k => gl.getAttribLocation(p, k) }; };
   // 部屋と通路：頂点の色（光は焼いてある）×主のまわりのほのかな明かり、遠くは闇
-  const PM = prog(`attribute vec3 ap;attribute vec3 ac;uniform mat4 VP;uniform vec3 OFF;uniform float PSC;uniform vec3 SC;uniform mat3 CM;uniform vec3 CO;uniform vec3 EYE;varying vec3 vc;varying vec3 vw;varying vec3 vl;varying float vd;
-    void main(){vl=ap*PSC*SC;vec3 w=vl+OFF;gl_Position=VP*vec4(w,1.0);vc=clamp(CM*ac+CO,0.0,1.0);vw=w;vd=distance(w,EYE);}`,
+  const PM = prog(`attribute vec3 ap;attribute vec3 ac;uniform mat4 VP;uniform vec3 OFF;uniform float PSC;uniform vec3 SC;uniform mat3 CM;uniform vec3 CO;uniform vec3 EYE;uniform float YS;varying vec3 vc;varying vec3 vw;varying vec3 vl;varying float vd;
+    void main(){vl=ap*PSC*SC;if(vl.y>2.2)vl.y=2.2+(vl.y-2.2)*YS;vec3 w=vl+OFF;gl_Position=VP*vec4(w,1.0);vc=clamp(CM*ac+CO,0.0,1.0);vw=w;vd=distance(w,EYE);}`,
     `precision mediump float;varying vec3 vc;varying vec3 vw;varying vec3 vl;varying float vd;uniform vec4 DR;uniform vec3 LT[6];uniform float LF[6];
     float h(vec3 p){return fract(sin(dot(p,vec3(12.9898,78.233,37.719)))*43758.5453);}
     void main(){if(DR.z>0.5&&abs(vl.x)<2.35&&vl.y>0.12&&vl.y<3.5){if(DR.y>0.5&&vl.z<DR.w)discard;if(DR.x>0.5&&vl.z>7.0&&max(vc.r,max(vc.g,vc.b))<0.1)discard;}
@@ -13043,10 +13044,13 @@ function fpOpen26(){
     for (let k = 0; k < steps; k++) for (let j = 0; j < R; j++) { const a0 = k * R + j, a1 = k * R + (j + 1) % R, b0 = a0 + R, b1 = a1 + R; I.push(a0, b0, a1, a1, b0, b1); }
     /* 通路の口のまわりの岩の壁（穴のまわりの黒いすき間をふさぐ）。でこぼこの岩肌で、まん中に通路の形の穴 */
     const inHole = (x, y) => { const ax = Math.abs(x); return ax < 2.55 && y < (ax < 2.4 ? 2.4 + 0.62 * (1 - (ax / 2.4) ** 2) : 2.3); };
-    [[z0, y0, 1], [z1, y1, -1]].forEach(([zf, yb, sg]) => { const G = 0.45, NX = Math.round(13 / G), NY = Math.round(6 / G), base0 = P.length / 3;
-      for (let iy = 0; iy <= NY; iy++) for (let ix = 0; ix <= NX; ix++) { const x = -6.5 + ix * G, y = iy * G, e = Math.min(1, Math.hypot(x / 6.5, y / 6)), dep = (hs(ix * 1.7 + zf, iy * 2.3) - 0.5) * 0.5 + e * e * 1.6;
-        P.push(x, yb + y - 0.05, zf + sg * dep); const wv = 0.45 + 0.45 * hs(ix * 5 + zf, iy * 3), nr = inHole(x * 0.92, y * 0.95) ? 0 : Math.max(0, 1 - Math.hypot(x, y - 1.3) / 5.5); C.push(...[58, 48, 42].map((v, q) => Math.min(255, v * wv + nr * [46, 26, 10][q]))); }
-      for (let iy = 0; iy < NY; iy++) for (let ix = 0; ix < NX; ix++) { const cx = -6.5 + (ix + 0.5) * G, cy = (iy + 0.5) * G; if (inHole(cx, cy) || (cx / 6.5) ** 2 + (cy / 6) ** 2 > 0.72 + 0.28 * hs(ix * 0.7 + zf, iy * 1.3)) continue;   /* 外のふちはぎざぎざに（四角い板に見えた） */ const a0 = base0 + iy * (NX + 1) + ix, a1 = a0 + 1, b0 = a0 + NX + 1, b1 = b0 + 1; I.push(a0, b0, a1, a1, b0, b1); } });
+    /* 通路の口の岩：穴のふちから外へ輪を重ね、外ほど暗く奥へ反らせて洞窟の闇になじませる（四角い板に見えないように） */
+    [[z0, y0, 1], [z1, y1, -1]].forEach(([zf, yb, sg]) => { const IN = [], NI = 26, MR = 7, base0 = P.length / 3;
+      for (let k = 0; k <= NI; k++) { const t = k / NI; let x, y; if (t < 0.2) { x = 2.6; y = t / 0.2 * 2.3; } else if (t > 0.8) { x = -2.6; y = (1 - t) / 0.2 * 2.3; } else { const an = (t - 0.2) / 0.6 * Math.PI; x = 2.6 * Math.cos(an); y = 2.3 + 0.75 * Math.sin(an); } IN.push([x, y]); }
+      for (let r = 0; r <= MR; r++) { const u = r / MR; IN.forEach(([x, y], k) => { const dx = x, dy = y - 1.0, L = Math.hypot(dx, dy) || 1, ro = 4.2 + 2.6 * hs(k * 0.9 + zf, 3.1) + 1.2 * Math.sin(k * 0.7 + zf), rr = u * ro * (0.85 + 0.3 * hs(k * 2.1, r * 1.7 + zf));
+        const px = x + dx / L * rr, py = Math.max(0, y + dy / L * rr * 1.05) * (y < 0.05 ? 0 : 1), dep = u * u * 3.6 + (hs(k * 3.3 + zf, r * 2.9) - 0.5) * 0.35 * (r ? 1 : 0);
+        P.push(px, yb + py - 0.04, zf + sg * dep); const sh = (1 - u) ** 1.6, wv = 0.55 + 0.4 * hs(k * 5 + zf, r * 3); C.push(...[58, 48, 42].map((v, q) => Math.min(255, v * wv * (0.8 + 0.2 * sh) + sh * sh * [40, 22, 8][q])));   /* 外のふちは部屋の壁と同じ色：奥の壁にめりこませてなじませる */ }); }
+      for (let r = 0; r < MR; r++) for (let k = 0; k < NI; k++) { const a0 = base0 + r * (NI + 1) + k, a1 = a0 + 1, b0 = a0 + NI + 1, b1 = b0 + 1; I.push(a0, b0, a1, a1, b0, b1); } });
     const pb = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, pb); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(P), gl.STATIC_DRAW);
     const cb = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, cb); gl.bufferData(gl.ARRAY_BUFFER, new Uint8Array(C), gl.STATIC_DRAW);
     const ib = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint32Array(I), gl.STATIC_DRAW); return { pb, cb, ib, n: I.length, z0, z1, y0, y1 }; }
@@ -13101,12 +13105,12 @@ function fpOpen26(){
   const persp = (fy, as, nn, ff) => { const t = 1 / Math.tan(fy / 2); return [t / as, 0, 0, 0, 0, t, 0, 0, 0, 0, (ff + nn) / (nn - ff), -1, 0, 0, 2 * ff * nn / (nn - ff), 0]; };
   const look = (e, c) => { const f = V3.n(V3.s(c, e)), s = V3.n(V3.x(f, [0, 1, 0])), u = V3.x(s, f); return [s[0], u[0], -f[0], 0, s[1], u[1], -f[1], 0, s[2], u[2], -f[2], 0, -V3.d(s, e), -V3.d(u, e), V3.d(f, e), 1]; };
   const mm = (a, b) => { const r = new Array(16).fill(0); for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) for (let k = 0; k < 4; k++) r[j * 4 + i] += a[k * 4 + i] * b[j * 4 + k]; return r; };
-  let VP = null, W = 1, H = 1, EYE = [0, 0, 0];
+  let VP = null, W = 1, H = 1, EYE = [0, 0, 0], SHK = 0;
   const toScr = (x, y, z) => { const v = [x, y, z, 1], o = [0, 0, 0, 0]; for (let i = 0; i < 4; i++) for (let k = 0; k < 4; k++) o[i] += VP[k * 4 + i] * v[k]; if (o[3] <= 0.1) return null; return [(o[0] / o[3] * 0.5 + 0.5) * VW(), (0.5 - o[1] / o[3] * 0.5) * VH(), o[3]]; };
   // タップ：近くの魔物 → その場のメニュー、看板 → 部屋の画面
   function tap(sx, sy){ if (!VP) return; let best = null;
     rooms.forEach(R => { if (Math.abs(R.i - curRoom) > 1) return;
-      (R.acts || []).forEach(a => { const s = toScr(a.x, R.Y + 1.0, R.Z + a.z); if (!s) return; const d = Math.hypot(s[0] - sx, s[1] - sy), wd = Math.hypot(a.x - P.x, R.Z + a.z - P.z); if (wd < 15 && d < 70 && (!best || d < best.d)) best = { d, a, R }; });
+      (R.acts || []).forEach(a => { const s = toScr(a.x, R.Y + (a.H || 2) * 0.5, R.Z + a.z); if (!s) return; const d = Math.hypot(s[0] - sx, s[1] - sy), wd = Math.hypot(a.x - P.x, R.Z + a.z - P.z); if (wd < 15 + (a.H || 0) && d < 70 + (a.H || 0) * 18 && (!best || d < best.d)) best = { d, a, R }; });
       const s = toScr(R.sx, R.Y + 1.8, R.Z + R.sz); if (s) { const d = Math.hypot(s[0] - sx, s[1] - sy), wd = Math.hypot(R.sx - P.x, R.Z + R.sz - P.z); if (wd < 14 && d < 60 && (!best || d < best.d)) best = { d, sign: R }; } });
     if (!best) { menu.hidden = true; return; }
     if (best.sign) { menu.hidden = true; try { peekOpen24(best.sign.i); } catch (e) {} return; }
@@ -13123,8 +13127,10 @@ function fpOpen26(){
       L.querySelectorAll("[data-r]").forEach(b => b.onclick = () => { const j = +b.dataset.r; m.home = j; m.job19 = null; m.job19h = j; try { save(); } catch (e) {} mkActs(rooms[R.i]); mkActs(rooms[j]); menu.hidden = true; toast(`${m.nick || ""} を ${rooms[j].name} へ`); }); }; }
   const toast = t => { const d = document.createElement("div"); d.className = "f26toast"; d.textContent = t; wrap.appendChild(d); setTimeout(() => d.remove(), 1800); };
   // 魔物の暮らし（軽く）
-  function stepActs(R, dt){ (R.acts || []).forEach(a => { if (a.stay) return; if (!a.walking) { a.wait -= dt; if (a.wait <= 0) { for (let k = 0; k < 8; k++) { const ang = Math.random() * 6.28, d = 2 + Math.random() * 5, x = a.hx + Math.cos(ang) * d, z = a.hz + Math.sin(ang) * d; if (floorOK(R, x, z)) { a.tx = x; a.tz = z; a.walking = true; break; } } a.wait = 2 + Math.random() * 4; } return; }
-    const dx = a.tx - a.x, dz = a.tz - a.z, L = Math.hypot(dx, dz); if (L < 0.1) { a.walking = false; return; } const s = Math.min(L, 2.2 * dt); a.x += dx / L * s; a.z += dz / L * s; a.dist += s; a.r = Math.atan2(dx, dz); }); }
+  function stepActs(R, dt){ (R.acts || []).forEach(a => { if (a.stay) return;
+    /* 近くに来たら足を止めて、こちらを向く（気づいたら ♪） */ { const dx = P.x - a.x, dz = P.z - (R.Z + a.z), d = Math.hypot(dx, dz); if (R.i === curRoom && d < 3.4 + (a.H || 0) * 0.45) { a.walking = false; a.wait = Math.max(a.wait, 1.5); const tr = Math.atan2(dx, dz), dr = ((tr - a.r) % 6.2832 + 9.4248) % 6.2832 - 3.1416; a.r += dr * Math.min(1, dt * 5); if (!a.nt) a.nt = performance.now(); return; } else if (d > 6 + (a.H || 0) * 0.45) a.nt = 0; }
+    if (!a.walking) { a.wait -= dt; if (a.wait <= 0) { for (let k = 0; k < 8; k++) { const ang = Math.random() * 6.28, d = 2 + Math.random() * 5, x = a.hx + Math.cos(ang) * d, z = a.hz + Math.sin(ang) * d; if (floorOK(R, x, z)) { a.tx = x; a.tz = z; a.walking = true; break; } } a.wait = 2 + Math.random() * 4; } return; }
+    const dx = a.tx - a.x, dz = a.tz - a.z, L = Math.hypot(dx, dz); if (L < 0.1) { a.walking = false; return; } const s = Math.min(L, 2.2 * Math.sqrt(a.mult || 1) * dt); a.x += dx / L * s; a.z += dz / L * s; a.dist += s; a.r = Math.atan2(dx, dz); }); }
   let curRoom = 0, lastT = performance.now(), ft = [];
   function loop(now){ if (!alive) return; requestAnimationFrame(loop);
     const dt = Math.max(0.001, Math.min(0.1, (now - lastT) / 1000)); lastT = now; ft.push(dt); if (ft.length > 20) ft.shift(); fpsEl.textContent = Math.round(ft.length / ft.reduce((x, y) => x + y, 0)) + "fps";
@@ -13132,23 +13138,23 @@ function fpOpen26(){
     // 歩く（壁で止まったら、横すべり）
     const sp = 8 * dt, fx = Math.sin(P.yaw), fz = -Math.cos(P.yaw), rx = Math.cos(P.yaw), rz = Math.sin(P.yaw);
     if (mv.x || mv.y) { const dx = (-mv.y * fx + mv.x * rx) * sp, dz = (-mv.y * fz + mv.x * rz) * sp;
-      const hitM = (x, z) => { const R = rooms[curRoom]; return (R.acts || []).some(a => Math.hypot(R.Z + a.z - z, a.x - x) < 1.5 && Math.hypot(R.Z + a.z - z, a.x - x) < Math.hypot(R.Z + a.z - P.z, a.x - P.x)); };   /* 魔物に重ならない */
+      const hitM = (x, z) => { const R = rooms[curRoom]; return (R.acts || []).some(a => Math.hypot(R.Z + a.z - z, a.x - x) < Math.max(1.5, (a.H || 0) * 0.4) && Math.hypot(R.Z + a.z - z, a.x - x) < Math.hypot(R.Z + a.z - P.z, a.x - P.x)); };   /* 魔物に重ならない */
       let ok = false; for (const an of [0, 0.5, -0.5, 1.0, -1.0]) { const c = Math.cos(an), sn = Math.sin(an), ex = dx * c - dz * sn, ez = dx * sn + dz * c; if (where(P.x + ex, P.z + ez) && !hitM(P.x + ex, P.z + ez)) { P.x += ex; P.z += ez; ok = true; break; } }   /* ぶつかったら少し向きを変えて回りこむ */
       if (!ok) { if (where(P.x + dx, P.z)) P.x += dx; else if (where(P.x, P.z + dz)) P.z += dz; } }
     if (mv.x || mv.y) { const W1 = where(P.x, P.z); if (W1 && W1.tight) P.x *= Math.max(0, 1 - dt * 2.5); }   /* 坑道・通路では真ん中へ寄せる（ふちで引っかかって進めなかった） */
-    const W0 = where(P.x, P.z) || { k: "r", i: curRoom, y: rooms[curRoom].Y, tight: false }; P.y += (W0.y - P.y) * Math.min(1, dt * 10); P.eye += ((W0.tight ? 2.05 : 3.3) - P.eye) * Math.min(1, dt * 4);
+    const W0 = where(P.x, P.z) || { k: "r", i: curRoom, y: rooms[curRoom].Y, tight: false }; P.y += (W0.y - P.y) * Math.min(1, dt * 10); P.eye += ((W0.tight ? 1.75 : 2.35) - P.eye) * Math.min(1, dt * 4);
     if (W0.k === "r") curRoom = W0.i; const R0 = rooms[curRoom]; whereB.textContent = W0.k === "c" || W0.tight ? "通路" : R0.name; whereS.textContent = `B${R0.f + 1}`;
     for (let i = Math.max(0, curRoom - 1); i <= Math.min(n - 1, curRoom + 1); i++) { loadRoom(rooms[i]); stepActs(rooms[i], dt); }
     if (msg.isConnected && R0.mb) msg.remove(); if (R0.err) msg.textContent = R0.err;
     const dpr = Math.min(2, window.devicePixelRatio || 1), r = { width: cv.clientWidth, height: cv.clientHeight }; W = Math.round(r.width * dpr); H = Math.round(r.height * dpr); if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
     gl.viewport(0, 0, W, H); gl.clearColor(0.01, 0.008, 0.008, 1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    P.walk = (P.walk || 0) + ((mv.x || mv.y) ? Math.hypot(mv.x, mv.y) * dt * 8 : 0); const bob = (mv.x || mv.y) ? Math.sin(P.walk * 1.9) * 0.07 : 0; EYE = [P.x, P.y + P.eye + bob, P.z]; const dir = [Math.sin(P.yaw) * Math.cos(P.pit), Math.sin(P.pit), -Math.cos(P.yaw) * Math.cos(P.pit)];
+    P.walk = (P.walk || 0) + ((mv.x || mv.y) ? Math.hypot(mv.x, mv.y) * dt * 8 : 0); const bob = (mv.x || mv.y) ? Math.sin(P.walk * 1.9) * 0.07 : 0; EYE = [P.x, P.y + P.eye + bob + SHK * Math.sin(now / 1000 * 47), P.z]; SHK *= Math.pow(0.02, dt); const dir = [Math.sin(P.yaw) * Math.cos(P.pit), Math.sin(P.pit), -Math.cos(P.yaw) * Math.cos(P.pit)];
     VP = mm(persp(1.15, W / H, 0.15, 120), look(EYE, [EYE[0] + dir[0], EYE[1] + dir[1], EYE[2] + dir[2]]));
     gl.enable(gl.DEPTH_TEST); gl.useProgram(PM.p); gl.uniformMatrix4fv(PM.U("VP"), false, new Float32Array(VP)); gl.uniform3fv(PM.U("EYE"), EYE);
     const LT6 = TORCH.map(t => [t, (t[0] - EYE[0]) ** 2 + (t[1] - EYE[1]) ** 2 + (t[2] - EYE[2]) ** 2]).sort((a, b) => a[1] - b[1]).slice(0, 6); while (LT6.length < 6) LT6.push([[0, -999, 0], 1e9]);
     gl.uniform3fv(PM.U("LT"), new Float32Array(LT6.flatMap(o => o[0]))); gl.uniform1fv(PM.U("LF"), new Float32Array(LT6.map((o, j) => o[0][1] < -900 ? 0 : 1.0 * (0.86 + 0.1 * Math.sin(now / 1000 * 11 + j * 2.1) + 0.04 * Math.sin(now / 1000 * 27 + j)))));
     const la = PM.A("ap"), lc = PM.A("ac"); gl.enableVertexAttribArray(la); gl.enableVertexAttribArray(lc);
-    const draw = (B, off, psc, short, CM, ri) => { gl.uniform3fv(PM.U("OFF"), off); gl.uniform1f(PM.U("PSC"), psc); gl.uniform3fv(PM.U("SC"), short ? [1, 1, -1] : [1, 1, 1]); gl.uniform4f(PM.U("DR"), short && ri > 0 ? 1 : 0, short && ri < n - 1 ? 1 : 0, short ? 1 : 0, ri != null ? fpBZ26(rooms[ri].kind) : -7); gl.uniformMatrix3fv(PM.U("CM"), false, new Float32Array([0, 3, 6, 1, 4, 7, 2, 5, 8].map(j => CM.M[j]))); gl.uniform3fv(PM.U("CO"), CM.O);
+    const draw = (B, off, psc, short, CM, ri) => { gl.uniform3fv(PM.U("OFF"), off); gl.uniform1f(PM.U("PSC"), psc); gl.uniform3fv(PM.U("SC"), short ? [1, 1, -1] : [1, 1, 1]); gl.uniform1f(PM.U("YS"), ri != null ? FPYS26 : 1);   /* 部屋の天井を高く（腰より上だけのばす：置き物の形はそのまま） */ gl.uniform4f(PM.U("DR"), short && ri > 0 ? 1 : 0, short && ri < n - 1 ? 1 : 0, short ? 1 : 0, ri != null ? fpBZ26(rooms[ri].kind) : -7); gl.uniformMatrix3fv(PM.U("CM"), false, new Float32Array([0, 3, 6, 1, 4, 7, 2, 5, 8].map(j => CM.M[j]))); gl.uniform3fv(PM.U("CO"), CM.O);
       gl.bindBuffer(gl.ARRAY_BUFFER, B.pb); gl.vertexAttribPointer(la, 3, short ? gl.SHORT : gl.FLOAT, false, 0, 0); gl.bindBuffer(gl.ARRAY_BUFFER, B.cb); gl.vertexAttribPointer(lc, 3, gl.UNSIGNED_BYTE, true, 0, 0);
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, B.ib); gl.drawElements(gl.TRIANGLES, B.n, gl.UNSIGNED_INT, 0); };
     const ID = { M: [1, 0, 0, 0, 1, 0, 0, 0, 1], O: [0, 0, 0] };
@@ -13160,17 +13166,19 @@ function fpOpen26(){
     // 足もとの影（ドット絵が浮いて見えた）
     gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(false); gl.uniform1f(PB.U("AM"), 1); gl.uniform1f(PB.U("FL"), 0); gl.uniform4f(PB.U("UR"), 0, 0, 1, 1); gl.uniform1f(PB.U("LB"), 1);
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, texOf(SHADOW)); gl.uniform1i(PB.U("tx"), 0); gl.uniform3f(PB.U("UPV"), 0, 0, 1); gl.uniform3f(PB.U("R"), 1, 0, 0);
-    for (let i = Math.max(0, curRoom - 1); i <= Math.min(n - 1, curRoom + 1); i++) { const R = rooms[i]; (R.acts || []).forEach(a => { if (DHOV25[a.sp]) return; gl.uniform3f(PB.U("C"), a.x, R.Y + 0.05, R.Z + a.z); gl.uniform4f(PB.U("Q"), -0.9, -0.5, 1.8, 1.0); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); }); }
+    for (let i = Math.max(0, curRoom - 1); i <= Math.min(n - 1, curRoom + 1); i++) { const R = rooms[i]; (R.acts || []).forEach(a => { if (DHOV25[a.sp]) return; const ss = Math.max(1, (a.H || 1.6) * 0.42); gl.uniform3f(PB.U("C"), a.x, R.Y + 0.05, R.Z + a.z); gl.uniform4f(PB.U("Q"), -0.9 * ss, -0.5 * ss, 1.8 * ss, 1.0 * ss); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); }); }
     gl.depthMask(true); gl.disable(gl.BLEND); gl.uniform1f(PB.U("AM"), 0); gl.uniform3f(PB.U("UPV"), 0, 1, 0);
     for (let i = Math.max(0, curRoom - 1); i <= Math.min(n - 1, curRoom + 1); i++) { const R = rooms[i];
       { const d = Math.hypot(R.sx - P.x, R.Z + R.sz - P.z); gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, texOf(R.sign)); gl.uniform1i(PB.U("tx"), 0); gl.uniform1f(PB.U("FL"), 0); gl.uniform4f(PB.U("UR"), 0, 0, 1, 1); gl.uniform1f(PB.U("LB"), 0.55 + 0.6 * Math.exp(-d / 6));
         gl.uniform3f(PB.U("C"), R.sx, R.Y, R.Z + R.sz); gl.uniform3fv(PB.U("R"), Rr); gl.uniform4f(PB.U("Q"), -1.3, 0, 2.6, 1.95); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); }
-      (R.acts || []).forEach(a => { const o = dspr25(a.sp, a.evo); if (!o || !o.ok) return; const wx = a.x, wz = R.Z + a.z, WS = dwalk25(a.sp, a.evo), view = Math.atan2(EYE[0] - wx, EYE[2] - wz); let rel = ((a.r - view) % 6.2832 + 9.4248) % 6.2832 - 3.1416;
+      (R.acts || []).forEach(a => { const o = dspr25(a.sp, a.evo); if (!o || !o.ok) return;
+        /* 大きい種族はもっと大きく（ドラゴンが人の背丈くらいでがっかりした）。天井 6.6 の手前で止める */
+        if (!a.mult) { const H0 = ((o.foot || 122) - (o.top || 0)) / (o.ppu || 36), q = Math.min(1, Math.max(0, (H0 - 2.2) / 2.4)), m0 = 1 + 0.55 * q * q * (3 - 2 * q); a.mult = Math.min(m0, 5.9 / H0); a.H = H0 * a.mult; } const wx = a.x, wz = R.Z + a.z, WS = dwalk25(a.sp, a.evo), view = Math.atan2(EYE[0] - wx, EYE[2] - wz); let rel = ((a.r - view) % 6.2832 + 9.4248) % 6.2832 - 3.1416;
         const ai = Math.min(12, Math.round(Math.abs(rel) / Math.PI * 12)), flip = rel < 0 && ai > 0 && ai < 12, ppu = o.ppu || 36; let im, cx, cy, cw, ch, hs, foot, ox = 0, oy = 0, bob = 0;
         /* 仕事中の子：横向きの「掘る」「打ちこむ」「寝る」コマ。向きは相手（岩・台）が画面の右か左かで決める */
         const T = now / 1000 + a.ph, lx = a.look ? a.look[0] : a.x + Math.sin(a.r), lz = a.look ? a.look[1] : a.z + Math.cos(a.r), s1 = toScr(a.x, R.Y + 0.8, R.Z + a.z), s2 = toScr(lx, R.Y + 0.8, R.Z + lz), side = s1 && s2 ? s2[0] < s1[0] : (lx - a.x) * Rr[0] + (lz - a.z) * Rr[2] < 0;   /* 相手が画面の左なら左を向く（真正面・真うしろのときに向きをまちがえた） */
-        let job = null; if (!a.walking && o.bip) { if (a.mode === "mine") { const M = dmine25(a.sp, a.evo); if (M && M.ok) { job = { im: M.im, f: Math.floor(T / 1.1 * 4) % 4, hs: 1 };
-          /* 岩のふちに立たせて、つるはしの先がちょうど岩に当たるように（離れて空を掘っていた） */ if (a.rk && !a.rkSet) { a.rkSet = 1; const [cx, cz, hw, hz] = a.rk, dx = a.x - cx, dz = a.z - cz, e = Math.hypot(dx / hw, dz / hz) || 1, L = Math.hypot(dx, dz) || 1, off = Math.max(0.3, (M.hx - 64) / ppu); a.x = cx + dx / e * 1.25 + dx / L * off; a.z = cz + dz / e * 1.25 + dz / L * off; a.look = [cx, cz];   /* 3Dでは岩の真ん中を向いて、まわりから叩く */ } } } else if (a.mode === "slash" || a.mode === "lift" || a.mode === "train") job = { im: o.im, f: 5 + Math.floor(T / 0.55 * 4) % 4, hs: o.hs || 1 }; else if (a.mode === "sleep") job = { im: o.im, f: 4, hs: o.hs || 1 }; }
+        let job = null; if (!a.walking && o.bip) { if (a.mode === "mine") { const M = dmine25(a.sp, a.evo); if (M && M.ok && a.mult) { job = { im: M.im, f: Math.floor(T / 1.1 * 4) % 4, hs: 1 };
+          /* 岩のふちに立たせて、つるはしの先がちょうど岩に当たるように（離れて空を掘っていた） */ if (a.rk && !a.rkSet) { a.rkSet = 1; const [cx, cz, hw, hz] = a.rk, dx = a.x - cx, dz = a.z - cz, e = Math.hypot(dx / hw, dz / hz) || 1, L = Math.hypot(dx, dz) || 1, off = Math.max(0.3, (M.hx - 64) / ppu * a.mult); a.x = cx + dx / e * 1.25 + dx / L * off; a.z = cz + dz / e * 1.25 + dz / L * off; a.look = [cx, cz];   /* 3Dでは岩の真ん中を向いて、まわりから叩く */ } } } else if (a.mode === "slash" || a.mode === "lift" || a.mode === "train") job = { im: o.im, f: 5 + Math.floor(T / 0.55 * 4) % 4, hs: o.hs || 1 }; else if (a.mode === "sleep") job = { im: o.im, f: 4, hs: o.hs || 1 }; }
         if (!a.walking && a.mode === "sleep" && !o.bip) job = { im: o.im, f: 0, hs: o.hs || 1, slow: 1 };
         a.fr = job ? job.f : -1;
         if (job) { hs = job.hs; cw = ch = Math.round(128 * hs); im = job.im; cx = job.f * cw; cy = 0; foot = o.foot; }
@@ -13178,30 +13186,39 @@ function fpOpen26(){
         else if (WS && WS.ok && WS.im.height >= WS.ch * 13) { const ph = a.walking ? Math.floor(a.dist / 0.9 * 6) % 6 : 0; im = WS.im; hs = WS.hs || 1; cw = WS.cw; ch = WS.ch; cx = ph * cw; cy = ai * ch; foot = WS.foot != null ? WS.foot : o.foot; ox = WS.ox / hs; oy = WS.oy / hs; if (!a.walking) bob = Math.sin(now / 1000 * 2.2 + a.ph) * 0.03; }
         else { hs = o.hs || 1; cw = ch = Math.round(128 * hs); im = o.im; cx = (Math.floor((now / 1000 + a.ph) / 0.4) % 4) * cw; cy = 0; foot = o.foot; if (a.walking) bob = Math.abs(Math.sin(a.dist * 7)) * 0.18; }
         const jobF = a.fr >= 0 || (a.mode === "spar" && a.look && !a.walking), fl2 = jobF ? side : flip; let jx = 0, jz = 0; if (a.mode === "spar" && a.sq != null && a.sq < 0.34 && a.look) { const f = Math.sin(a.sq / 0.34 * Math.PI), dx = a.look[0] - a.x, dz = a.look[1] - a.z, L = Math.hypot(dx, dz) || 1; jx = dx / L * 0.9 * f; jz = dz / L * 0.9 * f; bob = 0.55 * f; }
-        const k = 1 / ppu, w = cw / hs, h = ch / hs, x0 = fl2 ? 64 - ox - w : ox - 64, d = Math.hypot(wx - P.x, wz - P.z);
+        const br = a.walking || jobF ? 1 : 1 + 0.018 * Math.sin(now / 1000 * 2.3 + a.ph), k = (a.mult || 1) / ppu, w = cw / hs, h = ch / hs, x0 = fl2 ? 64 - ox - w : ox - 64, d = Math.hypot(wx - P.x, wz - P.z);
         gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, texOf(im)); gl.uniform1i(PB.U("tx"), 0); gl.uniform1f(PB.U("FL"), fl2 ? 1 : 0); gl.uniform4f(PB.U("UR"), cx / im.width, cy / im.height, cw / im.width, ch / im.height); gl.uniform1f(PB.U("LB"), 0.5 + 0.7 * Math.exp(-d / 7));
-        gl.uniform3f(PB.U("C"), wx + jx, R.Y + (a.y || 0) + (DHOV25[a.sp] ? 0.9 : 0) + bob, wz + jz); gl.uniform3fv(PB.U("R"), Rr); gl.uniform4f(PB.U("Q"), x0 * k, (foot - (oy + h)) * k, w * k, h * k); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); }); }
+        gl.uniform3f(PB.U("C"), wx + jx, R.Y + (a.y || 0) + (DHOV25[a.sp] ? 0.9 : 0) + bob, wz + jz); gl.uniform3fv(PB.U("R"), Rr); gl.uniform4f(PB.U("Q"), x0 * k, (foot - (oy + h)) * k * br, w * k, h * k * br); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        if (a.walking && (a.H || 0) > 3.6) { const st = Math.abs(Math.sin(a.dist * 1.4)); if (st > 0.97) SHK = Math.max(SHK, 0.09 * Math.min(1, (a.H - 3.6) / 1.6) * Math.exp(-d / 8)); }   /* 大きい子の足音で少しゆれる */ }); }
     // たいまつの火（足し算で光らせる）
     gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE); gl.depthMask(false); gl.uniform1f(PB.U("AM"), 1); gl.uniform1f(PB.U("FL"), 0); gl.uniform4f(PB.U("UR"), 0, 0, 1, 1); gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, texOf(FLAME)); gl.uniform1i(PB.U("tx"), 0); gl.uniform3fv(PB.U("R"), Rr);
     TORCH.forEach((t, j) => { const d2 = (t[0] - EYE[0]) ** 2 + (t[2] - EYE[2]) ** 2; if (d2 > 900) return; const fl = 0.85 + 0.15 * Math.sin(now / 1000 * 13 + j * 3.7); gl.uniform1f(PB.U("LB"), 1.2 * fl); gl.uniform3f(PB.U("C"), t[0], t[1] - 0.35, t[2]); gl.uniform4f(PB.U("Q"), -0.22, 0, 0.44, 0.75 * fl); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); });
     gl.depthMask(true); gl.disable(gl.BLEND); gl.uniform1f(PB.U("AM"), 0);
     // 近くの子に「話しかける」ボタン（動く子をタップで当てるのは難しかった）
-    { const R = rooms[curRoom], fx = Math.sin(P.yaw), fz = -Math.cos(P.yaw); let best = null; (R.acts || []).forEach(a => { if (!a.m) return; const dx = a.x - P.x, dz = R.Z + a.z - P.z, d = Math.hypot(dx, dz); if (d < 5.5 && (dx * fx + dz * fz) / (d || 1) > 0.3 && (!best || d < best.d)) best = { a, d }; });
+    { const R = rooms[curRoom], fx = Math.sin(P.yaw), fz = -Math.cos(P.yaw); let best = null; (R.acts || []).forEach(a => { if (!a.m) return; const dx = a.x - P.x, dz = R.Z + a.z - P.z, d = Math.hypot(dx, dz); if (d < 5.5 + (a.H || 0) * 0.6 && (dx * fx + dz * fz) / (d || 1) > 0.3 && (!best || d < best.d)) best = { a, d }; });
       const tb = wrap.querySelector(".f26talk"); if (best && menu.hidden) { tb.hidden = false; if (tb.dataset.id != best.a.m.id) { tb.dataset.id = best.a.m.id; tb.textContent = `💬 ${best.a.m.nick || ""}に話しかける`; tb.onclick = () => monMenu(best.a, R, VW() / 2, VH() * 0.55); } } else tb.hidden = true; }
     // 名前の札（近くの子）。画面の外にいる子は、端に矢印
     { const lc = wrap.querySelector(".f26lab"), dp = Math.min(2, window.devicePixelRatio || 1); if (lc.width !== Math.round(VW() * dp)) { lc.width = Math.round(VW() * dp); lc.height = Math.round(VH() * dp); } const g = lc.getContext("2d"); g.setTransform(dp, 0, 0, dp, 0, 0); g.clearRect(0, 0, VW(), VH()); g.textAlign = "center"; g.font = "bold 12px system-ui,sans-serif";
       const R = rooms[curRoom];
-      [[0, fpBZ26(R.kind) - 2.5, curRoom < n - 1 ? "▼ 次の部屋へ" : ""], [0, 14.5, curRoom > 0 ? "▲ 前の部屋へ" : ""]].forEach(([ex, ez, t]) => { if (!t) return; const s = toScr(ex, R.Y + 1.4, R.Z + ez); if (s && s[0] > 0 && s[0] < VW() && s[1] > 40 && s[1] < VH()) { g.fillStyle = "rgba(255,200,110,.85)"; g.font = "bold 13px system-ui,sans-serif"; g.fillText(t, s[0], s[1]); } });   /* 出口の場所 */
+      [[0, fpBZ26(R.kind) - 2.5, curRoom < n - 1 ? "▼ 次の部屋へ" : ""], [0, 14.5, curRoom > 0 ? "▲ 前の部屋へ" : ""]].forEach(([ex, ez, t]) => { if (!t) return; const pz = P.z - R.Z; if (t[0] === "▼" ? pz < ez + 1 : pz > ez - 1) return;   /* 通り過ぎた札は出さない（通路でふり返ると2枚重なった） */ const s = toScr(ex, R.Y + 1.4, R.Z + ez); if (s && s[0] > 0 && s[0] < VW() && s[1] > 40 && s[1] < VH()) { g.fillStyle = "rgba(255,200,110,.85)"; g.font = "bold 13px system-ui,sans-serif"; g.fillText(t, s[0], s[1]); } });   /* 出口の場所 */
       /* 仕事の手ごたえ：つるはしが当たると石のかけらと光、打ちこむと火花、寝ている子は Zz */
       (R.acts || []).forEach(a => { const wx = a.x, wz = R.Z + a.z, d = Math.hypot(wx - P.x, wz - P.z); if (d > 18 || !los(wx, wz)) return; const u = Math.max(0.7, Math.min(2.2, 7 / Math.max(2, d))), T = now / 1000 + a.ph;
-        if (a.mode === "sleep" && !a.walking) { const s = toScr(wx, R.Y + (a.y || 0) + 1.3, wz); if (!s) return; g.save(); g.fillStyle = "#d8e4ff"; for (let j = 0; j < 3; j++) { const q = (T * 0.35 + j / 3) % 1; g.globalAlpha = Math.sin(q * Math.PI) * 0.85; g.font = `bold ${Math.round((9 + 7 * q) * u)}px system-ui`; g.fillText(j % 2 ? "z" : "Z", s[0] + (6 + q * 16) * u, s[1] - q * 26 * u); } g.restore(); return; }
+        if (a.mode === "sleep" && !a.walking) { const s = toScr(wx, R.Y + (a.y || 0) + (a.H || 1.8) * 0.72, wz); if (!s) return; g.save(); g.fillStyle = "#d8e4ff"; for (let j = 0; j < 3; j++) { const q = (T * 0.35 + j / 3) % 1; g.globalAlpha = Math.sin(q * Math.PI) * 0.85; g.font = `bold ${Math.round((9 + 7 * q) * u)}px system-ui`; g.fillText(j % 2 ? "z" : "Z", s[0] + (6 + q * 16) * u, s[1] - q * 26 * u); } g.restore(); return; }
         if (!a.look || a.walking) return; const dx = a.look[0] - a.x, dz = a.look[1] - a.z, L = Math.hypot(dx, dz) || 1;
         if (a.mode === "mine" && a.fr === 2) { const ph = (T / 1.1 * 4) % 1, s = toScr(wx + dx / L * 0.9, R.Y + 0.9, wz + dz / L * 0.9); if (!s) return; g.save(); g.globalAlpha = 1 - ph * 0.8; g.fillStyle = "rgba(255,245,200,.9)"; g.beginPath(); g.arc(s[0], s[1], (3 + 7 * (1 - ph)) * u, 0, 7); g.fill();
           for (let j = 0; j < 6; j++) { const an = -2.8 + j * 0.5 + a.ph % 1 * 0.3, dd = (6 + 16 * ph) * u; g.fillStyle = j % 2 ? "#8a7a68" : (j === 2 ? "#c9a8ff" : "#9fe4ff"); g.fillRect(s[0] + Math.cos(an) * dd, s[1] + Math.sin(an) * dd * 0.8 + ph * ph * 14 * u, 2.4 * u, 2.4 * u); } g.restore(); }
         if ((a.mode === "slash" || a.mode === "lift") && a.fr === 7) { const q = (T / 0.55 * 4) % 1, s = toScr(wx + dx / L * 1.0, R.Y + 0.9, wz + dz / L * 1.0); if (!s) return; g.save(); g.globalAlpha = 1 - q; g.strokeStyle = "rgba(255,240,200,.95)"; g.lineWidth = 2 * u; g.beginPath(); for (let j = 0; j < 6; j++) { const an = j * 1.05 + a.ph; g.moveTo(s[0] + Math.cos(an) * 3 * u, s[1] + Math.sin(an) * 3 * u); g.lineTo(s[0] + Math.cos(an) * (7 + 9 * q) * u, s[1] + Math.sin(an) * (7 + 9 * q) * u); } g.stroke(); g.restore(); }
         if (a.mode === "spar" && a.sq != null && a.sq >= 0.3 && a.sq < 0.5) { const q = (a.sq - 0.3) / 0.2, s = toScr(wx + dx / L * 0.9, R.Y + 0.1, wz + dz / L * 0.9); if (!s) return; g.save(); g.globalAlpha = 0.5 * (1 - q); g.fillStyle = "#b89a78"; for (let j = 0; j < 4; j++) { g.beginPath(); g.arc(s[0] + (j - 1.5) * (7 + 8 * q) * u, s[1] - q * 4 * u, (3 + 3 * q) * u, 0, 7); g.fill(); } g.restore(); } });
+      /* 気づいた子の頭に ♪（1.6秒） */
+      (R.acts || []).forEach(a => { if (!a.nt || !a.m) return; const t = (performance.now() - a.nt) / 1600; if (t > 1) return; const wx = a.x, wz = R.Z + a.z; if (!los(wx, wz)) return; const s = toScr(wx, R.Y + (a.y || 0) + (a.H || 2) + 0.2, wz); if (!s) return; g.save(); g.globalAlpha = Math.min(1, (1 - t) * 3); g.font = "bold 20px system-ui"; g.fillStyle = "#ffd98a"; g.strokeStyle = "rgba(40,20,10,.8)"; g.lineWidth = 3; const yy = s[1] - 18 - Math.sin(Math.min(1, t * 4) * Math.PI) * 10; g.strokeText("♪", s[0] + 12, yy); g.fillText("♪", s[0] + 12, yy); g.restore(); });
+      /* 宙をただようほこり（明かりのまわりで光る）。部屋の空気が見えるように */
+      { if (!window.__fpDust26) window.__fpDust26 = Array.from({ length: 46 }, () => ({ x: 0, y: 0, z: 0, p: Math.random() * 9, dead: 1 })); const T = now / 1000;
+        g.save(); window.__fpDust26.forEach(q => { if (q.dead || Math.hypot(q.x - P.x, q.z - P.z) > 9) { const an = Math.random() * 6.28, r = 1.5 + Math.random() * 7; q.x = P.x + Math.cos(an) * r; q.z = P.z + Math.sin(an) * r; q.y = P.y + 0.4 + Math.random() * 3.4; q.dead = 0; }
+          q.x += Math.sin(T * 0.3 + q.p) * 0.004; q.y += Math.sin(T * 0.21 + q.p * 2) * 0.002 - 0.0008; q.z += Math.cos(T * 0.27 + q.p) * 0.004; if (q.y < P.y + 0.1) q.dead = 1;
+          let lt = 0; TORCH.forEach(t => { const d2 = (t[0] - q.x) ** 2 + (t[1] - q.y) ** 2 + (t[2] - q.z) ** 2; if (d2 < 30) lt = Math.max(lt, 1 - d2 / 30); }); const s = toScr(q.x, q.y, q.z); if (!s) return; const dd = Math.hypot(q.x - EYE[0], q.y - EYE[1], q.z - EYE[2]);
+          g.globalAlpha = (0.12 + 0.55 * lt) * (0.6 + 0.4 * Math.sin(T * 2 + q.p * 5)); g.fillStyle = lt > 0.2 ? "#ffd9a0" : "#c8bba8"; const r = Math.max(0.6, 2.2 / Math.max(1, dd)); g.beginPath(); g.arc(s[0], s[1], r, 0, 7); g.fill(); }); g.restore(); }
       g.font = "bold 12px system-ui,sans-serif";
-      (R.acts || []).forEach(a => { if (!a.m) return; const wx = a.x, wz = R.Z + a.z, d = Math.hypot(wx - P.x, wz - P.z); const s = toScr(wx, R.Y + 2.4, wz);
+      (R.acts || []).forEach(a => { if (!a.m) return; const wx = a.x, wz = R.Z + a.z, d = Math.hypot(wx - P.x, wz - P.z); const s = toScr(wx, R.Y + (a.y || 0) + (a.H || 2) + 0.45, wz);
         if (s && s[0] > 0 && s[0] < VW() && s[1] > 40 && s[1] < VH()) { if (d > 22 || !los(wx, wz)) return; const t = a.m.nick || "", w = g.measureText(t).width + 10; g.globalAlpha = Math.max(0.35, 1 - d / 22); g.fillStyle = "rgba(14,10,8,.7)"; g.fillRect(s[0] - w / 2, s[1] - 15, w, 18); g.fillStyle = "#e8f5d8"; g.fillText(t, s[0], s[1] - 2); g.globalAlpha = 1; }
         else { const ang = Math.atan2(wx - P.x, -(wz - P.z)) - P.yaw, a2 = Math.atan2(Math.sin(ang), Math.cos(ang)), x = VW() / 2 + Math.sin(a2) * VW() * 0.42, y = VH() * 0.5 - Math.cos(a2) * VH() * 0.3;
           g.save(); g.globalAlpha = 0.8; g.translate(Math.max(18, Math.min(VW() - 18, x)), Math.max(70, Math.min(VH() - 140, y))); g.rotate(a2); g.fillStyle = "#e8f5d8"; g.beginPath(); g.moveTo(0, -10); g.lineTo(7, 4); g.lineTo(-7, 4); g.closePath(); g.fill(); g.rotate(-a2); g.font = "10px system-ui,sans-serif"; g.fillText(a.m.nick || "", 0, 16); g.restore(); } }); }
