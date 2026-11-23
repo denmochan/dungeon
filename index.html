@@ -6374,7 +6374,8 @@ setTimeout(() => { render(); cloudInit(); }, 0);   // ほかのファイルの�
 // タイトルから「はじめる／つづきから」を押したとき
 function enterGame(){
   title = false; modal = null;
-if (SAVED_AT && !tutOn() && !S.ended && !S.contractDone) { const r = awayRun9(S, Date.now() - SAVED_AT); if (r.days) { r.evos.forEach(e => queue.push({ k: "evo", ...e })); modal = () => awayModal(r); if (S.ended) modal = () => awayModal(r); save(); } }
+/* 留守のあいだに日は進めない（勝手に日が飛んだと感じた）。かわりに、留守の長さに応じて最大1日ぶんの💎だけ */
+if (SAVED_AT && !tutOn() && !S.ended && !S.contractDone) { try { const ms = Date.now() - SAVED_AT, v = typeof income15 === "function" ? income15(S) : 0; if (ms >= 1800000 && v > 0) { const g = Math.max(1, Math.round(v * Math.min(1, ms / 28800000))); S.dp += g; save(); setTimeout(() => toast(`🌙 留守のあいだに 💎+${g}`), 900); } } catch (e) {} }
 if (!modal) { if (S.ended) modal = rebirthModal; else if (S.contractDone) modal = contractModal; }
 SAVED_AT = 0; render();
 }
@@ -7383,7 +7384,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.301（11/23 14:11）";
+const VER20 = "No.302（11/23 14:15）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
