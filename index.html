@@ -1220,6 +1220,26 @@ body:has(.modal) .inv25btn,body:has(.ntfull19) .inv25btn{display:none}
 .bk27{background:#24304a !important;border-color:#6a8ad0 !important;color:#cfe0ff !important}
 .bkrow27{display:flex;gap:8px;align-items:center;width:100%;text-align:left;margin:4px 0;padding:8px 10px;height:auto;min-height:48px;line-height:1.4;white-space:normal}
 .bkrow27[disabled]{opacity:.45}
+/* proto28：夜明けの1枚 */
+.dw28{width:100%;max-width:360px;margin:6px 0 12px;border:1px solid #6b5230;border-radius:12px;background:linear-gradient(#2a1d10,#1a120b);padding:8px 10px 10px;box-shadow:0 0 18px #e8b84a33;animation:dw28in .6s ease-out both}
+@keyframes dw28in{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
+.dh28{font-weight:700;color:#f1c76a;text-align:center;letter-spacing:.1em;margin-bottom:6px}
+.dr28{display:flex;align-items:center;gap:10px;padding:6px 4px;border-top:1px solid #3a2a1a;position:relative;animation:dw28in .5s ease-out both}
+.dr28:nth-child(3){animation-delay:.25s}.dr28:nth-child(4){animation-delay:.5s}.dr28:nth-child(5){animation-delay:.75s}.dr28:nth-child(n+6){animation-delay:1s}
+.dr28>img,.dr28>.ic28{flex:0 0 52px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;font-size:30px;border-radius:10px;background:radial-gradient(circle,#ffffff14,transparent 70%)}
+.dr28.ch>img,.dr28.ch>.ic28{background:radial-gradient(circle,var(--cc) -40%,transparent 70%)}
+.dr28.ch.t2>img,.dr28.ch.t3>img,.dr28.ch.t2>.ic28,.dr28.ch.t3>.ic28{animation:dr28glow 1.6s ease-in-out infinite}
+@keyframes dr28glow{50%{filter:drop-shadow(0 0 8px var(--cc)) brightness(1.15)}}
+.ic28.kk{color:#c7a6ff;text-shadow:0 0 10px #a77bff}
+.dr28 .tx{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.35;text-align:left}
+.dr28 .tx small{font-size:12px;opacity:.7}.dr28 .tx b{font-size:14px}.dr28 .tx i{font-style:normal;font-size:12px;opacity:.8}
+.new28{position:absolute;right:4px;top:4px;font-size:12px;font-weight:700;color:#ffe27a;text-shadow:0 0 6px #f90}
+.db28{display:flex;gap:8px;margin-top:8px}.d28b{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 6px;border-radius:10px;border:1px solid #8a6a3a;background:#3a2814;color:#f6e3c0;font-weight:700}
+.d28b small{font-weight:400;font-size:12px;opacity:.75}.d28b.mem{border-color:#8f6fd0;background:#2a1f40}
+/* 歩く画面の管理ボタン */
+#fp26 .f26nav{display:flex;gap:6px}#fp26 .f26nav button{padding:7px 9px;font-size:12px}
+#fp26 .f26nav button.day{background:#5a3a18;border-color:#c08a3a}#fp26 .f26nav button.raid{background:#6a1e18;border-color:#e2614f}
+.fpret28{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 74px);z-index:70;padding:9px 16px;border-radius:999px;border:1px solid #c08a3a;background:#3a2814ee;color:#f6e3c0;font-weight:700;font-size:14px;box-shadow:0 4px 14px #0008}
 </style>
 </head>
 <body>
@@ -7405,7 +7425,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.330（11/24 03:24）";
+const VER20 = "No.331（11/24 07:59）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -13586,11 +13606,101 @@ document.addEventListener("click", ev => { const b = ev.target.closest && ev.tar
 
 monsModal = (prev => function () { const h = prev(); if (!(bkList27().length > 0)) return h; return h.replace('<div class="pk">', `<div class="pk"><button class="bk27" data-a="bookpick27">📜 スキルの書 ${S.bk27.length}冊</button>`); })(monsModal);
 /* 手に入れた直後：画面が落ち着いたら（ほかの表示が閉じたら）書の一覧を出す */
-setInterval(() => { try { if (S && S.bookNew27 && !(typeof title !== "undefined" && title) && bkList27().length > 0 && !modal && !N && !(typeof stage !== "undefined" && stage) && !document.querySelector(".kk25ov,#fp26"))   /* タイトルの上には出さない（つづきからが押せなくなった） */ { S.bookNew27 = 0; modal = () => bookListModal27(); render(); } } catch (e) {} }, 700);
+setInterval(() => { try { if (S && S.bookNew27 && !(typeof title !== "undefined" && title) && bkList27().length > 0 && !modal && !N && !(typeof stage !== "undefined" && stage) && !document.querySelector(".kk25ov,#fp26,.stage"))   /* タイトルの上には出さない（つづきからが押せなくなった） */ { S.bookNew27 = 0; modal = () => bookListModal27(); render(); } } catch (e) {} }, 700);
 
 /* 最初の宝箱はスキルの書にする（13日遊んでも書に出会えなかった） */
 { const _rc = rollChest19; rollChest19 = function (S2) { const c = _rc.apply(this, arguments); try { if (S2 && !S2.bkFirst27 && !S2.sim23) { c.kind = "skill"; c.val = 1; } } catch (e) {} return c; }; }
 { const _oc2 = openChest19; openChest19 = function (S2, c) { try { if (c && c.kind === "skill" && S2) S2.bkFirst27 = 1; } catch (e) {} return _oc2.apply(this, arguments); }; }
+
+// ================= proto28：夜明けを1枚に・歩く画面から管理 =================
+// ---------- 1) 襲撃の朝：結果・宝箱・進化・かけら・記憶・書を、結果の1枚にまとめる ----------
+// 前は「結果→宝箱（開ける）→中身→かけら→記憶→進化→書」と最大6〜7回タップ。いまは結果の1枚で全部見えて「つづける」1回
+let DAWN28 = 0, DBAN28 = 0; const DCH28 = [];
+const CHN28 = ["銅の宝箱", "銀の宝箱", "金の宝箱", "虹の宝箱"];
+{ const _oc = openChest19; openChest19 = function (S2, c) { const o = _oc.apply(this, arguments); try { if (DAWN28 && o) DCH28.push({ c, o }); } catch (e) {} return o; }; }
+/* 宝箱の中身は結果の1枚に出すので、あとから出る宝箱の見出しは出さない */
+{ const _b = banner19; banner19 = function (text, cls) { if (DBAN28 > 0 && cls === "mis" && /宝箱/.test(String(text))) { DBAN28--; return; } return _b.apply(this, arguments); }; }
+function dawnFold28() {
+  if (!stage || stage.k !== "result" || S.ended) { DCH28.length = 0; return; }
+  const D = { ch: DCH28.splice(0), evo: [], kk: [], mem: [], book: 0 };
+  DBAN28 = D.ch.length;
+  // 卵の宝箱（ふつうは「タップで開ける」画面）も、ここで開けておく
+  const eggs = queue.filter(q => q.k === "chest" && !q.keep23); queue = queue.filter(q => !(q.k === "chest" && !q.keep23));
+  eggs.forEach(q => { const o = openChest19(S, q.c); (o.evos || []).forEach(e => queue.push({ k: "evo", ...e })); D.ch.push({ c: q.c, o }); });
+  D.evo = queue.filter(q => q.k === "evo"); queue = queue.filter(q => q.k !== "evo");
+  try { const K = kk25(S); if (K.pro) { D.kk = K.q.splice(0); const to = Math.min(MEM25.length, Math.floor(kkN25(S) / 4)); for (let i = K.seen; i < to; i++) D.mem.push(i); } } catch (e) {}
+  D.book = D.ch.some(x => x.c && x.c.kind === "skill") || (S.bookNew27 && bkList27().length) ? 1 : 0;
+  if (D.book) delete S.bookNew27;   /* 書の一覧は勝手に出さない（この1枚のボタンから） */
+  if (!D.ch.length && !D.evo.length && !D.kk.length && !D.mem.length) return;
+  stage.d28 = D; save(); render();
+  const big = D.ch.some(x => (x.c.tier || 0) >= 2) || D.evo.length || D.kk.length;
+  if (big) setTimeout(() => { try { if (stage && stage.d28 === D) { sfx16("hatch"); setTimeout(() => sfx16("win"), 250); } } catch (e) {} }, 700);
+}
+{ const _er = endRaid; endRaid = function () {
+  if (N && N.scout) return _er.apply(this, arguments);
+  DAWN28 = 1; DCH28.length = 0; let r;
+  try { r = _er.apply(this, arguments); } finally { DAWN28 = 0; }
+  try { dawnFold28(); } catch (e) { console.error(e); }
+  return r; }; }
+function dawnHtml28(D) {
+  const rows = [];
+  D.ch.forEach(({ c, o }) => { const t = c.tier || 0, C = CHEST19[t] || {};
+    const tt = String(o.text || "🎁"), sp1 = tt.indexOf(" "), ic = o.sp ? img(o.sp, 0, "sp", "width:52px;height:52px") : `<span class="ic28">${sp1 > 0 ? tt.slice(0, sp1) : "🎁"}</span>`, lab = !o.sp && sp1 > 0 ? tt.slice(sp1 + 1) : tt;
+    rows.push(`<div class="dr28 ch t${t}" style="--cc:${C.col || "#c9a"}">${ic}<div class="tx"><small>${CHN28[t] || "宝箱"}</small><b>${lab}</b><i>${o.sub || ""}</i></div>${o.isNew ? '<span class="new28">NEW!</span>' : ""}</div>`); });
+  D.evo.forEach(e => { const m = e.m; if (!m) return; let f; try { f = formOf(m); } catch (x) { f = [m.sp]; }
+    rows.push(`<div class="dr28 ev">${simg23(m, m.evos, "sp", "width:52px;height:52px")}<div class="tx"><small>進化</small><b>${esc(m.nick)}：${esc(e.before.name)} → <span class="gold">${esc(f[0])}</span></b><i>体力 ${e.before.hp}→${monHp5(m)}　攻撃 ${e.before.atk}→${monAtk5(m)}</i></div></div>`); });
+  if (D.kk.length) { let n0 = 0; try { n0 = kkN25(S) - D.kk.length; } catch (e) {}
+    D.kk.forEach((id, j) => { const k = KK25.find(o => o.id === id); if (!k) return;
+      rows.push(`<div class="dr28 kk"><span class="ic28 kk">✦</span><div class="tx"><small>魔王のかけら　${n0 + j + 1}/${KKMAX25}</small><b>${k.nm}</b><i>${kkEff25(k)}</i></div></div>`); }); }
+  let btn = "";
+  if (D.mem.length) btn += `<button class="d28b mem" data-a="d28mem">📜 記憶がもどった<small>読む</small></button>`;
+  if (D.book) btn += `<button class="d28b" data-a="d28book">📜 書を読ませる<small>あとで育成からも</small></button>`;
+  return `<div class="dw28"><div class="dh28">☀ 朝の収穫</div>${rows.join("")}${btn ? `<div class="db28">${btn}</div>` : ""}</div>`;
+}
+/* 見落とさないよう、MVPのすぐ下（「次の一手」より上）に出す */
+resultStage15 = (prev => function (r) { let h = prev(r); try { if (r.d28) { const x = dawnHtml28(r.d28), at = ['<div class="tip23">', '<div class="dmg23">', '<div class="rs-grid">', '<button class="main big" data-a="stagenext"'].map(k => h.indexOf(k)).find(i => i > 0); h = at > 0 ? h.slice(0, at) + x + h.slice(at) : h + x; } } catch (e) { console.error(e); } return h; })(resultStage15);
+/* 閉じたら：記憶は読んだことに（タイトルの「記憶とかけら」でいつでも読める）、書の案内は出さない */
+function dawnDone28() { try { const D = stage && stage.d28; if (!D) return; const K = kk25(S); if (D.mem.length) K.seen = Math.max(K.seen, D.mem[D.mem.length - 1] + 1); delete S.bookNew27; if (modal && /bookListModal27\(\)/.test(String(modal))) modal = null; stage.d28 = null; save(); } catch (e) {} }
+function dawnMem28(list) { const ov = document.createElement("div"); ov.className = "kk25ov"; document.body.appendChild(ov); let i = 0, until = 0;
+  const show = () => { if (i >= list.length) { ov.remove(); kkBlock25(); return; } ov.innerHTML = `<div class="kkmemwrap"><div class="kkmt">記憶がもどる</div>${kkMemHtml25(list[i])}<div class="kktap">タップで${i + 1 < list.length ? "次へ" : "閉じる"}</div></div>`; until = Date.now() + 1200; };
+  ov.onclick = () => { if (Date.now() < until) return; i++; show(); }; show(); }
+document.addEventListener("click", ev => {
+  const b = ev.target.closest && ev.target.closest("[data-a]"); if (!b || !stage || stage.k !== "result" || !stage.d28) return;
+  const a = b.dataset.a;
+  if (a === "d28mem") { ev.stopImmediatePropagation(); dawnMem28(stage.d28.mem.slice()); return; }
+  if (a === "d28book") { ev.stopImmediatePropagation(); dawnDone28(); nextStage(); if (!stage) { modal = () => bookListModal27(); render(); } else S.bookNew27 = 1; return; }
+  if (a === "stagenext") dawnDone28();
+}, true);
+// かけらの画面：結果の1枚が出ているあいだ（と、閉じた直後）は出さない
+{ const _k = kkShow25; kkShow25 = function () { if (typeof stage !== "undefined" && stage && stage.d28) return; return _k.apply(this, arguments); }; }
+
+// ---------- 2) 歩く画面から、そのまま管理（部屋・育成・店・次の日へ） ----------
+let FPRET28 = null;
+function fpAct28(a) { const b = document.createElement("button"); b.dataset.a = a; b.style.display = "none"; ($("app") || document.body).appendChild(b); b.click(); b.remove(); }
+{ const _fo = fpOpen26; fpOpen26 = function () {
+  const had = !!document.getElementById("fp26"); const r = _fo.apply(this, arguments);
+  try { const w = document.getElementById("fp26"); if (had || !w) return r; FPRET28 = null; document.querySelectorAll(".fpret28").forEach(x => x.remove());
+    const top = w.querySelector(".f26top"), x = top && top.querySelector('[data-f="x"]'); if (!top || !x) return r;
+    const nb = document.querySelector('.nav button.main[data-a="nextday"]'), dl = nb ? nb.textContent.replace("🎁", "").trim() : "☀️ 次の日へ";
+    const g = document.createElement("span"); g.className = "f26nav";
+    g.innerHTML = `<button data-n="room">🏠 部屋</button><button data-n="g20">🧭 育成</button><button data-n="shop">🛒 店</button><button data-n="nextday" class="day${/迎え撃つ/.test(dl) ? " raid" : ""}">${esc(dl)}</button>`;
+    top.insertBefore(g, x);
+    g.addEventListener("click", ev => { const t = ev.target.closest("button[data-n]"); if (!t) return; ev.stopPropagation();
+      const n = t.dataset.n, sel0 = roomSel; let ri = null; try { const m = /^r(\d+)/.exec((window.__fp26 && window.__fp26.P && window.__fp26.P.seg) || ""); if (m) ri = +m[1]; } catch (e) {}
+      x.click();   // 歩く画面を閉じる（いた場所は覚えている）
+      FPRET28 = n === "nextday" ? null : { sel: sel0 };
+      if (n === "room") { if (ri != null && S.path[ri] && S.path[ri].kind === "den") { page20 = null; roomSel = roomOpen = ri; } else { page20 = "grow"; roomSel = roomOpen = null; } modal = null; render(); }
+      else if (n === "g20") { page20 = "grow"; roomSel = roomOpen = null; modal = null; render(); }
+      else fpAct28(n);
+    });
+  } catch (e) { console.error(e); }
+  return r; }; }
+{ const _r = render; render = function () { _r.apply(this, arguments); try {
+  const show = FPRET28 && S && !title && !N && !stage && !document.getElementById("fp26"); let b = document.querySelector(".fpret28");
+  if (!show) { if (b) b.remove(); if (N) FPRET28 = null; return; }
+  if (!b) { b = document.createElement("button"); b.className = "fpret28"; b.innerHTML = "🚶 歩く画面にもどる"; document.body.appendChild(b);
+    b.addEventListener("click", ev => { ev.stopPropagation(); const s = FPRET28 || { sel: null }; FPRET28 = null; b.remove(); page20 = null; roomSel = roomOpen = s.sel; modal = null; addPick = null; render(); fpOpen26(); }); }
+} catch (e) {} }; }
 
 </script>
 </body>
