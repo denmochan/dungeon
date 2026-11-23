@@ -7400,7 +7400,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.312（11/23 19:08）";
+const VER20 = "No.313（11/23 19:20）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -13016,7 +13016,7 @@ function fpOpen26(){
   const loc = e => ROT() ? [e.clientY, innerWidth - e.clientX] : [e.clientX, e.clientY];
   const fit = () => { const r = ROT(); wrap.classList.toggle("rot", r); if (r) { wrap.style.width = innerHeight + "px"; wrap.style.height = innerWidth + "px"; } else { wrap.style.width = wrap.style.height = ""; } };
   fit(); addEventListener("resize", fit);
-  if (ROT()) { const tip = document.createElement("div"); tip.className = "f26rotip"; tip.textContent = "📱 スマホを横にして遊ぶ"; wrap.appendChild(tip); setTimeout(() => tip.remove(), 2600); }
+  if (ROT()) { const tip = document.createElement("div"); tip.className = "f26rotip"; tip.textContent = "📱 スマホを横にして遊ぶ"; wrap.appendChild(tip); setTimeout(() => tip.remove(), 1600); }
   const cv = wrap.querySelector("canvas"), msg = wrap.querySelector(".f26msg"), fpsEl = wrap.querySelector(".f26fps"), menu = wrap.querySelector(".f26menu"), whereB = wrap.querySelector(".f26where b"), whereS = wrap.querySelector(".f26where small");
   const gl = cv.getContext("webgl", { antialias: true, alpha: false }); let alive = true;
   const close = () => { alive = false; removeEventListener("resize", fit); wrap.remove(); try { const x = gl.getExtension("WEBGL_lose_context"); x && x.loseContext(); } catch (e) {} };
@@ -13029,7 +13029,7 @@ function fpOpen26(){
     void main(){vl=ap*PSC*SC;if(vl.y>3.6)vl.y=3.6+(vl.y-3.6)*YS;vec3 w=vl+OFF;gl_Position=VP*vec4(w,1.0);vc=clamp(CM*ac+CO,0.0,1.0);vw=w;vd=distance(w,EYE);}`,
     `precision mediump float;varying vec3 vc;varying vec3 vw;varying vec3 vl;varying float vd;uniform vec4 DR;uniform vec3 LT[6];uniform float LF[6];
     float h(vec3 p){return fract(sin(dot(p,vec3(12.9898,78.233,37.719)))*43758.5453);}
-    void main(){if(DR.z>0.5&&abs(vl.x)<2.3&&vl.y>0.12&&vl.y<2.2+0.62*(1.0-vl.x*vl.x/5.3)){if(DR.y>0.5&&vl.z<DR.w)discard;if(DR.x>0.5&&vl.z>7.0&&max(vc.r,max(vc.g,vc.b))<0.1)discard;}
+    void main(){if(DR.z>0.5){if(DR.y>0.5&&abs(vl.x)<2.3&&vl.y>0.12&&vl.y<2.2+0.62*(1.0-vl.x*vl.x/5.3)&&vl.z<DR.w)discard;if(DR.x>0.5&&vl.z>7.0&&vl.z<11.5&&abs(vl.x)<2.6&&vl.y>-0.6&&vl.y<3.5&&max(vc.r,max(vc.g,vc.b))<0.1)discard;}
     float g=0.9+0.2*h(floor(vw*13.0));vec3 c=vc*g*(0.55+0.8*exp(-vd/7.0));c+=vec3(0.05,0.03,0.012)*exp(-vd/4.0);
     vec3 L=vec3(0.0);for(int i=0;i<6;i++){vec3 q=vw-LT[i];L+=vec3(1.0,0.56,0.24)*LF[i]/(1.0+0.22*dot(q,q));}c+=vc*L*1.05+L*0.02;c=1.0-exp(-c*1.35);
     c=mix(c,vec3(0.012,0.01,0.01),smoothstep(18.0,48.0,vd));gl_FragColor=vec4(c,1.0);}`);   /* 部屋の出入口の壁をくりぬく（門の黒い板も）／たいまつの明かり */
@@ -13044,13 +13044,15 @@ function fpOpen26(){
     const hs = (x, y) => { const s = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453; return s - Math.floor(s); };
     const steps = Math.max(2, Math.round((z0 - z1) / 0.5)), nst = Math.abs(y1 - y0) / 0.38;
     for (let k = 0; k <= steps; k++) { const t = k / steps, z = z0 + (z1 - z0) * t, tq = nst ? Math.round(t * nst) / nst : t, yb = y0 + (y1 - y0) * tq;
-      const fq = d => d < 1.8 ? (1 - d / 1.8) ** 2 : 0, fr = Math.max(fq(z0 - z), fq(z - z1));   /* 口はラッパ形に広げて岩肌になじませる（筒の切り口が見えていた） */
+      const fq = d => d < 1.8 ? (1 - d / 1.8) ** 2 : 0, fr = fq(z0 - z);   /* 手前の部屋の門の側は門の柱が口の縁になるので広げない */   /* 口はラッパ形に広げて岩肌になじませる（筒の切り口が見えていた） */
       ring.forEach(([x, y], j) => { const fl = j <= 4, jx = fl ? 0 : (hs(k, j) - 0.5) * 0.35, jy = fl ? 0 : (hs(j, k) - 0.5) * 0.3; P.push((x + jx * Math.sign(x || 1)) * (1 + 0.42 * fr), yb + (y + jy) * (1 + 0.3 * fr), z);
         const tor = Math.abs(((z - z0) % 8 + 8) % 8 - 4) < 1.6 ? 1 : 0, wv = 0.7 + 0.5 * hs(k * 3, j * 7), stp = nst && fl ? (Math.round(t * nst) % 2 ? 0.85 : 1) : 1;
         const base = fl ? [80, 64, 50] : [58, 48, 42]; C.push(...base.map((v, q) => Math.min(255, (v * wv * stp + tor * [40, 22, 8][q] * (fl ? 0.6 : 1)) * (1 - 0.5 * fr)))); }); }
     for (let k = 0; k < steps; k++) for (let j = 0; j < R; j++) { const a0 = k * R + j, a1 = k * R + (j + 1) % R, b0 = a0 + R, b1 = a1 + R; I.push(a0, b0, a1, a1, b0, b1); }
     /* 通路の口のまわりの岩の壁（穴のまわりの黒いすき間をふさぐ）。でこぼこの岩肌で、まん中に通路の形の穴 */
     const inHole = (x, y) => { const ax = Math.abs(x); return ax < 2.55 && y < (ax < 2.4 ? 2.4 + 0.62 * (1 - (ax / 2.4) ** 2) : 2.3); };
+    /* 門の下の黒い板を消したあとに床を敷く（床に黒い穴が見えていた） */ { const b0 = P.length / 3, zA = b.Z + 7.6; for (let k = 0; k <= 4; k++) for (let j = 0; j <= 4; j++) { const x = -2.7 + j * 1.35, z = zA + (z1 - zA) * k / 4; P.push(x, y1 + 0.015, z); const wv = 0.7 + 0.25 * hs(j * 3 + 1, k * 5); C.push(...[62, 47, 35].map(v => v * wv)); }
+      for (let k = 0; k < 4; k++) for (let j = 0; j < 4; j++) { const a0 = b0 + k * 5 + j; I.push(a0, a0 + 5, a0 + 1, a0 + 1, a0 + 5, a0 + 6); } }
     /* （通路の口の岩の輪は、近くで見ると大きな板に見えたのでやめた。穴を通路の内側より少し小さくして、すき間ができないようにした） */
     const pb = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, pb); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(P), gl.STATIC_DRAW);
     const cb = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, cb); gl.bufferData(gl.ARRAY_BUFFER, new Uint8Array(C), gl.STATIC_DRAW);
@@ -13210,7 +13212,7 @@ function fpOpen26(){
     // 名前の札（近くの子）。画面の外にいる子は、端に矢印
     { const lc = wrap.querySelector(".f26lab"), dp = Math.min(2, window.devicePixelRatio || 1); if (lc.width !== Math.round(VW() * dp)) { lc.width = Math.round(VW() * dp); lc.height = Math.round(VH() * dp); } const g = lc.getContext("2d"); g.setTransform(dp, 0, 0, dp, 0, 0); g.clearRect(0, 0, VW(), VH()); g.textAlign = "center"; g.font = "bold 12px system-ui,sans-serif";
       const R = rooms[curRoom];
-      [[0, fpBZ26(R.kind) - 2.5, curRoom < n - 1 ? "▼ 次の部屋へ" : ""], [0, 14.5, curRoom > 0 ? "▲ 前の部屋へ" : ""]].forEach(([ex, ez, t]) => { if (!t) return; const pz = P.z - R.Z; if (t[0] === "▼" ? pz < ez + 1 : pz > ez - 1) return;   /* 通り過ぎた札は出さない（通路でふり返ると2枚重なった） */ const s = toScr(ex, R.Y + 1.4, R.Z + ez); if (s && s[0] > 0 && s[0] < VW() && s[1] > 40 && s[1] < VH()) { g.fillStyle = "rgba(255,200,110,.85)"; g.font = "bold 13px system-ui,sans-serif"; g.fillText(t, s[0], s[1]); } });   /* 出口の場所 */
+      [[0, fpBZ26(R.kind) - 2.5, curRoom < n - 1 ? "▼ 次の部屋へ" : ""], [0, 13, curRoom > 0 ? "▲ 前の部屋へ" : ""]].forEach(([ex, ez, t]) => { if (!t) return; const pz = P.z - R.Z; if (t[0] === "▼" ? pz < ez + 1 : pz > ez - 1) return;   /* 通り過ぎた札は出さない（通路でふり返ると2枚重なった） */ const s = toScr(ex, R.Y + 1.4, R.Z + ez); if (s && s[0] > 0 && s[0] < VW() && s[1] > 40 && s[1] < VH()) { g.fillStyle = "rgba(255,200,110,.85)"; g.font = "bold 13px system-ui,sans-serif"; g.fillText(t, s[0], s[1]); } });   /* 出口の場所 */
       /* 仕事の手ごたえ：つるはしが当たると石のかけらと光、打ちこむと火花、寝ている子は Zz */
       (R.acts || []).forEach(a => { const wx = a.x, wz = R.Z + a.z, d = Math.hypot(wx - P.x, wz - P.z); if (d > 18 || !los(wx, wz)) return; const u = Math.max(0.7, Math.min(2.2, 7 / Math.max(2, d))), T = now / 1000 + a.ph;
         if (a.mode === "sleep" && !a.walking) { const s = toScr(wx, R.Y + (a.y || 0) + (a.H || 1.8) * 0.72, wz); if (!s) return; g.save(); g.fillStyle = "#d8e4ff"; for (let j = 0; j < 3; j++) { const q = (T * 0.35 + j / 3) % 1; g.globalAlpha = Math.sin(q * Math.PI) * 0.85; g.font = `bold ${Math.round((9 + 7 * q) * u)}px system-ui`; g.fillText(j % 2 ? "z" : "Z", s[0] + (6 + q * 16) * u, s[1] - q * 26 * u); } g.restore(); return; }
