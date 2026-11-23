@@ -1218,6 +1218,8 @@ body:has(.modal) .inv25btn,body:has(.ntfull19) .inv25btn{display:none}
 .ghb27{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 8px}
 .ghb27 button{padding:6px 12px;font-size:13px}
 .bk27{background:#24304a !important;border-color:#6a8ad0 !important;color:#cfe0ff !important}
+.bkrow27{display:flex;gap:8px;align-items:center;width:100%;text-align:left;margin:4px 0;padding:8px 10px;height:auto;min-height:48px;line-height:1.4;white-space:normal}
+.bkrow27[disabled]{opacity:.45}
 </style>
 </head>
 <body>
@@ -7403,7 +7405,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.322（11/23 22:28）";
+const VER20 = "No.323（11/23 23:00）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -13426,28 +13428,43 @@ function fromBed27(S2) { const back = []; S2.mons.filter(m => m.back27 != null &
 autoAll19 = (prev => function (S2) { const R = restRooms27(S2); if (!R.length) return prev.apply(this, arguments);
   const tmp = []; S2.mons.filter(m => (m.rest || 0) > 0 && !m.job).sort((a, b) => (b.rest || 0) - (a.rest || 0) || b.lv - a.lv).forEach(m => { const i = R.includes(m.home) ? m.home : R.find(i => freeBeds27(S2, i) > 0); if (i == null) return; if (m.home !== i && m.back27 == null && m.home != null) m.back27 = m.home; m.home = i; m.job = "bed21"; tmp.push(m); });
   try { return prev.apply(this, arguments); } finally { tmp.forEach(m => { if (m.job === "bed21") m.job = null; }); } })(autoAll19);
-// ================= スキルの書：持ち物にして、覚える子を自分で選ぶ（全員4つ埋まっていると💎300に化けていた） =================
+// ================= スキルの書：書ごとに中身が決まっている（「📜 鉄壁の書」）。だれに読ませるかを選ぶ =================
+// 前は「読む子によって覚えるものが変わる」作りで、初めての人にはわけがわからなかった
+const bkList27 = S2 => { S2 = S2 || S; if (!S2.bk27) { S2.bk27 = []; for (let i = 0; i < (S2.books27 || 0); i++) { const k = pickSkill11("", {}); if (k) S2.bk27.push(k); } } S2.books27 = S2.bk27.length; return S2.bk27; };
 { const _oc = openChest19; openChest19 = function (S2, c) { if (!c || c.kind !== "skill") return _oc.apply(this, arguments);
-  S2.books27 = (S2.books27 || 0) + 1; S2.bookNew27 = 1; return { text: "📜 スキルの書", sub: "このあと覚えさせる子を選べる（あとでも、育成・魔物の一覧の「📜 スキルの書」から使える）", sp: null, evos: [] }; }; }
-const bookSk27 = m => { S.bookPick27 = S.bookPick27 || {}; let k = S.bookPick27[m.id]; if (k && SK11[k] && !(m.sk || {})[k]) return k;
-  k = pickSkill11(MON[m.sp].fam, m.sk || {}) || Object.keys(SK11).find(x => !(m.sk || {})[x]); if (k) { S.bookPick27[m.id] = k; save(); } return k; };
-function bookModal27(id) { const m = S.mons.find(o => o.id === id); if (!m) return `<button data-a="close">閉じる</button>`; const k = bookSk27(m); if (!k) return `<h2>📜 スキルの書</h2><div class="hint">この子が覚えられるスキルはもうない</div><button data-a="close">閉じる</button>`;
-  const L = skStar11(m), have = Object.keys(m.sk || {}), full = have.length >= 4;
-  let h = `<h2>📜 スキルの書（のこり${S.books27 || 0}冊）</h2><div class="box">${esc(m.nick)} が覚えるのは：<br>${skChip10(k, L)}<div class="hint">${skText11(k, L)}</div></div>`;
-  if (!full) return h + `<div class="mixbtn18"><button data-a="mcard27" data-v="${m.id}">やめる</button><button class="main" data-a="book27go" data-v="${m.id}">📜 覚える</button></div>`;
-  h += `<div class="lab2">スキルは4つまで。かわりに忘れるのは？</div>` + have.map(x => `<button class="row" style="width:100%;text-align:left;margin:4px 0" data-a="book27go" data-v="${m.id}:${x}">✖ ${skChip10(x, L)}<span class="hint">　${skText11(x, L)}</span></button>`).join("");
-  return h + `<button data-a="mcard27" data-v="${m.id}" style="width:100%;margin-top:8px">やめる（書は取っておく）</button>`; }
-monCard = (prev => function (id) { let h = prev(id); try { const m = S.mons.find(o => o.id === id); if (!m || N || !(S.books27 > 0)) return h;
-  const line = `<div class="tok27"><button data-a="book27" data-v="${m.id}" style="background:#24304a;border-color:#6a8ad0;color:#cfe0ff">📜 スキルの書を使う（${S.books27}冊）</button></div>`;
+  const k = pickSkill11("", {}) || Object.keys(SK11)[0]; bkList27(S2).push(k); S2.books27 = S2.bk27.length; S2.bookNew27 = 1;
+  return { text: `📜 ${SK11[k].name}の書`, sub: `読ませた子が「${SK11[k].name}」を覚える。このあと、だれに読ませるか選べる`, sp: null, evos: [] }; }; }
+const bkStar27 = m => { try { return skStar11(m); } catch (e) { return 1; } };
+/* 書の一覧（forId があれば、その子に読ませる書を選ぶ） */
+function bookListModal27(forId) { const B = bkList27(), m = forId != null ? S.mons.find(o => o.id === forId) : null, cnt = {}; B.forEach(k => cnt[k] = (cnt[k] || 0) + 1);
+  let h = `<h2>📜 スキルの書（${B.length}冊）</h2><div class="hint">書ごとに覚えるスキルが決まっている。${m ? `${esc(m.nick)} に読ませる書を選ぶ` : "書を選んで、読ませる子を決める"}</div>`;
+  h += Object.keys(cnt).map(k => { const has = m && (m.sk || {})[k]; return `<button class="bkrow27" ${has ? "disabled" : ""} data-a="${m ? "bk27who" : "bk27sel"}" data-v="${m ? k + "|" + m.id : k}">${skChip10(k, m ? bkStar27(m) : 1)} ×${cnt[k]}<br><span class="hint">${skText11(k, m ? bkStar27(m) : 1)}${has ? "（もう持っている）" : ""}</span></button>`; }).join("") || `<div class="box">書を持っていない</div>`;
+  return h + `<button data-a="${m ? "mcard27" : "close"}" ${m ? `data-v="${m.id}"` : ""} style="width:100%;margin-top:8px">${m ? "もどる" : "あとで（書は取っておく）"}</button>`; }
+/* この書をだれに読ませる？ */
+function bookWhoModal27(k) { const L = S.mons.slice().sort((a, b) => b.lv - a.lv);
+  return `<h2>📜 ${SK11[k].name}の書</h2><div class="box">${skChip10(k, 1)}<div class="hint">${skText11(k, 1)}</div></div><div class="lab2">だれに読ませる？</div>` +
+    L.map(m => { const has = (m.sk || {})[k], full = Object.keys(m.sk || {}).length >= 4; return `<button class="bkrow27" ${has ? "disabled" : ""} data-a="bk27who" data-v="${k}|${m.id}">${simg23(m, m.evos, "sp", "width:34px !important;height:34px !important;flex:0 0 auto")}<span style="flex:1"><b>${esc(m.nick)}</b> <small>Lv${m.lv}　${Object.keys(m.sk || {}).map(x => SK11[x] ? SK11[x].name : "").join("・")}</small><br><small>${has ? "もう持っている" : full ? "スキルが4つ：1つ忘れて覚える" : `覚えられる（あと${4 - Object.keys(m.sk || {}).length}つ）`}</small></span></button>`; }).join("") +
+    `<button data-a="bookpick27" style="width:100%;margin-top:8px">◀ 書の一覧へ</button>`; }
+/* 読ませる前の確認（4つ埋まっていたら、忘れるものを選ぶ） */
+function bookGoModal27(k, id) { const m = S.mons.find(o => o.id === id); if (!m) return `<button data-a="close">閉じる</button>`; const have = Object.keys(m.sk || {}), full = have.length >= 4, L = bkStar27(m);
+  let h = `<h2>📜 ${esc(m.nick)} に読ませる</h2><div class="box">覚える：${skChip10(k, L)}<div class="hint">${skText11(k, L)}</div></div>`;
+  if (!full) return h + `<div class="mixbtn18"><button data-a="bk27sel" data-v="${k}">やめる</button><button class="main" data-a="bk27go" data-v="${k}|${id}">📜 読ませる</button></div>`;
+  return h + `<div class="lab2">スキルは4つまで。かわりに忘れるのは？</div>` + have.map(x => `<button class="bkrow27" data-a="bk27go" data-v="${k}|${id}|${x}">✖ ${skChip10(x, L)}<span class="hint">　${skText11(x, L)}</span></button>`).join("") + `<button data-a="bk27sel" data-v="${k}" style="width:100%;margin-top:8px">やめる</button>`; }
+monCard = (prev => function (id) { let h = prev(id); try { const m = S.mons.find(o => o.id === id); if (!m || N || !(bkList27().length > 0)) return h;
+  const line = `<div class="tok27"><button data-a="bk27for" data-v="${m.id}" style="background:#24304a;border-color:#6a8ad0;color:#cfe0ff">📜 スキルの書を読ませる（${S.bk27.length}冊）</button></div>`;
   const i = h.indexOf('<div class="tok27"'); if (i >= 0) return h.slice(0, i) + line + h.slice(i); const j = h.indexOf('<div class="xp"'); if (j < 0) return h + line; const e = h.indexOf("</div>", j) + 6; return h.slice(0, e) + line + h.slice(e); } catch (e) { return h; } })(monCard);
-document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="book27"],[data-a="book27go"],[data-a="mcard27"]'); if (!b || !S) return; ev.stopImmediatePropagation(); ev.preventDefault();
-  const a = b.dataset.a, [id0, forget] = String(b.dataset.v).split(":"), id = +id0, m = S.mons.find(o => o.id === id); if (!m) return;
-  if (a === "mcard27") { modal = () => monCard(id); render(); return; }
-  if (a === "book27") { modal = () => bookModal27(id); render(); return; }
-  if (!(S.books27 > 0)) return; const k = bookSk27(m); if (!k) return; m.sk = m.sk || {};
+document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="bookpick27"],[data-a="bk27sel"],[data-a="bk27who"],[data-a="bk27go"],[data-a="bk27for"],[data-a="mcard27"]'); if (!b || !S) return; ev.stopImmediatePropagation(); ev.preventDefault();
+  const a = b.dataset.a, v = String(b.dataset.v || ""); S.bookNew27 = 0;
+  if (a === "bookpick27") { modal = () => bookListModal27(); render(); return; }
+  if (a === "mcard27") { modal = () => monCard(+v); render(); return; }
+  if (a === "bk27for") { modal = () => bookListModal27(+v); render(); return; }
+  if (a === "bk27sel") { modal = () => bookWhoModal27(v); render(); return; }
+  const [k, id0, forget] = v.split("|"), id = +id0, m = S.mons.find(o => o.id === id); if (!m || !SK11[k]) return;
+  if (a === "bk27who") { modal = () => bookGoModal27(k, id); render(); return; }
+  const B = bkList27(), bi = B.indexOf(k); if (bi < 0 || (m.sk || {})[k]) return; m.sk = m.sk || {};
   if (Object.keys(m.sk).length >= 4) { if (!forget || !m.sk[forget]) return; delete m.sk[forget]; }
-  m.sk[k] = 1; S.books27--; delete S.bookPick27[m.id]; try { dng23 = { key: "", v: null }; } catch (e) {}
-  save(); sfx16 && sfx16("lvup"); toast(`📜 ${m.nick} が「${SK11[k].name}」を覚えた${forget && SK11[forget] ? `（「${SK11[forget].name}」を忘れた）` : ""}`); modal = () => monCard(id); render(); }, true);
+  m.sk[k] = 1; B.splice(bi, 1); S.books27 = B.length; try { dng23 = { key: "", v: null }; } catch (e) {}
+  save(); try { sfx16("lvup"); } catch (e) {} toast(`📜 ${m.nick} が「${SK11[k].name}」を覚えた${forget && SK11[forget] ? `（「${SK11[forget].name}」を忘れた）` : ""}`); modal = B.length ? () => bookListModal27() : null; render(); }, true);
 // ================= おまかせ（試算で一番よい並びを探す） =================
 // 点数はすべて💎に換算して足す：
 //   稼ぎ＝次の襲撃までの日数 ×（1日に掘れる💎 ＋ 1日に上がるLv × そのLvを特訓で買う値段）
@@ -13529,15 +13546,9 @@ document.addEventListener("click", ev => { const b = ev.target.closest && ev.tar
 /* 「戻す」は仕事の希望・部屋の方針もまとめて戻す */
 { const _u = undo13; undo13 = function (S0) { if (window.__undo27) { window.__undo27(); window.__undo27 = null; return true; } return _u.apply(this, arguments); }; }
 
-/* スキルの書：だれに覚えさせるかを一覧で選ぶ（育成の画面・魔物の一覧・手に入れた直後から開く） */
-function bookPickModal27() { const L = S.mons.filter(m => m.home !== undefined).map(m => { const k = bookSk27(m); return { m, k }; }).filter(o => o.k).sort((a, b) => b.m.lv - a.m.lv);
-  return `<h2>📜 スキルの書（${S.books27 || 0}冊）</h2><div class="hint">覚えさせる子を選ぶ。覚えるスキルは子ごとに決まっている</div>` +
-    (L.length ? L.map(({ m, k }) => { const full = Object.keys(m.sk || {}).length >= 4; return `<button class="row" style="width:100%;text-align:left;margin:4px 0;display:flex;gap:8px;align-items:center" data-a="book27" data-v="${m.id}">${simg23(m, m.evos, "sp", "width:34px !important;height:34px !important;flex:0 0 auto")}<span style="flex:1"><b>${esc(m.nick)}</b> <small>Lv${m.lv}${full ? "・4つ埋まっている" : ""}</small><br>${skChip10(k, skStar11(m))}</span></button>`; }).join("") : `<div class="box">覚えられる子がいない</div>`) +
-    `<button data-a="close" style="width:100%;margin-top:8px">あとで（書は取っておく）</button>`; }
-document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="bookpick27"]'); if (!b || !S) return; ev.stopImmediatePropagation(); ev.preventDefault(); S.bookNew27 = 0; modal = bookPickModal27; render(); }, true);
-monsModal = (prev => function () { const h = prev(); if (!(S.books27 > 0)) return h; return h.replace('<div class="pk">', `<div class="pk"><button class="bk27" data-a="bookpick27">📜 スキルの書 ${S.books27}冊</button>`); })(monsModal);
-/* 手に入れた直後：画面が落ち着いたら（ほかの表示が閉じたら）選ぶ画面を出す */
-setInterval(() => { try { if (S && S.bookNew27 && S.books27 > 0 && !modal && !N && !(typeof stage !== "undefined" && stage) && !document.querySelector(".kk25ov,#fp26")) { S.bookNew27 = 0; modal = bookPickModal27; render(); } } catch (e) {} }, 700);
+monsModal = (prev => function () { const h = prev(); if (!(bkList27().length > 0)) return h; return h.replace('<div class="pk">', `<div class="pk"><button class="bk27" data-a="bookpick27">📜 スキルの書 ${S.bk27.length}冊</button>`); })(monsModal);
+/* 手に入れた直後：画面が落ち着いたら（ほかの表示が閉じたら）書の一覧を出す */
+setInterval(() => { try { if (S && S.bookNew27 && bkList27().length > 0 && !modal && !N && !(typeof stage !== "undefined" && stage) && !document.querySelector(".kk25ov,#fp26")) { S.bookNew27 = 0; modal = () => bookListModal27(); render(); } } catch (e) {} }, 700);
 
 </script>
 <script>// ================= 3Dの子を、今のコマアニメと同じ並び（17コマ）の絵に焼く（開発用・ページ内で実行） =================
