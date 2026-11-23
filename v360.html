@@ -1195,6 +1195,10 @@ body:has(.modal) .inv25btn,body:has(.ntfull19) .inv25btn{display:none}
 #fp26 .f26toast{position:absolute;left:50%;top:30%;transform:translateX(-50%);background:rgba(20,14,10,.9);border:1px solid #8a6a40;border-radius:999px;padding:8px 14px;font-size:13px}
 #fp26 .f26lab{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 #fp26 .f26talk{position:absolute;right:16px;bottom:calc(env(safe-area-inset-bottom,0px) + 60px);padding:12px 16px;font-size:14px;font-weight:700;background:#5a3a22;border-color:#c9a06a;border-radius:999px}
+/* 第6回のあと：吹き出しが「回して見る」をふさがない／実績の帯が「つづける」に隠れない */
+.d3card .o26go{z-index:40}
+.raidban .achpop{margin-bottom:40px!important}
+.dz27{margin-top:22px;border-top:1px dashed #5a4632;padding-top:8px;color:var(--dim)}.dz27 summary{font-size:12px;cursor:pointer;padding:6px 0}.dz27 button{display:block;width:100%;margin-top:6px}
 </style>
 </head>
 <body>
@@ -6081,7 +6085,7 @@ function lordModal(){
     <div class="box">📜 契約：${CONTRACT_LEN9}日のあいだダンジョンを守りきる。${CONTRACT_LEN9}日目の夜に最後の大襲撃が来る</div>
     <div class="hint">👻魂 ${M.souls}（タイトルの🔮主に刻むで使う）</div>
     <div class="box">しのいだ襲撃 <b class="gold">${S.raidsWon || 0}</b>回・転生${M.runs}回</div>
-    <button data-a="giveup" style="background:transparent;color:var(--dim)">今すぐ転生する（魂 +${soulsFor8(S)}）</button><button data-a="wipe" style="background:transparent;color:var(--red,#e66)">🗑 全部消して最初から</button>
+    <details class="dz27"><summary>⚠ やり直し（転生・全部消す）</summary><button data-a="giveup" style="background:transparent;color:var(--dim)">今すぐ転生する（魂 +${soulsFor8(S)}）</button><button data-a="wipe" style="background:transparent;color:var(--red,#e66)">🗑 全部消して最初から</button></details>
     <button data-a="close">閉じる</button>`;
 }
 function contractModal(){
@@ -7379,7 +7383,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.300（11/23 12:59）";
+const VER20 = "No.301（11/23 14:11）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -12724,6 +12728,7 @@ function kkMemHtml25(i, P) { const [t, b] = P || MEM25[i];
   return `<div class="kkmem"><div class="kkmh">${t}${P ? "" : `<b>かけら ${(i + 1) * 4}</b>`}</div>${b.split("|").map(p => `<p>${p.split("\n").map(l => `<span>${l}</span>`).join("")}</p>`).join("")}</div>`; }
 function kkShow25() {
   if (typeof S === "undefined" || !S || document.querySelector(".kk25ov")) return;
+  if (typeof title !== "undefined" && title) return;   /* タイトル画面の上には出さない（押そうとした操作が空振りした） */
   if ((typeof view !== "undefined" && view === "night") || document.querySelector(".inv25wrap") || (typeof stage !== "undefined" && stage && /result|raid/.test(stage.k || ""))) return;   // 戦いの結果を見てから出す   // 戦いの最中は出さない
   const K = kk25(S), needPro = !K.pro && typeof title !== "undefined" && !title; if (!needPro && !K.q.length && K.seen >= Math.min(MEM25.length, Math.floor(kkN25(S) / 4))) return;
   const ov = document.createElement("div"); ov.className = "kk25ov"; document.body.appendChild(ov);
@@ -13132,6 +13137,34 @@ function fpOpen26(){
 // 昼の画面に入口ボタン
 { const _cs = caveShell; caveShell = function (){ let h = _cs.apply(this, arguments); try { if (!N && caveFloor >= 0) h = h.replace('<div class="ctabs">', '<button class="d3t fp26go" data-a="fp26">👁 歩く</button><div class="ctabs">'); } catch (e) {} return h; }; }
 document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="fp26"]'); if (!b) return; ev.stopImmediatePropagation(); ev.preventDefault(); fpOpen26(); }, true);
+
+// ================= 第6回テストのあと：壊れの修正 =================
+// ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------
+// 勇者は同じ種（raidSeed23）で来るので、進んでいた手数ぶんを見せずに進めてから再開する
+{ const _sn = stepNight5; stepNight5 = function (S2, N2) {
+  const r = _sn.apply(this, arguments);
+  try { if (typeof N !== "undefined" && N2 === N && !N2.scout && !N2.ff27 && S2 === S && !S2.sim23) { N2.step27 = (N2.step27 || 0) + 1; S.raidStep27 = N2.step27; if (N2.step27 % 3 === 0) save(); } } catch (e) {}
+  return r; }; }
+{ const _er = endRaid; endRaid = function () { try { if (S) delete S.raidStep27; } catch (e) {} return _er.apply(this, arguments); }; }
+{ const _nd = nextDay; nextDay = function () { try { if (S && !N) delete S.raidStep27; } catch (e) {} return _nd.apply(this, arguments); }; }
+{ const _eg = enterGame; const want = (typeof S !== "undefined" && S && S.raidPending && S.raidStep27) || 0;
+  enterGame = function () { const r = _eg.apply(this, arguments);
+    try { if (want > 0 && N && !N.scout && !N.done && !N.step27) { N.ff27 = 1; let k = 0; while (k < want && !N.done) { stepNight5(S, N); k++; } N.ff27 = 0; N.step27 = k; S.raidStep27 = k; if (N.pops) N.pops.length = 0;
+      try { if (typeof B3 !== "undefined" && B3) { B3.pt = []; } } catch (e) {}
+      render(); setTimeout(() => toast("閉じたところから続ける"), 700); } } catch (e) { console.error(e); }
+    return r; }; }
+addEventListener("pagehide", () => { try { if (S && N && !N.scout && S.raidPending) save(); } catch (e) {} });
+document.addEventListener("visibilitychange", () => { try { if (document.hidden && S && N && !N.scout && S.raidPending) save(); } catch (e) {} });
+// ---------- 2) 案内（キキ）が光らせたボタンは、押せばそのまま進む（前は案内の幕にふさがれて反応しなかった） ----------
+document.addEventListener("click", ev => { try {
+  const ov = ev.target.closest && ev.target.closest(".tutov.block"); if (!ov || ev.target.closest(".tutb")) return;
+  const h = ov.querySelector(".tuth"); if (!h || h.style.display === "none") return;
+  const R = h.getBoundingClientRect(), x = ev.clientX, y = ev.clientY; if (x < R.left || x > R.right || y < R.top || y > R.bottom) return;
+  ev.stopPropagation(); ev.preventDefault();
+  ov.style.pointerEvents = "none"; const el = document.elementFromPoint(x, y); ov.style.pointerEvents = "";
+  if (typeof tutNext === "function") tutNext();
+  if (el && el !== ov && !ov.contains(el)) el.click();
+} catch (e) {} }, true);
 
 </script>
 <script>// ================= 3Dの子を、今のコマアニメと同じ並び（17コマ）の絵に焼く（開発用・ページ内で実行） =================
