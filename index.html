@@ -1200,6 +1200,7 @@ body:has(.modal) .inv25btn,body:has(.ntfull19) .inv25btn{display:none}
 .raidban .achpop{margin-bottom:40px!important}
 .dz27{margin-top:22px;border-top:1px dashed #5a4632;padding-top:8px;color:var(--dim)}.dz27 summary{font-size:12px;cursor:pointer;padding:6px 0}.dz27 button{display:block;width:100%;margin-top:6px}
 #off26{top:auto;bottom:calc(64px + env(safe-area-inset-bottom,0px));font-size:12px;opacity:.9}
+.tok27{margin:8px 0;display:flex;flex-direction:column;gap:3px}.tok27 button{width:100%;background:#4a2a14;border:1px solid #d08a3a;color:#ffd9a0;font-weight:700}.tok27 button:disabled{opacity:.45}.tok27 .hint{font-size:12px}
 </style>
 </head>
 <body>
@@ -7385,7 +7386,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.304（11/23 14:32）";
+const VER20 = "No.305（11/23 14:37）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -13214,6 +13215,7 @@ danger23 = function () {
   if (v.lord && !v.downs) add.push(`<span>主の体力：平均で残り約${Math.max(1, Math.round(v.left * 10))}割</span>`);
   if (S.lord && lordMax5(S) && S.lord.hp < lordMax5(S) * 0.7) add.push(`<span class="bad">主の体力が${Math.round(S.lord.hp / lordMax5(S) * 10)}割しかない（朝に1割ずつ戻る）</span>`);
   if (v.next) { const nx = nextRaid9({ ...S, day: S.day + 1 }); add.push(`<span class="nx27 l${v.next.lv}">つぎの襲撃${nx ? `（${nx}日目）` : ""}は、いまの並びのままだと ${DNG23[v.next.lv][0]}${DNG23[v.next.lv][1]}${v.next.lv > v.lv ? "　→ 今のうちに強くしておく" : ""}</span>`); }
+  if ((v.lv >= 1 || (v.next && v.next.lv >= 2)) && S.dp >= 200) add.push(`<span class="hint">💡 💎がたまっているなら、魔物をタップ →「🔥 💎で特訓」でLvを上げられる</span>`);
   if (add.length) h = h.replace(/(<div class="dng23[^"]*">[\s\S]*?)(<span class="hint">並べかえ)/, `$1${add.join("")}$2`);
   } catch (e) { console.error(e); } return h; }; }
 // 楽勝が続いたときの熱の上がり方をゆるく（🟢で+18%→+12%、上限120%→90%）。次の襲撃の目安で前もって見える
@@ -13257,6 +13259,18 @@ function mid27(S2, N2) {
     const wa = Math.round(ma * 0.7 * v.floor); if (N2.lord.atk < wa) N2.lord.atk = wa; } } catch (e) {}
   return N2; }; }
 { const _er = endRaid9; endRaid9 = function (S2, N2) { const r = _er.apply(this, arguments); try { const f = N2 && N2.lord && N2.lord.floor27; if (f && S2.lord) S2.lord.hp = Math.max(0, Math.round(N2.lord.hp / N2.lord.max * f.max)); } catch (e) {} return r; }; }
+// ================= 💎を戦力に：魔物の特訓（💎でLv+1） =================
+// 勇者は襲撃ごとに強くなるのに、こちらは💎がたまるだけで強くならなかった（15日目で💎1900）
+const tokCost27 = m => { const T = (S.tok27 && S.tok27.day === S.day) ? S.tok27.n : 0; return Math.round((10 * m.lv + 3 * m.lv * m.lv) * (1 + 0.5 * T) / 10) * 10; };
+monCard = (prev => function (id) { let h = prev(id); try { const m = S.mons.find(o => o.id === id); if (!m || N) return h; const c = tokCost27(m), ok = S.dp >= c;
+  const line = `<div class="tok27"><button data-a="tok27" data-v="${m.id}" ${ok ? "" : "disabled"}>🔥 💎で特訓：Lv${m.lv}→${m.lv + 1}（💎${fmt8(c)}）</button><span class="hint">その日のうちに続けると値段が上がる。勇者に追いつくための💎の使いみち</span></div>`;
+  const i = h.indexOf('<div class="xp"'); if (i < 0) return h + line; const j = h.indexOf("</div>", i) + 6; return h.slice(0, j) + line + h.slice(j); } catch (e) { return h; } })(monCard);
+document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="tok27"]'); if (!b || !S) return; ev.stopImmediatePropagation(); ev.preventDefault();
+  const m = S.mons.find(o => o.id === +b.dataset.v); if (!m || N) return; const c = tokCost27(m); if (S.dp < c) { toast("💎が足りない"); return; }
+  S.dp -= c; S.tok27 = (S.tok27 && S.tok27.day === S.day) ? { day: S.day, n: S.tok27.n + 1 } : { day: S.day, n: 1 };
+  const rep = newRep9(); gainXp9(S, m, Math.max(1, expNext5(m) - (m.exp || 0)), rep); sfx16 && sfx16("lvup"); toast(`🔥 ${m.nick} が Lv${m.lv} になった`);
+  try { dng23 = { key: "", v: null }; } catch (e) {}
+  save(); const id = m.id; if (rep.evos.length) { modal = null; rep.evos.forEach(e => queue.push({ k: "evo", ...e })); if (!stage) nextStage(); else render(); } else { modal = () => monCard(id); render(); } }, true);
 
 </script>
 </body>
