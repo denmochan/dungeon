@@ -7400,7 +7400,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.317（11/23 20:41）";
+const VER20 = "No.318（11/23 21:16）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -13081,7 +13081,10 @@ function fpOpen26(){
     const job = m => { try { if (typeof restLeft7 === "function" && restLeft7(S, m)) return "sleep"; } catch (e) {} let j = null; try { j = peekMon24(m, R.i).job; } catch (e) {} return j === "mine" ? "mine" : j === "train" ? "train" : j === "watch" ? "watch" : j === "nest" ? "nest" : j === "bed" ? "sleep" : "idle"; };
     try { cast = HAI25.place(R.on, ms.map(m => ({ sp: m.sp, evo: m.evos || 0, n: 1, act: job(m), id: m.id })), 11 + R.i * 17); } catch (e) {}
     R.acts = cast.map((c, k) => ({ m: ms.find(x => x.id === c.id) || ms[k],   /* 並べると順番が変わる：名前がちがう子に出ていた */ sp: c.sp, evo: c.evo || 0, x: c.o[0], z: -c.o[2], r: Math.random() * 6.28, hx: c.o[0], hz: -c.o[2], tx: c.o[0], tz: -c.o[2], wait: 1 + Math.random() * 3, ph: Math.random() * 6, walking: false, dist: 0, mode: c.mode || "idle", y: c.y || 0, look: c.look ? [c.look[0], -c.look[1]] : null, rk: c.rk ? [c.rk[0], -c.rk[1], c.rk[2], c.rk[3]] : null, boss: !!c.boss,
-      stay: /^(mine|slash|lift|spar|sleep|nest|watch)$/.test(c.mode) || !!c.boss })); };
+      stay: /^(mine|slash|lift|spar|sleep|nest|watch)$/.test(c.mode) || !!c.boss }));
+    /* 稽古：2人1組の手合わせと、人形を叩く子をまぜる（3人以上なら1人は人形へ） */
+    const tr = R.acts.filter(a => /^(slash|lift|spar)$/.test(a.mode)), np = Math.floor((tr.length - (tr.length >= 3 ? 1 : 0)) / 2);
+    for (let p = 0; p < np; p++) { const A = tr[p * 2], B = tr[p * 2 + 1], ph = Math.random() * 9; A.mode = B.mode = "duel"; A.pt = B; B.pt = A; A.role = 0; B.role = 1; A.dph = B.dph = ph; A.stay = B.stay = true; } };
   rooms.forEach(mkActs);
   // 看板（部屋の入口の右）
   const signCv = R => { const c = document.createElement("canvas"); c.width = 128; c.height = 96; const g = c.getContext("2d"); g.fillStyle = "#5a3a22"; g.fillRect(58, 40, 12, 56); g.fillStyle = "#7a5432"; g.fillRect(6, 6, 116, 46); g.strokeStyle = "#2a1a0e"; g.lineWidth = 4; g.strokeRect(6, 6, 116, 46);
@@ -13094,6 +13097,7 @@ function fpOpen26(){
   const gAt = (G, x, zl) => { const ix = Math.floor((x - G.x0) / G.c), iz = Math.floor((zl - G.z0) / G.c); return ix < 0 || iz < 0 || ix >= G.W || iz >= G.H ? -1 : iz * G.W + ix; };
   const gFree = (G, x, zl, rad, h) => { for (let k = 0; k < 9; k++) { const an = k * 0.785, rr = k === 8 ? 0 : rad, j = gAt(G, x + Math.cos(an) * rr, zl + Math.sin(an) * rr); if (j < 0 || G.fl[j] === 255 || G.cl[j] / 20 < h) return false; } return true; };
   const floorY = (R, x, zl) => { const G = R.G; if (!G) return 0; const j = gAt(G, x, zl); return j < 0 || G.fl[j] === 255 ? 0 : Math.max(-0.3, Math.min(0.5, G.fl[j] / 100 - 0.5)); };
+  const sepOK = (R, a, x, zl, useT) => (R.acts || []).every(b => b === a || b === a.pt || Math.hypot((useT ? b.tx : b.x) - x, (useT ? b.tz : b.z) - zl) >= 0.45 + ((a.H || 1.6) + (b.H || 1.6)) * 0.22);   /* ほかの子と重ならない */
   const fitsM = (R, a, x, zl) => { const G = R.G; if (!G) return floorOK(R, x, zl); return gFree(G, x, zl, Math.max(0.3, (a.H || 1.6) * 0.3), (a.H || 1.6) * 0.9 + (DHOV25[a.sp] ? 0.9 : 0)); };
   const floorOK = (R, x, zl, me) => { if (R.G) return gFree(R.G, x, zl, me ? 0.3 : 0.5, me ? P.eye + 0.2 : 1.5); const sd = shapeSd25(R.SH, x / SW25[0], -zl / SW25[1]); return sd < -0.2 && (!R.OBS.some(([ox, oz, or]) => Math.hypot(x - ox, -zl - oz) < or + 0.55)); };   /* 部屋の形の前後は、主が進む向きと逆（門が手前・玉座が奥） */   /* 主は真ん中の道（入口→奥の坑道）なら柵もまたいで通れる */
   // ある場所が歩けるか。どこにいるか（部屋 i ／ 通路 i）と床の高さを返す
@@ -13144,7 +13148,7 @@ function fpOpen26(){
   // 魔物の暮らし（軽く）
   function stepActs(R, dt){ (R.acts || []).forEach(a => { if (a.stay) return;
     /* 近くに来たら足を止めて、こちらを向く（気づいたら ♪） */ { const dx = P.x - a.x, dz = P.z - (R.Z + a.z), d = Math.hypot(dx, dz); if (R.i === curRoom && d < 3.4 + (a.H || 0) * 0.45) { a.walking = false; a.wait = Math.max(a.wait, 1.5); const tr = Math.atan2(dx, dz), dr = ((tr - a.r) % 6.2832 + 9.4248) % 6.2832 - 3.1416; a.r += dr * Math.min(1, dt * 5); if (!a.nt) a.nt = performance.now(); return; } else if (d > 6 + (a.H || 0) * 0.45) a.nt = 0; }
-    if (!a.walking) { a.wait -= dt; if (a.wait <= 0) { for (let k = 0; k < 8; k++) { const ang = Math.random() * 6.28, d = 2 + Math.random() * 5, x = a.hx + Math.cos(ang) * d, z = a.hz + Math.sin(ang) * d; let okp = fitsM(R, a, x, z); for (let t = 0.25; okp && t < 1; t += 0.25) okp = fitsM(R, a, a.x + (x - a.x) * t, a.z + (z - a.z) * t); if (okp) { a.tx = x; a.tz = z; a.walking = true; break; }   /* 体の大きさで通れる所だけ（大きい子が壁にめりこんでいた） */ } a.wait = 2 + Math.random() * 4; } return; }
+    if (!a.walking) { a.wait -= dt; if (a.wait <= 0) { for (let k = 0; k < 8; k++) { const ang = Math.random() * 6.28, d = 2 + Math.random() * 5, x = a.hx + Math.cos(ang) * d, z = a.hz + Math.sin(ang) * d; let okp = fitsM(R, a, x, z) && sepOK(R, a, x, z, 1); for (let t = 0.25; okp && t < 1; t += 0.25) okp = fitsM(R, a, a.x + (x - a.x) * t, a.z + (z - a.z) * t); if (okp) { a.tx = x; a.tz = z; a.walking = true; break; }   /* 体の大きさで通れる所だけ（大きい子が壁にめりこんでいた） */ } a.wait = 2 + Math.random() * 4; } return; }
     const dx = a.tx - a.x, dz = a.tz - a.z, L = Math.hypot(dx, dz); if (L < 0.1) { a.walking = false; return; } const s = Math.min(L, 2.2 * Math.sqrt(a.mult || 1) * dt); a.x += dx / L * s; a.z += dz / L * s; a.dist += s; a.r = Math.atan2(dx, dz); }); }
   let curRoom = 0, lastT = performance.now(), ft = [];
   function loop(now){ if (!alive) return; requestAnimationFrame(loop);
@@ -13192,13 +13196,20 @@ function fpOpen26(){
         /* 大きい種族はもっと大きく（ドラゴンが人の背丈くらいでがっかりした）。天井 6.6 の手前で止める */
         if (!a.mult) { const H0 = ((o.foot || 122) - (o.top || 0)) / (o.ppu || 36), q = Math.min(1, Math.max(0, (H0 - 2.2) / 2.4)), m0 = 1 + 0.55 * q * q * (3 - 2 * q); a.mult = Math.min(m0, 5.9 / H0); a.H = H0 * a.mult; }
         /* 置いた場所が壁や岩にかかっていたら、近くの入れる所へずらす（昼の配置は2Dの形なので3Dではめりこむことがあった） */
-        if (R.G && !a.fixd && !(a.y > 0) && (a.mode !== "mine" || a.rkSet || !o.bip)) { a.fixd = 1; if (!fitsM(R, a, a.x, a.z)) { let got = null; for (let r = 0.25; r < 9 && !got; r += 0.25) for (let k = 0; k < 16; k++) { const an = k / 16 * 6.2832, x = a.x + Math.cos(an) * r, z = a.z + Math.sin(an) * r; if (fitsM(R, a, x, z)) { got = [x, z]; break; } } if (got) { a.x = a.hx = a.tx = got[0]; a.z = a.hz = a.tz = got[1]; } } }
+        if (R.G && !a.fixd && !(a.y > 0) && a.mode !== "duel" && (a.mode !== "mine" || a.rkSet || !o.bip)) { a.fixd = 1; if (!fitsM(R, a, a.x, a.z) || !sepOK(R, a, a.x, a.z)) { let got = null; for (let r = 0.25; r < 9 && !got; r += 0.25) for (let k = 0; k < 16; k++) { const an = k / 16 * 6.2832, x = a.x + Math.cos(an) * r, z = a.z + Math.sin(an) * r; if (fitsM(R, a, x, z) && sepOK(R, a, x, z)) { got = [x, z]; break; } } if (got) { a.x = a.hx = a.tx = got[0]; a.z = a.hz = a.tz = got[1]; } } }
+        /* 手合わせの2人：向かい合わせに置く（体の大きさぶん離す） */
+        if (a.mode === "duel" && R.G && !a.duelSet && a.pt && a.mult && a.pt.mult) { const A = a.role ? a.pt : a, B = a.role ? a : a.pt, gap = 1.5 + (A.H + B.H) * 0.3; let got = null;
+          for (let r = 0; r < 6 && !got; r += 0.5) for (let k = 0; k < 12 && !got; k++) { const an = k / 12 * 6.2832, cx = A.x + Math.cos(an * 1.7) * r, cz = A.z + Math.sin(an * 1.7) * r, dx = Math.cos(an) * gap / 2, dz = Math.sin(an) * gap / 2;
+            if (fitsM(R, A, cx - dx, cz - dz) && fitsM(R, B, cx + dx, cz + dz) && sepOK(R, A, cx - dx, cz - dz) && sepOK(R, B, cx + dx, cz + dz)) got = [cx - dx, cz - dz, cx + dx, cz + dz]; }
+          if (got) { A.x = A.hx = A.tx = got[0]; A.z = A.hz = A.tz = got[1]; B.x = B.hx = B.tx = got[2]; B.z = B.hz = B.tz = got[3]; } A.duelSet = B.duelSet = A.fixd = B.fixd = 1; }
+        if (a.mode === "duel" && a.pt) a.look = [a.pt.x, a.pt.z];
         const gy = floorY(R, a.x, a.z); const wx = a.x, wz = R.Z + a.z, WS = dwalk25(a.sp, a.evo), view = Math.atan2(EYE[0] - wx, EYE[2] - wz); let rel = ((a.r - view) % 6.2832 + 9.4248) % 6.2832 - 3.1416;
         const ai = Math.min(12, Math.round(Math.abs(rel) / Math.PI * 12)), flip = rel < 0 && ai > 0 && ai < 12, ppu = o.ppu || 36; let im, cx, cy, cw, ch, hs, foot, ox = 0, oy = 0, bob = 0;
         /* 仕事中の子：横向きの「掘る」「打ちこむ」「寝る」コマ。向きは相手（岩・台）が画面の右か左かで決める */
         const T = now / 1000 + a.ph, lx = a.look ? a.look[0] : a.x + Math.sin(a.r), lz = a.look ? a.look[1] : a.z + Math.cos(a.r), s1 = toScr(a.x, R.Y + 0.8, R.Z + a.z), s2 = toScr(lx, R.Y + 0.8, R.Z + lz), side = s1 && s2 ? s2[0] < s1[0] : (lx - a.x) * Rr[0] + (lz - a.z) * Rr[2] < 0;   /* 相手が画面の左なら左を向く（真正面・真うしろのときに向きをまちがえた） */
         let job = null; if (!a.walking && o.bip) { if (a.mode === "mine") { const M = dmine25(a.sp, a.evo); if (M && M.ok && a.mult) { job = { im: M.im, f: Math.floor(T / 1.1 * 4) % 4, hs: 1 };
           /* 岩のふちに立たせて、つるはしの先がちょうど岩に当たるように（離れて空を掘っていた） */ if (a.rk && !a.rkSet) { a.rkSet = 1; const [cx, cz, hw, hz] = a.rk, dx = a.x - cx, dz = a.z - cz, e = Math.hypot(dx / hw, dz / hz) || 1, L = Math.hypot(dx, dz) || 1, off = Math.max(0.3, (M.hx - 64) / ppu * a.mult); a.x = cx + dx / e * 1.25 + dx / L * off; a.z = cz + dz / e * 1.25 + dz / L * off; a.look = [cx, cz];   /* 3Dでは岩の真ん中を向いて、まわりから叩く */ } } } else if (a.mode === "slash" || a.mode === "lift" || a.mode === "train") job = { im: o.im, f: 5 + Math.floor(T / 0.55 * 4) % 4, hs: o.hs || 1 }; else if (a.mode === "sleep") job = { im: o.im, f: 4, hs: o.hs || 1 }; }
+        if (a.mode === "duel" && a.duelSet && !a.walking) { const T2 = now / 1000 + a.dph, q = (T2 % 1.8) / 1.8, mine = a.role ? q >= 0.5 : q < 0.5, lq = (q % 0.5) / 0.5; a.dq = { mine, lq }; job = { im: o.im, hs: o.hs || 1, f: o.bip ? (mine ? 5 + Math.min(3, Math.floor(lq * 4)) : Math.floor(T2 / 0.4) % 4) : (mine && lq < 0.7 ? 11 + Math.min(3, Math.floor(lq / 0.7 * 4)) : Math.floor(T2 / 0.4) % 4) }; }   /* 交互に打ちこむ */
         if (!a.walking && a.mode === "sleep" && !o.bip) job = { im: o.im, f: 0, hs: o.hs || 1, slow: 1 };
         a.fr = job ? job.f : -1;
         if (job) { hs = job.hs; cw = ch = Math.round(128 * hs); im = job.im; cx = job.f * cw; cy = 0; foot = o.foot; }
@@ -13206,6 +13217,7 @@ function fpOpen26(){
         else if (WS && WS.ok && WS.im.height >= WS.ch * 13) { const ph = a.walking ? Math.floor(a.dist / 0.9 * 6) % 6 : 0; im = WS.im; hs = WS.hs || 1; cw = WS.cw; ch = WS.ch; cx = ph * cw; cy = ai * ch; foot = WS.foot != null ? WS.foot : o.foot; ox = WS.ox / hs; oy = WS.oy / hs; if (!a.walking) bob = Math.sin(now / 1000 * 2.2 + a.ph) * 0.03; }
         else { hs = o.hs || 1; cw = ch = Math.round(128 * hs); im = o.im; cx = (Math.floor((now / 1000 + a.ph) / 0.4) % 4) * cw; cy = 0; foot = o.foot; if (a.walking) bob = Math.abs(Math.sin(a.dist * 7)) * 0.18; }
         const jobF = a.fr >= 0 || (a.mode === "spar" && a.look && !a.walking), fl2 = jobF ? side : flip; let jx = 0, jz = 0; if (a.mode === "spar" && a.sq != null && a.sq < 0.34 && a.look) { const f = Math.sin(a.sq / 0.34 * Math.PI), dx = a.look[0] - a.x, dz = a.look[1] - a.z, L = Math.hypot(dx, dz) || 1; jx = dx / L * 0.4 * f; jz = dz / L * 0.4 * f; bob = 0.55 * f; }
+        if (a.mode === "duel" && a.dq && a.pt) { const dx = a.pt.x - a.x, dz = a.pt.z - a.z, L = Math.hypot(dx, dz) || 1, pq = a.pt.dq; let k = 0; if (a.dq.mine) { k = Math.sin(Math.min(1, a.dq.lq / 0.7) * Math.PI) * (o.bip ? 0.28 : 0.45); if (!o.bip) bob = 0.5 * k; } else if (pq && pq.mine && pq.lq > 0.45 && pq.lq < 0.85) k = -Math.sin((pq.lq - 0.45) / 0.4 * Math.PI) * 0.16; jx = dx / L * k; jz = dz / L * k; }   /* 打つ側は踏みこみ、受ける側は少し下がる */
         const br = a.walking || jobF ? 1 : 1 + 0.018 * Math.sin(now / 1000 * 2.3 + a.ph), k = (a.mult || 1) / ppu, w = cw / hs, h = ch / hs, x0 = fl2 ? 64 - ox - w : ox - 64, d = Math.hypot(wx - P.x, wz - P.z);
         gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, texOf(im)); gl.uniform1i(PB.U("tx"), 0); gl.uniform1f(PB.U("FL"), fl2 ? 1 : 0); gl.uniform4f(PB.U("UR"), cx / im.width, cy / im.height, cw / im.width, ch / im.height); gl.uniform1f(PB.U("LB"), 0.5 + 0.7 * Math.exp(-d / 7));
         gl.uniform3f(PB.U("C"), wx + jx, R.Y + gy + (a.y || 0) + (DHOV25[a.sp] ? 0.9 : 0) + bob, wz + jz); gl.uniform3fv(PB.U("R"), Rr); gl.uniform4f(PB.U("Q"), x0 * k, (foot - (oy + h)) * k * br, w * k, h * k * br); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -13227,6 +13239,7 @@ function fpOpen26(){
         if (!a.look || a.walking) return; const dx = a.look[0] - a.x, dz = a.look[1] - a.z, L = Math.hypot(dx, dz) || 1;
         if (a.mode === "mine" && a.fr === 2) { const ph = (T / 1.1 * 4) % 1, s = toScr(wx + dx / L * 0.9, R.Y + 0.9, wz + dz / L * 0.9); if (!s) return; g.save(); g.globalAlpha = 1 - ph * 0.8; g.fillStyle = "rgba(255,245,200,.9)"; g.beginPath(); g.arc(s[0], s[1], (3 + 7 * (1 - ph)) * u, 0, 7); g.fill();
           for (let j = 0; j < 6; j++) { const an = -2.8 + j * 0.5 + a.ph % 1 * 0.3, dd = (6 + 16 * ph) * u; g.fillStyle = j % 2 ? "#8a7a68" : (j === 2 ? "#c9a8ff" : "#9fe4ff"); g.fillRect(s[0] + Math.cos(an) * dd, s[1] + Math.sin(an) * dd * 0.8 + ph * ph * 14 * u, 2.4 * u, 2.4 * u); } g.restore(); }
+        if (a.mode === "duel" && a.dq && a.dq.mine && a.dq.lq > 0.42 && a.dq.lq < 0.72 && a.pt) { const q = (a.dq.lq - 0.42) / 0.3, s = toScr(a.x + (a.pt.x - a.x) * 0.55, R.Y + Math.min(a.H || 1.6, a.pt.H || 1.6) * 0.55, R.Z + a.z + (a.pt.z - a.z) * 0.55); if (s) { g.save(); g.globalAlpha = 1 - q; g.strokeStyle = "rgba(255,236,190,.95)"; g.lineWidth = 2.2 * u; g.beginPath(); for (let j = 0; j < 7; j++) { const an = j * 0.9 + a.dph; g.moveTo(s[0] + Math.cos(an) * 3 * u, s[1] + Math.sin(an) * 3 * u); g.lineTo(s[0] + Math.cos(an) * (8 + 12 * q) * u, s[1] + Math.sin(an) * (8 + 12 * q) * u); } g.stroke(); g.restore(); } }
         if ((a.mode === "slash" || a.mode === "lift") && a.fr === 7) { const q = (T / 0.55 * 4) % 1, s = toScr(wx + dx / L * 1.0, R.Y + 0.9, wz + dz / L * 1.0); if (!s) return; g.save(); g.globalAlpha = 1 - q; g.strokeStyle = "rgba(255,240,200,.95)"; g.lineWidth = 2 * u; g.beginPath(); for (let j = 0; j < 6; j++) { const an = j * 1.05 + a.ph; g.moveTo(s[0] + Math.cos(an) * 3 * u, s[1] + Math.sin(an) * 3 * u); g.lineTo(s[0] + Math.cos(an) * (7 + 9 * q) * u, s[1] + Math.sin(an) * (7 + 9 * q) * u); } g.stroke(); g.restore(); }
         if (a.mode === "spar" && a.sq != null && a.sq >= 0.3 && a.sq < 0.5) { const q = (a.sq - 0.3) / 0.2, s = toScr(wx + dx / L * 0.9, R.Y + 0.1, wz + dz / L * 0.9); if (!s) return; g.save(); g.globalAlpha = 0.5 * (1 - q); g.fillStyle = "#b89a78"; for (let j = 0; j < 4; j++) { g.beginPath(); g.arc(s[0] + (j - 1.5) * (7 + 8 * q) * u, s[1] - q * 4 * u, (3 + 3 * q) * u, 0, 7); g.fill(); } g.restore(); } });
       /* 気づいた子の頭に ♪（1.6秒） */
