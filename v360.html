@@ -7400,7 +7400,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.319（11/23 21:32）";
+const VER20 = "No.320（11/23 21:40）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -13461,26 +13461,50 @@ function score27(n) { const d = dngRun27({ morning: 1, n: n || 4 }), e = econ27(
   if (!d) return { total: H * (e.dp + e.val), d: null, e, H };
   const loss = d.downs / d.n * (4000 + S.dp) + d.lossHP + d.md * 60 + d.esc * (30 + 0.05 * S.dp) + d.stolen;
   return { total: H * (e.dp + e.val) - loss, loss, d, e, H }; }
-function optimize27(budget) { const t0 = performance.now(), dens = S.path.map((r, i) => r && r.kind === "den" && r.pol !== "rest" && !(hasFac12(r, "bed") && facsOf12(r).length === 1) ? i : -1).filter(i => i >= 0);
+/* 探す手順（1回試すごとに一息つける形）。押したときにその場で回すのにも、先回りで少しずつ回すのにも使う */
+function* optSteps27(out) { const dens = S.path.map((r, i) => r && r.kind === "den" && r.pol !== "rest" && !(hasFac12(r, "bed") && facsOf12(r).length === 1) ? i : -1).filter(i => i >= 0);
   const mov = () => S.mons.filter(m => !m.job && !(m.rest > 0) && (m.home == null || dens.includes(m.home)));
   const res = i => S.mons.filter(m => m.home === i).length, free = i => res(i) < capOfSlot7(S, i);
-  let cur = score27(), evals = 1, rounds = 0;
-  while (performance.now() - t0 < budget && rounds < 8) { rounds++; let best = null; const M = mov();
-    const tryIt = (apply, undo, label) => { if (performance.now() - t0 > budget) return; apply(); try { dng23 = { key: "", v: null }; const sc = score27(); evals++; if (sc.total > (best ? best.sc.total : cur.total) + 5) best = { sc, apply, label }; } finally { undo(); } };
-    M.forEach(m => dens.forEach(i => { if (m.home === i || !free(i)) return; const h0 = m.home; const j0 = m.job19, jh0 = m.job19h; tryIt(() => { m.home = i; m.job19 = null; m.job19h = i; }, () => { m.home = h0; m.job19 = j0; m.job19h = jh0; }); }));
-    for (let a = 0; a < M.length; a++) for (let b = a + 1; b < M.length; b++) { const x = M[a], y = M[b]; if (x.home === y.home) continue; const hx = x.home, hy = y.home; const xj = [x.job19, x.job19h], yj = [y.job19, y.job19h]; tryIt(() => { x.home = hy; y.home = hx; x.job19 = y.job19 = null; x.job19h = hy; y.job19h = hx; }, () => { x.home = hx; y.home = hy; [x.job19, x.job19h] = xj; [y.job19, y.job19h] = yj; }); }
-    if (!best) break; best.apply(); cur = best.sc; }
-  S.mons.forEach(m => { if (m.home != null && !m.job) m.job19h = m.home; });
-  dng23 = { key: "", v: null };
-  return { cur, evals, rounds, ms: Math.round(performance.now() - t0) }; }
+  /* 同じ並びは二度計算しない。探すあいだは試す夜を3回に減らし、最後のくらべだけ6回 */
+  const memo = new Map(), key = () => S.mons.map(m => m.home + ":" + (m.job19 || "")).join(",") + "|" + S.path.map(r => r && r.pol || "").join(",");
+  const sc3 = () => { const k = key(); if (memo.has(k)) return memo.get(k); dng23 = { key: "", v: null }; const v = score27(3); memo.set(k, v); out.evals++; return v; };
+  out.evals = 0; out.rounds = 0; let cur = sc3(); yield;
+  while (out.rounds < 8) { out.rounds++; let best = null; const M = mov(), C = [];
+    for (const m of M) for (const i of dens) { if (m.home === i || !free(i)) continue; const h0 = m.home, j0 = m.job19, jh0 = m.job19h; C.push([() => { m.home = i; m.job19 = null; m.job19h = i; }, () => { m.home = h0; m.job19 = j0; m.job19h = jh0; }]); }
+    for (let a = 0; a < M.length; a++) for (let b = a + 1; b < M.length; b++) { const x = M[a], y = M[b]; if (x.home === y.home) continue; const hx = x.home, hy = y.home, xj = [x.job19, x.job19h], yj = [y.job19, y.job19h]; C.push([() => { x.home = hy; y.home = hx; x.job19 = y.job19 = null; x.job19h = hy; y.job19h = hx; }, () => { x.home = hx; y.home = hy; [x.job19, x.job19h] = xj; [y.job19, y.job19h] = yj; }]); }
+    for (const [ap, un] of C) { ap(); let sc; try { sc = sc3(); } finally { un(); } if (sc.total > (best ? best.sc.total : cur.total) + 5) best = { sc, ap }; yield; }
+    if (!best) break; best.ap(); cur = best.sc; }
+  out.cur = cur; }
+function optimize27(budget) { const t0 = performance.now(), out = {}, g = optSteps27(out); while (!g.next().done) if (performance.now() - t0 > budget) break;
+  S.mons.forEach(m => { if (m.home != null && !m.job) m.job19h = m.home; }); dng23 = { key: "", v: null };
+  return { evals: out.evals, rounds: out.rounds, ms: Math.round(performance.now() - t0) }; }
+/* 先回りの試算：ふだんの画面のすきまに、写しのデータで少しずつ探しておく。押したときに答えが出ていれば待たずに見せる */
+const PRE27 = { key: null, done: false };
+const key27 = () => JSON.stringify([S.day, S.dp > 0, S.lord && S.lord.lv, S.lord && S.lord.hp, S.mons.map(m => [m.id, m.sp, m.evos, m.lv, m.home, m.job, m.job19, m.rest, m.hp]), S.path.map(r => r && [r.kind, r.fac, r.facs, r.pol, r.flv])]);
+function preStep27(slice) { try {
+  if (!S || N || S.ended) return;
+  const k = key27(); if (PRE27.key !== k) { Object.assign(PRE27, { key: k, done: false, clone: JSON.parse(JSON.stringify(S)), phase: 0, out: {}, gen: null }); }
+  if (PRE27.done) return;
+  const real = S, d0 = dng23, sv = save, t0 = performance.now(); S = PRE27.clone; save = () => {};
+  try {
+    if (PRE27.phase === 0) { dng23 = { key: "", v: null }; PRE27.sc0 = score27(6); autoAll19(S); PRE27.gen = optSteps27(PRE27.out); PRE27.phase = 1; }
+    else if (PRE27.phase === 1) { while (performance.now() - t0 < slice) if (PRE27.gen.next().done) { PRE27.phase = 2; break; } }
+    else { S.mons.forEach(m => { if (m.home != null && !m.job) m.job19h = m.home; }); dng23 = { key: "", v: null }; PRE27.sc1 = score27(6);
+      PRE27.res = { m: new Map(S.mons.map(m => [m.id, [m.home, m.job, m.job19, m.job19h]])), p: S.path.map(r => r && r.pol) }; PRE27.done = true; }
+  } finally { S = real; dng23 = d0; save = sv; }
+} catch (e) { console.error(e); PRE27.done = true; PRE27.res = null; } }
+setInterval(() => { if (typeof stage !== "undefined" && stage) return; preStep27(14); }, 50);
+/* 押したときに途中なら、そこから続けて仕上げる（はじめからやり直さない） */
+function finishPre27(budget) { const t0 = performance.now(); while (!PRE27.done && performance.now() - t0 < budget) preStep27(budget); return PRE27.done && !!PRE27.res; }
 // 「おまかせ」ボタン：今までの並べ方 → 試算で詰める → 前と後をくらべて見せる
 function smartAuto27() {
   const prevH = new Map(S.mons.map(m => [m.id, m.home])); S.undo13 = S.mons.map(m => [m.id, m.home, m.job]);
   /* 並びだけでなく、仕事の希望・部屋の方針もまとめて覚えておく（前は「悪くなったら戻す」で部屋だけ戻り、方針や仕事は変わったまま→全部の値が下がっていた） */
   const snap = { m: S.mons.map(m => [m, m.home, m.job, m.job19, m.job19h]), p: S.path.map(r => [r, r && r.pol]) }, restore = () => { snap.m.forEach(([m, h, j, j9, jh]) => { m.home = h; m.job = j; m.job19 = j9; m.job19h = jh; }); snap.p.forEach(([r, p]) => { if (r) r.pol = p; }); dng23 = { key: "", v: null }; };
-  dng23 = { key: "", v: null }; const sc0 = score27(6);
-  autoAll19(S); const r = optimize27(2500); dng23 = { key: "", v: null }; const sc1 = score27(6);
-  const keep = sc1.total > sc0.total + Math.max(20, Math.abs(sc0.total) * 0.03);   /* はっきり良くなるときだけ変える（押すたびに並びが変わらないように） */
+  let sc0, sc1, r; const pre = PRE27.done && PRE27.res && PRE27.key === key27() ? PRE27 : null;
+  if (pre) { sc0 = pre.sc0; sc1 = pre.sc1; r = pre.out; S.mons.forEach(m => { const v = pre.res.m.get(m.id); if (v) [m.home, m.job, m.job19, m.job19h] = v; }); S.path.forEach((rm, i) => { if (rm) rm.pol = pre.res.p[i]; }); dng23 = { key: "", v: null }; }   /* 先回りで出ていた答え：すぐ見せる */
+  else { dng23 = { key: "", v: null }; sc0 = score27(6); autoAll19(S); r = optimize27(1200); dng23 = { key: "", v: null }; sc1 = score27(6); }
+  const keep = sc1.total > sc0.total + Math.max(20, Math.abs(sc0.total) * 0.03) && !(sc0.d && sc1.d && sc1.d.lv > sc0.d.lv);   /* 予報が悪くなる並びは選ばない */   /* はっきり良くなるときだけ変える（押すたびに並びが変わらないように） */
   if (!keep) restore(); else window.__undo27 = restore;
   const fin = keep ? sc1 : sc0, moved = S.mons.filter(m => prevH.get(m.id) !== m.home);
   const nm = i => i == null ? "控え" : roomTitle(S, i), lvTag = d => d ? `${DNG23[d.lv][0]}${DNG23[d.lv][1]}` : "—";
@@ -13490,8 +13514,9 @@ function smartAuto27() {
     <div class="mixbtn18">${moved.length ? `<button data-a="undo13">↩ 戻す</button>` : ""}<button class="main" data-a="close">OK</button></div>`;
   CV.sig = ""; save(); render(); }
 document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="af19go"],[data-a="rebal"]'); if (!b || !S || N) return; ev.stopImmediatePropagation(); ev.preventDefault();
+  if (PRE27.done && PRE27.res && PRE27.key === key27()) { try { smartAuto27(); } catch (e) { console.error(e); modal = null; render(); } return; }
   modal = () => `<h2>🪄 おまかせ</h2><div class="box">いろいろな並びで勇者と戦わせて、くらべています…</div>`; render();
-  setTimeout(() => { try { smartAuto27(); } catch (e) { console.error(e); modal = null; render(); } }, 60); }, true);
+  setTimeout(() => { try { finishPre27(1500); smartAuto27(); } catch (e) { console.error(e); modal = null; render(); } }, 60); }, true);
 
 /* 「戻す」は仕事の希望・部屋の方針もまとめて戻す */
 { const _u = undo13; undo13 = function (S0) { if (window.__undo27) { window.__undo27(); window.__undo27 = null; return true; } return _u.apply(this, arguments); }; }
