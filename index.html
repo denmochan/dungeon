@@ -1201,6 +1201,17 @@ body:has(.modal) .inv25btn,body:has(.ntfull19) .inv25btn{display:none}
 .dz27{margin-top:22px;border-top:1px dashed #5a4632;padding-top:8px;color:var(--dim)}.dz27 summary{font-size:12px;cursor:pointer;padding:6px 0}.dz27 button{display:block;width:100%;margin-top:6px}
 #off26{top:auto;bottom:calc(64px + env(safe-area-inset-bottom,0px));font-size:12px;opacity:.9}
 .tok27{margin:8px 0;display:flex;flex-direction:column;gap:3px}.tok27 button{width:100%;background:#4a2a14;border:1px solid #d08a3a;color:#ffd9a0;font-weight:700}.tok27 button:disabled{opacity:.45}.tok27 .hint{font-size:12px}
+/* 一人称の横持ち：縦のスマホでは画面ごと90度まわす */
+#fp26.rot{inset:auto;left:0;top:0;transform-origin:0 0;transform:rotate(90deg) translateY(-100%)}
+#fp26.rot .f26top{top:8px;left:calc(env(safe-area-inset-top,0px) + 10px);right:calc(env(safe-area-inset-bottom,0px) + 10px)}
+#fp26.rot .f26hint{top:46px;left:calc(env(safe-area-inset-top,0px) + 12px)}
+#fp26.rot .f26stick{left:calc(env(safe-area-inset-top,0px) + 30px);bottom:24px}
+#fp26.rot .f26stick.on{bottom:auto}
+#fp26.rot .f26talk{right:calc(env(safe-area-inset-bottom,0px) + 16px);bottom:24px}
+#fp26:not(.rot) .f26top{left:max(10px,env(safe-area-inset-left,0px));right:max(10px,env(safe-area-inset-right,0px))}
+#fp26:not(.rot) .f26stick{left:max(30px,calc(env(safe-area-inset-left,0px) + 16px))}
+#fp26:not(.rot) .f26talk{right:max(16px,env(safe-area-inset-right,0px))}
+#fp26 .f26rotip{position:absolute;left:50%;top:40%;transform:translateX(-50%);background:rgba(20,14,10,.9);border:1px solid #8a6a40;border-radius:999px;padding:10px 18px;font-size:15px;pointer-events:none}
 </style>
 </head>
 <body>
@@ -7386,7 +7397,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.306（11/23 14:46）";
+const VER20 = "No.307（11/23 14:52）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -12988,9 +12999,15 @@ function fpOpen26(){
   wrap.innerHTML = `<canvas></canvas><div class="f26top"><div class="f26where"><b></b><small></small></div><span class="f26fps"></span><button data-f="x">🗺 見下ろしへ</button></div>
     <div class="f26msg">ダンジョンを組み立てています…</div><div class="f26stick"><i></i></div><div class="f26hint">左で歩く・右をなぞって見回す・魔物や看板をタップ</div><div class="f26menu" hidden></div><canvas class="f26lab"></canvas><button class="f26talk" hidden></button>`;
   document.body.appendChild(wrap);
+  /* 横持ち：スマホが縦のままなら、画面ごと90度まわして横長で出す（主の目は横の方が見通せる） */
+  const ROT = () => innerHeight > innerWidth, VW = () => ROT() ? innerHeight : innerWidth, VH = () => ROT() ? innerWidth : innerHeight;
+  const loc = e => ROT() ? [e.clientY, innerWidth - e.clientX] : [e.clientX, e.clientY];
+  const fit = () => { const r = ROT(); wrap.classList.toggle("rot", r); if (r) { wrap.style.width = innerHeight + "px"; wrap.style.height = innerWidth + "px"; } else { wrap.style.width = wrap.style.height = ""; } };
+  fit(); addEventListener("resize", fit);
+  if (ROT()) { const tip = document.createElement("div"); tip.className = "f26rotip"; tip.textContent = "📱 スマホを横にして遊ぶ"; wrap.appendChild(tip); setTimeout(() => tip.remove(), 2600); }
   const cv = wrap.querySelector("canvas"), msg = wrap.querySelector(".f26msg"), fpsEl = wrap.querySelector(".f26fps"), menu = wrap.querySelector(".f26menu"), whereB = wrap.querySelector(".f26where b"), whereS = wrap.querySelector(".f26where small");
   const gl = cv.getContext("webgl", { antialias: true, alpha: false }); let alive = true;
-  const close = () => { alive = false; wrap.remove(); try { const x = gl.getExtension("WEBGL_lose_context"); x && x.loseContext(); } catch (e) {} };
+  const close = () => { alive = false; removeEventListener("resize", fit); wrap.remove(); try { const x = gl.getExtension("WEBGL_lose_context"); x && x.loseContext(); } catch (e) {} };
   wrap.querySelector('[data-f="x"]').onclick = close;
   if (!gl || !gl.getExtension("OES_element_index_uint")) { msg.textContent = "この端末では使えない"; return; }
   const sh = (ty, s) => { const o = gl.createShader(ty); gl.shaderSource(o, s); gl.compileShader(o); if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(o)); return o; };
@@ -13045,22 +13062,22 @@ function fpOpen26(){
   // 指：左は歩く（スティック）、右は見回す。動かさずに離したらタップ
   const stick = wrap.querySelector(".f26stick"), knob = stick.querySelector("i"); const mv = { x: 0, y: 0 }; const touches = new Map();
   cv.style.touchAction = "none";
-  wrap.addEventListener("pointerdown", e => { if (e.target.closest(".f26menu,.f26top,button")) return; const left = e.clientX < innerWidth * 0.42 && e.clientY > innerHeight * 0.45;
-    touches.set(e.pointerId, { left, x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY, t0: performance.now(), moved: 0 }); try { wrap.setPointerCapture(e.pointerId); } catch (er) {}
-    if (left) { stick.style.left = (e.clientX - 60) + "px"; stick.style.top = (e.clientY - 60) + "px"; stick.classList.add("on"); } });
-  wrap.addEventListener("pointermove", e => { const T = touches.get(e.pointerId); if (!T) return; const dx = e.clientX - T.x, dy = e.clientY - T.y; T.moved += Math.abs(dx) + Math.abs(dy); T.x = e.clientX; T.y = e.clientY;
+  wrap.addEventListener("pointerdown", e => { if (e.target.closest(".f26menu,.f26top,button")) return; const [ex, ey] = loc(e), left = ex < VW() * 0.42 && ey > VH() * 0.45;
+    touches.set(e.pointerId, { left, x0: ex, y0: ey, x: ex, y: ey, t0: performance.now(), moved: 0 }); try { wrap.setPointerCapture(e.pointerId); } catch (er) {}
+    if (left) { stick.style.left = (ex - 60) + "px"; stick.style.top = (ey - 60) + "px"; stick.classList.add("on"); } });
+  wrap.addEventListener("pointermove", e => { const T = touches.get(e.pointerId); if (!T) return; const [ex, ey] = loc(e), dx = ex - T.x, dy = ey - T.y; T.moved += Math.abs(dx) + Math.abs(dy); T.x = ex; T.y = ey;
     if (T.left) { let ax = T.x - T.x0, ay = T.y - T.y0; const L = Math.hypot(ax, ay), m = 50; if (L > m) { ax *= m / L; ay *= m / L; } mv.x = ax / m; mv.y = ay / m; knob.style.transform = `translate(${ax}px,${ay}px)`; }
     else { P.yaw += dx * 0.0035; P.pit = Math.max(-0.9, Math.min(0.6, P.pit - dy * 0.003)); } });   /* 見回しはゆっくり */
   const up = e => { const T = touches.get(e.pointerId); if (!T) return; touches.delete(e.pointerId);
     if (T.left) { mv.x = mv.y = 0; knob.style.transform = ""; stick.classList.remove("on"); stick.style.left = stick.style.top = ""; }
-    if (T.moved < 10 && performance.now() - T.t0 < 400) tap(e.clientX, e.clientY); };
+    if (T.moved < 10 && performance.now() - T.t0 < 400) { const [ex, ey] = loc(e); tap(ex, ey); } };
   wrap.addEventListener("pointerup", up); wrap.addEventListener("pointercancel", up);
   // 画面に映す
   const persp = (fy, as, nn, ff) => { const t = 1 / Math.tan(fy / 2); return [t / as, 0, 0, 0, 0, t, 0, 0, 0, 0, (ff + nn) / (nn - ff), -1, 0, 0, 2 * ff * nn / (nn - ff), 0]; };
   const look = (e, c) => { const f = V3.n(V3.s(c, e)), s = V3.n(V3.x(f, [0, 1, 0])), u = V3.x(s, f); return [s[0], u[0], -f[0], 0, s[1], u[1], -f[1], 0, s[2], u[2], -f[2], 0, -V3.d(s, e), -V3.d(u, e), V3.d(f, e), 1]; };
   const mm = (a, b) => { const r = new Array(16).fill(0); for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) for (let k = 0; k < 4; k++) r[j * 4 + i] += a[k * 4 + i] * b[j * 4 + k]; return r; };
   let VP = null, W = 1, H = 1, EYE = [0, 0, 0];
-  const toScr = (x, y, z) => { const v = [x, y, z, 1], o = [0, 0, 0, 0]; for (let i = 0; i < 4; i++) for (let k = 0; k < 4; k++) o[i] += VP[k * 4 + i] * v[k]; if (o[3] <= 0.1) return null; return [(o[0] / o[3] * 0.5 + 0.5) * innerWidth, (0.5 - o[1] / o[3] * 0.5) * innerHeight, o[3]]; };
+  const toScr = (x, y, z) => { const v = [x, y, z, 1], o = [0, 0, 0, 0]; for (let i = 0; i < 4; i++) for (let k = 0; k < 4; k++) o[i] += VP[k * 4 + i] * v[k]; if (o[3] <= 0.1) return null; return [(o[0] / o[3] * 0.5 + 0.5) * VW(), (0.5 - o[1] / o[3] * 0.5) * VH(), o[3]]; };
   // タップ：近くの魔物 → その場のメニュー、看板 → 部屋の画面
   function tap(sx, sy){ if (!VP) return; let best = null;
     rooms.forEach(R => { if (Math.abs(R.i - curRoom) > 1) return;
@@ -13073,7 +13090,7 @@ function fpOpen26(){
   function monMenu(a, R, sx, sy){ const m = a.m; if (!m) return; a.walking = false; a.wait = 6; a.r = Math.atan2(P.x - a.x, P.z - (R.Z + a.z));
     const lv = m.lv || 1, nm = (typeof esc === "function" ? esc(m.nick || "") : (m.nick || "")), line = SAY[(m.id || 0) % SAY.length];
     menu.innerHTML = `<div class="f26mh"><b>${nm}</b> <small>Lv${lv}</small></div><div class="f26say">「${line}」</div><div class="f26mb"><button data-m="card">📋 詳しく</button><button data-m="move">🏠 部屋を変える</button><button data-m="x">✕</button></div><div class="f26rooms" hidden></div>`;
-    menu.style.left = Math.max(8, Math.min(innerWidth - 248, sx - 120)) + "px"; menu.style.top = Math.max(70, Math.min(innerHeight - 220, sy - 170)) + "px"; menu.hidden = false;
+    menu.style.left = Math.max(8, Math.min(VW() - 248, sx - 120)) + "px"; menu.style.top = Math.max(70, Math.min(VH() - 220, sy - 170)) + "px"; menu.hidden = false;
     menu.querySelector('[data-m="x"]').onclick = () => { menu.hidden = true; };
     menu.querySelector('[data-m="card"]').onclick = () => { menu.hidden = true; try { modal = () => monCard(m.id) + ""; render(); } catch (e) {} };
     menu.querySelector('[data-m="move"]').onclick = () => { const L = menu.querySelector(".f26rooms"); L.hidden = !L.hidden;
@@ -13098,7 +13115,7 @@ function fpOpen26(){
     if (W0.k === "r") curRoom = W0.i; const R0 = rooms[curRoom]; whereB.textContent = W0.k === "c" || W0.tight ? "通路" : R0.name; whereS.textContent = `B${R0.f + 1}`;
     for (let i = Math.max(0, curRoom - 1); i <= Math.min(n - 1, curRoom + 1); i++) { loadRoom(rooms[i]); stepActs(rooms[i], dt); }
     if (msg.isConnected && R0.mb) msg.remove(); if (R0.err) msg.textContent = R0.err;
-    const dpr = Math.min(2, window.devicePixelRatio || 1), r = cv.getBoundingClientRect(); W = Math.round(r.width * dpr); H = Math.round(r.height * dpr); if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+    const dpr = Math.min(2, window.devicePixelRatio || 1), r = { width: cv.clientWidth, height: cv.clientHeight }; W = Math.round(r.width * dpr); H = Math.round(r.height * dpr); if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
     gl.viewport(0, 0, W, H); gl.clearColor(0.01, 0.008, 0.008, 1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     EYE = [P.x, P.y + P.eye, P.z]; const dir = [Math.sin(P.yaw) * Math.cos(P.pit), Math.sin(P.pit), -Math.cos(P.yaw) * Math.cos(P.pit)];
     VP = mm(persp(1.15, W / H, 0.15, 120), look(EYE, [EYE[0] + dir[0], EYE[1] + dir[1], EYE[2] + dir[2]]));
@@ -13125,15 +13142,15 @@ function fpOpen26(){
         gl.uniform3f(PB.U("C"), wx, R.Y + (DHOV25[a.sp] ? 0.9 : 0) + bob, wz); gl.uniform3fv(PB.U("R"), Rr); gl.uniform4f(PB.U("Q"), x0 * k, (foot - (oy + h)) * k, w * k, h * k); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); }); }
     // 近くの子に「話しかける」ボタン（動く子をタップで当てるのは難しかった）
     { const R = rooms[curRoom], fx = Math.sin(P.yaw), fz = -Math.cos(P.yaw); let best = null; (R.acts || []).forEach(a => { if (!a.m) return; const dx = a.x - P.x, dz = R.Z + a.z - P.z, d = Math.hypot(dx, dz); if (d < 5.5 && (dx * fx + dz * fz) / (d || 1) > 0.3 && (!best || d < best.d)) best = { a, d }; });
-      const tb = wrap.querySelector(".f26talk"); if (best && menu.hidden) { tb.hidden = false; if (tb.dataset.id != best.a.m.id) { tb.dataset.id = best.a.m.id; tb.textContent = `💬 ${best.a.m.nick || ""}に話しかける`; tb.onclick = () => monMenu(best.a, R, innerWidth / 2, innerHeight * 0.55); } } else tb.hidden = true; }
+      const tb = wrap.querySelector(".f26talk"); if (best && menu.hidden) { tb.hidden = false; if (tb.dataset.id != best.a.m.id) { tb.dataset.id = best.a.m.id; tb.textContent = `💬 ${best.a.m.nick || ""}に話しかける`; tb.onclick = () => monMenu(best.a, R, VW() / 2, VH() * 0.55); } } else tb.hidden = true; }
     // 名前の札（近くの子）。画面の外にいる子は、端に矢印
-    { const lc = wrap.querySelector(".f26lab"), dp = Math.min(2, window.devicePixelRatio || 1); if (lc.width !== Math.round(innerWidth * dp)) { lc.width = Math.round(innerWidth * dp); lc.height = Math.round(innerHeight * dp); } const g = lc.getContext("2d"); g.setTransform(dp, 0, 0, dp, 0, 0); g.clearRect(0, 0, innerWidth, innerHeight); g.textAlign = "center"; g.font = "bold 12px system-ui,sans-serif";
+    { const lc = wrap.querySelector(".f26lab"), dp = Math.min(2, window.devicePixelRatio || 1); if (lc.width !== Math.round(VW() * dp)) { lc.width = Math.round(VW() * dp); lc.height = Math.round(VH() * dp); } const g = lc.getContext("2d"); g.setTransform(dp, 0, 0, dp, 0, 0); g.clearRect(0, 0, VW(), VH()); g.textAlign = "center"; g.font = "bold 12px system-ui,sans-serif";
       const R = rooms[curRoom];
-      [[0, -14.5, curRoom < n - 1 ? "▼ 次の部屋へ" : ""], [0, 14.5, curRoom > 0 ? "▲ 前の部屋へ" : ""]].forEach(([ex, ez, t]) => { if (!t) return; const s = toScr(ex, R.Y + 1.4, R.Z + ez); if (s && s[0] > 0 && s[0] < innerWidth && s[1] > 40 && s[1] < innerHeight) { g.fillStyle = "rgba(255,200,110,.85)"; g.font = "bold 13px system-ui,sans-serif"; g.fillText(t, s[0], s[1]); } });   /* 出口の場所 */
+      [[0, -14.5, curRoom < n - 1 ? "▼ 次の部屋へ" : ""], [0, 14.5, curRoom > 0 ? "▲ 前の部屋へ" : ""]].forEach(([ex, ez, t]) => { if (!t) return; const s = toScr(ex, R.Y + 1.4, R.Z + ez); if (s && s[0] > 0 && s[0] < VW() && s[1] > 40 && s[1] < VH()) { g.fillStyle = "rgba(255,200,110,.85)"; g.font = "bold 13px system-ui,sans-serif"; g.fillText(t, s[0], s[1]); } });   /* 出口の場所 */
       (R.acts || []).forEach(a => { if (!a.m) return; const wx = a.x, wz = R.Z + a.z, d = Math.hypot(wx - P.x, wz - P.z); const s = toScr(wx, R.Y + 2.4, wz);
-        if (s && s[0] > 0 && s[0] < innerWidth && s[1] > 40 && s[1] < innerHeight) { if (d > 22) return; const t = a.m.nick || "", w = g.measureText(t).width + 10; g.globalAlpha = Math.max(0.35, 1 - d / 22); g.fillStyle = "rgba(14,10,8,.7)"; g.fillRect(s[0] - w / 2, s[1] - 15, w, 18); g.fillStyle = "#e8f5d8"; g.fillText(t, s[0], s[1] - 2); g.globalAlpha = 1; }
-        else { const ang = Math.atan2(wx - P.x, -(wz - P.z)) - P.yaw, a2 = Math.atan2(Math.sin(ang), Math.cos(ang)), x = innerWidth / 2 + Math.sin(a2) * innerWidth * 0.42, y = innerHeight * 0.5 - Math.cos(a2) * innerHeight * 0.3;
-          g.save(); g.globalAlpha = 0.8; g.translate(Math.max(18, Math.min(innerWidth - 18, x)), Math.max(70, Math.min(innerHeight - 140, y))); g.rotate(a2); g.fillStyle = "#e8f5d8"; g.beginPath(); g.moveTo(0, -10); g.lineTo(7, 4); g.lineTo(-7, 4); g.closePath(); g.fill(); g.rotate(-a2); g.font = "10px system-ui,sans-serif"; g.fillText(a.m.nick || "", 0, 16); g.restore(); } }); }
+        if (s && s[0] > 0 && s[0] < VW() && s[1] > 40 && s[1] < VH()) { if (d > 22) return; const t = a.m.nick || "", w = g.measureText(t).width + 10; g.globalAlpha = Math.max(0.35, 1 - d / 22); g.fillStyle = "rgba(14,10,8,.7)"; g.fillRect(s[0] - w / 2, s[1] - 15, w, 18); g.fillStyle = "#e8f5d8"; g.fillText(t, s[0], s[1] - 2); g.globalAlpha = 1; }
+        else { const ang = Math.atan2(wx - P.x, -(wz - P.z)) - P.yaw, a2 = Math.atan2(Math.sin(ang), Math.cos(ang)), x = VW() / 2 + Math.sin(a2) * VW() * 0.42, y = VH() * 0.5 - Math.cos(a2) * VH() * 0.3;
+          g.save(); g.globalAlpha = 0.8; g.translate(Math.max(18, Math.min(VW() - 18, x)), Math.max(70, Math.min(VH() - 140, y))); g.rotate(a2); g.fillStyle = "#e8f5d8"; g.beginPath(); g.moveTo(0, -10); g.lineTo(7, 4); g.lineTo(-7, 4); g.closePath(); g.fill(); g.rotate(-a2); g.font = "10px system-ui,sans-serif"; g.fillText(a.m.nick || "", 0, 16); g.restore(); } }); }
   }
   requestAnimationFrame(loop);
 }
