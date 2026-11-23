@@ -7400,7 +7400,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.314（11/23 19:57）";
+const VER20 = "No.315（11/23 20:11）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -12987,6 +12987,11 @@ async function fpMesh26(kind){ if (kind === "lordday") kind = "lord"; if (FPMESH
   const v = (typeof MESHV26 !== "undefined" && MESHV26[kind + ".fp26"]) || 1, r = await fetch(`bg26/${kind}.fp26.gz?v=${v}`); if (!r.ok) throw new Error("部屋の形が読めない " + kind);
   const buf = await new Response(r.body.pipeThrough(new DecompressionStream("gzip"))).arrayBuffer(), dv = new DataView(buf);
   const N = dv.getUint32(4, true), T = dv.getUint32(8, true); let o = 16; const pos = new Int16Array(buf.slice(o, o + N * 6)); o += N * 6; const col = new Uint8Array(buf.slice(o, o + N * 3)); o += N * 3; const idx = new Uint32Array(buf.slice(o, o + T * 12));
+  /* 色の手直し：①床に貼られた真っ黒な板（門の影）を床の色に ②くりぬいたトンネルの壁は通路と同じ岩の色に（白っぽい筒に見えた） */
+  for (let i = 0; i < N; i++) { const x = pos[i * 3] / 100, y = pos[i * 3 + 1] / 100, zf = -pos[i * 3 + 2] / 100, c = i * 3, mx = Math.max(col[c], col[c + 1], col[c + 2]), h = Math.abs(Math.sin(i * 12.9898) * 43758.5453) % 1;
+    if (y < 0.25 && mx < 30) { col[c] = 64 + h * 14; col[c + 1] = 48 + h * 10; col[c + 2] = 35 + h * 8; continue; }
+    const qx = Math.abs(x) - 2.4 + 0.75, qy = Math.abs(y - 1.47) - 1.43 + 0.75, csd = Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0) - 0.75;   /* くりぬいた面の上だけ */
+    if (y > 0.2 && Math.abs(csd) < 0.22 && (zf < -2.5 || zf > 7.1)) { const fl = y < 0.3, b = fl ? [80, 64, 50] : [58, 48, 42], w = 0.75 + 0.45 * h; col[c] = b[0] * w; col[c + 1] = b[1] * w; col[c + 2] = b[2] * w; } }
   return FPMESH26[kind] = { N, T, pos, col, idx }; }
 /* 当たり判定の地図（ポリゴンから作った 0.25 マス：床の高さと、床から上に何もない高さ）。小石は無視、壁・岩・柱は形どおり */
 const FPGRID26 = {};
@@ -13040,7 +13045,7 @@ function fpOpen26(){
   const TX = new Map(); const texOf = im => { let t = TX.get(im); if (t) return t; t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, im);
     [gl.TEXTURE_MIN_FILTER, gl.TEXTURE_MAG_FILTER].forEach(k => gl.texParameteri(gl.TEXTURE_2D, k, gl.NEAREST)); [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T].forEach(k => gl.texParameteri(gl.TEXTURE_2D, k, gl.CLAMP_TO_EDGE)); TX.set(im, t); return t; };
   // 通路（部屋 i の奥 → 部屋 i+1 の前）。岩の筒。階がかわるときは下りの段
-  function corridor(a, b){ const z0 = a.Z - 3.0, z1 = b.Z + 7.6, y0 = a.Y, y1 = b.Y, P = [], C = [], I = [];
+  function corridor(a, b){ const z0 = a.Z - 16.9, z1 = b.Z + 15.9,   /* 部屋の中のトンネルは模型の側にあるので、通路は部屋の外だけ（部屋の中に筒が立っていた） */ y0 = a.Y, y1 = b.Y, P = [], C = [], I = [];
     const ring = [[-2.6, 0], [-1.3, 0], [0, 0], [1.3, 0], [2.6, 0], [2.75, 1.3], [2.5, 2.35], [1.3, 2.9], [0, 3.05], [-1.3, 2.9], [-2.5, 2.35], [-2.75, 1.3]], R = ring.length;
     const hs = (x, y) => { const s = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453; return s - Math.floor(s); };
     const steps = Math.max(2, Math.round((z0 - z1) / 0.5)), nst = Math.abs(y1 - y0) / 0.38;
@@ -13058,7 +13063,7 @@ function fpOpen26(){
     const ib = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint32Array(I), gl.STATIC_DRAW); return { pb, cb, ib, n: I.length, z0, z1, y0, y1 }; }
   const CORR = []; for (let i = 0; i + 1 < n; i++) CORR.push(corridor(rooms[i], rooms[i + 1]));
   // たいまつ：部屋の出入口の両わきと、通路に6歩ごと（通路が真っ暗だった）
-  const TORCH = []; rooms.forEach((Rm, i) => { if (i > 0) TORCH.push([-2.9, Rm.Y + 2.3, Rm.Z + 7.6], [2.9, Rm.Y + 2.3, Rm.Z + 7.6]); if (i < n - 1) TORCH.push([-2.9, Rm.Y + 2.3, Rm.Z - 7.6], [2.9, Rm.Y + 2.3, Rm.Z - 7.6]); });
+  const TORCH = []; rooms.forEach((Rm, i) => { if (i > 0) TORCH.push([-3.1, Rm.Y + 2.3, Rm.Z + 7.6, i, 1], [3.1, Rm.Y + 2.3, Rm.Z + 7.6, i, 1]); if (i < n - 1) TORCH.push([-3.1, Rm.Y + 2.3, Rm.Z - 7.6, i, -1], [3.1, Rm.Y + 2.3, Rm.Z - 7.6, i, -1]); });
   CORR.forEach(C => { const L = C.z0 - C.z1, k = Math.max(1, Math.round(L / 6)); for (let j = 1; j < k; j++) { const t = j / k, z = C.z0 - L * t, y = C.y0 + (C.y1 - C.y0) * t; TORCH.push([(j % 2 ? -2.2 : 2.2), y + 2.0, z]); } });
   const mkTex = (w, h, f) => { const c = document.createElement("canvas"); c.width = w; c.height = h; f(c.getContext("2d"), w, h); return c; };
   const FLAME = mkTex(32, 64, (g, w, h) => { const gr = g.createRadialGradient(16, 44, 1, 16, 40, 22); gr.addColorStop(0, "rgba(255,250,210,1)"); gr.addColorStop(0.3, "rgba(255,190,80,.9)"); gr.addColorStop(0.7, "rgba(230,90,20,.35)"); gr.addColorStop(1, "rgba(120,30,0,0)"); g.fillStyle = gr; g.beginPath(); g.ellipse(16, 40, 11, 24, 0, 0, 6.3); g.fill(); });
@@ -13159,6 +13164,7 @@ function fpOpen26(){
     P.walk = (P.walk || 0) + ((mv.x || mv.y) ? Math.hypot(mv.x, mv.y) * dt * 8 : 0); const bob = (mv.x || mv.y) ? Math.sin(P.walk * 1.9) * 0.07 : 0; EYE = [P.x, P.y + P.eye + bob + SHK * Math.sin(now / 1000 * 47), P.z]; SHK *= Math.pow(0.02, dt); const dir = [Math.sin(P.yaw) * Math.cos(P.pit), Math.sin(P.pit), -Math.cos(P.yaw) * Math.cos(P.pit)];
     VP = mm(persp(1.15, W / H, 0.15, 120), look(EYE, [EYE[0] + dir[0], EYE[1] + dir[1], EYE[2] + dir[2]]));
     gl.enable(gl.DEPTH_TEST); gl.useProgram(PM.p); gl.uniformMatrix4fv(PM.U("VP"), false, new Float32Array(VP)); gl.uniform3fv(PM.U("EYE"), EYE);
+    /* 出入口のたいまつは、地図が読めたら本当の壁の位置へ（宙に浮いていた） */ TORCH.forEach(t => { if (t[3] == null || t[5]) return; const R = rooms[t[3]]; if (!R.G) return; t[5] = 1; const sg = t[4], z0 = sg < 0 ? -2.8 : 7.3; for (let k = 0; k < 60; k++) { const zl = z0 + sg * k * 0.25, j = gAt(R.G, t[0], zl); if (j < 0 || R.G.fl[j] === 255 || R.G.cl[j] / 20 < 2.6) { t[2] = R.Z + zl - sg * 0.35; return; } } });
     const LT6 = TORCH.map(t => [t, (t[0] - EYE[0]) ** 2 + (t[1] - EYE[1]) ** 2 + (t[2] - EYE[2]) ** 2]).sort((a, b) => a[1] - b[1]).slice(0, 6); while (LT6.length < 6) LT6.push([[0, -999, 0], 1e9]);
     gl.uniform3fv(PM.U("LT"), new Float32Array(LT6.flatMap(o => o[0]))); gl.uniform1fv(PM.U("LF"), new Float32Array(LT6.map((o, j) => o[0][1] < -900 ? 0 : 1.0 * (0.86 + 0.1 * Math.sin(now / 1000 * 11 + j * 2.1) + 0.04 * Math.sin(now / 1000 * 27 + j)))));
     const la = PM.A("ap"), lc = PM.A("ac"); gl.enableVertexAttribArray(la); gl.enableVertexAttribArray(lc);
