@@ -1,0 +1,59 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>第7回テスト報告</title>
+<style>
+:root{--bg:#1a1410;--card:#261d17;--fg:#efe3d3;--mut:#a8988a;--red:#e2614f;--yel:#e8b84a;--grn:#7cc68a;--line:#3b2f26}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.65 system-ui,"Hiragino Sans",sans-serif;padding:16px max(16px,env(safe-area-inset-right)) 40px max(16px,env(safe-area-inset-left));max-width:640px;margin-inline:auto}
+h1{font-size:20px;margin:4px 0}h2{font-size:16px;margin:22px 0 8px}p.s{color:var(--mut);margin:0 0 14px;font-size:13px}
+.big{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}.big div{flex:1 1 120px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px}
+.big b{font-size:26px;display:block;color:var(--yel)}
+ul{margin:4px 0 10px;padding-left:18px}li{margin:4px 0}
+.ok{color:var(--grn)}.ng{color:var(--red)}.m{color:var(--mut);font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 14px;margin:0 0 10px}
+</style></head><body>
+<h1>第7回テスト（10人）</h1>
+<p class="s">2026-11-24 夜中。点は10点満点。10人が同時に遊んだので機械が重く（10fps前後）、動きのばらつきの一部はそのせい。</p>
+
+<div class="big"><div><b>5.1</b>平均点（前回4.3）</div><div><b>18件</b>夜のうちに直した</div><div><b>3つ</b>決めてほしいこと</div></div>
+
+<h2>きびしく言うと</h2>
+<div class="card">トンネルの見た目は全員が「すき間が無くなった・雰囲気が出た」と認めた。<br>でも<b class="ng">「歩いて隣の部屋へ行く」が、まだ半分の人でつまずいた</b>。原因はトンネルと通路の境目の引っかかり（直した）。<br>もう1つの壁は<b class="ng">💎が余りすぎて悩まない</b>（16日目で1609残り）。経営ゲームとしての芯がまだ弱い。</div>
+
+<h2>夜のうちに直したもの</h2>
+<ul>
+<li class="ok">スキルの書の画面がタイトルの上に出て「つづきから」が押せなくなる（★3）</li>
+<li class="ok">歩く：トンネルと通路の境目で止まる・重い端末でほとんど進まない（★3）</li>
+<li class="ok">歩く：部屋のすみから岩の裏に入りこめる（★3）</li>
+<li class="ok">歩く：魔物がトンネルに入って通せんぼ／壁に顔がくっつく／見回しが速すぎる</li>
+<li class="ok">歩く：名札どうしが重なる・画面外の印が床の真ん中に浮く</li>
+<li class="ok">歩く：「▼次の部屋へ」の札を押すと、その部屋まで自動で歩く（新しく）</li>
+<li class="ok">歩く：手のない子（スライム等）も岩をかじって掘る</li>
+<li class="ok">歩く：足音・つるはし・打ち合い・しずくの音（新しく）</li>
+<li class="ok">魔物の待機・攻撃・掘る・寝るを13方向の絵に（まわりこんでも向きが合う）</li>
+<li class="ok">おまかせ：2つの出発点から探して見落としを減らす／予報を良くしないのに稼ぎを半分以下にする並びは選ばない</li>
+<li class="ok">おまかせ：試せる並びがないときは理由を出す／方針の画面は「⚙ おまかせの方針」に改名（同じ名前が2つあった）</li>
+<li class="ok">育成の画面に休む部屋も出す（そこにいる子が消えて見えた）</li>
+<li class="ok">最初の宝箱はスキルの書（13日遊んでも書に出会えなかった）</li>
+<li class="ok">特訓の連打で2Lv上がる・スキルの説明の食い違い</li>
+<li class="ok">店の「→第1の間」の予告と実際の行き先がちがう</li>
+<li class="ok">先の襲撃の予報を厳しめに、「目安」と書く</li>
+<li class="ok">侵略：まるで歯が立たない拠点に💀</li>
+</ul>
+
+<h2>まだ残っている大きいもの</h2>
+<ul>
+<li><b>💎が余る</b>：中盤に💎を食う大物がない ★3</li>
+<li><b>夜明けの演出が続く</b>：完全勝利→かけら→記憶→宝箱→進化→書、と最大6枚タップ ★2</li>
+<li><b>歩く画面に管理ボタンがない</b>：デフォルトにするなら必須 ★2</li>
+<li><b>侵略の戦場</b>：魔物が門へ向かわず真ん中で止まる・前列後列が見分けられない・編成で倍率が変わらない ★2〜3</li>
+<li>夜の途中で開き直すと、始まりの演出から見えて「最初から」と感じる（中身は続きから）★2</li>
+<li>最初の目標「レベルアップ」で特訓の場所が奥すぎる ★2</li>
+</ul>
+<p class="m">ほか：上の「+○/日」とおまかせの「掘る💎/日」が別の数字で混乱／横持ちでタイトルが詰む／話しかけの枠が魔物を隠す／「地図 +1部屋」の意味が分からない。</p>
+
+<h2>次に決めてほしいこと</h2>
+<div class="card">
+<b>A.</b> 💎の使い道（中盤の大物：例「主の間の強化」「新しい階」）と流入の見直し<br>
+<b>B.</b> 夜明けの演出を1枚にまとめる＋歩く画面に管理ボタン<br>
+<b>C.</b> 侵略の戦場を作り直す（門へ向かう・前列後列・編成で倍率）<br>
+<span class="m">おすすめは A→B→C。経営の悩みが無いと、ほかを良くしても続けて遊ぶ理由が弱いため。</span>
+</div>
+</body></html>
