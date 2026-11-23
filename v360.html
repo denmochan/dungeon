@@ -1246,6 +1246,18 @@ body:has(.modal) .inv25btn,body:has(.ntfull19) .inv25btn{display:none}
 #fp26 .f26say.pop28{animation:say28 .25s ease-out}@keyframes say28{from{opacity:.2;transform:translateY(4px)}to{opacity:1;transform:none}}
 #fp26 .f26mb{flex-wrap:wrap}#fp26 .f26mb button[data-m="more"]{flex:1 0 100%;background:#3a2814;border-color:#c08a3a}
 #fp26 .f26menu:not([hidden]) ~ .f26map{display:none}
+/* proto28：横持ちのタイトル（ボタンが画面の外にあって押せなかった）→ 左に絵、右にボタン */
+@media (orientation:landscape) and (max-height:520px){
+.title{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(260px,44%);grid-template-rows:auto auto auto 1fr;column-gap:18px;row-gap:4px;align-content:start;align-items:start;justify-items:center;overflow:hidden!important;padding:max(10px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 10px max(16px,env(safe-area-inset-left))!important}
+.title::before,.title::after{display:none!important}
+.title>.tlogo{grid-column:1;grid-row:1}.title>.tlord{grid-column:1;grid-row:2;zoom:.62}.title>.tinfo{grid-column:1;grid-row:3}.title>.kk25bar{grid-column:1;grid-row:4}
+.title>.tmenu{grid-column:2;grid-row:1/span 4;width:100%;max-height:calc(100vh - 20px);overflow-y:auto;-webkit-overflow-scrolling:touch;align-self:stretch;padding-bottom:12px}.title>.tmenu>*{flex-shrink:0}
+}
+.rs-grid .rsn28{display:block;font-style:normal;font-size:12px;opacity:.7;margin-top:2px;line-height:1.3}
+.tkl28{display:flex;flex-direction:column;gap:6px;max-height:60vh;overflow-y:auto}.tkr28{display:flex;align-items:center;gap:10px;padding:4px 6px;border:1px solid #3a2c20;border-radius:10px;background:#1c1510}
+.tkr28 .tx{flex:1;min-width:0;display:flex;flex-direction:column}.tkr28 .tx small{opacity:.7}.tkr28 button{display:flex;flex-direction:column;align-items:center;padding:6px 10px;min-width:84px}.tkr28 button small{font-size:12px;opacity:.85}
+.res28{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 70px);transform:translateX(-50%);z-index:95;background:#1b120cee;border:1px solid #e8b84a;border-radius:12px;padding:10px 16px;text-align:center;color:#f6e3c0;box-shadow:0 6px 20px #000a;display:flex;flex-direction:column;gap:2px;transition:opacity .5s;pointer-events:none;max-width:calc(100vw - 32px)}
+.res28 b{font-size:16px;color:#ffd56a;white-space:nowrap}.res28 small{font-size:12px;opacity:.85}.res28.out{opacity:0}
 </style>
 </head>
 <body>
@@ -7431,7 +7443,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.332（11/24 08:13）";
+const VER20 = "No.333（11/24 08:19）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -13600,7 +13612,7 @@ function smartAuto27() {
   const fin = keep ? sc1 : sc0, moved = S.mons.filter(m => prevH.get(m.id) !== m.home);
   const nm = i => i == null ? "控え" : roomTitle(S, i), lvTag = d => d ? `${DNG23[d.lv][0]}${DNG23[d.lv][1]}` : "—";
   modal = () => `<h2>🪄 おまかせ</h2><div class="hint">${(r.evals || 0) <= 1 ? "動かして試せる並びがなかった（移せる部屋が1つだけ、または全員📌固定・休み中）。部屋を掘って増やすと、ためせる並びが増える" : `守り（次の襲撃を試す）・稼ぎ・育ちを💎に換算して、${r.evals}通りの並びを試した`}</div>
-    <div class="rs-grid"><div><small>次の襲撃</small><b>${lvTag(sc0.d)} → ${lvTag(fin.d)}</b></div><div><small>掘る💎/日</small><b>${Math.round(sc0.e.dp)} → ${Math.round(fin.e.dp)}</b></div><div><small>育ち Lv/日</small><b>${sc0.e.lv.toFixed(1)} → ${fin.e.lv.toFixed(1)}</b></div><div><small>守りの損（💎）</small><b>${Math.round(sc0.loss || 0)} → ${Math.round(fin.loss || 0)}</b></div></div>
+    <div class="rs-grid"><div><small>次の襲撃</small><b>${lvTag(sc0.d)} → ${lvTag(fin.d)}</b></div><div><small>💎/日（上の数字）</small><b>${(v => (v[0] < 0 ? "" : "+") + v[0] + " → " + (v[1] < 0 ? "" : "+") + v[1])((i1 => [Math.round(i1 - (fin.e.dp - sc0.e.dp)), Math.round(i1)])(income15(S)))}</b></div><div><small>育ち Lv/日</small><b>${sc0.e.lv.toFixed(1)} → ${fin.e.lv.toFixed(1)}</b></div><div><small>守りの損（💎）</small><b>${Math.round(sc0.loss || 0)} → ${Math.round(fin.loss || 0)}</b></div></div>
     ${moved.length ? `<div class="lab2">並べ替えた（${moved.length}体）<small>　気に入らなければ ↩ 戻す</small></div>` + moved.map(m => `<div class="hint">${esc(m.nick)}：${esc(nm(prevH.get(m.id)))} → <b>${esc(nm(m.home))}</b></div>`).join("") : `<div class="box">いまの並びがいちばん</div>`}
     <div class="mixbtn18">${moved.length ? `<button data-a="undo13">↩ 戻す</button>` : ""}<button class="main" data-a="close">OK</button></div>`;
   CV.sig = ""; save(); render(); }
@@ -13864,6 +13876,42 @@ function talk28(m) {
 }
 // 話題ごとの小さな印（会話窓の右上に出す）
 const TKICON28 = { hurt: "🩹", hungry: "🍖", raid0: "⚔️", raid1: "⚔️", lord: "👑", bench: "🪑", mine: "⛏", train: "📚", fight: "🛡", mate: "👥", alone: "🌙", kills: "💀", like: "💗", master: "⭐", rare: "✨", again: "💬", voice: "🗨", bio: "📖", idle: "" };
+
+// ================= proto28：第7回テストの残り =================
+// ---------- 1) 結果の「地図 +1部屋」が何のことか分からなかった ----------
+resultStage15 = (prev => function (r) { let h = prev(r); try {
+  h = h.replace(/<div><small>地図<\/small><b class="bad">\+(\d+)部屋<\/b><\/div>/, (_, n) => `<div><small>🗺 地図を持ち帰られた</small><b class="bad">+${n}部屋</b><i class="rsn28">知られた部屋は罠を見ぬかれやすい</i></div>`);
+  h = h.replace(/<div><small>地図<\/small><b class="">守った<\/b><\/div>/, `<div><small>🗺 地図</small><b>守った</b><i class="rsn28">逃げた勇者がいない</i></div>`);
+} catch (e) {} return h; })(resultStage15);
+
+// ---------- 2) 特訓が魔物カードの奥にあって見つからない → 育成の画面から一覧で ----------
+function tokList28() {
+  const L = S.mons.slice().sort((a, b) => (b.home != null) - (a.home != null) || b.lv - a.lv);
+  return `<h2>🔥 💎で特訓</h2><div class="hint">💎を払って、すぐLvを1上げる。同じ日に続けると値段が上がる。いま 💎${fmt8(S.dp)}</div>` +
+    `<div class="tkl28">${L.map(m => { const c = tokCost27(m), ok = S.dp >= c; return `<div class="tkr28">${simg23(m, m.evos, "sp", "width:40px;height:40px")}<div class="tx"><b>${esc(m.nick)}</b><small>Lv${m.lv}${m.home == null ? "・控え" : ""}</small></div><button data-a="tok27" data-v="${m.id}" ${ok ? "" : "disabled"}>Lv${m.lv + 1}へ<small>💎${fmt8(c)}</small></button></div>`; }).join("")}</div>` +
+    `<button data-a="close" style="width:100%;margin-top:8px">閉じる</button>`;
+}
+let TOKL28 = false;
+addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest("[data-a]"); if (!b) return;
+  if (b.dataset.a === "tok28") { ev.stopImmediatePropagation(); ev.preventDefault(); TOKL28 = true; modal = tokList28; render(); return; }
+  if (b.dataset.a === "tok27" && TOKL28 && b.closest(".tkl28")) setTimeout(() => { if (typeof modal === "function" && !stage) { modal = tokList28; render(); } }, 0);   /* 特訓したあとも一覧のまま */
+  if (b.dataset.a === "close") TOKL28 = false;
+}, true);
+{ const _r = render; render = function () { _r.apply(this, arguments); try {
+  const g = document.querySelector(".ghb27"); if (g && !g.querySelector('[data-a="tok28"]')) { const x = document.createElement("button"); x.dataset.a = "tok28"; x.textContent = "🔥 💎で特訓"; g.appendChild(x); }
+} catch (e) {} }; }
+MIS19.lvup.t = n => `魔物を${n}回レベルアップ（🔥特訓・📚鍛える・夜の戦い）`;
+
+// ---------- 3) 夜の途中で開き直すと「最初から」に見えた → 続きだとはっきり出す ----------
+{ const _t = toast; let last = 0; toast = function (t) {
+  if (t === "閉じる前の襲撃のつづき" || t === "閉じたところから続ける") { if (Date.now() - last < 3000) return; last = Date.now(); return resume28(); }
+  return _t.apply(this, arguments); }; }
+function resume28() { try {
+  setTimeout(() => { if (!N) return; const H = N.heroes || [], dead = H.filter(h => h.st === "dead").length, esc2 = H.filter(h => h.st === "escaped").length;
+    const d = document.createElement("div"); d.className = "res28";
+    d.innerHTML = `<b>▶ 閉じたところから再開</b><small>勇者 ${H.length}人のうち ${dead}人を倒した${esc2 ? `・${esc2}人に逃げられた` : ""}／主の体力 ${N.lord ? Math.round(N.lord.hp) : "?"}</small>`;
+    document.body.appendChild(d); setTimeout(() => d.classList.add("out"), 2600); setTimeout(() => d.remove(), 3200); }, 400);
+} catch (e) {} }
 
 </script>
 <script>// ================= 3Dの子を、今のコマアニメと同じ並び（17コマ）の絵に焼く（開発用・ページ内で実行） =================
