@@ -7378,7 +7378,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.296（11/23 12:37）";
+const VER20 = "No.297（11/23 12:41）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -11307,7 +11307,7 @@ const HAI25 = (() => {
     // 大きい子から置く
     const all = []; list.forEach(e => { for (let i = 0; i < e.n; i++) all.push({ sp: e.sp, evo: e.evo, act: e.act }); });
     all.sort((a, b) => footR(b) - footR(a));
-    all.forEach(e => { const c = { sp: e.sp, evo: e.evo, mode: "idle", t: (k++) * 0.37, r: 0, lie: false }; const r = footR(c); const bip = BIP(e.sp);
+    all.forEach(e => { const c = { sp: e.sp, evo: e.evo, id: e.id, mode: "idle", t: (k++) * 0.37, r: 0, lie: false }; const r = footR(c); const bip = BIP(e.sp);
       let pos = null;
       if (e.act === "mine" && bip && spots.length && si < spots.length) { const s = spots[si++]; c.mode = "mine"; c.look = [s[2][0], s[1]]; c.rk = s[3]; c.r = Math.atan2(s[2][0] - s[0], 0); pos = [s[0], s[1]]; }
       else if (e.act === "mine" && bip && veins.length && vi < veins.length * 2) { const v = veins[vi % veins.length], side = vi >= veins.length ? -1 : 1; vi++;
@@ -12880,6 +12880,7 @@ function orbit26(i){
   const ms = S.mons.filter(m => m.home === i).slice(0, 8);
   let cast = []; try { cast = HAI25.place(on, ms.map(m => ({ sp: m.sp, evo: m.evos || 0, n: 1, act: "idle" })), 11 + i * 17); } catch (e) {}
   const acts = cast.map((c, k) => ({ sp: c.sp, evo: c.evo || 0, x: c.o[0], z: c.o[2], r: Math.random() * 6.28, hx: c.o[0], hz: c.o[2], tx: c.o[0], tz: c.o[2], wait: 1 + Math.random() * 3, ph: Math.random() * 6, walking: false, dist: 0 }));
+  if (S.path[i].kind === "lord") acts.push({ lord: 1, sp: "lord", evo: typeof lordTier === "function" ? lordTier() : 0, x: 0, y: 1.3, z: 7.7, r: Math.PI, hx: 0, hz: 7.7, tx: 0, tz: 7.7, wait: 1e9, ph: 0, walking: false, dist: 0 });   /* 主の間に主がいなかった */
 
   const th = (() => { try { return (S.floors[floorOf(S, i)] || {}).theme; } catch (e) { return ""; } })(), CM = cssMat26((typeof THF25 !== "undefined" && THF25[th]) || "");
   const wrap = document.createElement("div"); wrap.id = "orb26";
@@ -12921,10 +12922,10 @@ function orbit26(i){
   // 魔物の暮らし（軽く）：ときどき近くへ歩いて、また立ち止まる
   const SH = SHAPE25[(ROOMS24[HAI25.room(on)] || {}).shape] || SHAPE25.base, OBS = (() => { try { return HAI25.foots(on).filter(o => o[2] >= 0.5); } catch (e) { return []; } })();
   const fl = (x, z) => shapeSd25(SH, x / SW25[0], z / SW25[1]) < -0.25 && !OBS.some(([ox, oz, or]) => Math.hypot(x - ox, z - oz) < or + 0.6);
-  function stepActs(dt){ acts.forEach(a => { if (!a.walking) { a.wait -= dt; if (a.wait <= 0) { for (let k = 0; k < 8; k++) { const ang = Math.random() * 6.28, d = 2 + Math.random() * 5, x = a.hx + Math.cos(ang) * d, z = a.hz + Math.sin(ang) * d; if (fl(x, z)) { a.tx = x; a.tz = z; a.walking = true; break; } } a.wait = 2 + Math.random() * 4; } return; }
+  function stepActs(dt){ acts.forEach(a => { if (a.lord) return; if (!a.walking) { a.wait -= dt; if (a.wait <= 0) { for (let k = 0; k < 8; k++) { const ang = Math.random() * 6.28, d = 2 + Math.random() * 5, x = a.hx + Math.cos(ang) * d, z = a.hz + Math.sin(ang) * d; if (fl(x, z)) { a.tx = x; a.tz = z; a.walking = true; break; } } a.wait = 2 + Math.random() * 4; } return; }
     const dx = a.tx - a.x, dz = a.tz - a.z, L = Math.hypot(dx, dz); if (L < 0.1) { a.walking = false; return; } const s = Math.min(L, 2.2 * dt); a.x += dx / L * s; a.z += dz / L * s; a.dist = (a.dist || 0) + s; a.r = Math.atan2(dx, dz); a.ph = (a.ph + dt * 7.5) % 6; }); }
   function loop(now){ if (!alive) return; requestAnimationFrame(loop);
-    const dt = Math.min(0.1, (now - lastT) / 1000); lastT = now; ft.push(dt); if (ft.length > 20) ft.shift(); fpsEl.textContent = Math.round(ft.length / ft.reduce((x, y) => x + y, 0)) + "fps";
+    const dt = Math.max(0.001, Math.min(0.1, (now - lastT) / 1000)); lastT = now; ft.push(dt); if (ft.length > 20) ft.shift(); fpsEl.textContent = Math.round(ft.length / ft.reduce((x, y) => x + y, 0)) + "fps";
     if (auto) yaw += dt * 0.2; stepActs(dt);
     const dpr = Math.min(2, window.devicePixelRatio || 1), r = cv.getBoundingClientRect(), W = Math.round(r.width * dpr), H = Math.round(r.height * dpr); if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
     gl.viewport(0, 0, W, H); gl.clearColor(0.03, 0.025, 0.025, 1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); if (!MB) return;
@@ -12946,7 +12947,7 @@ function orbit26(i){
       else { hs = o.hs || 1; cw = ch = Math.round(128 * hs); im = o.im; cx = (Math.floor((now / 1000 + a.ph) / 0.4) % 4) * cw; cy = 0; foot = o.foot; var ox = 0, oy = 0; if (a.walking) bob = Math.abs(Math.sin(a.dist * 7)) * 0.18; }
       const k = 1 / ppu, w = cw / hs, h = ch / hs, x0 = flip ? 64 - (ox + w - 64) - 64 : ox - 64;
       gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, texOf(im)); gl.uniform1i(PB.U("tx"), 0); gl.uniform1f(PB.U("FL"), flip ? 1 : 0); gl.uniform4f(PB.U("UR"), cx / im.width, cy / im.height, cw / im.width, ch / im.height);
-      gl.uniform3f(PB.U("C"), a.x, (DHOV25[a.sp] ? 0.9 : 0) + bob, a.z); gl.uniform3fv(PB.U("R"), Rr);
+      gl.uniform3f(PB.U("C"), a.x, (a.y || 0) + (DHOV25[a.sp] ? 0.9 : 0) + bob, a.z); gl.uniform3fv(PB.U("R"), Rr);
       gl.uniform4f(PB.U("Q"), x0 * k, (foot - (oy + h)) * k, w * k, h * k); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); });
   }
   requestAnimationFrame(loop);
@@ -13014,7 +13015,7 @@ function fpOpen26(){
     const ib = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, m.idx, gl.STATIC_DRAW); R.mb = { pb, cb, ib, n: m.T * 3 }; }).catch(e => { R.err = String(e.message || e); }); };
   // 魔物（部屋ごと）
   const mkActs = R => { const ms = S.mons.filter(m => m.home === R.i).slice(0, 10); let cast = []; try { cast = HAI25.place(R.on, ms.map(m => ({ sp: m.sp, evo: m.evos || 0, n: 1, act: "idle", id: m.id })), 11 + R.i * 17); } catch (e) {}
-    R.acts = cast.map((c, k) => ({ m: ms.find(x => x.id === c.id) || ms.find(x => x.sp === c.sp) || ms[k],   /* 並べると順番が変わる：名前がちがう子に出ていた */ sp: c.sp, evo: c.evo || 0, x: c.o[0], z: c.o[2], r: Math.random() * 6.28, hx: c.o[0], hz: c.o[2], tx: c.o[0], tz: c.o[2], wait: 1 + Math.random() * 3, ph: Math.random() * 6, walking: false, dist: 0 })); };
+    R.acts = cast.map((c, k) => ({ m: ms.find(x => x.id === c.id) || ms[k],   /* 並べると順番が変わる：名前がちがう子に出ていた */ sp: c.sp, evo: c.evo || 0, x: c.o[0], z: c.o[2], r: Math.random() * 6.28, hx: c.o[0], hz: c.o[2], tx: c.o[0], tz: c.o[2], wait: 1 + Math.random() * 3, ph: Math.random() * 6, walking: false, dist: 0 })); };
   rooms.forEach(mkActs);
   // 看板（部屋の入口の右）
   const signCv = R => { const c = document.createElement("canvas"); c.width = 128; c.height = 96; const g = c.getContext("2d"); g.fillStyle = "#5a3a22"; g.fillRect(58, 40, 12, 56); g.fillStyle = "#7a5432"; g.fillRect(6, 6, 116, 46); g.strokeStyle = "#2a1a0e"; g.lineWidth = 4; g.strokeRect(6, 6, 116, 46);
@@ -13038,7 +13039,7 @@ function fpOpen26(){
     if (left) { stick.style.left = (e.clientX - 60) + "px"; stick.style.top = (e.clientY - 60) + "px"; stick.classList.add("on"); } });
   wrap.addEventListener("pointermove", e => { const T = touches.get(e.pointerId); if (!T) return; const dx = e.clientX - T.x, dy = e.clientY - T.y; T.moved += Math.abs(dx) + Math.abs(dy); T.x = e.clientX; T.y = e.clientY;
     if (T.left) { let ax = T.x - T.x0, ay = T.y - T.y0; const L = Math.hypot(ax, ay), m = 50; if (L > m) { ax *= m / L; ay *= m / L; } mv.x = ax / m; mv.y = ay / m; knob.style.transform = `translate(${ax}px,${ay}px)`; }
-    else { P.yaw += dx * 0.006; P.pit = Math.max(-0.9, Math.min(0.6, P.pit - dy * 0.005)); } });
+    else { P.yaw += dx * 0.0035; P.pit = Math.max(-0.9, Math.min(0.6, P.pit - dy * 0.003)); } });   /* 見回しはゆっくり */
   const up = e => { const T = touches.get(e.pointerId); if (!T) return; touches.delete(e.pointerId);
     if (T.left) { mv.x = mv.y = 0; knob.style.transform = ""; stick.classList.remove("on"); stick.style.left = stick.style.top = ""; }
     if (T.moved < 10 && performance.now() - T.t0 < 400) tap(e.clientX, e.clientY); };
@@ -13073,12 +13074,13 @@ function fpOpen26(){
     const dx = a.tx - a.x, dz = a.tz - a.z, L = Math.hypot(dx, dz); if (L < 0.1) { a.walking = false; return; } const s = Math.min(L, 2.2 * dt); a.x += dx / L * s; a.z += dz / L * s; a.dist += s; a.r = Math.atan2(dx, dz); }); }
   let curRoom = 0, lastT = performance.now(), ft = [];
   function loop(now){ if (!alive) return; requestAnimationFrame(loop);
-    const dt = Math.min(0.1, (now - lastT) / 1000); lastT = now; ft.push(dt); if (ft.length > 20) ft.shift(); fpsEl.textContent = Math.round(ft.length / ft.reduce((x, y) => x + y, 0)) + "fps";
+    const dt = Math.max(0.001, Math.min(0.1, (now - lastT) / 1000)); lastT = now; ft.push(dt); if (ft.length > 20) ft.shift(); fpsEl.textContent = Math.round(ft.length / ft.reduce((x, y) => x + y, 0)) + "fps";
     const busy = !!document.querySelector("#peek24[style*='flex'], .modal") ; if (busy) return;
     // 歩く（壁で止まったら、横すべり）
     const sp = 8 * dt, fx = Math.sin(P.yaw), fz = -Math.cos(P.yaw), rx = Math.cos(P.yaw), rz = Math.sin(P.yaw);
     if (mv.x || mv.y) { const dx = (-mv.y * fx + mv.x * rx) * sp, dz = (-mv.y * fz + mv.x * rz) * sp;
-      let ok = false; for (const an of [0, 0.5, -0.5, 1.0, -1.0]) { const c = Math.cos(an), sn = Math.sin(an), ex = dx * c - dz * sn, ez = dx * sn + dz * c; if (where(P.x + ex, P.z + ez)) { P.x += ex; P.z += ez; ok = true; break; } }   /* ぶつかったら少し向きを変えて回りこむ */
+      const hitM = (x, z) => { const R = rooms[curRoom]; return (R.acts || []).some(a => Math.hypot(R.Z + a.z - z, a.x - x) < 1.5 && Math.hypot(R.Z + a.z - z, a.x - x) < Math.hypot(R.Z + a.z - P.z, a.x - P.x)); };   /* 魔物に重ならない */
+      let ok = false; for (const an of [0, 0.5, -0.5, 1.0, -1.0]) { const c = Math.cos(an), sn = Math.sin(an), ex = dx * c - dz * sn, ez = dx * sn + dz * c; if (where(P.x + ex, P.z + ez) && !hitM(P.x + ex, P.z + ez)) { P.x += ex; P.z += ez; ok = true; break; } }   /* ぶつかったら少し向きを変えて回りこむ */
       if (!ok) { if (where(P.x + dx, P.z)) P.x += dx; else if (where(P.x, P.z + dz)) P.z += dz; } }
     const W0 = where(P.x, P.z) || { k: "r", i: curRoom, y: rooms[curRoom].Y, tight: false }; P.y += (W0.y - P.y) * Math.min(1, dt * 10); P.eye += ((W0.tight ? 2.05 : 3.3) - P.eye) * Math.min(1, dt * 4);
     if (W0.k === "r") curRoom = W0.i; const R0 = rooms[curRoom]; whereB.textContent = W0.k === "c" ? "通路" : R0.name; whereS.textContent = `B${R0.f + 1}`;
