@@ -1260,6 +1260,14 @@ body:has(.modal) .inv25btn,body:has(.ntfull19) .inv25btn{display:none}
 .res28 b{font-size:16px;color:#ffd56a;white-space:nowrap}.res28 small{font-size:12px;opacity:.85}.res28.out{opacity:0}
 .dm28h{display:flex;flex-direction:column;align-items:center;gap:2px;margin-bottom:6px}.dm28h small{opacity:.7}.dm28h b{font-size:24px;color:#ffd56a;text-shadow:0 0 12px #e8b84a88}.dm28h i{font-style:normal;font-size:13px;opacity:.9}
 .rel28{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.rel28 span{font-size:12px;padding:2px 8px;border-radius:999px;background:#2a1f18}.rel28 .g{color:#ffb3c8}.rel28 .b{color:#ff9a7a}
+/* proto28：侵略の編成 */
+.inv28met{display:flex;flex-direction:column;gap:6px;margin:6px 0 8px;padding:8px 10px;border-radius:10px;background:#1a120cdd;border:1px solid #4a3828}
+.inv28met .o28{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}.inv28met .o28 b{font-size:16px}.inv28met .o28 span{font-size:12px;opacity:.8}
+.inv28met .o28.g b{color:#7cd88a}.inv28met .o28.y b{color:#f1c76a}.inv28met .o28.o b{color:#ff9a5a}.inv28met .o28.r b{color:#ff6a5a}
+.inv28met .bar28{position:relative;height:8px;border-radius:4px;background:#000a;overflow:hidden}.inv28met .bar28 i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;transition:width .3s}
+.inv28met .bar28 i.g{background:#5cc070}.inv28met .bar28 i.y{background:#d9a441}.inv28met .bar28 i.o{background:#e07a3a}.inv28met .bar28 i.r{background:#c84a3a}.inv28met .bar28 u{position:absolute;left:62%;top:-2px;bottom:-2px;width:2px;background:#fff8}
+.inv28met .f28{font-size:12px;opacity:.9}.inv28met .best28{padding:7px 10px;border-radius:8px;border:1px solid #c08a3a;background:#3a2814;color:#f6e3c0;font-weight:700}
+.inv25row.bad28{background:#5a2a1a!important;color:#ffb39a!important}
 </style>
 </head>
 <body>
@@ -7445,7 +7453,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.335（11/24 08:24）";
+const VER20 = "No.336（11/24 08:27）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -14036,6 +14044,57 @@ function resume28() { try {
     d.innerHTML = `<b>▶ 閉じたところから再開</b><small>勇者 ${H.length}人のうち ${dead}人を倒した${esc2 ? `・${esc2}人に逃げられた` : ""}／主の体力 ${N.lord ? Math.round(N.lord.hp) : "?"}</small>`;
     document.body.appendChild(d); setTimeout(() => d.classList.add("out"), 2600); setTimeout(() => d.remove(), 3200); }, 400);
 } catch (e) {} }
+
+// ================= proto28：侵略の戦場を作り直す =================
+// テストで出たこと：①前列・後列を変えても強さが変わらない ②戦場で前列と後列が見分けられない ③魔物が門へ向かわず真ん中で止まる
+// ---------- 1) 並びの向き・不向き：前列は体の強い子、後列は飛ぶ子・飛び道具・支える子 ----------
+const invKind28 = m => { const R = (MON[m.sp] || {}).role, fly = !!INVFLY25[m.sp], shot = Object.keys(m.sk || {}).some(k => INVRSK25[k]) || (fly && /dragon|chimera|ifrit/.test(m.sp));
+  return shot ? "shot" : fly ? "fly" : (R === "heal" || R === "hex") ? "sup" : (R === "tank") ? "tank" : "melee"; };
+const INVFIT28 = {   // [体力, 攻撃]
+  front: { tank: [1.25, 1.0], melee: [1.1, 1.15], shot: [0.8, 0.85], fly: [0.85, 0.9], sup: [0.8, 0.85] },
+  back: { tank: [1.0, 0.75], melee: [1.0, 0.8], shot: [1.0, 1.3], fly: [1.0, 1.2], sup: [1.05, 1.2] } };
+const invFit28 = (m, row) => INVFIT28[row][invKind28(m)];
+const invGood28 = (m, row) => { const f = invFit28(m, row), o = invFit28(m, row === "front" ? "back" : "front"); return f[0] * f[1] >= o[0] * o[1] - 1e-6; };
+const invBest28 = m => { const a = invFit28(m, "front"), b = invFit28(m, "back"); return a[0] * a[1] >= b[0] * b[1] ? "front" : "back"; };
+const invRowOf28 = m => (window.__invRow = window.__invRow || {})[m.id] || invBest28(m);
+// 戦いに反映
+{ const _s = INV25.start; INV25.start = function (list, vt, node) { const st = _s.apply(this, arguments);
+  try { st.mons.forEach(bm => { const f = invFit28(bm.ref, bm.row || "front"); bm.hp = bm.max = Math.round(bm.max * f[0]); bm.atk = Math.round(bm.atk * f[1]); bm.fit28 = invGood28(bm.ref, bm.row || "front"); }); } catch (e) { console.error(e); }
+  return st; }; }
+// 編成の強さ（戦いと同じかけ算で）
+const invUs28 = (L, rowOf) => ({ hp: L.reduce((a, m) => a + monHp5(m) * invFit28(m, rowOf(m))[0], 0), atk: L.reduce((a, m) => a + monAtk5(m) * invFit28(m, rowOf(m))[1], 0) });
+const invOdds28 = X => X < 0.8 ? ["有利", "g"] : X < 1.05 ? ["互角", "y"] : X < 1.4 ? ["不利", "o"] : ["むぼう", "r"];
+
+// ---------- 2) 編成の画面：勝ち目のメーター・向き不向きの印・おすすめの並び ----------
+invOpenForm25 = (prev => function (node) { try { const R = window.__invRow = window.__invRow || {}; S.mons.forEach(m => { if (!R[m.id]) R[m.id] = invBest28(m); }); } catch (e) {} prev.apply(this, arguments);
+  try { node = node || window.__invNode || null; const el = document.querySelector(".inv25form"); if (!el) return;
+    const card = () => el.querySelector(".inv25card"), ms = S.mons.slice(), th = node ? INV25.est(node) : null;
+    const deco = () => { const c = card(); if (!c) return;
+      const ids = [...c.querySelectorAll('input[type=checkbox]:checked')].map(x => +x.dataset.id), L = ms.filter(m => ids.includes(m.id));
+      c.querySelectorAll("[data-row]").forEach(b => { const m = ms.find(q => q.id === +b.dataset.row); if (!m) return; const r = invRowOf28(m), good = invGood28(m, r); b.textContent = (r === "back" ? "後列" : "前列") + (good ? "◎" : "△"); b.classList.toggle("bad28", !good); b.title = good ? "向いている" : "反対の列のほうが強い"; });
+      let met = c.querySelector(".inv28met"); if (!met) { met = document.createElement("div"); met.className = "inv28met"; const h = c.querySelector(".inv25hint"); h.after(met); }
+      if (!L.length) { met.innerHTML = ""; return; }
+      const us = invUs28(L, invRowOf28), bad = L.filter(m => !invGood28(m, invRowOf28(m))).length;
+      let h = "";
+      if (th) { const X = invX25(th, us), [w, k] = invOdds28(X);
+        h += `<div class="o28 ${k}"><b>勝ち目：${w}</b><span>相手の強さ ${Math.round(100 * X)}（こちら100）</span></div><div class="bar28"><i class="${k}" style="width:${Math.max(4, Math.min(100, 62 / X))}%"></i><u></u></div>`; }
+      h += `<div class="f28">${bad ? `△ 向いていない列の子が${bad}体 → 前列は体の強い子、後列は飛ぶ子・飛び道具・回復や呪いの子` : "◎ みんな向いている列にいる"}</div>`;
+      if (bad) h += `<button class="best28">🪄 おすすめの並びにする</button>`;
+      met.innerHTML = h; const bb = met.querySelector(".best28"); if (bb) bb.onclick = () => { L.forEach(m => { window.__invRow[m.id] = invBest28(m); }); redraw(); }; };
+    // もとの画面は押すたびに作り直すので、そのたびに飾りなおす
+    const redraw = () => { const c = card(); if (!c) return; const t = c.querySelector('input[type=checkbox]'); if (t) t.dispatchEvent(new Event("change")); };
+    new MutationObserver(() => { if (card() && !card().querySelector(".inv28met")) deco(); }).observe(el, { childList: true });
+    el.addEventListener("click", () => setTimeout(deco, 0)); deco();
+  } catch (e) { console.error(e); } })(invOpenForm25);
+
+// ---------- 3) 戦場：足もとの輪の下に「前」「後」（向いていない列なら △） ----------
+{ const _o = INV25.overlay; INV25.overlay = function (g, now, r) {
+  try { const st = INV25.st; if (st && B3 && B3.C) { g.save();
+    st.mons.forEach(m => { if (m.dead) return; const A = B3.A[m.id]; if (!A || A.al < 0.3 || A.dying) return; const front = m.row !== "back", q = B3.C.toScreen([A.x, 0.02, A.z]); if (!q) return;
+      const show = st.t < 8 || !m.fit28; g.globalAlpha = show ? 1 : 0.75; g.font = `800 ${show ? 11 : 9}px system-ui,sans-serif`; g.textAlign = "center"; g.lineWidth = 3; g.strokeStyle = "rgba(0,0,0,.85)";
+      const t = (front ? "前" : "後") + (m.fit28 ? "" : "△"); g.strokeText(t, q[0], q[1] + 16); g.fillStyle = front ? "#ffd27a" : "#9fd0ff"; g.fillText(t, q[0], q[1] + 16); });
+    g.restore(); } } catch (e) {}
+  return _o.apply(this, arguments); }; }
 
 </script>
 <script>// ================= 3Dの子を、今のコマアニメと同じ並び（17コマ）の絵に焼く（開発用・ページ内で実行） =================
