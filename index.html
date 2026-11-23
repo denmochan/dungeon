@@ -7400,7 +7400,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.308（11/23 15:07）";
+const VER20 = "No.309（11/23 17:02）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -11327,7 +11327,7 @@ const HAI25 = (() => {
     const beds = []; MS.forEach(m => { if (m.bedsF) burrowBeds25().forEach(b => beds.push(b)); if (m.beds) { const [dx, dz] = off(m); m.beds.forEach(([x, z]) => beds.push([x + dx, z + dz])); } });
     let oi = 0, bi = 0, k = 0, ti = 0;
     // 大きい子から置く
-    const all = []; list.forEach(e => { for (let i = 0; i < e.n; i++) all.push({ sp: e.sp, evo: e.evo, act: e.act }); });
+    const all = []; list.forEach(e => { for (let i = 0; i < e.n; i++) all.push({ sp: e.sp, evo: e.evo, act: e.act, id: e.id }); });   /* 名前つきで並べる（大きい順に並べかえると別の子の名前が出ていた） */
     all.sort((a, b) => footR(b) - footR(a));
     all.forEach(e => { const c = { sp: e.sp, evo: e.evo, id: e.id, mode: "idle", t: (k++) * 0.37, r: 0, lie: false }; const r = footR(c); const bip = BIP(e.sp);
       let pos = null;
@@ -12988,6 +12988,8 @@ async function fpMesh26(kind){ if (kind === "lordday") kind = "lord"; if (FPMESH
   const buf = await new Response(r.body.pipeThrough(new DecompressionStream("gzip"))).arrayBuffer(), dv = new DataView(buf);
   const N = dv.getUint32(4, true), T = dv.getUint32(8, true); let o = 16; const pos = new Int16Array(buf.slice(o, o + N * 6)); o += N * 6; const col = new Uint8Array(buf.slice(o, o + N * 3)); o += N * 3; const idx = new Uint32Array(buf.slice(o, o + T * 12));
   return FPMESH26[kind] = { N, T, pos, col, idx }; }
+/* 出口の穴をあける深さ（部屋のローカル、奥が−）。採掘場・稽古場は奥の壁が手前にあり、穴が壁の向こうにかくれて「道が空いてない」に見えていた */
+const FPBZ26 = { mine: -3, mine_bed: -3, mine_nest: -3, mine_watch: -3, train_mine: -3, train: -2.6, train_watch: -2.6 }, fpBZ26 = k => FPBZ26[k] != null ? FPBZ26[k] : -7;
 const FPK26 = { RZ0: -16, RZ1: 17, CH: 2.55, CW: 2.6 };   // 部屋の格子の前後のはし（ローカル）・通路の半分の幅
 function fpOpen26(){
   if (document.getElementById("fp26")) return;
@@ -13020,7 +13022,7 @@ function fpOpen26(){
     void main(){vl=ap*PSC*SC;vec3 w=vl+OFF;gl_Position=VP*vec4(w,1.0);vc=clamp(CM*ac+CO,0.0,1.0);vw=w;vd=distance(w,EYE);}`,
     `precision mediump float;varying vec3 vc;varying vec3 vw;varying vec3 vl;varying float vd;uniform vec4 DR;uniform vec3 LT[6];uniform float LF[6];
     float h(vec3 p){return fract(sin(dot(p,vec3(12.9898,78.233,37.719)))*43758.5453);}
-    void main(){if(DR.z>0.5&&abs(vl.x)<2.35&&vl.y>0.12&&vl.y<3.5){if(DR.y>0.5&&vl.z<-7.0)discard;if(DR.x>0.5&&vl.z>7.0&&max(vc.r,max(vc.g,vc.b))<0.1)discard;}
+    void main(){if(DR.z>0.5&&abs(vl.x)<2.35&&vl.y>0.12&&vl.y<3.5){if(DR.y>0.5&&vl.z<DR.w)discard;if(DR.x>0.5&&vl.z>7.0&&max(vc.r,max(vc.g,vc.b))<0.1)discard;}
     float g=0.9+0.2*h(floor(vw*13.0));vec3 c=vc*g*(0.55+0.8*exp(-vd/7.0));c+=vec3(0.05,0.03,0.012)*exp(-vd/4.0);
     vec3 L=vec3(0.0);for(int i=0;i<6;i++){vec3 q=vw-LT[i];L+=vec3(1.0,0.56,0.24)*LF[i]/(1.0+0.22*dot(q,q));}c+=vc*L*1.3+L*0.025;
     c=mix(c,vec3(0.012,0.01,0.01),smoothstep(18.0,48.0,vd));gl_FragColor=vec4(c,1.0);}`);   /* 部屋の出入口の壁をくりぬく（門の黒い板も）／たいまつの明かり */
@@ -13030,7 +13032,7 @@ function fpOpen26(){
   const TX = new Map(); const texOf = im => { let t = TX.get(im); if (t) return t; t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, im);
     [gl.TEXTURE_MIN_FILTER, gl.TEXTURE_MAG_FILTER].forEach(k => gl.texParameteri(gl.TEXTURE_2D, k, gl.NEAREST)); [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T].forEach(k => gl.texParameteri(gl.TEXTURE_2D, k, gl.CLAMP_TO_EDGE)); TX.set(im, t); return t; };
   // 通路（部屋 i の奥 → 部屋 i+1 の前）。岩の筒。階がかわるときは下りの段
-  function corridor(a, b){ const z0 = a.Z + FPK26.RZ0 + 6, z1 = b.Z + FPK26.RZ1 - 6, y0 = a.Y, y1 = b.Y, P = [], C = [], I = [];
+  function corridor(a, b){ const z0 = a.Z + fpBZ26(a.kind) - 0.3, z1 = b.Z + FPK26.RZ1 - 6, y0 = a.Y, y1 = b.Y, P = [], C = [], I = [];
     const ring = [[-2.6, 0], [-1.3, 0], [0, 0], [1.3, 0], [2.6, 0], [2.75, 1.3], [2.5, 2.35], [1.3, 2.9], [0, 3.05], [-1.3, 2.9], [-2.5, 2.35], [-2.75, 1.3]], R = ring.length;
     const hs = (x, y) => { const s = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453; return s - Math.floor(s); };
     const steps = Math.max(2, Math.round((z0 - z1) / 0.5)), nst = Math.abs(y1 - y0) / 0.38;
@@ -13039,6 +13041,12 @@ function fpOpen26(){
         const tor = Math.abs(((z - z0) % 8 + 8) % 8 - 4) < 1.6 ? 1 : 0, wv = 0.7 + 0.5 * hs(k * 3, j * 7), stp = nst && fl ? (Math.round(t * nst) % 2 ? 0.85 : 1) : 1;
         const base = fl ? [80, 64, 50] : [58, 48, 42]; C.push(...base.map((v, q) => Math.min(255, v * wv * stp + tor * [40, 22, 8][q] * (fl ? 0.6 : 1)))); }); }
     for (let k = 0; k < steps; k++) for (let j = 0; j < R; j++) { const a0 = k * R + j, a1 = k * R + (j + 1) % R, b0 = a0 + R, b1 = a1 + R; I.push(a0, b0, a1, a1, b0, b1); }
+    /* 通路の口のまわりの岩の壁（穴のまわりの黒いすき間をふさぐ）。でこぼこの岩肌で、まん中に通路の形の穴 */
+    const inHole = (x, y) => { const ax = Math.abs(x); return ax < 2.55 && y < (ax < 2.4 ? 2.4 + 0.62 * (1 - (ax / 2.4) ** 2) : 2.3); };
+    [[z0, y0, 1], [z1, y1, -1]].forEach(([zf, yb, sg]) => { const G = 0.45, NX = Math.round(13 / G), NY = Math.round(6 / G), base0 = P.length / 3;
+      for (let iy = 0; iy <= NY; iy++) for (let ix = 0; ix <= NX; ix++) { const x = -6.5 + ix * G, y = iy * G, e = Math.min(1, Math.hypot(x / 6.5, y / 6)), dep = (hs(ix * 1.7 + zf, iy * 2.3) - 0.5) * 0.5 + e * e * 1.6;
+        P.push(x, yb + y - 0.05, zf + sg * dep); const wv = 0.45 + 0.45 * hs(ix * 5 + zf, iy * 3), nr = inHole(x * 0.92, y * 0.95) ? 0 : Math.max(0, 1 - Math.hypot(x, y - 1.3) / 5.5); C.push(...[58, 48, 42].map((v, q) => Math.min(255, v * wv + nr * [46, 26, 10][q]))); }
+      for (let iy = 0; iy < NY; iy++) for (let ix = 0; ix < NX; ix++) { const cx = -6.5 + (ix + 0.5) * G, cy = (iy + 0.5) * G; if (inHole(cx, cy) || (cx / 6.5) ** 2 + (cy / 6) ** 2 > 0.72 + 0.28 * hs(ix * 0.7 + zf, iy * 1.3)) continue;   /* 外のふちはぎざぎざに（四角い板に見えた） */ const a0 = base0 + iy * (NX + 1) + ix, a1 = a0 + 1, b0 = a0 + NX + 1, b1 = b0 + 1; I.push(a0, b0, a1, a1, b0, b1); } });
     const pb = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, pb); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(P), gl.STATIC_DRAW);
     const cb = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, cb); gl.bufferData(gl.ARRAY_BUFFER, new Uint8Array(C), gl.STATIC_DRAW);
     const ib = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint32Array(I), gl.STATIC_DRAW); return { pb, cb, ib, n: I.length, z0, z1, y0, y1 }; }
@@ -13054,8 +13062,12 @@ function fpOpen26(){
     const cb = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, cb); gl.bufferData(gl.ARRAY_BUFFER, m.col, gl.STATIC_DRAW);
     const ib = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, m.idx, gl.STATIC_DRAW); R.mb = { pb, cb, ib, n: m.T * 3 }; }).catch(e => { R.err = String(e.message || e); }); };
   // 魔物（部屋ごと）
-  const mkActs = R => { const ms = S.mons.filter(m => m.home === R.i).slice(0, 10); let cast = []; try { cast = HAI25.place(R.on, ms.map(m => ({ sp: m.sp, evo: m.evos || 0, n: 1, act: "idle", id: m.id })), 11 + R.i * 17); } catch (e) {}
-    R.acts = cast.map((c, k) => ({ m: ms.find(x => x.id === c.id) || ms[k],   /* 並べると順番が変わる：名前がちがう子に出ていた */ sp: c.sp, evo: c.evo || 0, x: c.o[0], z: -c.o[2], r: Math.random() * 6.28, hx: c.o[0], hz: -c.o[2], tx: c.o[0], tz: -c.o[2], wait: 1 + Math.random() * 3, ph: Math.random() * 6, walking: false, dist: 0 })); };
+  const mkActs = R => { const ms = S.mons.filter(m => m.home === R.i).slice(0, 10); let cast = [];
+    /* 仕事どおりに置く：掘る子は岩の前、稽古の子は打ちこみ台のまわり、休む子は寝床（昼の見下ろしと同じ） */
+    const job = m => { try { if (typeof restLeft7 === "function" && restLeft7(S, m)) return "sleep"; } catch (e) {} let j = null; try { j = peekMon24(m, R.i).job; } catch (e) {} return j === "mine" ? "mine" : j === "train" ? "train" : j === "watch" ? "watch" : j === "nest" ? "nest" : j === "bed" ? "sleep" : "idle"; };
+    try { cast = HAI25.place(R.on, ms.map(m => ({ sp: m.sp, evo: m.evos || 0, n: 1, act: job(m), id: m.id })), 11 + R.i * 17); } catch (e) {}
+    R.acts = cast.map((c, k) => ({ m: ms.find(x => x.id === c.id) || ms[k],   /* 並べると順番が変わる：名前がちがう子に出ていた */ sp: c.sp, evo: c.evo || 0, x: c.o[0], z: -c.o[2], r: Math.random() * 6.28, hx: c.o[0], hz: -c.o[2], tx: c.o[0], tz: -c.o[2], wait: 1 + Math.random() * 3, ph: Math.random() * 6, walking: false, dist: 0, mode: c.mode || "idle", y: c.y || 0, look: c.look ? [c.look[0], -c.look[1]] : null, rk: c.rk ? [c.rk[0], -c.rk[1], c.rk[2], c.rk[3]] : null, boss: !!c.boss,
+      stay: /^(mine|slash|lift|spar|sleep|nest|watch)$/.test(c.mode) || !!c.boss })); };
   rooms.forEach(mkActs);
   // 看板（部屋の入口の右）
   const signCv = R => { const c = document.createElement("canvas"); c.width = 128; c.height = 96; const g = c.getContext("2d"); g.fillStyle = "#5a3a22"; g.fillRect(58, 40, 12, 56); g.fillStyle = "#7a5432"; g.fillRect(6, 6, 116, 46); g.strokeStyle = "#2a1a0e"; g.lineWidth = 4; g.strokeRect(6, 6, 116, 46);
@@ -13067,7 +13079,7 @@ function fpOpen26(){
   const floorOK = (R, x, zl, me) => { const sd = shapeSd25(R.SH, x / SW25[0], -zl / SW25[1]); return sd < -0.2 && (!R.OBS.some(([ox, oz, or]) => Math.hypot(x - ox, -zl - oz) < or + 0.55)); };   /* 部屋の形の前後は、主が進む向きと逆（門が手前・玉座が奥） */   /* 主は真ん中の道（入口→奥の坑道）なら柵もまたいで通れる */
   // ある場所が歩けるか。どこにいるか（部屋 i ／ 通路 i）と床の高さを返す
   function where(x, z){ for (let i = 0; i < n; i++) { const R = rooms[i], zl = z - R.Z; if (zl > FPK26.RZ0 - 0.01 && zl <= FPK26.RZ1) {
-        const door = Math.abs(x) < 2.2 && ((zl > 7.5 && i > 0) || (zl < -7 && i < n - 1));   /* 入口の部屋の前の穴（外）へは出られない */
+        const door = Math.abs(x) < 2.2 && ((zl > 7.5 && i > 0) || (zl < fpBZ26(R.kind) + 0.4 && i < n - 1));   /* 入口の部屋の前の穴（外）へは出られない */
         return (floorOK(R, x, zl, 1) || door) ? { k: "r", i, y: R.Y, tight: door && !floorOK(R, x, zl, 1) } : null; } }
     for (let i = 0; i + 1 < n; i++) { const C = CORR[i]; if (z <= C.z0 && z >= C.z1) { if (Math.abs(x) >= 1.9) return null; const t = (C.z0 - z) / (C.z0 - C.z1), nst = Math.abs(C.y1 - C.y0) / 0.38; return { k: "c", i, y: C.y0 + (C.y1 - C.y0) * (nst ? Math.round(t * nst) / nst : t), tight: true }; } }
     return null; }
@@ -13111,7 +13123,7 @@ function fpOpen26(){
       L.querySelectorAll("[data-r]").forEach(b => b.onclick = () => { const j = +b.dataset.r; m.home = j; m.job19 = null; m.job19h = j; try { save(); } catch (e) {} mkActs(rooms[R.i]); mkActs(rooms[j]); menu.hidden = true; toast(`${m.nick || ""} を ${rooms[j].name} へ`); }); }; }
   const toast = t => { const d = document.createElement("div"); d.className = "f26toast"; d.textContent = t; wrap.appendChild(d); setTimeout(() => d.remove(), 1800); };
   // 魔物の暮らし（軽く）
-  function stepActs(R, dt){ (R.acts || []).forEach(a => { if (!a.walking) { a.wait -= dt; if (a.wait <= 0) { for (let k = 0; k < 8; k++) { const ang = Math.random() * 6.28, d = 2 + Math.random() * 5, x = a.hx + Math.cos(ang) * d, z = a.hz + Math.sin(ang) * d; if (floorOK(R, x, z)) { a.tx = x; a.tz = z; a.walking = true; break; } } a.wait = 2 + Math.random() * 4; } return; }
+  function stepActs(R, dt){ (R.acts || []).forEach(a => { if (a.stay) return; if (!a.walking) { a.wait -= dt; if (a.wait <= 0) { for (let k = 0; k < 8; k++) { const ang = Math.random() * 6.28, d = 2 + Math.random() * 5, x = a.hx + Math.cos(ang) * d, z = a.hz + Math.sin(ang) * d; if (floorOK(R, x, z)) { a.tx = x; a.tz = z; a.walking = true; break; } } a.wait = 2 + Math.random() * 4; } return; }
     const dx = a.tx - a.x, dz = a.tz - a.z, L = Math.hypot(dx, dz); if (L < 0.1) { a.walking = false; return; } const s = Math.min(L, 2.2 * dt); a.x += dx / L * s; a.z += dz / L * s; a.dist += s; a.r = Math.atan2(dx, dz); }); }
   let curRoom = 0, lastT = performance.now(), ft = [];
   function loop(now){ if (!alive) return; requestAnimationFrame(loop);
@@ -13136,7 +13148,7 @@ function fpOpen26(){
     const LT6 = TORCH.map(t => [t, (t[0] - EYE[0]) ** 2 + (t[1] - EYE[1]) ** 2 + (t[2] - EYE[2]) ** 2]).sort((a, b) => a[1] - b[1]).slice(0, 6); while (LT6.length < 6) LT6.push([[0, -999, 0], 1e9]);
     gl.uniform3fv(PM.U("LT"), new Float32Array(LT6.flatMap(o => o[0]))); gl.uniform1fv(PM.U("LF"), new Float32Array(LT6.map((o, j) => o[0][1] < -900 ? 0 : 1.0 * (0.86 + 0.1 * Math.sin(now / 1000 * 11 + j * 2.1) + 0.04 * Math.sin(now / 1000 * 27 + j)))));
     const la = PM.A("ap"), lc = PM.A("ac"); gl.enableVertexAttribArray(la); gl.enableVertexAttribArray(lc);
-    const draw = (B, off, psc, short, CM, ri) => { gl.uniform3fv(PM.U("OFF"), off); gl.uniform1f(PM.U("PSC"), psc); gl.uniform3fv(PM.U("SC"), short ? [1, 1, -1] : [1, 1, 1]); gl.uniform4f(PM.U("DR"), short && ri > 0 ? 1 : 0, short && ri < n - 1 ? 1 : 0, short ? 1 : 0, 0); gl.uniformMatrix3fv(PM.U("CM"), false, new Float32Array([0, 3, 6, 1, 4, 7, 2, 5, 8].map(j => CM.M[j]))); gl.uniform3fv(PM.U("CO"), CM.O);
+    const draw = (B, off, psc, short, CM, ri) => { gl.uniform3fv(PM.U("OFF"), off); gl.uniform1f(PM.U("PSC"), psc); gl.uniform3fv(PM.U("SC"), short ? [1, 1, -1] : [1, 1, 1]); gl.uniform4f(PM.U("DR"), short && ri > 0 ? 1 : 0, short && ri < n - 1 ? 1 : 0, short ? 1 : 0, ri != null ? fpBZ26(rooms[ri].kind) : -7); gl.uniformMatrix3fv(PM.U("CM"), false, new Float32Array([0, 3, 6, 1, 4, 7, 2, 5, 8].map(j => CM.M[j]))); gl.uniform3fv(PM.U("CO"), CM.O);
       gl.bindBuffer(gl.ARRAY_BUFFER, B.pb); gl.vertexAttribPointer(la, 3, short ? gl.SHORT : gl.FLOAT, false, 0, 0); gl.bindBuffer(gl.ARRAY_BUFFER, B.cb); gl.vertexAttribPointer(lc, 3, gl.UNSIGNED_BYTE, true, 0, 0);
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, B.ib); gl.drawElements(gl.TRIANGLES, B.n, gl.UNSIGNED_INT, 0); };
     const ID = { M: [1, 0, 0, 0, 1, 0, 0, 0, 1], O: [0, 0, 0] };
@@ -13155,11 +13167,20 @@ function fpOpen26(){
         gl.uniform3f(PB.U("C"), R.sx, R.Y, R.Z + R.sz); gl.uniform3fv(PB.U("R"), Rr); gl.uniform4f(PB.U("Q"), -1.3, 0, 2.6, 1.95); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); }
       (R.acts || []).forEach(a => { const o = dspr25(a.sp, a.evo); if (!o || !o.ok) return; const wx = a.x, wz = R.Z + a.z, WS = dwalk25(a.sp, a.evo), view = Math.atan2(EYE[0] - wx, EYE[2] - wz); let rel = ((a.r - view) % 6.2832 + 9.4248) % 6.2832 - 3.1416;
         const ai = Math.min(12, Math.round(Math.abs(rel) / Math.PI * 12)), flip = rel < 0 && ai > 0 && ai < 12, ppu = o.ppu || 36; let im, cx, cy, cw, ch, hs, foot, ox = 0, oy = 0, bob = 0;
-        if (WS && WS.ok && WS.im.height >= WS.ch * 13) { const ph = a.walking ? Math.floor(a.dist / 0.9 * 6) % 6 : 0; im = WS.im; hs = WS.hs || 1; cw = WS.cw; ch = WS.ch; cx = ph * cw; cy = ai * ch; foot = WS.foot != null ? WS.foot : o.foot; ox = WS.ox / hs; oy = WS.oy / hs; if (!a.walking) bob = Math.sin(now / 1000 * 2.2 + a.ph) * 0.03; }
+        /* 仕事中の子：横向きの「掘る」「打ちこむ」「寝る」コマ。向きは相手（岩・台）が画面の右か左かで決める */
+        const T = now / 1000 + a.ph, lx = a.look ? a.look[0] : a.x + Math.sin(a.r), lz = a.look ? a.look[1] : a.z + Math.cos(a.r), s1 = toScr(a.x, R.Y + 0.8, R.Z + a.z), s2 = toScr(lx, R.Y + 0.8, R.Z + lz), side = s1 && s2 ? s2[0] < s1[0] : (lx - a.x) * Rr[0] + (lz - a.z) * Rr[2] < 0;   /* 相手が画面の左なら左を向く（真正面・真うしろのときに向きをまちがえた） */
+        let job = null; if (!a.walking && o.bip) { if (a.mode === "mine") { const M = dmine25(a.sp, a.evo); if (M && M.ok) { job = { im: M.im, f: Math.floor(T / 1.1 * 4) % 4, hs: 1 };
+          /* 岩のふちに立たせて、つるはしの先がちょうど岩に当たるように（離れて空を掘っていた） */ if (a.rk && !a.rkSet) { a.rkSet = 1; const [cx, cz, hw, hz] = a.rk, dx = a.x - cx, dz = a.z - cz, e = Math.hypot(dx / hw, dz / hz) || 1, L = Math.hypot(dx, dz) || 1, off = Math.max(0.3, (M.hx - 64) / ppu); a.x = cx + dx / e * 1.25 + dx / L * off; a.z = cz + dz / e * 1.25 + dz / L * off; a.look = [cx, cz];   /* 3Dでは岩の真ん中を向いて、まわりから叩く */ } } } else if (a.mode === "slash" || a.mode === "lift" || a.mode === "train") job = { im: o.im, f: 5 + Math.floor(T / 0.55 * 4) % 4, hs: o.hs || 1 }; else if (a.mode === "sleep") job = { im: o.im, f: 4, hs: o.hs || 1 }; }
+        if (!a.walking && a.mode === "sleep" && !o.bip) job = { im: o.im, f: 0, hs: o.hs || 1, slow: 1 };
+        a.fr = job ? job.f : -1;
+        if (job) { hs = job.hs; cw = ch = Math.round(128 * hs); im = job.im; cx = job.f * cw; cy = 0; foot = o.foot; }
+        else if (a.mode === "spar" && a.look && !a.walking) { const q = (T % 2.6) / 2.6; hs = o.hs || 1; cw = ch = Math.round(128 * hs); im = o.im; cx = (q < 0.34 ? 11 + Math.floor(q / 0.34 * 4) % 4 : Math.floor(T / 0.4) % 4) * cw; cy = 0; foot = o.foot; a.sq = q; }
+        else if (WS && WS.ok && WS.im.height >= WS.ch * 13) { const ph = a.walking ? Math.floor(a.dist / 0.9 * 6) % 6 : 0; im = WS.im; hs = WS.hs || 1; cw = WS.cw; ch = WS.ch; cx = ph * cw; cy = ai * ch; foot = WS.foot != null ? WS.foot : o.foot; ox = WS.ox / hs; oy = WS.oy / hs; if (!a.walking) bob = Math.sin(now / 1000 * 2.2 + a.ph) * 0.03; }
         else { hs = o.hs || 1; cw = ch = Math.round(128 * hs); im = o.im; cx = (Math.floor((now / 1000 + a.ph) / 0.4) % 4) * cw; cy = 0; foot = o.foot; if (a.walking) bob = Math.abs(Math.sin(a.dist * 7)) * 0.18; }
-        const k = 1 / ppu, w = cw / hs, h = ch / hs, x0 = flip ? 64 - ox - w : ox - 64, d = Math.hypot(wx - P.x, wz - P.z);
-        gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, texOf(im)); gl.uniform1i(PB.U("tx"), 0); gl.uniform1f(PB.U("FL"), flip ? 1 : 0); gl.uniform4f(PB.U("UR"), cx / im.width, cy / im.height, cw / im.width, ch / im.height); gl.uniform1f(PB.U("LB"), 0.5 + 0.7 * Math.exp(-d / 7));
-        gl.uniform3f(PB.U("C"), wx, R.Y + (DHOV25[a.sp] ? 0.9 : 0) + bob, wz); gl.uniform3fv(PB.U("R"), Rr); gl.uniform4f(PB.U("Q"), x0 * k, (foot - (oy + h)) * k, w * k, h * k); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); }); }
+        const jobF = a.fr >= 0 || (a.mode === "spar" && a.look && !a.walking), fl2 = jobF ? side : flip; let jx = 0, jz = 0; if (a.mode === "spar" && a.sq != null && a.sq < 0.34 && a.look) { const f = Math.sin(a.sq / 0.34 * Math.PI), dx = a.look[0] - a.x, dz = a.look[1] - a.z, L = Math.hypot(dx, dz) || 1; jx = dx / L * 0.9 * f; jz = dz / L * 0.9 * f; bob = 0.55 * f; }
+        const k = 1 / ppu, w = cw / hs, h = ch / hs, x0 = fl2 ? 64 - ox - w : ox - 64, d = Math.hypot(wx - P.x, wz - P.z);
+        gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, texOf(im)); gl.uniform1i(PB.U("tx"), 0); gl.uniform1f(PB.U("FL"), fl2 ? 1 : 0); gl.uniform4f(PB.U("UR"), cx / im.width, cy / im.height, cw / im.width, ch / im.height); gl.uniform1f(PB.U("LB"), 0.5 + 0.7 * Math.exp(-d / 7));
+        gl.uniform3f(PB.U("C"), wx + jx, R.Y + (a.y || 0) + (DHOV25[a.sp] ? 0.9 : 0) + bob, wz + jz); gl.uniform3fv(PB.U("R"), Rr); gl.uniform4f(PB.U("Q"), x0 * k, (foot - (oy + h)) * k, w * k, h * k); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); }); }
     // たいまつの火（足し算で光らせる）
     gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE); gl.depthMask(false); gl.uniform1f(PB.U("AM"), 1); gl.uniform1f(PB.U("FL"), 0); gl.uniform4f(PB.U("UR"), 0, 0, 1, 1); gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, texOf(FLAME)); gl.uniform1i(PB.U("tx"), 0); gl.uniform3fv(PB.U("R"), Rr);
     TORCH.forEach((t, j) => { const d2 = (t[0] - EYE[0]) ** 2 + (t[2] - EYE[2]) ** 2; if (d2 > 900) return; const fl = 0.85 + 0.15 * Math.sin(now / 1000 * 13 + j * 3.7); gl.uniform1f(PB.U("LB"), 1.2 * fl); gl.uniform3f(PB.U("C"), t[0], t[1] - 0.35, t[2]); gl.uniform4f(PB.U("Q"), -0.22, 0, 0.44, 0.75 * fl); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); });
@@ -13170,7 +13191,16 @@ function fpOpen26(){
     // 名前の札（近くの子）。画面の外にいる子は、端に矢印
     { const lc = wrap.querySelector(".f26lab"), dp = Math.min(2, window.devicePixelRatio || 1); if (lc.width !== Math.round(VW() * dp)) { lc.width = Math.round(VW() * dp); lc.height = Math.round(VH() * dp); } const g = lc.getContext("2d"); g.setTransform(dp, 0, 0, dp, 0, 0); g.clearRect(0, 0, VW(), VH()); g.textAlign = "center"; g.font = "bold 12px system-ui,sans-serif";
       const R = rooms[curRoom];
-      [[0, -14.5, curRoom < n - 1 ? "▼ 次の部屋へ" : ""], [0, 14.5, curRoom > 0 ? "▲ 前の部屋へ" : ""]].forEach(([ex, ez, t]) => { if (!t) return; const s = toScr(ex, R.Y + 1.4, R.Z + ez); if (s && s[0] > 0 && s[0] < VW() && s[1] > 40 && s[1] < VH()) { g.fillStyle = "rgba(255,200,110,.85)"; g.font = "bold 13px system-ui,sans-serif"; g.fillText(t, s[0], s[1]); } });   /* 出口の場所 */
+      [[0, fpBZ26(R.kind) - 2.5, curRoom < n - 1 ? "▼ 次の部屋へ" : ""], [0, 14.5, curRoom > 0 ? "▲ 前の部屋へ" : ""]].forEach(([ex, ez, t]) => { if (!t) return; const s = toScr(ex, R.Y + 1.4, R.Z + ez); if (s && s[0] > 0 && s[0] < VW() && s[1] > 40 && s[1] < VH()) { g.fillStyle = "rgba(255,200,110,.85)"; g.font = "bold 13px system-ui,sans-serif"; g.fillText(t, s[0], s[1]); } });   /* 出口の場所 */
+      /* 仕事の手ごたえ：つるはしが当たると石のかけらと光、打ちこむと火花、寝ている子は Zz */
+      (R.acts || []).forEach(a => { const wx = a.x, wz = R.Z + a.z, d = Math.hypot(wx - P.x, wz - P.z); if (d > 18 || !los(wx, wz)) return; const u = Math.max(0.7, Math.min(2.2, 7 / Math.max(2, d))), T = now / 1000 + a.ph;
+        if (a.mode === "sleep" && !a.walking) { const s = toScr(wx, R.Y + (a.y || 0) + 1.3, wz); if (!s) return; g.save(); g.fillStyle = "#d8e4ff"; for (let j = 0; j < 3; j++) { const q = (T * 0.35 + j / 3) % 1; g.globalAlpha = Math.sin(q * Math.PI) * 0.85; g.font = `bold ${Math.round((9 + 7 * q) * u)}px system-ui`; g.fillText(j % 2 ? "z" : "Z", s[0] + (6 + q * 16) * u, s[1] - q * 26 * u); } g.restore(); return; }
+        if (!a.look || a.walking) return; const dx = a.look[0] - a.x, dz = a.look[1] - a.z, L = Math.hypot(dx, dz) || 1;
+        if (a.mode === "mine" && a.fr === 2) { const ph = (T / 1.1 * 4) % 1, s = toScr(wx + dx / L * 0.9, R.Y + 0.9, wz + dz / L * 0.9); if (!s) return; g.save(); g.globalAlpha = 1 - ph * 0.8; g.fillStyle = "rgba(255,245,200,.9)"; g.beginPath(); g.arc(s[0], s[1], (3 + 7 * (1 - ph)) * u, 0, 7); g.fill();
+          for (let j = 0; j < 6; j++) { const an = -2.8 + j * 0.5 + a.ph % 1 * 0.3, dd = (6 + 16 * ph) * u; g.fillStyle = j % 2 ? "#8a7a68" : (j === 2 ? "#c9a8ff" : "#9fe4ff"); g.fillRect(s[0] + Math.cos(an) * dd, s[1] + Math.sin(an) * dd * 0.8 + ph * ph * 14 * u, 2.4 * u, 2.4 * u); } g.restore(); }
+        if ((a.mode === "slash" || a.mode === "lift") && a.fr === 7) { const q = (T / 0.55 * 4) % 1, s = toScr(wx + dx / L * 1.0, R.Y + 0.9, wz + dz / L * 1.0); if (!s) return; g.save(); g.globalAlpha = 1 - q; g.strokeStyle = "rgba(255,240,200,.95)"; g.lineWidth = 2 * u; g.beginPath(); for (let j = 0; j < 6; j++) { const an = j * 1.05 + a.ph; g.moveTo(s[0] + Math.cos(an) * 3 * u, s[1] + Math.sin(an) * 3 * u); g.lineTo(s[0] + Math.cos(an) * (7 + 9 * q) * u, s[1] + Math.sin(an) * (7 + 9 * q) * u); } g.stroke(); g.restore(); }
+        if (a.mode === "spar" && a.sq != null && a.sq >= 0.3 && a.sq < 0.5) { const q = (a.sq - 0.3) / 0.2, s = toScr(wx + dx / L * 0.9, R.Y + 0.1, wz + dz / L * 0.9); if (!s) return; g.save(); g.globalAlpha = 0.5 * (1 - q); g.fillStyle = "#b89a78"; for (let j = 0; j < 4; j++) { g.beginPath(); g.arc(s[0] + (j - 1.5) * (7 + 8 * q) * u, s[1] - q * 4 * u, (3 + 3 * q) * u, 0, 7); g.fill(); } g.restore(); } });
+      g.font = "bold 12px system-ui,sans-serif";
       (R.acts || []).forEach(a => { if (!a.m) return; const wx = a.x, wz = R.Z + a.z, d = Math.hypot(wx - P.x, wz - P.z); const s = toScr(wx, R.Y + 2.4, wz);
         if (s && s[0] > 0 && s[0] < VW() && s[1] > 40 && s[1] < VH()) { if (d > 22 || !los(wx, wz)) return; const t = a.m.nick || "", w = g.measureText(t).width + 10; g.globalAlpha = Math.max(0.35, 1 - d / 22); g.fillStyle = "rgba(14,10,8,.7)"; g.fillRect(s[0] - w / 2, s[1] - 15, w, 18); g.fillStyle = "#e8f5d8"; g.fillText(t, s[0], s[1] - 2); g.globalAlpha = 1; }
         else { const ang = Math.atan2(wx - P.x, -(wz - P.z)) - P.yaw, a2 = Math.atan2(Math.sin(ang), Math.cos(ang)), x = VW() / 2 + Math.sin(a2) * VW() * 0.42, y = VH() * 0.5 - Math.cos(a2) * VH() * 0.3;
