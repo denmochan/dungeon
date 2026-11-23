@@ -7400,7 +7400,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.320（11/23 21:40）";
+const VER20 = "No.321（11/23 21:51）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7459,7 +7459,8 @@ function roomPage20(i) {
 function growPage20() {
   const C = afc19(S), D = dens20(), thr = thrLv19(S);
   // おまかせで並べたらどうなるかを先に計算（写しで試すだけ。本物は動かさない）
-  let plan = {}; try { const T = JSON.parse(JSON.stringify(S)); autoAll19(T); T.mons.forEach(o => { const m = S.mons.find(q => q.id === o.id); if (m && m.home !== o.home) plan[o.id] = o.home; }); } catch (e) { plan = {}; }
+  /* 予告は、おまかせが本当に出す答え（先回りの試算）を使う。前は昔の並べ方で数えていて「1体が動く」→押すと「いまがいちばん」になっていた */
+  let plan = (typeof plan27 === "function" && plan27()) || null; const busy = !plan; plan = plan || {};
   const moves = Object.keys(plan).length, rn = i => i == null ? "🪑控え" : ((POL13[purpose19(S, i)] || {}).icon || "") + roomTitle(S, i);
   const mini = m => { const tags = [restLeft9(S, m) ? "💤" : "", ROLEI18[aptOf18(m.sp)] ? ROLEI18[aptOf18(m.sp)][0] : ""].join("");
     const mv = plan[m.id] !== undefined ? `<i class="mv20">→ ${esc(rn(plan[m.id]))}</i>` : "";
@@ -7478,7 +7479,7 @@ function growPage20() {
   h += `<details class="adv20"><summary>⚙ 設定</summary>
     <div class="lane20"><div class="lh"><b>🎓 卒業のきまり</b><span class="hint">このLvまでは、まず訓練</span></div><div class="chips20">${[3, 5, 7, 10].map(v => `<button class="chip20 ${C.gradLv === v ? "on" : ""}" data-a="gl20" data-v="${v}">Lv${v}</button>`).join("")}<button class="chip20 ${!C.gradLv ? "on" : ""}" data-a="gl20" data-v="0">おまかせ</button></div><div class="hint">いま：Lv${thr}までは訓練、Lv${thr + 1}から得意の部屋へ</div></div>
     <div class="chips20"><button class="chip20 ${C.daily ? "on" : ""}" data-a="af19d">🌅 毎朝おまかせ ${C.daily ? "ON" : "OFF"}</button><button class="chip20" data-a="af19open">⚙️ こまかい設定</button><button class="chip20" data-a="mons">👾 魔物の一覧</button></div></details>`;
-  return h + `</div>${sheet20()}<div class="bar20"><button data-a="pgback">◀ ダンジョン</button><button class="main" data-a="af19go" ${moves ? "" : "disabled"}>🪄 おまかせで並べる${moves ? `<small>${moves}体が動く</small>` : "<small>いまがいちばん</small>"}</button></div>`;
+  return h + `</div>${sheet20()}<div class="bar20"><button data-a="pgback">◀ ダンジョン</button><button class="main" data-a="af19go" ${moves || busy ? "" : "disabled"}>🪄 おまかせで並べる${busy ? "<small>試算中…</small>" : moves ? `<small>${moves}体が動く</small>` : "<small>いまがいちばん</small>"}</button></div>`;
 }
 // 部屋の設備タブでは、役目の枠を出さない
 let noRoles20 = false;
@@ -13478,6 +13479,8 @@ function* optSteps27(out) { const dens = S.path.map((r, i) => r && r.kind === "d
 function optimize27(budget) { const t0 = performance.now(), out = {}, g = optSteps27(out); while (!g.next().done) if (performance.now() - t0 > budget) break;
   S.mons.forEach(m => { if (m.home != null && !m.job) m.job19h = m.home; }); dng23 = { key: "", v: null };
   return { evals: out.evals, rounds: out.rounds, ms: Math.round(performance.now() - t0) }; }
+/* はっきり良くなり、予報も悪くならないときだけ並びを変える（押すたびに変わらないように） */
+const keep27 = (a, b) => b.total > a.total + Math.max(20, Math.abs(a.total) * 0.03) && !(a.d && b.d && b.d.lv > a.d.lv);
 /* 先回りの試算：ふだんの画面のすきまに、写しのデータで少しずつ探しておく。押したときに答えが出ていれば待たずに見せる */
 const PRE27 = { key: null, done: false };
 const key27 = () => JSON.stringify([S.day, S.dp > 0, S.lord && S.lord.lv, S.lord && S.lord.hp, S.mons.map(m => [m.id, m.sp, m.evos, m.lv, m.home, m.job, m.job19, m.rest, m.hp]), S.path.map(r => r && [r.kind, r.fac, r.facs, r.pol, r.flv])]);
@@ -13490,10 +13493,12 @@ function preStep27(slice) { try {
     if (PRE27.phase === 0) { dng23 = { key: "", v: null }; PRE27.sc0 = score27(6); autoAll19(S); PRE27.gen = optSteps27(PRE27.out); PRE27.phase = 1; }
     else if (PRE27.phase === 1) { while (performance.now() - t0 < slice) if (PRE27.gen.next().done) { PRE27.phase = 2; break; } }
     else { S.mons.forEach(m => { if (m.home != null && !m.job) m.job19h = m.home; }); dng23 = { key: "", v: null }; PRE27.sc1 = score27(6);
-      PRE27.res = { m: new Map(S.mons.map(m => [m.id, [m.home, m.job, m.job19, m.job19h]])), p: S.path.map(r => r && r.pol) }; PRE27.done = true; }
+      PRE27.res = { m: new Map(S.mons.map(m => [m.id, [m.home, m.job, m.job19, m.job19h]])), p: S.path.map(r => r && r.pol) }; PRE27.keep = keep27(PRE27.sc0, PRE27.sc1); PRE27.done = true; PRE27.fresh = 1; }
   } finally { S = real; dng23 = d0; save = sv; }
 } catch (e) { console.error(e); PRE27.done = true; PRE27.res = null; } }
-setInterval(() => { if (typeof stage !== "undefined" && stage) return; preStep27(14); }, 50);
+setInterval(() => { if (typeof stage !== "undefined" && stage) return; preStep27(14); if (PRE27.fresh) { PRE27.fresh = 0; if (!modal && document.getElementById("pg20")) { CV.sig = ""; render(); } } }, 50);   /* 答えが出たら育成の画面の「○体が動く」を書きかえる */
+/* 育成の画面の予告用：おまかせを押したら本当に動く子（先回りの答え）。まだなら null */
+function plan27() { if (!(PRE27.done && PRE27.res && PRE27.key === key27())) return null; const p = {}; if (!PRE27.keep) return p; S.mons.forEach(m => { const v = PRE27.res.m.get(m.id); if (v && v[0] !== m.home) p[m.id] = v[0]; }); return p; }
 /* 押したときに途中なら、そこから続けて仕上げる（はじめからやり直さない） */
 function finishPre27(budget) { const t0 = performance.now(); while (!PRE27.done && performance.now() - t0 < budget) preStep27(budget); return PRE27.done && !!PRE27.res; }
 // 「おまかせ」ボタン：今までの並べ方 → 試算で詰める → 前と後をくらべて見せる
@@ -13504,7 +13509,7 @@ function smartAuto27() {
   let sc0, sc1, r; const pre = PRE27.done && PRE27.res && PRE27.key === key27() ? PRE27 : null;
   if (pre) { sc0 = pre.sc0; sc1 = pre.sc1; r = pre.out; S.mons.forEach(m => { const v = pre.res.m.get(m.id); if (v) [m.home, m.job, m.job19, m.job19h] = v; }); S.path.forEach((rm, i) => { if (rm) rm.pol = pre.res.p[i]; }); dng23 = { key: "", v: null }; }   /* 先回りで出ていた答え：すぐ見せる */
   else { dng23 = { key: "", v: null }; sc0 = score27(6); autoAll19(S); r = optimize27(1200); dng23 = { key: "", v: null }; sc1 = score27(6); }
-  const keep = sc1.total > sc0.total + Math.max(20, Math.abs(sc0.total) * 0.03) && !(sc0.d && sc1.d && sc1.d.lv > sc0.d.lv);   /* 予報が悪くなる並びは選ばない */   /* はっきり良くなるときだけ変える（押すたびに並びが変わらないように） */
+  const keep = keep27(sc0, sc1);   /* 予報が悪くなる並びは選ばない */   /* はっきり良くなるときだけ変える（押すたびに並びが変わらないように） */
   if (!keep) restore(); else window.__undo27 = restore;
   const fin = keep ? sc1 : sc0, moved = S.mons.filter(m => prevH.get(m.id) !== m.home);
   const nm = i => i == null ? "控え" : roomTitle(S, i), lvTag = d => d ? `${DNG23[d.lv][0]}${DNG23[d.lv][1]}` : "—";
