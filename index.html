@@ -7405,7 +7405,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.326（11/24 02:16）";
+const VER20 = "No.327（11/24 02:21）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7478,7 +7478,7 @@ function growPage20() {
   const notes = [];
   if (guardEmpty.length) notes.push(`<div class="note20 bad">🛡 守る部屋に誰もいない。今夜、勇者が素通りする${S.mons.some(m => plan[m.id] != null && guardEmpty.includes(plan[m.id])) ? "（おまかせで入る）" : ""}</div>`);
   let h = `<div class="pg20" id="pg20"><div class="gh20"><b>🧭 育成</b><span class="hint">カードを押すと、部屋を移す・手放す</span></div><div class="ghb27"><button data-a="mons">👾 魔物の一覧</button>${S.books27 > 0 ? `<button class="bk27" data-a="bookpick27">📜 スキルの書 ${S.books27}冊</button>` : ""}</div>${notes.join("")}`;
-  h += `<div class="flow20">${col("grow")}${D.some(i => purpose19(S, i) === "grow") ? `<div class="ar20"><small>育ったら</small>▶</div>` : ""}${col("earn")}</div>${col("guard")}`;
+  h += `<div class="flow20">${col("grow")}${D.some(i => purpose19(S, i) === "grow") ? `<div class="ar20"><small>育ったら</small>▶</div>` : ""}${col("earn")}</div>${col("guard")}${col("rest")}`;   /* 休む部屋も出す（そこにいる子が見えなくなっていた） */
   if (bench.length) h += `<div class="col20 c-bench"><h4>🪑 控え ${bench.length}</h4><div class="mrow20">${bench.map(mini).join("")}</div></div>`;
   // なれてからの設定は、たたんでおく
   h += `<details class="adv20"><summary>⚙ 設定</summary>
@@ -12037,7 +12037,7 @@ function invOpenMap25(){ if (typeof S === "undefined" || !S) return; const I = i
   // ★は守りの実際の強さ（守る人数×村の特色×レベル）を全拠点の中で5段階に並べたもの
   const pw = n => { const T = INVVT25[n.vt] || INVVT25.farm; return n.pop * T.fight * T.mul * (1 + n.lv / 6) * ({ village: 0.18, town: 0.26, city: 0.36, fort: 0.5, capital: 0.6 }[n.type] || .5); };
   const US = invOur25(S.mons || []), EST = {}, ex = n => EST[n.id] || (EST[n.id] = INV25.est(n)), xOf = n => invX25(ex(n), US);
-  const star = n => { const x = xOf(n); return "★".repeat(x < 0.6 ? 1 : x < 0.85 ? 2 : x < 1.1 ? 3 : x < 1.6 ? 4 : 5); }, feel = n => { const x = xOf(n); return (x < 0.6 ? "楽勝" : x < 0.85 ? "勝てそう" : x < 1.1 ? "互角" : x < 1.6 ? "きつい" : x < 2.5 ? "あと少し強くなれば" : "まだまだ") + `／守りはいまの${x.toFixed(1)}倍`; };   /* ★は「いまの魔物みんな」とくらべた強さ */
+  const star = n => { const x = xOf(n); return "★".repeat(x < 0.6 ? 1 : x < 0.85 ? 2 : x < 1.1 ? 3 : x < 1.6 ? 4 : 5) + (x >= 2.5 ? "💀" : ""); }, feel = n => { const x = xOf(n); return (x < 0.6 ? "楽勝" : x < 0.85 ? "勝てそう" : x < 1.1 ? "互角" : x < 1.6 ? "きつい" : x < 2.5 ? "あと少し強くなれば" : "まだまだ") + `／守りはいまの${x.toFixed(1)}倍`; };   /* ★は「いまの魔物みんな」とくらべた強さ */
   const icon = n => { const own = I.own[n.id], c = own ? "#7a1e14" : "#3b2614";
     if (n.type === "home") return `<circle r="3.2" fill="#3a1a4a" stroke="#c7a0ff" stroke-width=".7"/><text y="1.3" font-size="3.4" text-anchor="middle">👑</text>`;
     const sh = n.type === "village" ? `<circle r="2" fill="${c}"/>` : n.type === "town" ? `<rect x="-2.4" y="-2.4" width="4.8" height="4.8" fill="${c}"/>` : n.type === "city" ? `<rect x="-3.2" y="-3.2" width="6.4" height="6.4" rx="1" fill="${c}"/><rect x="-1.6" y="-5" width="3.2" height="2" fill="${c}"/>` : n.type === "fort" ? `<path d="M-3 2.6 L0 -3.4 L3 2.6 Z" fill="${c}"/>` : `<path d="M-4.4 3 L-4.4 -2 L-2.2 0 L0 -4 L2.2 0 L4.4 -2 L4.4 3 Z" fill="#8a1a10" stroke="#e8c060" stroke-width=".6"/>`;
@@ -13373,7 +13373,7 @@ danger23 = function () {
   const v = dngRun27({ morning: 1, n: 8 }); if (!v) return null;
   /* 次の襲撃の目安：熱・回数・人数ぶん強くなった勇者で同じ並びを試す（前ぶれなく🔴、をなくす） */
   try { if (!S.prep23 || !Object.keys(S.prep23).length) {
-    const h0 = S.heat23 || 0, h1 = Math.min(HEATCAP27, h0 + HEAT27[v.lv]);
+    const h0 = S.heat23 || 0, h1 = Math.min(HEATCAP27, h0 + Math.max(HEAT27[v.lv], 0.12) + 0.06);   /* 勝つほど熱が上がり、勇者も対策してくる。少し厳しめに見積もる（「余裕」の予報が当日「危ない」に変わった） */
     if (RAID_DAYS9.some(d => d > S.day)) { const w = dngRun27({ morning: 1, n: 6, nextRaid: { heat: h1 } }); if (w) v.next = w; } } } catch (e) { console.error(e); }
   dng23 = { key, v }; return v;
 };
@@ -13382,7 +13382,7 @@ danger23 = function () {
   const add = [];
   if (v.lord && !v.downs) add.push(`<span>主の体力：平均で残り約${Math.max(1, Math.round(v.left * 10))}割</span>`);
   if (S.lord && lordMax5(S) && S.lord.hp < lordMax5(S) * 0.7) add.push(`<span class="bad">主の体力が${Math.round(S.lord.hp / lordMax5(S) * 10)}割しかない（朝に1割ずつ戻る）</span>`);
-  if (v.next) { const nx = nextRaid9({ ...S, day: S.day + 1 }); add.push(`<span class="nx27 l${v.next.lv}">つぎの襲撃${nx ? `（${nx}日目）` : ""}は、いまの並びのままだと ${DNG23[v.next.lv][0]}${DNG23[v.next.lv][1]}${v.next.lv > v.lv ? "　→ 今のうちに強くしておく" : ""}</span>`); }
+  if (v.next) { const nx = nextRaid9({ ...S, day: S.day + 1 }); add.push(`<span class="nx27 l${v.next.lv}">つぎの襲撃${nx ? `（${nx}日目）` : ""}は、いまの並びのままだと ${DNG23[v.next.lv][0]}${DNG23[v.next.lv][1]}${v.next.lv > v.lv ? "　→ 今のうちに強くしておく" : ""}<small>（目安。勝ちつづけると勇者は強くなる）</small></span>`); }
   if ((v.lv >= 1 || (v.next && v.next.lv >= 2)) && S.dp >= 200) add.push(`<span class="hint">💡 💎がたまっているなら、魔物をタップ →「🔥 💎で特訓」でLvを上げられる</span>`);
   if (add.length) h = h.replace(/(<div class="dng23[^"]*">[\s\S]*?)(<span class="hint">並べかえ)/, `$1${add.join("")}$2`);
   } catch (e) { console.error(e); } return h; }; }
@@ -13433,7 +13433,7 @@ const tokCost27 = m => { const T = (S.tok27 && S.tok27.day === S.day) ? S.tok27.
 monCard = (prev => function (id) { let h = prev(id); try { const m = S.mons.find(o => o.id === id); if (!m || N) return h; const c = tokCost27(m), ok = S.dp >= c;
   const line = `<div class="tok27"><button data-a="tok27" data-v="${m.id}" ${ok ? "" : "disabled"}>🔥 💎で特訓：Lv${m.lv}→${m.lv + 1}（💎${fmt8(c)}）</button><span class="hint">その日のうちに続けると値段が上がる。勇者に追いつくための💎の使いみち</span></div>`;
   const i = h.indexOf('<div class="xp"'); if (i < 0) return h + line; const j = h.indexOf("</div>", i) + 6; return h.slice(0, j) + line + h.slice(j); } catch (e) { return h; } })(monCard);
-document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="tok27"]'); if (!b || !S) return; ev.stopImmediatePropagation(); ev.preventDefault();
+document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="tok27"]'); if (!b || !S) return; ev.stopImmediatePropagation(); ev.preventDefault(); if (performance.now() - (window.__tok27t || 0) < 700) return; window.__tok27t = performance.now();   /* 連打で2Lv上がらないように */
   const m = S.mons.find(o => o.id === +b.dataset.v); if (!m || N) return; const c = tokCost27(m); if (S.dp < c) { toast("💎が足りない"); return; }
   S.dp -= c; S.tok27 = (S.tok27 && S.tok27.day === S.day) ? { day: S.day, n: S.tok27.n + 1 } : { day: S.day, n: 1 };
   const rep = newRep9(); gainXp9(S, m, Math.max(1, expNext5(m) - (m.exp || 0)), rep); sfx16 && sfx16("lvup"); toast(`🔥 ${m.nick} が Lv${m.lv} になった`);
@@ -13538,7 +13538,7 @@ function optimize27(budget) { const t0 = performance.now(), out = {}, g = optSte
   S.mons.forEach(m => { if (m.home != null && !m.job) m.job19h = m.home; }); dng23 = { key: "", v: null };
   return { evals: out.evals, rounds: out.rounds, ms: Math.round(performance.now() - t0) }; }
 /* はっきり良くなり、予報も悪くならないときだけ並びを変える（押すたびに変わらないように） */
-const keep27 = (a, b) => b.total > a.total + Math.max(20, Math.abs(a.total) * 0.03) && !(a.d && b.d && b.d.lv > a.d.lv);
+const keep27 = (a, b) => b.total > a.total + Math.max(20, Math.abs(a.total) * 0.03) && !(a.d && b.d && b.d.lv > a.d.lv) && !(a.e && b.e && a.e.dp > 10 && b.e.dp < a.e.dp * 0.5 && !(a.d && b.d && b.d.lv < a.d.lv));   /* 予報が良くならないのに稼ぎを半分以下にする並びは選ばない */
 /* 先回りの試算：ふだんの画面のすきまに、写しのデータで少しずつ探しておく。押したときに答えが出ていれば待たずに見せる */
 const PRE27 = { key: null, done: false };
 const key27 = () => JSON.stringify([S.day, S.dp > 0, S.lord && S.lord.lv, S.lord && S.lord.hp, S.mons.map(m => [m.id, m.sp, m.evos, m.lv, m.home, m.job, m.job19, m.rest, m.hp]), S.path.map(r => r && [r.kind, r.fac, r.facs, r.pol, r.flv])]);
@@ -13587,6 +13587,10 @@ document.addEventListener("click", ev => { const b = ev.target.closest && ev.tar
 monsModal = (prev => function () { const h = prev(); if (!(bkList27().length > 0)) return h; return h.replace('<div class="pk">', `<div class="pk"><button class="bk27" data-a="bookpick27">📜 スキルの書 ${S.bk27.length}冊</button>`); })(monsModal);
 /* 手に入れた直後：画面が落ち着いたら（ほかの表示が閉じたら）書の一覧を出す */
 setInterval(() => { try { if (S && S.bookNew27 && !(typeof title !== "undefined" && title) && bkList27().length > 0 && !modal && !N && !(typeof stage !== "undefined" && stage) && !document.querySelector(".kk25ov,#fp26"))   /* タイトルの上には出さない（つづきからが押せなくなった） */ { S.bookNew27 = 0; modal = () => bookListModal27(); render(); } } catch (e) {} }, 700);
+
+/* 最初の宝箱はスキルの書にする（13日遊んでも書に出会えなかった） */
+{ const _rc = rollChest19; rollChest19 = function (S2) { const c = _rc.apply(this, arguments); try { if (S2 && !S2.bkFirst27 && !S2.sim23) { c.kind = "skill"; c.val = 1; } } catch (e) {} return c; }; }
+{ const _oc2 = openChest19; openChest19 = function (S2, c) { try { if (c && c.kind === "skill" && S2) S2.bkFirst27 = 1; } catch (e) {} return _oc2.apply(this, arguments); }; }
 
 </script>
 </body>
