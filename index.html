@@ -7400,7 +7400,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.315（11/23 20:11）";
+const VER20 = "No.316（11/23 20:13）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -13097,7 +13097,7 @@ function fpOpen26(){
   function where(x, z){ for (let i = 0; i < n; i++) { const R = rooms[i], zl = z - R.Z; if (zl > FPK26.RZ0 - 0.01 && zl <= FPK26.RZ1) {
         const door = Math.abs(x) < 2.2 && ((zl > 7.5 && i > 0) || (zl < fpBZ26(R.kind) + 0.4 && i < n - 1));   /* 入口の部屋の前の穴（外）へは出られない */
         return (floorOK(R, x, zl, 1) || door) ? { k: "r", i, y: R.Y + (door ? 0 : floorY(R, x, zl)), tight: door && !floorOK(R, x, zl, 1) } : null; } }
-    for (let i = 0; i + 1 < n; i++) { const C = CORR[i]; if (z <= C.z0 && z >= C.z1) { if (Math.abs(x) >= 1.9) return null; const t = (C.z0 - z) / (C.z0 - C.z1), nst = Math.abs(C.y1 - C.y0) / 0.38; return { k: "c", i, y: C.y0 + (C.y1 - C.y0) * (nst ? Math.round(t * nst) / nst : t), tight: true }; } }
+    for (let i = 0; i + 1 < n; i++) { const C = CORR[i]; if (z <= Math.max(C.z0, rooms[i].Z + FPK26.RZ0 + 0.05) && z >= Math.min(C.z1, rooms[i + 1].Z + FPK26.RZ1 - 0.05)) {   /* 部屋のはしと通路の入口のあいだで止まらない */ if (Math.abs(x) >= 1.9) return null; const t = (C.z0 - z) / (C.z0 - C.z1), nst = Math.abs(C.y1 - C.y0) / 0.38; return { k: "c", i, y: C.y0 + (C.y1 - C.y0) * (nst ? Math.round(t * nst) / nst : t), tight: true }; } }
     return null; }
   const los = (wx, wz) => { const dx = wx - P.x, dz = wz - P.z, L = Math.hypot(dx, dz), k = Math.ceil(L / 0.8); for (let j = 1; j < k; j++) { const t = j / k; if (!where(P.x + dx * t, P.z + dz * t)) return false; } return true; };   /* 壁の向こうの子の名札は出さない */
   // 指：左は歩く（スティック）、右は見回す。動かさずに離したらタップ
