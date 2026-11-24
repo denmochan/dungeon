@@ -1239,7 +1239,7 @@ body:has(.modal) .inv25btn,body:has(.ntfull19) .inv25btn{display:none}
 /* 歩く画面の管理ボタン */
 #fp26 .f26nav{display:flex;gap:6px}#fp26 .f26nav button{padding:7px 9px;font-size:12px}
 #fp26 .f26nav button.day{background:#5a3a18;border-color:#c08a3a}#fp26 .f26nav button.raid{background:#6a1e18;border-color:#e2614f}
-.fpret28{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 74px);z-index:70;padding:9px 16px;border-radius:999px;border:1px solid #c08a3a;background:#3a2814ee;color:#f6e3c0;font-weight:700;font-size:14px;box-shadow:0 4px 14px #0008}
+.fpret28{position:fixed;right:max(10px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 84px);z-index:70;padding:8px 12px;border-radius:999px;opacity:.94;border:1px solid #c08a3a;background:#3a2814ee;color:#f6e3c0;font-weight:700;font-size:13px;box-shadow:0 4px 14px #0008}
 /* proto28：話す */
 #fp26 .f26say{position:relative;min-height:3.2em;font-size:14px;line-height:1.5;padding:8px 10px;border-radius:10px;background:#1a120cdd;border:1px solid #5a4330}
 #fp26 .f26say .f26ico{position:absolute;right:-6px;top:-10px;font-size:16px;filter:drop-shadow(0 1px 2px #000)}
@@ -1268,6 +1268,22 @@ body:has(.modal) .inv25btn,body:has(.ntfull19) .inv25btn{display:none}
 .inv28met .bar28 i.g{background:#5cc070}.inv28met .bar28 i.y{background:#d9a441}.inv28met .bar28 i.o{background:#e07a3a}.inv28met .bar28 i.r{background:#c84a3a}.inv28met .bar28 u{position:absolute;left:62%;top:-2px;bottom:-2px;width:2px;background:#fff8}
 .inv28met .f28{font-size:12px;opacity:.9}.inv28met .best28{padding:7px 10px;border-radius:8px;border:1px solid #c08a3a;background:#3a2814;color:#f6e3c0;font-weight:700}
 .inv25row.bad28{background:#5a2a1a!important;color:#ffb39a!important}
+/* proto28：結果の「つづける」はいつも画面の下に見える（横持ちで下まで送れず進めなかった） */
+.stage.result>button[data-a="stagenext"]{position:sticky;bottom:calc(env(safe-area-inset-bottom,0px) + 8px);z-index:3;box-shadow:0 -6px 18px #000c,0 4px 10px #0008}
+@media (orientation:landscape) and (max-height:520px){
+.stage.result .raidban .rb-h{font-size:26px}.stage.result .mvp img,.stage.result .mvp .sp{width:56px!important;height:56px!important}.stage.result .mvp{margin:2px 0}
+.stage.result .dw28{max-width:520px}.stage.result>button[data-a="stagenext"]{max-width:420px!important}
+}
+.dr28.big{padding:10px 4px}.dr28 .pic28{position:relative;display:inline-flex;flex:0 0 auto;border-radius:12px;background:radial-gradient(circle,#ffe7a055,transparent 70%)}
+.dr28 .pic28::before{content:"";position:absolute;inset:-6px;border-radius:50%;background:conic-gradient(from 0deg,#ffd56a00,#ffd56a66,#ffd56a00 30%,#ffd56a66 50%,#ffd56a00 70%);animation:spin28 6s linear infinite;z-index:-1}
+@keyframes spin28{to{transform:rotate(360deg)}}
+.dr28.ch.big>.pic28>img,.dr28 .pic28>img{width:72px!important;height:72px!important;flex:none}
+.dr28 .evp28{display:flex;align-items:center;gap:2px;flex:0 0 auto}.dr28 .evp28>img{opacity:.6;filter:grayscale(.4);width:48px!important;height:48px!important}.dr28 .evp28>b{color:#ffd56a;font-size:14px}
+.dr28.ev{cursor:pointer}.dr28 .tx small em{font-style:normal;margin-left:6px;color:#ffd56a;opacity:.9}
+.stage.result{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 30px)!important}
+.ban19.chb28{pointer-events:auto}
+#off26{left:max(8px,env(safe-area-inset-left,0px))!important;transform:none!important;top:auto!important;bottom:calc(6px + env(safe-area-inset-bottom,0px))!important;font-size:11px!important;opacity:.75;padding:3px 8px}
+#fp26 .f26menu{z-index:6}#fp26 .f26menu:not([hidden]) ~ .f26lab{opacity:.12}
 </style>
 </head>
 <body>
@@ -7453,7 +7469,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.336（11/24 08:27）";
+const VER20 = "No.337（11/24 09:29）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -11659,9 +11675,9 @@ function frame25(tm){
     else if (!vis || (a.w.leave && Math.hypot(a.x - a.tx, a.z - a.tz) < 0.6)) a.al -= dt * 2; else a.al = Math.min(1, a.al + dt * 2.5);
     if (a.al <= 0 && (a.dying || !vis || a.w.leave)) { if (a.dying) (B3.gone || (B3.gone = new Set())).add(a.id); delete B3.A[a.id]; return; }
     // 歩く
-    const dx = a.tx - a.x, dz = a.tz - a.z, dist = Math.hypot(dx, dz), spd = (a.id[0] === "h" ? 4.2 : 3.2) * (B3.size[a.key] || 1) ** 0.3;
+    const dx = a.tx - a.x, dz = a.tz - a.z, dist = Math.hypot(dx, dz), spd = Math.max((a.id[0] === "h" ? 4.2 : 3.2) * (B3.size[a.key] || 1) ** 0.3, window.__INVADE25 ? dist * 5 : 0);   /* 侵略：計算の位置に追いつく（×2・×4で絵だけ置いていかれて、前に出ていないように見えた） */
     const busy = a.anim === "atk" && now - a.at < a.dur || a.anim === "hurt" && now - a.at < a.dur;
-    if (!a.dying && dist > 0.15 && !busy) { const st2 = Math.min(dist, spd * (B3.frz ? 0 : dt)); a.x += dx / dist * st2; a.z += dz / dist * st2; if (!window.__INVADE25) { const OBS = B3.obK === B3.roomKey ? B3.ob : (B3.obK = B3.roomKey, B3.ob = (() => { try { const on = {}; ROOMSET25[roomKind25(B3.room)].forEach(k => on[k] = true); return HAI25.foots(on).filter(o => o[2] >= 0.5); } catch (e) { return []; } })()); const rr = 0.45 * (B3.size[a.key] || 1);
+    if (!a.dying && dist > 0.15 && (!busy || window.__INVADE25)) { const st2 = Math.min(dist, spd * (B3.frz ? 0 : dt)); a.x += dx / dist * st2; a.z += dz / dist * st2; if (!window.__INVADE25) { const OBS = B3.obK === B3.roomKey ? B3.ob : (B3.obK = B3.roomKey, B3.ob = (() => { try { const on = {}; ROOMSET25[roomKind25(B3.room)].forEach(k => on[k] = true); return HAI25.foots(on).filter(o => o[2] >= 0.5); } catch (e) { return []; } })()); const rr = 0.45 * (B3.size[a.key] || 1);
       OBS.forEach(([ox, oz, or]) => { const ex = a.x - ox, ez = a.z - oz, L = Math.hypot(ex, ez), need = or + rr; if (L < need && L > 1e-3) { a.x = ox + ex / L * need; a.z = oz + ez / L * need; } }); }   /* 柵・家具・柱をすり抜けない */ if (!window.__INVADE25) Object.values(B3.A).forEach(o => { if (o === a || o.dying || !o.w) return; const ex = a.x - o.x, ez = a.z - o.z, L = Math.hypot(ex, ez), need = 0.5 * ((B3.size[a.key] || 1) + (B3.size[o.key] || 1)) * 0.75; if (L < need) { const k = (need - L) * 0.5, ux = L > 1e-3 ? ex / L : 1, uz = L > 1e-3 ? ez / L : 0; a.x += ux * k; a.z += uz * k; } });   /* 勇者どうしが1点に重ならない */ if (Math.abs(dx) > 0.2) a.face = dx > 0 ? 1 : -1; if (a.anim !== "walk") play25(a, "walk", 9); }
     else if (!busy && a.anim !== "idle" && !(dist > 0.15)) play25(a, "idle", 9);
     if (!a.dying && !busy && dist < 0.15) { const fo = a.id[0] === "h" ? B3.A[B3.tgt[a.id]] : null; const face = o => { if (o && Math.abs(o.x - a.x) > 0.6) a.face = o.x >= a.x ? 1 : -1; };   /* 向きは近い相手へ。少しの左右差では振り向かない */
@@ -11929,7 +11945,8 @@ const INV25 = (() => { let spd0 = 2;
     const G = st.mons.filter(m => !m.dead).concat(st.vil.filter(v => !v.dead && !v.up)), rad = u => (u.n ? (u.n > 2 ? 1.7 : u.n > 1 ? 1.3 : 0.7) : 0.8) * ((B3 && B3.size[u.key]) || 1);
     for (let i = 0; i < G.length; i++) for (let j = i + 1; j < G.length; j++) { const a = G[i], b = G[j], dx = b.x - a.x, dz = b.z - a.z, d = Math.hypot(dx, dz) || 0.01, need = rad(a) + rad(b);
       if (d < need) { const push = (need - d) * 0.5 * Math.min(1, dt * 8), ux = dx / d, uz = dz / d, fa = a.role === "front" ? 0.2 : 1, fb = b.role === "front" ? 0.2 : 1; a.x -= ux * push * fa; a.z -= uz * push * fa; b.x += ux * push * fb; b.z += uz * push * fb; } }
-    if (!st.vil.some(v => !v.dead)) end(true); else if (!st.mons.some(m => !m.dead)) end(false); }
+    if (!st.vil.some(v => !v.dead)) end(true); else if (!st.mons.some(m => !m.dead)) end(false);
+    else if (st.gate.broken && !st.flee28) { const left = st.vil.filter(v => !v.dead).reduce((a, v) => a + alive(v), 0), all = st.vil.reduce((a, v) => a + (v.n || 1), 0); if (left <= Math.max(2, Math.round(all * 0.12))) { st.flee28 = 1; st.vil.forEach(v => { v.dead = true; }); st.banner = { txt: "残りの守りは逃げ出した！", at: st.t }; end(true); } } }   /* 最後の数人を待つ時間が長かった */
   function breakGate(){ st.gate.broken = true; st.gate.hp = 0; st.brokeAt = st.t;
     st.vil.forEach(v => { if (!v.up || v.dead || v.role !== "tower") return; v.up = 0; v.x -= 1.6; v.z += Math.sign(v.z) * 0.6; v.hx = v.x; v.hz = v.z; const d = Math.round(v.max * 0.3); v.hp -= d; st.hits.push({ a: null, b: v.id + "_0", d, kill: v.hp <= 0, big: true }); if (v.hp <= 0) v.dead = true; });
     st.banner = { txt: "門を破った！", at: st.t };   // 門の上ではなく、画面の上の帯の下に大きく出す（撃破！や数字と重なっていた）
@@ -11987,7 +12004,7 @@ const INV25 = (() => { let spd0 = 2;
     g.restore(); }
   // 拠点の守りの強さ（実際に並べてみて数える）。体力の合計×攻撃の合計＝数の二乗に効く強さ
   function est(node){ const old = st; let r = { hp: 1, atk: 1, n: 0 }; try { start([], node.vt, node); r = { hp: st.vil.reduce((a, v) => a + v.max, 0) + st.gate.max * 0.5, atk: st.vil.reduce((a, v) => a + v.atk, 0), n: st.vil.reduce((a, v) => a + (v.n || 1), 0) }; } catch (e) {} st = old; return r; }
-  return { start, want, overlay, gate, est, get st(){ return st; }, set spd(v){ spd0 = v; if (st) st.spd = v; } };
+  return { start, want, overlay, gate, est, run(dt){ sim(dt); }, swap(v){ const o = st; st = v; return o; }, get st(){ return st; }, set spd(v){ spd0 = v; if (st) st.spd = v; } };
 })();
 
 // ---- 入口・編成・戦闘の画面 ----
@@ -13201,7 +13218,7 @@ function fpOpen26(){
     const lv = m.lv || 1, nm = (typeof esc === "function" ? esc(m.nick || "") : (m.nick || "")), T0 = typeof talk28 === "function" ? talk28(m) : { line: SAY[(m.id || 0) % SAY.length], top: "idle" }, ico = t => (typeof TKICON28 !== "undefined" && TKICON28[t]) || "", qn = (typeof QUIRK !== "undefined" && QUIRK[m.quirk]) ? QUIRK[m.quirk].name : "";
     const sayH = o => `<span class="f26ico">${ico(o.top)}</span>「${typeof esc === "function" ? esc(o.line) : o.line}」`;
     menu.innerHTML = `<div class="f26mh"><b>${nm}</b> <small>Lv${lv}${qn ? "・" + qn : ""}</small></div><div class="f26say">${sayH(T0)}</div><div class="f26mb"><button data-m="more">💬 もっと話す</button><button data-m="card">📋 詳しく</button><button data-m="move">🏠 部屋を変える</button><button data-m="x">✕</button></div><div class="f26rooms" hidden></div>`;
-    /* 話している子の顔を隠さないよう、画面の右側に出す */ menu.style.left = Math.max(8, VW() - 262) + "px"; menu.style.top = Math.max(70, VH() - 262) + "px"; menu.hidden = false;
+    /* 話している子の顔を隠さないよう、画面の右側に出す */ menu.style.left = (sx > VW() * 0.55 ? 8 : Math.max(8, VW() - 262)) + "px"; menu.style.top = Math.max(70, VH() - 262) + "px"; menu.hidden = false;
     menu.querySelector('[data-m="x"]').onclick = () => { menu.hidden = true; };
     menu.querySelector('[data-m="more"]').onclick = () => { a.wait = 6; const o = typeof talk28 === "function" ? talk28(m) : T0, el = menu.querySelector(".f26say"); el.classList.remove("pop28"); void el.offsetWidth; el.classList.add("pop28"); el.innerHTML = sayH(o); try { tone16(520 + Math.random() * 200, 0, 0.05, "square", 0.03); tone16(700 + Math.random() * 200, 0.06, 0.05, "square", 0.03); } catch (e) {} };
     menu.querySelector('[data-m="card"]').onclick = () => { menu.hidden = true; try { modal = () => monCard(m.id) + ""; render(); } catch (e) {} };
@@ -13649,7 +13666,7 @@ let DAWN28 = 0, DBAN28 = 0; const DCH28 = [];
 const CHN28 = ["銅の宝箱", "銀の宝箱", "金の宝箱", "虹の宝箱"];
 { const _oc = openChest19; openChest19 = function (S2, c) { const o = _oc.apply(this, arguments); try { if (DAWN28 && o) DCH28.push({ c, o }); } catch (e) {} return o; }; }
 /* 宝箱の中身は結果の1枚に出すので、あとから出る宝箱の見出しは出さない */
-{ const _b = banner19; banner19 = function (text, cls) { if (DBAN28 > 0 && cls === "mis" && /宝箱/.test(String(text))) { DBAN28--; return; } return _b.apply(this, arguments); }; }
+{ const _b = banner19; banner19 = function (text, cls, ms) { if (DBAN28 > 0 && cls === "mis" && /宝箱/.test(String(text))) { DBAN28--; return; } if (cls === "mis" && /宝箱/.test(String(text))) return _b.call(this, text, cls + " chb28", Math.max(ms || 0, 3600)); return _b.apply(this, arguments); }; }
 /* 朝にたまった演出（宝箱・進化・かけら・記憶・書）を1つにまとめる。何もなければ null */
 function gather28(withPlain) {
   const D = { ch: DCH28.splice(0), evo: [], kk: [], mem: [], book: 0 };
@@ -13698,10 +13715,10 @@ function morning28() {
 function dawnHtml28(D) {
   const rows = [];
   D.ch.forEach(({ c, o }) => { const t = c.tier || 0, C = CHEST19[t] || {};
-    const tt = String(o.text || "🎁"), sp1 = tt.indexOf(" "), ic = o.sp ? img(o.sp, 0, "sp", "width:52px;height:52px") : `<span class="ic28">${sp1 > 0 ? tt.slice(0, sp1) : "🎁"}</span>`, lab = !o.sp && sp1 > 0 ? tt.slice(sp1 + 1) : tt;
-    rows.push(`<div class="dr28 ch t${t}" style="--cc:${C.col || "#c9a"}">${ic}<div class="tx"><small>${CHN28[t] || "宝箱"}</small><b>${lab}</b><i>${o.sub || ""}</i></div>${o.isNew ? '<span class="new28">NEW!</span>' : ""}</div>`); });
+    const tt = String(o.text || "🎁"), sp1 = tt.indexOf(" "), ic = o.sp ? `<span class="pic28">${img(o.sp, 0, "sp", "width:72px;height:72px")}</span>` : `<span class="ic28">${sp1 > 0 ? tt.slice(0, sp1) : "🎁"}</span>`, lab = !o.sp && sp1 > 0 ? tt.slice(sp1 + 1) : tt;
+    rows.push(`<div class="dr28 ch t${t}${o.sp ? " big" : ""}" style="--cc:${C.col || "#c9a"}">${ic}<div class="tx"><small>${CHN28[t] || "宝箱"}</small><b>${lab}</b><i>${o.sub || ""}</i></div>${o.isNew ? '<span class="new28">NEW!</span>' : ""}</div>`); });
   D.evo.forEach(e => { const m = e.m; if (!m) return; let f; try { f = formOf(m); } catch (x) { f = [m.sp]; }
-    rows.push(`<div class="dr28 ev">${simg23(m, m.evos, "sp", "width:52px;height:52px")}<div class="tx"><small>進化</small><b>${esc(m.nick)}：${esc(e.before.name)} → <span class="gold">${esc(f[0])}</span></b><i>体力 ${e.before.hp}→${monHp5(m)}　攻撃 ${e.before.atk}→${monAtk5(m)}</i></div></div>`); });
+    rows.push(`<div class="dr28 ev big" data-a="d28evo" data-v="${D.evo.indexOf(e)}"><span class="evp28">${img(m.sp, e.before.evos || 0, "sp", "width:48px;height:48px")}<b>▶</b><span class="pic28">${simg23(m, m.evos, "sp", "width:72px;height:72px")}</span></span><div class="tx"><small>✨ 進化した！<em>タップで見る</em></small><b>${esc(m.nick)}：${esc(e.before.name)} → <span class="gold">${esc(f[0])}</span></b><i>体力 ${e.before.hp}→${monHp5(m)}　攻撃 ${e.before.atk}→${monAtk5(m)}</i></div></div>`); });
   if (D.kk.length) { let n0 = 0; try { n0 = kkN25(S) - D.kk.length; } catch (e) {}
     D.kk.forEach((id, j) => { const k = KK25.find(o => o.id === id); if (!k) return;
       rows.push(`<div class="dr28 kk"><span class="ic28 kk">✦</span><div class="tx"><small>魔王のかけら　${n0 + j + 1}/${KKMAX25}</small><b>${k.nm}</b><i>${kkEff25(k)}</i></div></div>`); }); }
@@ -13720,8 +13737,9 @@ function dawnMem28(list) { const ov = document.createElement("div"); ov.classNam
 document.addEventListener("click", ev => {
   const b = ev.target.closest && ev.target.closest("[data-a]"); if (!b || !stage || stage.k !== "result" || !stage.d28) return;
   const a = b.dataset.a;
+  if (a === "d28evo") { ev.stopImmediatePropagation(); const e = stage.d28.evo[+b.dataset.v]; if (!e || !e.m) return; const back = stage; queue.unshift(back); stage = { k: "evo", ...e, step: 0, replay28: 1 }; render(); return; }
   if (a === "d28mem") { ev.stopImmediatePropagation(); dawnMem28(stage.d28.mem.slice()); return; }
-  if (a === "d28book") { ev.stopImmediatePropagation(); dawnDone28(); nextStage(); if (!stage) { modal = () => bookListModal27(); render(); } else S.bookNew27 = 1; return; }
+  if (a === "d28book") { ev.stopImmediatePropagation(); dawnDone28(); nextStage(); if (!stage) { const B = [...new Set(bkList27())]; modal = B.length === 1 ? () => bookWhoModal27(B[0]) : () => bookListModal27(); render(); } else S.bookNew27 = 1; return; }
   if (a === "stagenext") dawnDone28();
 }, true);
 // かけらの画面：結果の1枚が出ているあいだ（と、閉じた直後）は出さない
@@ -13739,9 +13757,11 @@ function fpAct28(a) { const b = document.createElement("button"); b.dataset.a = 
     g.innerHTML = `<button data-n="room">🏠 部屋</button><button data-n="g20">🧭 育成</button><button data-n="shop">🛒 店</button><button data-n="nextday" class="day${/迎え撃つ/.test(dl) ? " raid" : ""}">${esc(dl)}</button>`;
     top.insertBefore(g, x);
     g.addEventListener("click", ev => { const t = ev.target.closest("button[data-n]"); if (!t) return; ev.stopPropagation();
-      const n = t.dataset.n, sel0 = roomSel; let ri = null; try { const m = /^r(\d+)/.exec((window.__fp26 && window.__fp26.P && window.__fp26.P.seg) || ""); if (m) ri = +m[1]; } catch (e) {}
+      const n = t.dataset.n, sel0 = roomSel; let ri = null;
+      /* いま立っている部屋：左上の部屋名で。通路なら近いほうの部屋 */
+      try { const F = window.__fp26, nm = (w.querySelector(".f26where b") || {}).textContent || "", Rs = (F && F.rooms) || []; const hit = Rs.find(R => R.name === nm); if (hit) ri = hit.i; else if (F && F.P) ri = Rs.slice().sort((a, b) => Math.abs(a.Z - F.P.z) - Math.abs(b.Z - F.P.z))[0].i; } catch (e) {}
       x.click();   // 歩く画面を閉じる（いた場所は覚えている）
-      FPRET28 = n === "nextday" ? null : { sel: sel0 };
+      FPRET28 = { sel: sel0, auto: n === "nextday" ? Date.now() : 0 };   /* 次の日へ・迎え撃つのあとも、終わったら戻れる */
       if (n === "room") { if (ri != null && S.path[ri] && S.path[ri].kind === "den") { page20 = null; roomSel = roomOpen = ri; } else { page20 = "grow"; roomSel = roomOpen = null; } modal = null; render(); }
       else if (n === "g20") { page20 = "grow"; roomSel = roomOpen = null; modal = null; render(); }
       else fpAct28(n);
@@ -13750,7 +13770,9 @@ function fpAct28(a) { const b = document.createElement("button"); b.dataset.a = 
   return r; }; }
 { const _r = render; render = function () { _r.apply(this, arguments); try {
   const show = FPRET28 && S && !title && !N && !stage && !document.getElementById("fp26"); let b = document.querySelector(".fpret28");
-  if (!show) { if (b) b.remove(); if (N) FPRET28 = null; return; }
+  if (!show) { if (b) b.remove(); return; }
+  /* 歩く画面から「次の日へ／迎え撃つ」を押したときは、夜と朝が終わったら自動で歩く画面にもどる */
+  if (FPRET28.auto && !modal && !queue.length && !document.querySelector(".kk25ov")) { const s = FPRET28; if (b) b.remove(); setTimeout(() => { if (FPRET28 !== s || stage || N || modal || title) return; FPRET28 = null; page20 = null; roomSel = roomOpen = s.sel; render(); fpOpen26(); }, 600); return; }
   if (!b) { b = document.createElement("button"); b.className = "fpret28"; b.innerHTML = "🚶 歩く画面にもどる"; document.body.appendChild(b);
     b.addEventListener("click", ev => { ev.stopPropagation(); const s = FPRET28 || { sel: null }; FPRET28 = null; b.remove(); page20 = null; roomSel = roomOpen = s.sel; modal = null; addPick = null; render(); fpOpen26(); }); }
 } catch (e) {} }; }
@@ -13873,7 +13895,7 @@ function talk28(m) {
   try {
     const V = TK28[m.quirk] || TK28.brave, D = MON[m.sp] || {}, f = (() => { try { return formOf(m); } catch (e) { return null; } })();
     const H = TKHIST28[m.id] = TKHIST28[m.id] || { n: 0, last: "", lastT: "", rec: [] }; H.n++;
-    const room = m.home != null && S.path[m.home], mates = room ? residents5(S, m.home).filter(o => o !== m) : [], mate = mates.length ? mates[Math.floor(Math.random() * mates.length)] : null;
+    const room = m.home != null && S.path[m.home], mates = room ? residents5(S, m.home).filter(o => o !== m) : [], mn = mates.filter(o => rel28(m, o) === 0), mate = mn.length ? mn[Math.floor(Math.random() * mn.length)] : null;
     const job = (() => { try { return jobOf12(S, m); } catch (e) { return null; } })(), dr = (() => { try { return daysToRaid9(S); } catch (e) { return null; } })();
     const lordLow = (() => { try { return S.lord.hp < lordMax5(S) * 0.6; } catch (e) { return false; } })();
     const k = m.kt19 || 0, likes = String(D.likes || "").split("・").filter(Boolean), mas = Math.max(0, ...Object.values(m.mas || {}));
@@ -13885,14 +13907,12 @@ function talk28(m) {
     if (lordLow) T.push(["lord", 3]);
     if (m.home == null) T.push(["bench", 4]);
     else if (job === "mine") T.push(["mine", 3]); else if (job === "train" || job === "teach") T.push(["train", 3]); else if (job === "fight") T.push(["fight", 2]);
-    if (mate) T.push(["mate", 2]); else if (room && room.kind === "den") T.push(["alone", 1]);
+    if (mate) T.push(["mate", 2]); else if (room && room.kind === "den" && !mates.length) T.push(["alone", 1]);
     if (k > 0) T.push(["kills", 2]);
     if (likes.length) T.push(["like", 1]);
     if (mas >= 20) T.push(["master", 1]);
     if (m.rar19 === "SSR" || m.rar19 === "SR" || m.shiny19) T.push(["rare", 1]);
     if (H.n >= 3) T.push(["again", 2]);
-    if (f && f[2] && (f[2].up || f[2].go)) T.push(["voice", 1]);
-    if (D.bio) T.push(["bio", 1]);
     T.push(["idle", 2]);
     const cand = T.filter(t => t[0] !== H.lastT || T.length === 1), sum = cand.reduce((a, t) => a + t[1], 0); let r = Math.random() * sum, top = cand[0][0];
     for (const t of cand) { r -= t[1]; if (r <= 0) { top = t[0]; break; } }
@@ -13926,7 +13946,7 @@ const TKSP28 = {
   maou: ["…ふん。かけらの主よ。わしの力、使いこなしてみせよ", "かつての城に比べれば狭いが、悪くない"],
   mimic: ["……（ふたが少し開いて、また閉じた）", "……（中から金貨の音がする）"],
   ghost: ["ば〜っ！ …おどろかない？ つまんない", "すり抜けるの、けっこう疲れるんだよ"],
-  goblin: ["へっへっへ、勇者の財布は全部いただきだ", "ゴブリンは数が多いのが取り柄よ"],
+  goblin: ["（耳をぴくぴくさせている。ゴブリンは物音に敏感だ）", "（腰の袋から、拾った金貨がのぞいている）"],
   slime: ["ゴポッ（ぷるん）", "ゴポポ…（うれしそうに揺れている）"],
   skeleton: ["カタカタ…（骨を鳴らしてあいさつしている）", "盾は、生きてたころから使ってた気がする"],
   vampire: ["ごきげんよう。今宵の勇者は、血の気が多いといいね", "日の光の届かないここは、楽園だ"],
@@ -13936,7 +13956,7 @@ const TKSP28 = {
 };
 
 // ---------- 3) 仲間の好き嫌い（2体の組み合わせで決まる。同じ一族は仲良くなりやすい） ----------
-function rel28(a, b) { if (!a || !b) return 0; const x = Math.min(a.id, b.id), y = Math.max(a.id, b.id); let h = (x * 73856093) ^ (y * 19349663); h = Math.abs(h) % 100;
+function rel28(a, b) { if (!a || !b) return 0; const x = Math.min(a.id, b.id), y = Math.max(a.id, b.id); let h = Math.imul(x + 0x9E37, 0x85EBCA6B) ^ Math.imul(y + 0x7F4A, 0xC2B2AE35); h ^= h >>> 13; h = Math.imul(h, 0x27D4EB2F); h ^= h >>> 15; h = (h >>> 0) % 100;
   const fa = (MON[a.sp] || {}).fam, fb = (MON[b.sp] || {}).fam; if (fa && fa === fb) h += 25; if (a.quirk === b.quirk) h += 10; if ((a.quirk === "hot" && b.quirk === "lazy") || (a.quirk === "lazy" && b.quirk === "hot") || (a.quirk === "quick" && b.quirk === "sturdy") || (a.quirk === "sturdy" && b.quirk === "quick")) h -= 25;
   return h >= 70 ? 1 : h < 22 ? -1 : 0; }
 const TKREL28 = {
@@ -13986,12 +14006,12 @@ function ev28(m, k, v) { try { if (!m) return; m.ev28 = (m.ev28 || []).filter(e 
     if (evs.length) extra.push(["ev", 7]);
     const room = m.home != null && S.path[m.home], mates = room ? residents5(S, m.home).filter(o => o !== m) : [], rm = mates.map(o => [o, rel28(m, o)]).filter(x => x[1] !== 0);
     if (rm.length) extra.push(["rel", 2]);
-    const fam = (MON[m.sp] || {}).fam; if (TKFAM28[fam]) extra.push(["fam", 1.5]); if (TKSP28[m.sp]) extra.push(["sp", 1.5]);
+    const fam = (MON[m.sp] || {}).fam; if (TKFAM28[fam]) extra.push(["fam", 0.8]); if (TKSP28[m.sp]) extra.push(["sp", 0.8]);
     // 半分くらいは、もとの話題から（役に立つ話はそちらが優先）。出来事があれば、そちらを強めに
     const wE = extra.reduce((a, t) => a + t[1], 0), pick = Math.random() * (wE + 6);
-    if (extra.length && pick < wE && extra.map(t => t[0]).some(t => t !== H.lastT)) {
-      let r = pick, top = extra[0][0]; for (const t of extra) { r -= t[1]; if (r <= 0) { top = t[0]; break; } }
-      if (top === H.lastT && extra.length > 1) top = extra.find(t => t[0] !== H.lastT)[0];
+    if (evs.length || (extra.length && pick < wE && extra.map(t => t[0]).some(t => t !== H.lastT))) {   /* 昨夜の出来事は、まだ話していなければ最初に話す */
+      let r = pick, top = evs.length ? "ev" : extra[0][0]; if (!evs.length) for (const t of extra) { r -= t[1]; if (r <= 0) { top = t[0]; break; } }
+      if (top !== "ev" && top === H.lastT && extra.length > 1) top = extra.find(t => t[0] !== H.lastT)[0];
       let line, icon = "";
       if (top === "ev") { const e = evs[evs.length - 1]; H.usedEv = (H.usedEv || []).concat(e.k + e.d).slice(-12); const L = TKEV28[V][e.k] || ["……"]; line = L[Math.floor(Math.random() * L.length)].replace(/\{v\}/g, e.v); icon = { kill: "⚔️", down: "🩹", mvp: "🏆", evo: "✨", tok: "🔥", moved: "🏠", book: "📜" }[e.k] || "💬"; }
       else if (top === "rel") { const [o, s] = rm[Math.floor(Math.random() * rm.length)]; const L = TKREL28[V][s > 0 ? "good" : "bad"]; line = L[Math.floor(Math.random() * L.length)].replace(/\{mate\}/g, o.nick); icon = s > 0 ? "💕" : "💢"; }
@@ -14013,19 +14033,20 @@ monCard = (prev => function (id) { let h = prev(id); try { const m = S.mons.find
 // ---------- 1) 結果の「地図 +1部屋」が何のことか分からなかった ----------
 resultStage15 = (prev => function (r) { let h = prev(r); try {
   h = h.replace(/<div><small>地図<\/small><b class="bad">\+(\d+)部屋<\/b><\/div>/, (_, n) => `<div><small>🗺 地図を持ち帰られた</small><b class="bad">+${n}部屋</b><i class="rsn28">知られた部屋は罠を見ぬかれやすい</i></div>`);
-  h = h.replace(/<div><small>地図<\/small><b class="">守った<\/b><\/div>/, `<div><small>🗺 地図</small><b>守った</b><i class="rsn28">逃げた勇者がいない</i></div>`);
+  h = h.replace(/<div><small>地図<\/small><b class="">守った<\/b><\/div>/, `<div><small>🗺 地図</small><b>守った</b><i class="rsn28">新しい部屋は知られなかった</i></div>`);
 } catch (e) {} return h; })(resultStage15);
 
 // ---------- 2) 特訓が魔物カードの奥にあって見つからない → 育成の画面から一覧で ----------
 function tokList28() {
-  const L = S.mons.slice().sort((a, b) => (b.home != null) - (a.home != null) || b.lv - a.lv);
+  if (!TOKL28 || !tokList28.ord) tokList28.ord = S.mons.slice().sort((a, b) => (b.home != null) - (a.home != null) || b.lv - a.lv).map(m => m.id);   /* 押しているあいだは並び順を変えない（進化で順番が動いて、別の子に払っていた） */
+  const L = tokList28.ord.map(id => S.mons.find(m => m.id === id)).filter(Boolean).concat(S.mons.filter(m => !tokList28.ord.includes(m.id)));
   return `<h2>🔥 💎で特訓</h2><div class="hint">💎を払って、すぐLvを1上げる。同じ日に続けると値段が上がる。いま 💎${fmt8(S.dp)}</div>` +
     `<div class="tkl28">${L.map(m => { const c = tokCost27(m), ok = S.dp >= c; return `<div class="tkr28">${simg23(m, m.evos, "sp", "width:40px;height:40px")}<div class="tx"><b>${esc(m.nick)}</b><small>Lv${m.lv}${m.home == null ? "・控え" : ""}</small></div><button data-a="tok27" data-v="${m.id}" ${ok ? "" : "disabled"}>Lv${m.lv + 1}へ<small>💎${fmt8(c)}</small></button></div>`; }).join("")}</div>` +
     `<button data-a="close" style="width:100%;margin-top:8px">閉じる</button>`;
 }
 let TOKL28 = false;
 addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest("[data-a]"); if (!b) return;
-  if (b.dataset.a === "tok28") { ev.stopImmediatePropagation(); ev.preventDefault(); TOKL28 = true; modal = tokList28; render(); return; }
+  if (b.dataset.a === "tok28") { ev.stopImmediatePropagation(); ev.preventDefault(); TOKL28 = false; tokList28.ord = null; modal = tokList28; TOKL28 = true; render(); return; }
   if (b.dataset.a === "tok27" && TOKL28 && b.closest(".tkl28")) setTimeout(() => { if (typeof modal === "function" && !stage) { modal = tokList28; render(); } }, 0);   /* 特訓したあとも一覧のまま */
   if (b.dataset.a === "close") TOKL28 = false;
 }, true);
@@ -14038,12 +14059,15 @@ MIS19.lvup.t = n => `魔物を${n}回レベルアップ（🔥特訓・📚鍛�
 { const _t = toast; let last = 0; toast = function (t) {
   if (t === "閉じる前の襲撃のつづき" || t === "閉じたところから続ける") { if (Date.now() - last < 3000) return; last = Date.now(); return resume28(); }
   return _t.apply(this, arguments); }; }
-function resume28() { try {
+function resume28() { try { resume28.t = Date.now();
   setTimeout(() => { if (!N) return; const H = N.heroes || [], dead = H.filter(h => h.st === "dead").length, esc2 = H.filter(h => h.st === "escaped").length;
     const d = document.createElement("div"); d.className = "res28";
     d.innerHTML = `<b>▶ 閉じたところから再開</b><small>勇者 ${H.length}人のうち ${dead}人を倒した${esc2 ? `・${esc2}人に逃げられた` : ""}／主の体力 ${N.lord ? Math.round(N.lord.hp) : "?"}</small>`;
-    document.body.appendChild(d); setTimeout(() => d.classList.add("out"), 2600); setTimeout(() => d.remove(), 3200); }, 400);
+    document.body.appendChild(d); const go = () => { d.classList.add("out"); setTimeout(() => d.remove(), 600); }; setTimeout(go, 9000); document.addEventListener("pointerdown", go, { once: true }); }, 400);
 } catch (e) {} }
+
+// 夜の途中で開き直したら、倒した数が0でも必ず「再開」を出す（何も起きていないと出なかった）
+{ const _eg = enterGame; enterGame = function () { const r = _eg.apply(this, arguments); try { setTimeout(() => { if (N && !N.scout && !N.done && !document.querySelector(".res28") && !(Date.now() - (resume28.t || 0) < 4000)) resume28(); }, 900); } catch (e) {} return r; }; }
 
 // ================= proto28：侵略の戦場を作り直す =================
 // テストで出たこと：①前列・後列を変えても強さが変わらない ②戦場で前列と後列が見分けられない ③魔物が門へ向かわず真ん中で止まる
@@ -14063,6 +14087,14 @@ const invRowOf28 = m => (window.__invRow = window.__invRow || {})[m.id] || invBe
   return st; }; }
 // 編成の強さ（戦いと同じかけ算で）
 const invUs28 = (L, rowOf) => ({ hp: L.reduce((a, m) => a + monHp5(m) * invFit28(m, rowOf(m))[0], 0), atk: L.reduce((a, m) => a + monAtk5(m) * invFit28(m, rowOf(m))[1], 0) });
+/* ほんとうに何回か戦わせて勝ち目を出す（力の足し算だけの目安は「互角」で全滅することがあった） */
+const SIM28 = { key: "", v: null };
+function invSim28(L, node, n) { n = n || 5; const key = node.id + "|" + L.map(m => m.id + (window.__invRow || {})[m.id] + m.lv + (m.evos || 0)).join(","); if (SIM28.key === key) return SIM28.v;
+  const old = INV25.swap(null), B0 = typeof B3 !== "undefined" ? B3 : null, R0 = Math.random, t0 = performance.now(); let win = 0, kill = 0, lost = 0, tot = 0, done = 0;
+  try { B3 = null; for (let k = 0; k < n; k++) { Math.random = invRng25(9173 + k * 7919 + (node.x | 0)); const st = INV25.start(L, node.vt, node); let g = 0; while (!st.over && g++ < 1500) INV25.run(0.1);
+      done++; if (st.over === "win") win++; kill += st.vil.filter(v => v.dead).reduce((a, v) => a + (v.n || 1), 0); tot += st.vil.reduce((a, v) => a + (v.n || 1), 0); lost += st.mons.filter(m => m.dead).length; if (performance.now() - t0 > 1500) break; } }
+  catch (e) { console.error(e); } finally { Math.random = R0; B3 = B0; INV25.swap(old); }
+  const v = done ? { win, n: done, kill: kill / done, tot: tot / done, lost: lost / done } : null; SIM28.key = key; SIM28.v = v; return v; }
 const invOdds28 = X => X < 0.8 ? ["有利", "g"] : X < 1.05 ? ["互角", "y"] : X < 1.4 ? ["不利", "o"] : ["むぼう", "r"];
 
 // ---------- 2) 編成の画面：勝ち目のメーター・向き不向きの印・おすすめの並び ----------
@@ -14076,15 +14108,22 @@ invOpenForm25 = (prev => function (node) { try { const R = window.__invRow = win
       if (!L.length) { met.innerHTML = ""; return; }
       const us = invUs28(L, invRowOf28), bad = L.filter(m => !invGood28(m, invRowOf28(m))).length;
       let h = "";
-      if (th) { const X = invX25(th, us), [w, k] = invOdds28(X);
-        h += `<div class="o28 ${k}"><b>勝ち目：${w}</b><span>相手の強さ ${Math.round(100 * X)}（こちら100）</span></div><div class="bar28"><i class="${k}" style="width:${Math.max(4, Math.min(100, 62 / X))}%"></i><u></u></div>`; }
+      if (th) { const X = invX25(th, us), sim = node ? invSim28(L, node) : null, r = sim ? sim.win / sim.n : null, [w, k] = r == null ? invOdds28(X) : r >= 0.8 ? ["有利", "g"] : r >= 0.4 ? ["互角", "y"] : r > 0 ? ["不利", "o"] : ["むぼう", "r"];
+        h += `<div class="o28 ${k}"><b>勝ち目：${w}</b><span>こちらの力 ${Math.round(100 / X)}（守り100）</span></div><div class="bar28"><i class="${k}" style="width:${Math.max(4, Math.min(100, r == null ? 62 / X : 8 + 92 * (sim.win + sim.kill / Math.max(1, sim.tot) * 0.6) / (sim.n + 0.6)))}%"></i></div>`
+          + (sim ? `<div class="f28">🎲 ためしに${sim.n}回戦わせると <b>${sim.win}勝</b>・守り${Math.round(sim.tot)}人のうち平均${Math.round(sim.kill)}人を倒し、魔物は平均${sim.lost.toFixed(1)}体倒れる</div>` : ""); }
       h += `<div class="f28">${bad ? `△ 向いていない列の子が${bad}体 → 前列は体の強い子、後列は飛ぶ子・飛び道具・回復や呪いの子` : "◎ みんな向いている列にいる"}</div>`;
-      if (bad) h += `<button class="best28">🪄 おすすめの並びにする</button>`;
+      h += `<button class="best28" style="${bad ? "" : "visibility:hidden"}">🪄 おすすめの並びにする</button>`;   /* 出たり消えたりで下のカードがずれないよう、場所はいつも取る */
       met.innerHTML = h; const bb = met.querySelector(".best28"); if (bb) bb.onclick = () => { L.forEach(m => { window.__invRow[m.id] = invBest28(m); }); redraw(); }; };
     // もとの画面は押すたびに作り直すので、そのたびに飾りなおす
     const redraw = () => { const c = card(); if (!c) return; const t = c.querySelector('input[type=checkbox]'); if (t) t.dispatchEvent(new Event("change")); };
     new MutationObserver(() => { if (card() && !card().querySelector(".inv28met")) deco(); }).observe(el, { childList: true });
-    el.addEventListener("click", () => setTimeout(deco, 0)); deco();
+    el.addEventListener("click", () => setTimeout(deco, 0));
+    /* けがで休んでいる子（💤）は最初は外す。印も付ける */
+    const rest = m => { try { return restLeft9(S, m) > 0; } catch (e) { return false; } };
+    const mark = () => { const c = card(); if (!c) return; c.querySelectorAll("input[type=checkbox]").forEach(x => { const m = ms.find(q => q.id === +x.dataset.id); if (m && rest(m)) { const sp = x.parentElement.querySelector("span small"); if (sp && !/💤/.test(sp.textContent)) sp.textContent += "・💤休み中"; } }); };
+    new MutationObserver(mark).observe(el, { childList: true });
+    { const c = card(); const first = c ? [...c.querySelectorAll("input[type=checkbox]:checked")].filter(x => { const m = ms.find(q => q.id === +x.dataset.id); return m && rest(m); }) : []; first.forEach(x => { const y = card().querySelector(`input[data-id="${x.dataset.id}"]`); if (y) { y.checked = false; y.dispatchEvent(new Event("change")); } }); }
+    mark(); deco();
   } catch (e) { console.error(e); } })(invOpenForm25);
 
 // ---------- 3) 戦場：足もとの輪の下に「前」「後」（向いていない列なら △） ----------
