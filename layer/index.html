@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層1／No.350（11/25 00:49）";
+const VER20 = "層2／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -13461,7 +13461,7 @@ function fpOpen30(){
       const kind = roomKind25(i), on = {}; ROOMSET25[kind].forEach(k => on[k] = true); const th = (S.floors[f] || {}).theme;
       rooms.push({ i, kind, on, Z, Y, f, th, G30: G, ZS, ZE, CS, OBS: [], CM: cssMat26((typeof THF25 !== "undefined" && THF25[th]) || ""), name: S.path[i].kind === "lord" ? "主の間" : i === 0 ? "入口の層" : "第" + i + "層" }); } }
   const wrap = document.createElement("div"); wrap.id = "fp26";
-  wrap.innerHTML = `<canvas></canvas><div class="f26top"><div class="f26where"><b></b><small></small></div><span class="f26fps"></span><button data-f="x">🗺 見下ろしへ</button></div>
+  wrap.innerHTML = `<canvas></canvas><div class="f26top"><div class="f26where"><b></b><small></small></div><span class="f26fps"></span><button data-f="dig">⛏ 掘る</button><button data-f="x">🗺 見下ろしへ</button></div>
     <div class="f26msg">ダンジョンを組み立てています…</div><div class="f26stick"><i></i></div><div class="f26hint">左で歩く・右をなぞって見回す・魔物や看板をタップ</div><div class="f26menu" hidden></div><canvas class="f26lab"></canvas><canvas class="f26map" width="300" height="220"></canvas><button class="f26talk" hidden></button>`;
   document.body.appendChild(wrap);
   /* 横持ち：スマホが縦のままなら、画面ごと90度まわして横長で出す（主の目は横の方が見通せる） */
@@ -13514,8 +13514,9 @@ function fpOpen30(){
   const CORR = []; for (let i = 0; i + 1 < n; i++) CORR.push(corridor(rooms[i], rooms[i + 1]));
   // たいまつ：部屋の出入口の両わきと、通路に6歩ごと（通路が真っ暗だった）
   /* たいまつ：層の道ぞいの壁に、3マスおき（暗い所と明るい所ができて洞窟らしく） */
-  const TORCH = []; rooms.forEach(Rm => { const G = Rm.G30, CS = Rm.CS, mid = (G.W - 1) / 2; let k = 0; for (let y = 0; y < G.H; y++) for (let x = 0; x < G.W; x++) { if (!g30at(G, x, y)) continue; const nb = [[1, 0], [-1, 0], [0, 1], [0, -1]].find(([dx, dy]) => !g30at(G, x + dx, y + dy) && !((y + dy < 0 && Rm.i > 0) || (y + dy >= G.H && Rm.i < n - 1)));
-      if (!nb || (x * 7 + y * 13) % 4) continue; const wx = (x - mid) * CS + nb[0] * (CS / 2 - 0.35), wz = Rm.Z - y * CS - nb[1] * (CS / 2 - 0.35); TORCH.push([wx, Rm.Y + 2.2, wz]); k++; } });
+  const torchesFor = Rm => { const out = [], G = Rm.G30, CS = Rm.CS, mid = (G.W - 1) / 2; for (let y = 0; y < G.H; y++) for (let x = 0; x < G.W; x++) { if (!g30at(G, x, y)) continue; const nb = [[1, 0], [-1, 0], [0, 1], [0, -1]].find(([dx, dy]) => !g30at(G, x + dx, y + dy) && !((y + dy < 0 && Rm.i > 0) || (y + dy >= G.H && Rm.i < n - 1)));
+      if (!nb || (x * 7 + y * 13) % 4) continue; out.push([(x - mid) * CS + nb[0] * (CS / 2 - 0.35), Rm.Y + 2.2, Rm.Z - y * CS - nb[1] * (CS / 2 - 0.35), null, null, null, Rm.i]); } return out; };
+  const TORCH = []; rooms.forEach(Rm => TORCH.push(...torchesFor(Rm)));
   CORR.forEach(C => { const L = C.z0 - C.z1, k = Math.max(1, Math.round(L / 6)); for (let j = 1; j < k; j++) { const t = j / k, z = C.z0 - L * t, y = C.y0 + (C.y1 - C.y0) * t; TORCH.push([C.off(z) + (j % 2 ? -2.2 : 2.2), y + 2.0, z]); } });
   const mkTex = (w, h, f) => { const c = document.createElement("canvas"); c.width = w; c.height = h; f(c.getContext("2d"), w, h); return c; };
   const FLAME = mkTex(32, 64, (g, w, h) => { const gr = g.createRadialGradient(16, 44, 1, 16, 40, 22); gr.addColorStop(0, "rgba(255,250,210,1)"); gr.addColorStop(0.3, "rgba(255,190,80,.9)"); gr.addColorStop(0.7, "rgba(230,90,20,.35)"); gr.addColorStop(1, "rgba(120,30,0,0)"); g.fillStyle = gr; g.beginPath(); g.ellipse(16, 40, 11, 24, 0, 0, 6.3); g.fill(); });
@@ -13601,7 +13602,7 @@ function fpOpen30(){
   // 指：左は歩く（スティック）、右は見回す。動かさずに離したらタップ
   const stick = wrap.querySelector(".f26stick"), knob = stick.querySelector("i"); const mv = { x: 0, y: 0 }; const touches = new Map();
   cv.style.touchAction = "none";
-  wrap.addEventListener("pointerdown", e => { if (e.target.closest(".f26menu,.f26top,button")) return; const [ex, ey] = loc(e), left = ex < VW() * 0.42 && ey > VH() * 0.45; if (left) P.auto = null;
+  wrap.addEventListener("pointerdown", e => { if (e.target.closest(".f26menu,.f26top,button,.dig30")) return; const [ex, ey] = loc(e), left = ex < VW() * 0.42 && ey > VH() * 0.45; if (left) P.auto = null;
     touches.set(e.pointerId, { left, x0: ex, y0: ey, x: ex, y: ey, t0: performance.now(), moved: 0 }); try { wrap.setPointerCapture(e.pointerId); } catch (er) {}
     if (left) { stick.style.left = (ex - 60) + "px"; stick.style.top = (ey - 60) + "px"; stick.classList.add("on"); } });
   wrap.addEventListener("pointermove", e => { const T = touches.get(e.pointerId); if (!T) return; const [ex, ey] = loc(e), dx = ex - T.x, dy = ey - T.y; T.moved += Math.abs(dx) + Math.abs(dy); T.x = ex; T.y = ey;
@@ -13803,6 +13804,32 @@ function fpOpen30(){
         (Rm.acts || []).forEach(a => { g.fillStyle = "#9fe08a"; g.beginPath(); g.arc(X(a.x), Z(Rm.Z + a.z), 4.5, 0, 6.3); g.fill(); }); });
       g.save(); g.translate(cx, cz); g.rotate(P.yaw); g.fillStyle = "#ffd36a"; g.beginPath(); g.moveTo(0, -13); g.lineTo(9, 9); g.lineTo(0, 4); g.lineTo(-9, 9); g.closePath(); g.fill(); g.restore(); }
   }
+  // ===== 掘る画面：いまいる層をマスで見て、道を掘る・広間にする・埋める・罠を動かす =====
+  const digCost30 = (Rm, v) => v === 2 ? 60 + 15 * Rm.i : 20 + 6 * Rm.i;
+  const rebuild = Rm => { Rm.mb = null; Rm.G = null; try { g30sync(S, Rm.i); } catch (e) {} Rm.traps = trapSpots(Rm); for (let j = TORCH.length - 1; j >= 0; j--) if (TORCH[j][6] === Rm.i) TORCH.splice(j, 1); TORCH.push(...torchesFor(Rm)); loadRoom(Rm); mkActs(Rm); try { keepers(); } catch (e) {} };
+  function digOpen(){ const Rm = rooms[curRoom], G = Rm.G30, mid = (G.W - 1) / 2; let mode = "dig", selT = null;
+    const ov = document.createElement("div"); ov.className = "dig30"; wrap.appendChild(ov);
+    const conn = () => !!bfs30(G, [mid, 0], [mid, G.H - 1]);
+    const draw = () => { const me = [Math.round(P.x / Rm.CS + mid), Math.round(-(P.z - Rm.Z) / Rm.CS)];
+      let h = `<div class="dg30h"><b>⛏ ${Rm.name}を掘る</b><small>💎${fmt8(S.dp)}</small><button data-g="x">✕ 閉じる</button></div><div class="dg30m">${[["dig", "⛏ 道", `💎${digCost30(Rm, 1)}`], ["hall", "🏛 広間", `💎${digCost30(Rm, 2)}`], ["fill", "🪨 埋める", "0"], ["trap", "🪤 罠を動かす", ""]].map(([k, t, c]) => `<button data-g="m" data-v="${k}" class="${mode === k ? "on" : ""}">${t}<small>${c}</small></button>`).join("")}</div>`;
+      const cz = Math.max(14, Math.floor(Math.min((VW() - 24) / G.W, (VH() - 128) / G.H)) - 2); h += `<div class="dg30g" style="grid-template-columns:repeat(${G.W},${cz}px);width:auto">`;
+      for (let y = 0; y < G.H; y++) for (let x = 0; x < G.W; x++) { const v = g30at(G, x, y), tp = (G.t || []).findIndex(t => t[0] === x && t[1] === y), ms = (Rm.acts || []).filter(a => Math.round(a.x / Rm.CS + mid) === x && Math.round(-a.z / Rm.CS) === y).length, fix = (x === mid && (y === 0 || y === G.H - 1)), edge = x === 0 || x === G.W - 1;
+        const cls = ["c", v === 2 ? "hall" : v ? "path" : edge ? "edge" : "rock", fix ? "fix" : "", selT === tp && tp >= 0 ? "sel" : "", me[0] === x && me[1] === y ? "me" : ""].join(" ");
+        const ic = tp >= 0 ? (TRAP24[G.t[tp][2]] || {}).ic || "🪤" : fix ? (y === 0 ? "⬆" : "⬇") : ms ? "👾" : ""; h += `<button data-g="c" data-x="${x}" data-y="${y}" class="${cls}">${ic}</button>`; }
+      h += `</div><div class="dg30f">${mode === "trap" ? (selT == null ? "動かす罠をタップ → 置きたい道のマスをタップ" : "置きたい道のマスをタップ") : mode === "fill" ? "埋めると道が切れる所は埋められない" : "掘ったマスのとなりだけ掘れる。広間は道を広げた所（天井が高く、魔物が住む）"}</div>`;
+      ov.innerHTML = h; };
+    ov.addEventListener("click", ev => { const b = ev.target.closest("[data-g]"); if (!b) return; ev.stopPropagation(); const g = b.dataset.g;
+      if (g === "x") { ov.remove(); try { save(); } catch (e) {} return; }
+      if (g === "m") { mode = b.dataset.v; selT = null; draw(); return; }
+      const x = +b.dataset.x, y = +b.dataset.y, v = g30at(G, x, y), fix = x === mid && (y === 0 || y === G.H - 1), say = t => { const f = ov.querySelector(".dg30f"); if (f) { f.textContent = t; f.classList.add("bad"); } };
+      if (mode === "dig" || mode === "hall") { const want = mode === "hall" ? 2 : 1; if (x === 0 || x === G.W - 1) return say("いちばん外の岩は掘れない"); if (v >= want) return say("もう掘ってある");
+        if (!v && ![[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => g30at(G, x + dx, y + dy))) return say("掘ったマスのとなりから掘る"); const c = digCost30(Rm, want); if (S.dp < c) return say("💎が足りない");
+        S.dp -= c; g30set(G, x, y, want); try { tone16(300, 0, 0.06, "square", 0.04); noise16(0, 0.08, 0.05, 600); } catch (e) {} rebuild(Rm); draw(); return; }
+      if (mode === "fill") { if (!v || fix) return say(fix ? "入口と降り口は埋められない" : "岩はそのまま"); const old = G.c; g30set(G, x, y, 0); if (!conn()) { G.c = old; return say("ここを埋めると降り口まで行けなくなる"); } G.t = (G.t || []).filter(t => !(t[0] === x && t[1] === y)); rebuild(Rm); draw(); return; }
+      if (mode === "trap") { const tp = (G.t || []).findIndex(t => t[0] === x && t[1] === y); if (selT == null) { if (tp < 0) return say((G.t || []).length ? "罠のあるマスをタップ" : "この層に罠はない（部屋の画面で作る）"); selT = tp; draw(); return; }
+        if (v !== 1) return say("罠は道（広間でない所）に置く"); if (tp >= 0 && tp !== selT) return say("そこにはもう罠がある"); G.t[selT][0] = x; G.t[selT][1] = y; selT = null; rebuild(Rm); draw(); return; } });
+    draw(); }
+  wrap.querySelector('[data-f="dig"]').onclick = ev => { ev.stopPropagation(); if (!wrap.querySelector(".dig30")) digOpen(); };
   requestAnimationFrame(loop);
 }
 // 昼の画面に入口ボタン
@@ -13812,6 +13839,14 @@ document.addEventListener("click", ev => { const b = ev.target.closest && ev.tar
 // ================= main30：層の試作版のつなぎ =================
 fpOpen26 = fpOpen30;   /* fp26 のすぐ後に入る（上に重ねたボタンなどはそのまま効く） */
 { const _r = render; render = function () { _r.apply(this, arguments); try { if (!document.querySelector(".lay30tag")) { const d = document.createElement("div"); d.className = "lay30tag"; d.textContent = "🧪 層の試作版"; document.body.appendChild(d); } } catch (e) {} }; }
+// 掘る画面の見た目
+{ const st = document.createElement("style"); st.textContent = `
+.dig30{position:absolute;inset:0;z-index:40;justify-content:flex-start;background:rgba(14,10,8,.94);display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px max(8px,env(safe-area-inset-right)) 8px max(8px,env(safe-area-inset-left));overflow:auto;color:#efe3d3}
+.dg30h{display:flex;gap:10px;align-items:center;width:100%;max-width:520px}.dg30h b{flex:1}.dg30h button{padding:4px 10px}
+.dg30m{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}.dg30m button{display:flex;flex-direction:column;align-items:center;padding:4px 10px;font-size:13px}.dig30 .dg30m button.on{background:#e8b84a!important;color:#1a1410!important}.dg30m small{font-size:10px;opacity:.8}
+.dg30g{display:grid;gap:2px;width:min(92vw,62vh,420px)}.dg30g .c{aspect-ratio:1;padding:0;border:0;border-radius:3px;font-size:13px;line-height:1;min-width:0}
+.dig30 .dg30g .c{background:#2b221c!important;border:0!important;box-shadow:none;color:#fff;min-width:0!important;min-height:0!important;padding:0!important;margin:0!important;width:auto}.dig30 .dg30g .edge{background:#120d0a!important}.dig30 .dg30g .path{background:#8a6e52!important}.dig30 .dg30g .hall{background:#c49a6c!important}.dg30g .fix{outline:2px solid #e8b84a}.dg30g .sel{outline:3px solid #ff6a5a}.dig30 .dg30g .me{box-shadow:inset 0 0 0 3px #7cc68a!important}
+.dg30f{font-size:12px;color:#a8988a;text-align:center;max-width:520px}.dg30f.bad{color:#ff8a70}`; document.head.appendChild(st); }
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------
