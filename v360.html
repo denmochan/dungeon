@@ -5284,12 +5284,12 @@ tribute16 = S => ({ dp: 0, souls: 0 });
 // 試練1より上：勇者の強さ倍率を魂の倍率と同じにする。序盤3回の襲撃は今までの強さ、そこから6回かけて魂と同じ倍率まで上がる。
 {
   const base22 = DIFF15.map(d => d.fame);
-  const k22 = S => { const c = (S.contract && S.contract.lv) || 1, n = (S.raidNo || 0) + 10 * (c - 1); return Math.max(0, Math.min(1, (n - 3) / 6)); };
+  const k22 = S => { const c = (S.contract && S.contract.lv) || 1, n = (S.raidNo || 0) + 10 * (c - 1); return Math.max(0, Math.min(1, (n - 1) / 8)); };   /* 11/24：2回目の襲撃から8回かけてなだらかに（4回目から6回だと、勇者の伸びと重なって18〜24日目が崖になった） */
   hardMul21 = S => 1;   // 前の×1.25はやめて、下で直接決める
   const _sr22 = startRaid9;
   startRaid9 = function (S) { const i = S.diff || 0, d = DIFF15[i]; if (i < 2) return _sr22.apply(this, arguments);
     const f0 = d.fame; d.fame = +(base22[i] + (d.rate - base22[i]) * k22(S)).toFixed(3); try { return _sr22.apply(this, arguments); } finally { d.fame = f0; } };
-  DIFF15.forEach((d, i) => { if (i >= 2) d.text = d.text.replace(/（4回目の襲撃から強くなり、最後は×[\d.]+）/, "") + `（勇者の強さも魂と同じ×${d.rate}。4回目の襲撃から上がっていく）`; });
+  DIFF15.forEach((d, i) => { if (i >= 2) d.text = d.text.replace(/（4回目の襲撃から強くなり、最後は×[\d.]+）/, "") + `（勇者の強さも魂と同じ×${d.rate}。2回目の襲撃から少しずつ上がっていく）`; });
 }
 
 // ================= 洞窟ビュー：勇者から見たダンジョン（上から見たマップ） =================
@@ -7469,7 +7469,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.339（11/24 11:14）";
+const VER20 = "No.340（11/24 12:09）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -14149,6 +14149,28 @@ invOpenForm25 = (prev => function (node) { try { const R = window.__invRow = win
       const t = (front ? "前" : "後") + (m.fit28 ? "" : "△"); g.strokeText(t, q[0], q[1] + 16); g.fillStyle = front ? "#ffd27a" : "#9fd0ff"; g.fillText(t, q[0], q[1] + 16); });
     g.restore(); } } catch (e) {}
   return _o.apply(this, arguments); }; }
+
+// ================= proto28：難易度テスト（第9回）のあとの調整 =================
+// ---------- 1) 転生するとき、余った💎を魂に（11/14に外した上納を、転生のときだけ戻す）。400💎で1（難易度の倍率がかかる） ----------
+const DP2SOUL28 = 400, DPKEEP28 = 0;
+const dpSoul28 = S0 => Math.floor(Math.max(0, (S0.dp || 0) - DPKEEP28) / DP2SOUL28);
+document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="rebirth"]'); if (!b || !S) return;
+  try { if (!S.vaultDone18 && S.mons.length && vaultOk22(S)) return;   /* 先に保管庫の画面が出る。そのあとの「転生」で換える */
+    const n = soulsRate15(S, dpSoul28(S)); if (n > 0) { metaOf8(S).souls += n; S.dp = 0; setTimeout(() => { try { toast(`💎 余った💎を魂に：👻+${n}`); } catch (e) {} }, 600); } } catch (e) {} }, true);
+rebirthModal = (prev => function () { let h = prev(); try { const n = dpSoul28(S); if (n > 0) h = h.replace(/(<div class="box gold"[^>]*>👻 魂 \+\d+<\/div>)/, `$1<div class="box" style="text-align:center">＋ 余った💎${fmt8(S.dp)} → 👻 +${soulsRate15(S, n)}<small>（💎${DP2SOUL28}で1・難易度の倍率つき）</small></div>`); } catch (e) {} return h; })(rebirthModal);
+
+// ---------- 2) 配合：子は強いほうの親と同じLv、世代を重ねるほど＋10%（前は子が親より弱く、配合を重ねる意味がなかった） ----------
+{ const _br = breed5; breed5 = function (S0, a, b) {
+  const A = S0.mons.find(m => m.id === a), B = S0.mons.find(m => m.id === b); const lv = Math.max(A ? A.lv : 1, B ? B.lv : 1), pl = Math.max(A ? A.plus || 0 : 0, B ? B.plus || 0 : 0);
+  const r = _br.apply(this, arguments);
+  try { if (r && r.m) { const m = r.m; if (m.lv < lv) { m.lv = lv; m.exp = 0; } m.evos = Math.max(m.evos || 0, lv >= EVO_LV5[1] ? 2 : lv >= EVO_LV5[0] ? 1 : 0); m.plus = Math.max(m.plus || 0, pl + 1); m.gen28 = (m.plus || 0); } } catch (e) { console.error(e); }
+  return r; }; }
+mixConfirm = (prev => function () { let h = prev(); try { h = h.replace(/進化と倒した数は引きつがない/g, "Lvは強いほうの親と同じ。世代を重ねるほど＋10%（倒した数は引きつがない）"); } catch (e) {} return h; })(mixConfirm);
+
+// ---------- 3) 難しさの形：前半を少し重く、18〜24日目の崖をなだらかに ----------
+// 勇者の強さ＝こちらの戦力×ALPHA。前は 0.20→（7回目で）0.62 と急に上がり、試練1より上はさらに4回目から6回で倍率が跳ねた（2つが重なって崖）
+ALPHA17 = n => Math.min(0.62, 0.30 + 0.04 * n);
+if (DIFF15[1]) DIFF15[1].fame = 2.3;   // むずかしい：ぬるいと2人とも
 
 </script>
 <script>// ================= 3Dの子を、今のコマアニメと同じ並び（17コマ）の絵に焼く（開発用・ページ内で実行） =================
