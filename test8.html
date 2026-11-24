@@ -1,0 +1,66 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>第8回テスト報告</title>
+<style>
+:root{--bg:#1a1410;--card:#261d17;--fg:#efe3d3;--mut:#a8988a;--red:#e2614f;--yel:#e8b84a;--grn:#7cc68a;--line:#3b2f26}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.65 system-ui,"Hiragino Sans",sans-serif;padding:16px max(16px,env(safe-area-inset-right)) 40px max(16px,env(safe-area-inset-left));max-width:640px;margin-inline:auto}
+h1{font-size:20px;margin:4px 0}h2{font-size:16px;margin:22px 0 8px}p.s{color:var(--mut);margin:0 0 14px;font-size:13px}
+.big{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}.big div{flex:1 1 120px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px}
+.big b{font-size:26px;display:block;color:var(--yel)}
+ul{margin:4px 0 10px;padding-left:18px}li{margin:4px 0}
+.ok{color:var(--grn)}.ng{color:var(--red)}.m{color:var(--mut);font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 14px;margin:0 0 10px}
+</style></head><body>
+<h1>第8回テスト（10人）</h1>
+<p class="s">2026-11-24 昼。点は10点満点。今回の版：No.338</p>
+
+<div class="big"><div><b>5.6</b>平均点（前回5.1）</div><div><b>20件</b>テストのあと直した</div><div><b>2つ</b>決めてほしいこと</div></div>
+
+<h2>きびしく言うと</h2>
+<div class="card">
+「朝の収穫」1枚と特訓の一覧は、ほぼ全員が「楽になった」と言った。<br>
+でも<b class="ng">侵略の戦いは「魔物が前に出ない」と全員に言われた</b>。原因は、絵が計算に追いつけていなかったこと（直した）。<br>
+<b class="ng">「話す」は飾りに見える</b>：遊びに効かないので、愛着型の人以外には刺さっていない。<br>
+辛口の人は「12日目まで負けそうにならない・💎が余る」。前回と同じ指摘。
+</div>
+
+<h2>テストのあと直したもの</h2>
+<ul>
+<li class="ok">侵略：魔物の絵が計算の位置に追いつかず、左にかたまって見えた（★3・全員）</li>
+<li class="ok">侵略：勝ち目は、編成のまま5回戦わせて出すように（前は「互角」で全滅した）。「こちらの力」で表示</li>
+<li class="ok">侵略：門を破って守りが少しになったら逃げ出して終わる（最後の1人を待つのが長かった）</li>
+<li class="ok">侵略：けがで休んでいる子は💤の印、最初は外す／🪄ボタンでカードがずれない</li>
+<li class="ok">結果：「逃げられた」のに地図が「逃げた勇者がいない」と出た矛盾（★3・5人）</li>
+<li class="ok">結果：「つづける」をいつも画面の下に（横持ちで押せなかった）／横持ちの見出しを小さく</li>
+<li class="ok">朝の収穫：進化は前→後の大きな絵、タップで全画面の進化をもう一度。新しい仲間も大きく</li>
+<li class="ok">朝の収穫：書が1冊なら、すぐ「だれに読ませる」へ</li>
+<li class="ok">ふつうの朝の宝箱の見出しを長めに（一瞬で消えた）</li>
+<li class="ok">特訓の一覧：押すたびに並び順が変わって、別の子に払っていた（★2・3人）</li>
+<li class="ok">再開：夜の始まりで閉じても「▶ 閉じたところから再開」を出す。表示は押すまで消えない</li>
+<li class="ok">再開：偵察の夜も続きから（前は昼に戻って夜が消えた）</li>
+<li class="ok">歩く画面：「🏠 部屋」が今いる部屋でなく入口を開いていた</li>
+<li class="ok">歩く画面：「次の日へ／迎え撃つ」のあと、朝が終わったら自動で歩く画面に戻る</li>
+<li class="ok">歩く画面：「🚶もどる」ボタンを右下の小さい丸に（ボタンや窓に重なっていた）</li>
+<li class="ok">話す：昨夜の出来事（倒れた・倒した・MVP）を最初に話す</li>
+<li class="ok">話す：会話の窓に看板・名前・矢印が重なって読めなかった／話す子の反対側に窓を出す</li>
+<li class="ok">話す：図鑑の文や戦いのセリフを会話に出さない／仲良しの相手にけなす台詞を言わない</li>
+<li class="ok">話す：仲の良し悪しがかたよっていた（みんな同じ子と仲良し）</li>
+<li class="ok">「オフライン用に保存中」の札がボタンに重なる → 左下の小さい札に</li>
+</ul>
+
+<h2>まだ残っているもの</h2>
+<ul>
+<li><b>難しさと💎</b>：辛口の人は「12日目まで負けそうな夜がない・4日目から💎が余る」 ★3（下の決めてほしいこと）</li>
+<li><b>「話す」に役目がない</b>：遊びに効かないので飾りに見える ★2</li>
+<li><b>歩く画面は横だけ</b>：縦持ちの人には横倒しで出る ★2</li>
+<li>侵略：遠征の日数が進まず何回でも攻められる／仲間を選ぶ前に閉じると勝手に決まる ★2</li>
+<li>💎の出入りの内訳が見えず、上の「+○/日」と実際の増え方が合わない日がある ★2</li>
+</ul>
+<p class="m">ほか：偵察まで「あと何日」の表示の食い違い／魔物のスキル説明で「起き上がる回数」がばらばら／横持ちの侵略地図が左半分だけ。</p>
+
+<h2>決めてほしいこと</h2>
+<div class="card">
+<b>1. 難しさ</b>：テストの人は「簡単すぎ・💎が余る」、でんもさんは「DPギリギリ」。遊び方で差が出ている。<br>
+<span class="m">案：a) 今のまま　b) 7〜10日目に一度「危ない夜」を必ず作る（💎はいじらない）　c) 宝箱の💎を減らす</span><br><br>
+<b>2. 「話す」に役目を持たせるか</b><br>
+<span class="m">案：a) 飾りのまま　b) 話すと「やる気」が上がり、その日の仕事が少し良くなる　c) 話すと望み（部屋を変えたい・特訓したい）が分かり、かなえると強くなる</span>
+</div>
+</body></html>
