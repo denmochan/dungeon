@@ -1,0 +1,62 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>第10回 難易度テスト</title>
+<style>
+:root{--bg:#1a1410;--card:#261d17;--fg:#efe3d3;--mut:#a8988a;--red:#e2614f;--yel:#e8b84a;--grn:#7cc68a;--line:#3b2f26}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.65 system-ui,"Hiragino Sans",sans-serif;padding:16px max(16px,env(safe-area-inset-right)) 40px max(16px,env(safe-area-inset-left));max-width:680px;margin-inline:auto}
+h1{font-size:20px;margin:4px 0}h2{font-size:16px;margin:22px 0 8px}p.s{color:var(--mut);margin:0 0 14px;font-size:13px}
+ul{margin:4px 0 10px;padding-left:18px}li{margin:4px 0}.ok{color:var(--grn)}.ng{color:var(--red)}.m{color:var(--mut);font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 14px;margin:0 0 10px}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px;min-width:500px}th,td{border-bottom:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}th{color:var(--mut)}
+</style></head><body>
+<h1>第10回テスト：難易度（勇者の強さを見直したあと）</h1>
+<p class="s">2026-11-24。前回と同じ10人・同じ引き継ぎデータ。テスト時の版はNo.341、そのあと直して今はNo.342</p>
+
+<h2>結論（きびしく）</h2>
+<div class="card">
+<b class="ok">「強くしたぶん有利」は全員が実感した</b>：特訓・配合・準備で予報が🔴→🟠→🟡と動く。配合の子が主力になった。<br>
+<b class="ng">でも崖はまだあった</b>：「完封した次の襲撃で全滅」。原因は2つ見つかった——①「うわさの熱」（楽勝が続くと勇者が最大2倍強くなる）が残っていた ②勇者の目安を機械で測ったが、機械は魔物を30体以上並べるので人より強めだった。<br>
+<b class="ng">一度瀕死になると立て直せない</b>：主の回復が⏩で日を飛ばすと10%しか効いていなかった。
+</div>
+
+<h2>難易度ごと</h2>
+<div class="tw"><table>
+<tr><th>難易度</th><th>だれ</th><th>判定</th><th>どうなった</th></tr>
+<tr><td>むずかしい</td><td>上手い人</td><td>ぬるい寄りのちょうどいい 6点</td><td>21日目まで主は無傷。🔴でも並べ替え＋準備で🟡に</td></tr>
+<tr><td>むずかしい</td><td>おまかせだけ</td><td>きつい 5点</td><td>29日目まで耐えて、30日目のボスで全滅</td></tr>
+<tr><td>試練1</td><td>数字派</td><td>きつい 5点</td><td>9日目・18日目に「余裕→8回中8回負け」と崖</td></tr>
+<tr><td>試練1</td><td>せっかち</td><td>きつい 5点</td><td>半分は「寝床から戻らない」不具合のせい</td></tr>
+<tr><td>試練1</td><td>やりこみ</td><td>きつい 5点</td><td>21日目に完封、24日目に倒れた</td></tr>
+<tr><td>試練1</td><td>中級</td><td>18日目までぬるい 5点</td><td>💎が最後まで余った</td></tr>
+<tr><td>試練2</td><td>配合好き</td><td>前半ぬるい・後半ちょうどいい 6点</td><td>配合で止められるようになった</td></tr>
+<tr><td>試練2</td><td>半々</td><td>きつい 5点</td><td>15日目に瀕死、21日目に倒れた</td></tr>
+<tr><td>試練3</td><td>上級者</td><td>きつい（理不尽の手前）6点</td><td>9日目までは工夫で越えられた。15日目瀕死、18日目に倒れた</td></tr>
+<tr><td>伝説</td><td>死にゲー好き</td><td>理不尽寄り 4点</td><td>12日目に瀕死、15日目に倒れた</td></tr>
+</table></div>
+<p class="m">平均 5.3点（前回5.5）。前回「ぬるい」が多かったのが「きつい」側に寄った。崖の場所は前に出てきた。</p>
+
+<h2>No.342で直したもの</h2>
+<ul>
+<li class="ok">「うわさの熱」をやめた（勇者が最大2倍に跳ね、完封の次に崩れる原因）</li>
+<li class="ok">勇者の目安を人の手ざわりに合わせて下げた（後半ほど下げる）</li>
+<li class="ok">主の体力は毎朝20%戻る（⏩で日を飛ばしても効く）。主の回復に「半分まで」を追加</li>
+<li class="ok">特訓の値上がりは「同じ子を同じ日に」だけ（前は1体上げると全員が上がった）</li>
+<li class="ok">店で呼んだ子は群れの平均Lvの6割から（SRがLv1で来た）</li>
+<li class="ok">配合：同じ種族どうしは進化とレア度も強い親から（子が親より弱いことがあった）</li>
+<li class="ok">「🛏寝床へ運ぶ」で動かした子が治っても戻らなかった（★3・3人）</li>
+<li class="ok">保管庫から連れていく画面が、開き直しやタップで消えた（★3）→選ぶまで出る。倒れたときも保管庫に残せる</li>
+<li class="ok">開き直したときに残っていた卵・進化・宝箱を1枚にまとめる</li>
+<li class="ok">結果を閉じた直後のタップで「⏩襲撃の日まで」が押され2日飛んだ</li>
+<li class="ok">おまかせは襲撃2日前から守りを弱める並びを選ばない／守る部屋がないと大きく案内</li>
+<li class="ok">文言：「💎は持ち帰れない」→魂になる、回復の割合、難易度の倍率、難易度の初期値は前回のまま</li>
+</ul>
+
+<h2>まだ残っているもの</h2>
+<ul>
+<li><b>危ない度の🟠が広すぎる</b>：同じ🟠で「無傷で全滅させた」日も「ほぼ全滅」の日もある ★2</li>
+<li><b>保管庫の子はLv1</b>のまま（引き継ぎは「後で考える」で止めている）★2</li>
+<li>30日目のボスが別格（準備を全部買っても🔴のまま）★2</li>
+<li>試練の説明文の倍率（×2.4 と ×4）の見せ方 ★1</li>
+</ul>
+
+<h2>次の一手（おすすめ）</h2>
+<div class="card">直したぶんの効き目を、もう一度同じ10人で確かめる。とくに「崖がなだらかになったか」「瀕死から立て直せるか」。</div>
+</body></html>
