@@ -7473,7 +7473,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.342（11/24 13:29）";
+const VER20 = "No.343（11/24 14:34）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -14108,7 +14108,14 @@ function resume28() { try { resume28.t = Date.now();
   if (h && v && v.lv >= 2 && !hasG && S.path.length < MAX_PATH) h += `<div class="note20 bad" style="margin-top:6px">🛡 守る部屋がない。<b>⛏ 部屋を掘る（💎${fmt8(digCost7(S))}）</b>で「守る」部屋を作ると、勇者を手前で止めやすくなる</div>`; } catch (e) {} return h; }; }
 
 // 保管庫から連れていく画面：選ぶまで何度でも出す（開き直したり、かけらの演出を閉じたタップで消えて、連れていけなかった）
-{ const _r = render; render = function () { _r.apply(this, arguments); try { if (S && !title && !N && !stage && !modal && !S.vaultAsked18 && (S.day || 1) <= 1 && !S.raidNo && !(S.contract && S.contract.lv > 1) && vaultOf18(S).length && !document.querySelector(".kk25ov")) { VSEL18 = vaultAutoPick18(); modal = vaultBringModal18; _r.apply(this, arguments); } } catch (e) {} }; }
+{ const _r = render; render = function () { _r.apply(this, arguments); try { if (S && !title && !N && !stage && !modal && !S.vaultAsked18 && !S.mons.some(m => m.vault18) && (S.day || 1) <= 1 && !S.raidNo && !(S.contract && S.contract.lv > 1) && vaultOf18(S).length && !document.querySelector(".kk25ov")) { VSEL18 = vaultAutoPick18(); modal = vaultBringModal18; _r.apply(this, arguments); } } catch (e) {} }; }
+
+// 襲撃の翌朝も、主の体力を2割戻す（ふつうの朝だけ戻って、瀕死の翌朝が0のままだった）
+{ const _er = endRaid; endRaid = function () { const sc = N && N.scout, r = _er.apply(this, arguments); try { if (!sc && S && S.lord && !S.ended) { const mx = lordMax5(S); S.lord.hp = Math.min(mx, Math.max(0, S.lord.hp) + Math.round(mx * 0.2)); save(); } } catch (e) {} return r; }; }
+// 演出を閉じたら、すぐ保存（保存されないまま開き直すと、見た進化がまた出た）
+{ const _ns = nextStage; nextStage = function () { const r = _ns.apply(this, arguments); try { save(); } catch (e) {} return r; }; }
+// ⏩で日を飛ばしたときも、治った子は元の部屋へ（1日ずつ進めたときしか戻らなかった）
+{ const _rd = runDay9; runDay9 = function (S2) { const r = _rd.apply(this, arguments); try { if (S2 === S && typeof fromBed27 === "function") fromBed27(S2); } catch (e) {} return r; }; }
 
 // ================= proto28：侵略の戦場を作り直す =================
 // テストで出たこと：①前列・後列を変えても強さが変わらない ②戦場で前列と後列が見分けられない ③魔物が門へ向かわず真ん中で止まる
