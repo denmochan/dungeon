@@ -4592,14 +4592,18 @@ todo13 = (prev => function (S) {
 // これまで：入口の部屋だけで全員倒せてしまい、奥の部屋・罠・通路・寝床が意味を持たなかった
 // これから：勇者の強さを「ダンジョン全体の強さ」に合わせる。入口だけでは止まらず、奥へ奥へと削られていく
 const fame17 = N => N.mons.reduce((a, m) => a + m.atk * 2 + m.max * 0.3, 0);
+// 11/24：勇者の強さは「こちらの戦力」ではなく「何回目の襲撃か」で決める（強くしても勇者が同じだけ強くなり、判断が効かなかった）
+// 目安の戦力＝ふつうに遊んだときの中央値（機械に何周も遊ばせて測った）。ふつうは少しやさしめ
+const expP28 = (S, n) => 700 * (1 + 0.6 * n + 0.17 * n * n) * ((S && (S.diff || 0)) === 0 ? 0.85 : 1);
+const expPM28 = (S, n) => Math.max(380, 380 + 300 * n - 8 * Math.min(n, 15) * Math.min(n, 15)) * ((S && (S.diff || 0)) === 0 ? 0.85 : 1);
 const heroPow17 = h => h.atk * 2 + h.max * 0.3;
 // 襲撃の何回目か（契約の中）で、勇者の強さの目安（ダンジョン全体の何割か）
 let ALPHA17 = n => Math.min(0.62, 0.2 + 0.06 * n);
 let FAMEK17 = 0.6;   // 調整用
 function scaleParty17(S, N) {
   N.heroes.forEach((h, i) => { if (!h.rival) h.delay = Math.floor(i / 3); });   // パーティーでまとまって入ってくる
-  const P = fame17(N), H = N.heroes.reduce((a, h) => a + heroPow17(h), 0); if (!P || !H) return;
   const d = DIFF15[S.diff || 0], c = (S.contract && S.contract.lv) || 1, n = (S.raidNo || 0) + 10 * (c - 1);   // 悪名は契約をまたいで積もる
+  const P = expP28(S, n), H = N.heroes.reduce((a, h) => a + heroPow17(h), 0); if (!P || !H) return;
   const want = P * ALPHA17(n) * (d.fame || 1 + d.add / 40) * FAMEK17 * (1 + 0.8 * (c - 1));
   if (want <= H) return;
   const s = want / H, k = Math.sqrt(s);
@@ -4612,9 +4616,8 @@ startRaid9 = (prev => function (S, rnd) { const N = prev(S, rnd); if (N && !N.sc
 // 昼の予報で見せるLv（悪名を見込んだ目安）
 function estLv17(S, fc) {
   try {
-    const P = S.mons.filter(m => m.home != null).reduce((a, m) => a + monAtk5(m) * 2 + monHp5(m) * 0.3, 0);
     const mul = heroMul5(fc.lv), H = fc.jobs.reduce((a, j) => a + (JOB5[j].atk * 2 + JOB5[j].hp * 0.3) * mul, 0);
-    const d = DIFF15[S.diff || 0], c = (S.contract && S.contract.lv) || 1, want = P * ALPHA17((S.raidNo || 0) + 10 * (c - 1)) * (d.fame || 1 + d.add / 40) * FAMEK17 * (1 + 0.8 * (c - 1));
+    const d = DIFF15[S.diff || 0], c = (S.contract && S.contract.lv) || 1, P = expP28(S, (S.raidNo || 0) + 10 * (c - 1)), want = P * ALPHA17((S.raidNo || 0) + 10 * (c - 1)) * (d.fame || 1 + d.add / 40) * FAMEK17 * (1 + 0.8 * (c - 1));
     return want > H ? fc.lv + Math.max(0, Math.round(Math.log2(want / H) * 1.6)) : fc.lv;
   } catch (e) { return fc.lv; }
 }
@@ -4978,8 +4981,8 @@ let ROOMK19 = n => Math.min(1.15, 0.45 + 0.065 * n);
 function roomPow19(list) { const by = {}; list.forEach(([home, p]) => { if (home == null) return; by[home] = (by[home] || 0) + p; }); return Math.max(0, ...Object.values(by)); }
 startRaid9 = (prev => function (S, rnd) {
   const N = prev(S, rnd); if (!N || N.scout || !N.heroes || !N.heroes.length) return N;
-  const Pmax = roomPow19(N.mons.map(m => [m.home, m.atk * 2 + m.max * 0.3])); if (!Pmax) return N;
   const c = (S.contract && S.contract.lv) || 1, n = (S.raidNo || 0) + 10 * (c - 1), d = DIFF15[S.diff || 0];
+  const Pmax = expPM28(S, n);   /* 11/24：こちらの部屋の強さではなく、何回目の襲撃かで */
   const waves = Math.max(1, Math.ceil(N.heroes.filter(h => !h.rival).length / 3)), H = N.heroes.reduce((a, h) => a + h.atk * 2 + h.max * 0.3, 0);
   const want = Pmax * ROOMK19(n) * ROOMD19(d.fame || 1) * waves;
   if (want <= H) return N;
@@ -4990,7 +4993,7 @@ startRaid9 = (prev => function (S, rnd) {
 })(startRaid9);
 estLv17 = (prev => function (S, fc) {
   const lv = prev(S, fc);
-  try { const Pmax = roomPow19(S.mons.map(m => [m.home, monAtk5(m) * 2 + monHp5(m) * 0.3])), c = (S.contract && S.contract.lv) || 1, n = (S.raidNo || 0) + 10 * (c - 1), d = DIFF15[S.diff || 0];
+  try { const c = (S.contract && S.contract.lv) || 1, n = (S.raidNo || 0) + 10 * (c - 1), d = DIFF15[S.diff || 0], Pmax = expPM28(S, n);
     const mul = heroMul5(fc.lv), H = fc.jobs.reduce((a, j) => a + (JOB5[j].atk * 2 + JOB5[j].hp * 0.3) * mul, 0), want = Pmax * ROOMK19(n) * ROOMD19(d.fame || 1) * Math.max(1, Math.ceil(fc.jobs.length / 3));
     return want > H ? Math.max(lv, fc.lv + Math.round(Math.log2(want / H) * 1.6)) : lv; } catch (e) { return lv; }
 })(estLv17);
@@ -7469,7 +7472,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.340（11/24 12:09）";
+const VER20 = "No.341（11/24 12:17）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -14170,7 +14173,7 @@ mixConfirm = (prev => function () { let h = prev(); try { h = h.replace(/進化�
 // ---------- 3) 難しさの形：前半を少し重く、18〜24日目の崖をなだらかに ----------
 // 勇者の強さ＝こちらの戦力×ALPHA。前は 0.20→（7回目で）0.62 と急に上がり、試練1より上はさらに4回目から6回で倍率が跳ねた（2つが重なって崖）
 ALPHA17 = n => Math.min(0.62, 0.30 + 0.04 * n);
-if (DIFF15[1]) DIFF15[1].fame = 2.3;   // むずかしい：ぬるいと2人とも
+/* むずかしいの強さはそのまま（勇者が日にちで決まるようになり、機械では18〜30日目に負けるくらいになった） */
 
 </script>
 </body>
