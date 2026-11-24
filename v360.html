@@ -7469,7 +7469,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.338（11/24 09:30）";
+const VER20 = "No.339（11/24 11:14）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -7540,7 +7540,7 @@ function growPage20() {
   const bench = S.mons.filter(m => m.home == null);
   const guardEmpty = D.filter(i => purpose19(S, i) === "guard" && !residents5(S, i).length);
   const notes = [];
-  if (guardEmpty.length) notes.push(`<div class="note20 bad">🛡 守る部屋に誰もいない。今夜、勇者が素通りする${S.mons.some(m => plan[m.id] != null && guardEmpty.includes(plan[m.id])) ? "（おまかせで入る）" : ""}</div>`);
+  if (guardEmpty.length) notes.push(`<div class="note20 bad">🛡 守る部屋に誰もいない。奥まで素通りされる。ただし少人数を奥に置くと各個に倒されやすい——🪄おまかせの試算で「守りの損」が減るかを見て決める${S.mons.some(m => plan[m.id] != null && guardEmpty.includes(plan[m.id])) ? "（おまかせで入る）" : ""}</div>`);
   let h = `<div class="pg20" id="pg20"><div class="gh20"><b>🧭 育成</b><span class="hint">カードを押すと、部屋を移す・手放す</span></div><div class="ghb27"><button data-a="mons">👾 魔物の一覧</button>${S.books27 > 0 ? `<button class="bk27" data-a="bookpick27">📜 スキルの書 ${S.books27}冊</button>` : ""}</div>${notes.join("")}`;
   h += `<div class="flow20">${col("grow")}${D.some(i => purpose19(S, i) === "grow") ? `<div class="ar20"><small>育ったら</small>▶</div>` : ""}${col("earn")}</div>${col("guard")}${col("rest")}`;   /* 休む部屋も出す（そこにいる子が見えなくなっていた） */
   if (bench.length) h += `<div class="col20 c-bench"><h4>🪑 控え ${bench.length}</h4><div class="mrow20">${bench.map(mini).join("")}</div></div>`;
@@ -7710,7 +7710,7 @@ autoAll19 = (prev => function (S) {
   const before = new Map(S.mons.map(m => [m.id, m.home]));
   const zz = S.mons.filter(m => !m.job && restLeft9(S, m) && (m.home == null || dens.includes(m.home))).sort((a, b) => (b.rest || 0) - (a.rest || 0) || b.lv - a.lv);
   const bedded = [];
-  zz.forEach(m => { const i = dens.find(i => free[i] > 0); if (i != null) { free[i]--; m.home = i; m.job = "bed21"; m.job19 = null; bedded.push(m); } });
+  zz.forEach(m => { const i = dens.find(i => free[i] > 0); if (i != null) { free[i]--; if (m.home != null && m.home !== i && m.back27 == null) m.back27 = m.home; /* 治ったら元の部屋へ（守る部屋の主力が、寝床のある稼ぐ部屋に置きっぱなしになっていた） */ m.home = i; m.job = "bed21"; m.job19 = null; bedded.push(m); } });
   let n; try { n = prev(S); } finally { bedded.forEach(m => { m.job = null; }); }
   return S.mons.filter(m => before.get(m.id) !== m.home).length;
 })(autoAll19);
@@ -13580,7 +13580,9 @@ function econ27() { const S0 = S, R0 = Math.random, U0 = UID5; let out = { dp: 0
 function score27(n) { const d = dngRun27({ morning: 1, n: n || 4 }), e = econ27(), H = Math.max(1, (daysToRaid9(S) ?? 2) + 1);
   if (!d) return { total: H * (e.dp + e.val), d: null, e, H };
   const loss = d.downs / d.n * (4000 + S.dp) + d.lossHP + d.md * 60 + d.esc * (30 + 0.05 * S.dp) + d.stolen;
-  return { total: H * (e.dp + e.val) - loss, loss, d, e, H }; }
+  /* 守る部屋と入口を空にする並びは選ばない（試算で勇者が来なくても、警告と食い違って怖い） */
+  const guardEmpty = S.path.reduce((n, r, i) => n + (r && r.kind === "den" && (i === 0 || (typeof purpose19 === "function" && purpose19(S, i) === "guard")) && !S.mons.some(m => m.home === i && !(m.rest > 0)) ? 1 : 0), 0);
+  return { total: H * (e.dp + e.val) - loss, loss, d, e, H, guardEmpty }; }
 /* 探す手順（1回試すごとに一息つける形）。押したときにその場で回すのにも、先回りで少しずつ回すのにも使う */
 function* optSteps27(out) { const dens = S.path.map((r, i) => r && r.kind === "den" && r.pol !== "rest" && !(hasFac12(r, "bed") && facsOf12(r).length === 1) ? i : -1).filter(i => i >= 0);
   const mov = () => S.mons.filter(m => !m.job && !(m.rest > 0) && (m.home == null || dens.includes(m.home)));
@@ -13638,9 +13640,11 @@ function smartAuto27() {
   if (!keep) restore(); else window.__undo27 = restore;
   const fin = keep ? sc1 : sc0, moved = S.mons.filter(m => prevH.get(m.id) !== m.home);
   const nm = i => i == null ? "控え" : roomTitle(S, i), lvTag = d => d ? `${DNG23[d.lv][0]}${DNG23[d.lv][1]}` : "—";
-  modal = () => `<h2>🪄 おまかせ</h2><div class="hint">${(r.evals || 0) <= 1 ? "動かして試せる並びがなかった（移せる部屋が1つだけ、または全員📌固定・休み中）。部屋を掘って増やすと、ためせる並びが増える" : `守り（次の襲撃を試す）・稼ぎ・育ちを💎に換算して、${r.evals}通りの並びを試した`}</div>
+  const pinN = S.mons.filter(m => m.job && m.job !== "bed21").length, zzN = S.mons.filter(m => m.rest > 0).length;
+  modal = () => `<h2>🪄 おまかせ</h2><div class="hint">${(r.evals || 0) <= 1 ? `動かして試せる並びがなかった。${pinN ? `📌固定の子が${pinN}体（手で役目を決めた子は動かさない。外すと任せられる）` : ""}${zzN ? `${pinN ? "・" : ""}休み中が${zzN}体` : ""}${!pinN && !zzN ? "移せる部屋が1つだけ。部屋を掘ると、ためせる並びが増える" : ""}` : `守り（次の襲撃を試す）・稼ぎ・育ちを💎に換算して、${r.evals}通りの並びを試した`}</div>
     <div class="rs-grid"><div><small>次の襲撃</small><b>${lvTag(sc0.d)} → ${lvTag(fin.d)}</b></div><div><small>💎/日（上の数字）</small><b>${(v => (v[0] < 0 ? "" : "+") + v[0] + " → " + (v[1] < 0 ? "" : "+") + v[1])((i1 => [Math.round(i1 - (fin.e.dp - sc0.e.dp)), Math.round(i1)])(income15(S)))}</b></div><div><small>育ち Lv/日</small><b>${sc0.e.lv.toFixed(1)} → ${fin.e.lv.toFixed(1)}</b></div><div><small>守りの損（💎）</small><b>${Math.round(sc0.loss || 0)} → ${Math.round(fin.loss || 0)}</b></div></div>
     ${moved.length ? `<div class="lab2">並べ替えた（${moved.length}体）<small>　気に入らなければ ↩ 戻す</small></div>` + moved.map(m => `<div class="hint">${esc(m.nick)}：${esc(nm(prevH.get(m.id)))} → <b>${esc(nm(m.home))}</b></div>`).join("") : `<div class="box">いまの並びがいちばん</div>`}
+    ${fin.guardEmpty ? `<div class="hint">🛡 守る部屋は空のまま：ためした中では、手前の部屋に集めたほうが守りの損が少なかった（奥に少しだけ置くと、ひとりずつ倒されやすい）</div>` : ""}
     <div class="mixbtn18">${moved.length ? `<button data-a="undo13">↩ 戻す</button>` : ""}<button class="main" data-a="close">OK</button></div>`;
   CV.sig = ""; save(); render(); }
 document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="af19go"],[data-a="rebal"]'); if (!b || !S || N) return; ev.stopImmediatePropagation(); ev.preventDefault();
@@ -14076,6 +14080,9 @@ function resume28() { try { resume28.t = Date.now();
   try { const R = S && S.scoutRun28; if (R && R.day === S.day && S.scoutDay === S.day && !N && !S.ended) { dayRep = Object.assign(newRep9(), R.rep || {}); N = startScout9(S); N.pops = []; view = "night"; CV.heroes = {}; caveFollow = true; stage = null; render(); tick(); resume28(); }
     else if (R) delete S.scoutRun28; } catch (e) { console.error(e); }
   return r; }; }
+
+// 主の体力：毎朝すこし自然に戻る（瀕死のあと3日たっても戻らず、そのまま負けた）。💎で全部戻す手はそのまま
+{ const _cd = closeDay; closeDay = function () { const r = _cd.apply(this, arguments); try { if (S && S.lord && !S.ended) { const mx = lordMax5(S); if (S.lord.hp < mx) S.lord.hp = Math.min(mx, Math.round(S.lord.hp + mx * 0.12)); } } catch (e) {} return r; }; }
 
 // ================= proto28：侵略の戦場を作り直す =================
 // テストで出たこと：①前列・後列を変えても強さが変わらない ②戦場で前列と後列が見分けられない ③魔物が門へ向かわず真ん中で止まる
