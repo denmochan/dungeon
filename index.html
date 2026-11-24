@@ -1254,7 +1254,7 @@ body:has(.modal) .inv25btn,body:has(.ntfull19) .inv25btn{display:none}
 .title>.tmenu{grid-column:2;grid-row:1/span 4;width:100%;max-height:calc(100vh - 20px);overflow-y:auto;-webkit-overflow-scrolling:touch;align-self:stretch;padding-bottom:12px}.title>.tmenu>*{flex-shrink:0}
 }
 .rs-grid .rsn28{display:block;font-style:normal;font-size:12px;opacity:.7;margin-top:2px;line-height:1.3}
-.tkl28{display:flex;flex-direction:column;gap:6px;max-height:60vh;overflow-y:auto}.tkr28{display:flex;align-items:center;gap:10px;padding:4px 6px;border:1px solid #3a2c20;border-radius:10px;background:#1c1510}
+.tkl28{display:flex;flex-direction:column;gap:6px;max-height:min(60vh,calc(100dvh - 250px));overflow-y:auto;overscroll-behavior:contain}.tkr28{display:flex;align-items:center;gap:10px;padding:4px 6px;border:1px solid #3a2c20;border-radius:10px;background:#1c1510}
 .tkr28 .tx{flex:1;min-width:0;display:flex;flex-direction:column}.tkr28 .tx small{opacity:.7}.tkr28 button{display:flex;flex-direction:column;align-items:center;padding:6px 10px;min-width:84px}.tkr28 button small{font-size:12px;opacity:.85}
 .res28{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 70px);transform:translateX(-50%);z-index:95;background:#1b120cee;border:1px solid #e8b84a;border-radius:12px;padding:10px 16px;text-align:center;color:#f6e3c0;box-shadow:0 6px 20px #000a;display:flex;flex-direction:column;gap:2px;transition:opacity .5s;pointer-events:none;max-width:calc(100vw - 32px)}
 .res28 b{font-size:16px;color:#ffd56a;white-space:nowrap}.res28 small{font-size:12px;opacity:.85}.res28.out{opacity:0}
@@ -7473,7 +7473,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.343（11/24 14:34）";
+const VER20 = "No.344（11/24 14:45）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -8423,7 +8423,7 @@ function gainK23(d0) { return 0.55 / (1 + Math.max(0, d0 || 0) / 2500); }
 // 結果画面：「手に入れた」は実際に増えた💎（ボーナス込み）。持ち逃げは「盗まれた」に入れる
 resultStage15 = (prev => function (r) { let h = prev(r); try {
   const G = S.gain23; if (G && G.n === S.raidNo) h = h.replace(/(<small>手に入れた<\/small><b class="gold">)💎\+[\d,]+/, `$1💎+${fmt8(G.v)}`);
-  const R = S.runaway23; if (R && R.lost && R.n === S.raidNo && r.esc) h = h.replace(/(<small>盗まれた<\/small><b class=")[^"]*(">)[^<]*/, `$1bad$2-${fmt8((r.stolen || 0) + R.lost)}`);
+  const R = S.runaway23; if (R && R.lost && r.esc) h = h.replace(/(<small>盗まれた<\/small><b class=")[^"]*(">)[^<]*/, `$1bad$2-${fmt8((r.stolen || 0) + R.lost)}`);
 } catch (e) {} return h; })(resultStage15);
 // 指令「盗ませるな」：逃げた勇者がいたら失敗（持ち逃げされるので）
 try { const o = ORD16.nosteal; if (o) { const ok = o.ok; o.ok = (r, N) => ok(r, N) && !N.heroes.some(h => h.st === "escaped"); } } catch (e) {}
@@ -13420,7 +13420,7 @@ function dngRun27(opt) {
       const N2 = startRaid9(S, g0);
       if (opt.nextRaid) { /* 同じ顔ぶれを、次の襲撃のぶんだけ強くする（Lv・うわさの熱・回数）。人数が増える見込みなら1人足す */
         const L0 = raidLevel9(S), L1 = raidLevel9({ ...S, raidNo: (S.raidNo || 0) + 1 }), lr = heroMul5(L1) / heroMul5(L0), h0 = S.heat23 || 0, h1 = opt.nextRaid.heat;
-        const fh = lr * (1 + h1) / (1 + h0) * 1.035, fa = lr * (1 + 0.7 * h1) / (1 + 0.7 * h0) * 1.025;
+        const c9 = (S.contract && S.contract.lv) || 1, n0 = (S.raidNo || 0) + 10 * (c9 - 1), pr = (expP28(S, n0 + 1) * ALPHA17(n0 + 1)) / Math.max(1, expP28(S, n0) * ALPHA17(n0)), fh = Math.sqrt(pr), fa = Math.sqrt(pr);   /* 勇者は日にちで決まる（No.342〜）。前の「熱＋Lv」の見積もりのままで、つぎの襲撃がいつも🔴に出ていた */
         N2.heroes.forEach(h => { h.max = Math.round(h.max * fh); h.hp = h.max; h.atk = Math.round(h.atk * fa); });
         const reg = N2.heroes.filter(h => !h.boss); if (reg.length && reg.length < Math.min(8, partySize5({ ...S, psLast26: reg.length, raidNo: (S.raidNo || 0) + 1, night: L1 }))) { const src = reg[reg.length - 1]; N2.heroes.push({ ...src, id: Math.max(...N2.heroes.map(h => h.id)) + 1, delay: Math.max(...N2.heroes.map(h => h.delay || 0)) + 2, off: {} }); } }
       if (opt.grow) N2.heroes.forEach(h => { h.max = Math.round(h.max * opt.grow.hp); h.hp = h.max; h.atk = Math.round(h.atk * opt.grow.atk); });
@@ -13453,7 +13453,7 @@ danger23 = function () {
   const add = [];
   if (v.lord && !v.downs) add.push(`<span>主の体力：平均で残り約${Math.max(1, Math.round(v.left * 10))}割</span>`);
   if (S.lord && lordMax5(S) && S.lord.hp < lordMax5(S) * 0.7) add.push(`<span class="bad">主の体力が${Math.round(S.lord.hp / lordMax5(S) * 10)}割しかない（朝に1割ずつ戻る）</span>`);
-  if (v.next) { const nx = nextRaid9({ ...S, day: S.day + 1 }); add.push(`<span class="nx27 l${v.next.lv}">つぎの襲撃${nx ? `（${nx}日目）` : ""}は、いまの並びのままだと ${DNG23[v.next.lv][0]}${DNG23[v.next.lv][1]}${v.next.lv > v.lv ? "　→ 今のうちに強くしておく" : ""}<small>（目安。勝ちつづけると勇者は強くなる）</small></span>`); }
+  if (v.next) { const nx = nextRaid9({ ...S, day: S.day + 1 }); add.push(`<span class="nx27 l${v.next.lv}">つぎの襲撃${nx ? `（${nx}日目）` : ""}は、いまの並びのまま育てなかったら ${DNG23[v.next.lv][0]}${DNG23[v.next.lv][1]}${v.next.lv > v.lv ? "　→ それまでに強くしておく" : ""}<small>（目安。それまでの育ちは入れていない）</small></span>`); }
   if ((v.lv >= 1 || (v.next && v.next.lv >= 2)) && S.dp >= 200) add.push(`<span class="hint">💡 💎がたまっているなら、魔物をタップ →「🔥 💎で特訓」でLvを上げられる</span>`);
   if (add.length) h = h.replace(/(<div class="dng23[^"]*">[\s\S]*?)(<span class="hint">並べかえ)/, `$1${add.join("")}$2`);
   } catch (e) { console.error(e); } return h; }; }
@@ -13645,7 +13645,7 @@ function smartAuto27() {
   const fin = keep ? sc1 : sc0, moved = S.mons.filter(m => prevH.get(m.id) !== m.home);
   const nm = i => i == null ? "控え" : roomTitle(S, i), lvTag = d => d ? `${DNG23[d.lv][0]}${DNG23[d.lv][1]}` : "—";
   const pinN = S.mons.filter(m => m.job && m.job !== "bed21").length, zzN = S.mons.filter(m => m.rest > 0).length;
-  modal = () => `<h2>🪄 おまかせ</h2><div class="hint">${(r.evals || 0) <= 1 ? `動かして試せる並びがなかった。${pinN ? `📌固定の子が${pinN}体（手で役目を決めた子は動かさない。外すと任せられる）` : ""}${zzN ? `${pinN ? "・" : ""}休み中が${zzN}体` : ""}${!pinN && !zzN ? "移せる部屋が1つだけ。部屋を掘ると、ためせる並びが増える" : ""}` : `守り（次の襲撃を試す）・稼ぎ・育ちを💎に換算して、${r.evals}通りの並びを試した`}</div>
+  modal = () => `<h2>🪄 おまかせ</h2><div class="hint">${(r.evals || 0) <= 1 ? `動かして試せる並びがなかった。${pinN ? `📌固定の子が${pinN}体（手で役目を決めた子は動かさない。外すと任せられる）` : ""}${zzN ? `${pinN ? "・" : ""}休み中が${zzN}体` : ""}${!pinN && !zzN ? "いまの並びより良くなる動かし方が見つからなかった" : ""}` : `守り（次の襲撃を試す）・稼ぎ・育ちを💎に換算して、${r.evals}通りの並びを試した`}</div>
     <div class="rs-grid"><div><small>次の襲撃</small><b>${lvTag(sc0.d)} → ${lvTag(fin.d)}</b></div><div><small>💎/日（上の数字）</small><b>${(v => (v[0] < 0 ? "" : "+") + v[0] + " → " + (v[1] < 0 ? "" : "+") + v[1])((i1 => [Math.round(i1 - (fin.e.dp - sc0.e.dp)), Math.round(i1)])(income15(S)))}</b></div><div><small>育ち Lv/日</small><b>${sc0.e.lv.toFixed(1)} → ${fin.e.lv.toFixed(1)}</b></div><div><small>守りの損（💎）</small><b>${Math.round(sc0.loss || 0)} → ${Math.round(fin.loss || 0)}</b></div></div>
     ${moved.length ? `<div class="lab2">並べ替えた（${moved.length}体）<small>　気に入らなければ ↩ 戻す</small></div>` + moved.map(m => `<div class="hint">${esc(m.nick)}：${esc(nm(prevH.get(m.id)))} → <b>${esc(nm(m.home))}</b></div>`).join("") : `<div class="box">いまの並びがいちばん</div>`}
     ${fin.guardEmpty ? `<div class="hint">🛡 守る部屋は空のまま：ためした中では、手前の部屋に集めたほうが守りの損が少なかった（奥に少しだけ置くと、ひとりずつ倒されやすい）</div>` : ""}
@@ -14210,6 +14210,23 @@ ALPHA17 = n => Math.min(0.62, 0.30 + 0.04 * n);
 // 店で呼んだ子は、群れの平均Lvの6割から（💎570のSRがLv1で来て、後半は💎を戦力に変えられなかった）
 { const _b = buy5; buy5 = function (S0) { const L = S0.mons.filter(m => m.home != null), avg = L.length ? L.reduce((a, m) => a + m.lv, 0) / L.length : 1; const m = _b.apply(this, arguments);
   try { if (m) { const lv = Math.max(m.lv || 1, Math.round(avg * 0.6)); if (lv > m.lv) { m.lv = lv; m.exp = 0; m.evos = Math.max(m.evos || 0, lv >= EVO_LV5[1] ? 2 : lv >= EVO_LV5[0] ? 1 : 0); } } } catch (e) {} return m; }; }
+
+// ================= proto29：第11回テストの残り =================
+// ---------- 1) 見た進化が、開き直すたびにまた出た → 見た進化を覚えて、二度と出さない ----------
+const evoKey29 = q => q && q.m && q.before ? q.m.id + ">" + (q.before.evos || 0) : null;
+const evoSeen29 = () => (S.evoSeen29 = S.evoSeen29 || []);
+const evoMark29 = q => { const k = evoKey29(q); if (k && S && !evoSeen29().includes(k)) { S.evoSeen29.push(k); if (S.evoSeen29.length > 200) S.evoSeen29.splice(0, 50); } };
+const evoOld29 = q => q && q.k === "evo" && !q.replay28 && evoSeen29().includes(evoKey29(q));
+{ const _r = render; render = function () { try { if (S && stage) { if (stage.k === "evo") evoMark29(stage); if (stage.d28 && stage.d28.evo) stage.d28.evo.forEach(evoMark29); } } catch (e) {} return _r.apply(this, arguments); }; }
+{ const _ns = nextStage; nextStage = function () { try { if (S) queue = queue.filter(q => !evoOld29(q)); } catch (e) {} return _ns.apply(this, arguments); }; }
+{ const _eg = enterGame; enterGame = function () { const r = _eg.apply(this, arguments); try { if (S) { queue = queue.filter(q => !evoOld29(q)); if (stage && evoOld29(stage)) { stage = null; nextStage(); } } } catch (e) {} return r; }; }
+
+// ---------- 2) 記憶がたまっていると、開くたびに1枚ずつ出た → いちばん新しい1枚だけ。残りは「記憶とかけら」で読める ----------
+{ const _k = kkShow25; kkShow25 = function () { try { if (S && !document.querySelector(".kk25ov")) { const K = kk25(S), want = Math.min(MEM25.length, Math.floor(kkN25(S) / 4)); if (K.pro && want - K.seen >= 2) { K.seen = want - 1; save(); } } } catch (e) {} return _k.apply(this, arguments); }; }
+
+// ---------- 3) 特訓の一覧：押した途中で進化の演出が割りこみ、続けて押したぶんが空振りした → 進化は一覧を閉じてからまとめて ----------
+{ const _ns = nextStage; nextStage = function () { if (typeof TOKL28 !== "undefined" && TOKL28 && !stage && queue.length && queue.every(q => q.k === "evo")) { setTimeout(() => { if (typeof modal === "function" || stage) return; modal = tokList28; render(); }, 0); return; } return _ns.apply(this, arguments); }; }
+addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="close"]'); if (!b || typeof TOKL28 === "undefined" || !TOKL28) return; setTimeout(() => { if (!stage && !modal && queue.length) nextStage(); }, 0); }, true);
 
 </script>
 </body>
