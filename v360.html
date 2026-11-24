@@ -1284,6 +1284,7 @@ body:has(.modal) .inv25btn,body:has(.ntfull19) .inv25btn{display:none}
 .ban19.chb28{pointer-events:auto}
 #off26{left:max(8px,env(safe-area-inset-left,0px))!important;transform:none!important;top:auto!important;bottom:calc(6px + env(safe-area-inset-bottom,0px))!important;font-size:11px!important;opacity:.75;padding:3px 8px}
 #fp26 .f26menu{z-index:6}#fp26 .f26menu:not([hidden]) ~ .f26lab{opacity:.12}
+.big29{margin:0 0 8px}.big29 button{width:100%;display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px;background:linear-gradient(135deg,#6b3fa0,#a0562a);border-color:#e8b84a}.big29 small{font-size:12px;opacity:.85}
 </style>
 </head>
 <body>
@@ -7473,7 +7474,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.344（11/24 14:45）";
+const VER20 = "No.345（11/24 14:57）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -14227,6 +14228,30 @@ const evoOld29 = q => q && q.k === "evo" && !q.replay28 && evoSeen29().includes(
 // ---------- 3) 特訓の一覧：押した途中で進化の演出が割りこみ、続けて押したぶんが空振りした → 進化は一覧を閉じてからまとめて ----------
 { const _ns = nextStage; nextStage = function () { if (typeof TOKL28 !== "undefined" && TOKL28 && !stage && queue.length && queue.every(q => q.k === "evo")) { setTimeout(() => { if (typeof modal === "function" || stage) return; modal = tokList28; render(); }, 0); return; } return _ns.apply(this, arguments); }; }
 addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="close"]'); if (!b || typeof TOKL28 === "undefined" || !TOKL28) return; setTimeout(() => { if (!stage && !modal && queue.length) nextStage(); }, 0); }, true);
+
+// ---------- 4) 難しさ：むずかしい以上は、ボスのいない「ふだんの襲撃」を約2割強く（ふだんはぬるく、ボスの日だけ壁だった） ----------
+const NORM29 = 1.1;   /* 体力・攻撃それぞれ×1.1 ＝ 強さ約1.2倍 */
+startRaid9 = (prev => function (S0, rnd) { const N0 = prev.apply(this, arguments);
+  try { if (N0 && !N0.scout && (S0.diff || 0) >= 1 && !N0.heroes.some(h => h.boss)) N0.heroes.forEach(h => { h.max = Math.round(h.max * NORM29); h.hp = h.max; h.atk = Math.round(h.atk * NORM29); }); } catch (e) {}
+  return N0; })(startRaid9);
+
+// ---------- 5) 💎の大きい使い道：「📯 大物を呼ぶ」SR以上が確定、群れの平均Lvで来る。呼ぶたびに値上がり（その周回のあいだ） ----------
+const bigCost29 = S0 => 600 + 500 * ((S0.big29 && S0.big29.n) || 0);
+function bigCands29(S0) { const all = Object.keys(MON).filter(sp => (MON[sp].star || 1) >= 3 && MON[sp].forms), seen = all.filter(sp => (S0.dex || []).includes(sp)); return seen.length >= 3 ? seen : all; }
+function bigSummon29(S0) { const c = bigCost29(S0); if (S0.dp < c) return null; const L = bigCands29(S0); if (!L.length) return null;
+  const sp = L[(Math.random() * L.length) | 0], rar = Math.random() < 0.25 ? "SSR" : "SR", o = { sp, sk: {}, rar, big29: 1 };
+  S0.shop = S0.shop || []; S0.shop.push(o); const i = S0.shop.length - 1, p = price5(sp, o); S0.dp += p; let m = null;
+  try { m = buy5(S0, i); } finally { S0.shop.splice(i, 1); if (!m) S0.dp -= p; }
+  if (!m) return null; S0.dp -= c; m.rar19 = rar;
+  const P = S0.mons.filter(x => x.home != null && x !== m), avg = P.length ? P.reduce((a, x) => a + x.lv, 0) / P.length : 1, lv = Math.max(m.lv || 1, Math.round(avg));
+  if (lv > m.lv) { m.lv = lv; m.exp = 0; } m.evos = Math.max(m.evos || 0, m.lv >= EVO_LV5[1] ? 2 : m.lv >= EVO_LV5[0] ? 1 : 0);
+  S0.big29 = { n: ((S0.big29 && S0.big29.n) || 0) + 1 }; save(); return m; }
+shopModal = (prev => function () { let h = prev(); try { const c = bigCost29(S);
+  h = h.replace('<div class="pk">', `<div class="big29"><button class="main" data-a="big29" ${S.dp < c ? "disabled" : ""}>📯 大物を呼ぶ <b>💎${fmt8(c)}</b><small>SR以上が確定・群れの平均Lvで来る（呼ぶたびに+500）</small></button></div><div class="pk">`); } catch (e) {} return h; })(shopModal);
+addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="big29"]'); if (!b || !S) return; ev.stopImmediatePropagation(); ev.preventDefault();
+  const m = bigSummon29(S); if (!m) { toast("💎が足りない"); return; }
+  try { if (m.home == null && typeof bestRoom9 === "function") m.home = bestRoom9(S, m.sp, m); } catch (e) {}
+  try { sfx16("win"); } catch (e) {} toast(`📯 ${m.rar19} ${esc(m.nick)}（Lv${m.lv}）がやってきた！`); render(); }, true);
 
 </script>
 <script>// ================= 3Dの子を、今のコマアニメと同じ並び（17コマ）の絵に焼く（開発用・ページ内で実行） =================
