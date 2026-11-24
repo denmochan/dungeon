@@ -7469,7 +7469,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.337（11/24 09:29）";
+const VER20 = "No.338（11/24 09:30）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -14068,6 +14068,14 @@ function resume28() { try { resume28.t = Date.now();
 
 // 夜の途中で開き直したら、倒した数が0でも必ず「再開」を出す（何も起きていないと出なかった）
 { const _eg = enterGame; enterGame = function () { const r = _eg.apply(this, arguments); try { setTimeout(() => { if (N && !N.scout && !N.done && !document.querySelector(".res28") && !(Date.now() - (resume28.t || 0) < 4000)) resume28(); }, 900); } catch (e) {} return r; }; }
+// 偵察の夜も、閉じたら続きから（前は偵察の前の昼に戻り、夜が消えていた）
+{ const _nd = nextDay; nextDay = function () { const r = _nd.apply(this, arguments);
+  try { if (N && N.scout && S && !S.sim23) { S.scoutRun28 = { day: S.day, rep: JSON.parse(JSON.stringify(dayRep || {})) }; save(); } } catch (e) {} return r; }; }
+{ const _er = endRaid; endRaid = function () { try { if (N && N.scout && S) delete S.scoutRun28; } catch (e) {} return _er.apply(this, arguments); }; }
+{ const _eg = enterGame; enterGame = function () { const r = _eg.apply(this, arguments);
+  try { const R = S && S.scoutRun28; if (R && R.day === S.day && S.scoutDay === S.day && !N && !S.ended) { dayRep = Object.assign(newRep9(), R.rep || {}); N = startScout9(S); N.pops = []; view = "night"; CV.heroes = {}; caveFollow = true; stage = null; render(); tick(); resume28(); }
+    else if (R) delete S.scoutRun28; } catch (e) { console.error(e); }
+  return r; }; }
 
 // ================= proto28：侵略の戦場を作り直す =================
 // テストで出たこと：①前列・後列を変えても強さが変わらない ②戦場で前列と後列が見分けられない ③魔物が門へ向かわず真ん中で止まる
