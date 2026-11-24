@@ -7474,7 +7474,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.347（11/24 22:54）";
+const VER20 = "No.348（11/25 00:26）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -13240,6 +13240,7 @@ function fpOpen26(){
     if (!a.walking) { a.wait -= dt; if (a.wait <= 0) { for (let k = 0; k < 8; k++) { const ang = Math.random() * 6.28, d = 2 + Math.random() * 5, x = a.hx + Math.cos(ang) * d, z = a.hz + Math.sin(ang) * d; let okp = fitsM(R, a, x, z) && sepOK(R, a, x, z, 1); for (let t = 0.25; okp && t < 1; t += 0.25) okp = fitsM(R, a, a.x + (x - a.x) * t, a.z + (z - a.z) * t); if (okp) { a.tx = x; a.tz = z; a.walking = true; break; }   /* 体の大きさで通れる所だけ（大きい子が壁にめりこんでいた） */ } a.wait = 2 + Math.random() * 4; } return; }
     const dx = a.tx - a.x, dz = a.tz - a.z, L = Math.hypot(dx, dz); if (L < 0.1) { a.walking = false; return; } const s = Math.min(L, 2.2 * Math.sqrt(a.mult || 1) * dt); a.x += dx / L * s; a.z += dz / L * s; a.dist += s; a.r = Math.atan2(dx, dz); }); }
   let curRoom = 0, lastT = performance.now(), ft = [];
+  const FPQ = window.__FPQ29 = window.__FPQ29 || { q: 1, t: 0 };
   function loop(now){ if (!alive) return; requestAnimationFrame(loop);
     const dt = Math.max(0.001, Math.min(0.1, (now - lastT) / 1000)); lastT = now; ft.push(dt); if (ft.length > 20) ft.shift(); fpsEl.textContent = Math.round(ft.length / ft.reduce((x, y) => x + y, 0)) + "fps";
     const busy = !!document.querySelector("#peek24[style*='flex'], .modal") ; if (busy) return;
@@ -13259,7 +13260,8 @@ function fpOpen26(){
     if (W0.k === "r") curRoom = W0.i; const R0 = rooms[curRoom]; whereB.textContent = W0.k === "c" || W0.tight ? "通路" : R0.name; whereS.textContent = `B${R0.f + 1}`;
     for (let i = Math.max(0, curRoom - 1); i <= Math.min(n - 1, curRoom + 1); i++) { loadRoom(rooms[i]); stepActs(rooms[i], dt); }
     if (msg.isConnected && R0.mb) msg.remove(); if (R0.err) msg.textContent = R0.err;
-    const dpr = Math.min(2, window.devicePixelRatio || 1), r = { width: cv.clientWidth, height: cv.clientHeight }; W = Math.round(r.width * dpr); H = Math.round(r.height * dpr); if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+    if (ft.length >= 20) { const fps = ft.length / ft.reduce((x, y) => x + y, 0); FPQ.t += dt; if (FPQ.t > 1.5) { FPQ.t = 0; if (fps < 26 && FPQ.q > 0.5) FPQ.q = Math.max(0.5, FPQ.q - 0.15); else if (fps > 50 && FPQ.q < 1) FPQ.q = Math.min(1, FPQ.q + 0.1); } }   /* 重い端末では自動で解像度を下げる（なめらかさを優先） */
+    const dpr = Math.min(2, window.devicePixelRatio || 1) * FPQ.q, r = { width: cv.clientWidth, height: cv.clientHeight }; W = Math.round(r.width * dpr); H = Math.round(r.height * dpr); if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
     gl.viewport(0, 0, W, H); gl.clearColor(0.01, 0.008, 0.008, 1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     P.walk = (P.walk || 0) + ((mv.x || mv.y) ? Math.hypot(mv.x, mv.y) * dt * 8 : 0); const bob = (mv.x || mv.y) ? Math.sin(P.walk * 1.9) * 0.07 : 0; EYE = [P.x, P.y + P.eye + bob + SHK * Math.sin(now / 1000 * 47), P.z]; SHK *= Math.pow(0.02, dt); const dir = [Math.sin(P.yaw) * Math.cos(P.pit), Math.sin(P.pit), -Math.cos(P.yaw) * Math.cos(P.pit)];
     VP = mm(persp(1.15, W / H, 0.15, 120), look(EYE, [EYE[0] + dir[0], EYE[1] + dir[1], EYE[2] + dir[2]]));
@@ -14256,6 +14258,11 @@ addEventListener("click", ev => { const b = ev.target.closest && ev.target.close
   const m = bigSummon29(S); if (!m) { toast("💎が足りない"); return; }
   try { if (m.home == null && typeof bestRoom9 === "function") m.home = bestRoom9(S, m.sp, m); } catch (e) {}
   try { sfx16("win"); } catch (e) {} toast(`📯 ${m.rar19} ${esc(m.nick)}（Lv${m.lv}）がやってきた！`); render(); }, true);
+
+// ---------- 6) 歩く画面を基本に：つづきから・はじめるで、まず歩く画面を開く（見下ろしは「🗺 見下ろしへ」で行ける。2Dは段階的になくす） ----------
+{ const _eg = enterGame; enterGame = function () { const r = _eg.apply(this, arguments);
+  try { const go = (k = 0) => { if (!S || title || N || document.getElementById("fp26")) return; if (stage || modal || queue.length || document.querySelector(".kk25ov,.tut,.tutov") || (typeof S.tut === "number" && S.tut < TUT.length)) { if (k < 40) setTimeout(() => go(k + 1), 800); return; } fpOpen26(); }; setTimeout(go, 1200); } catch (e) {}
+  return r; }; }
 
 </script>
 <script>// ================= 3Dの子を、今のコマアニメと同じ並び（17コマ）の絵に焼く（開発用・ページ内で実行） =================
