@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層3／No.350（11/25 00:49）";
+const VER20 = "層4／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -13581,6 +13581,9 @@ function fpOpen30(){
     const tr = R.acts.filter(a => /^(slash|lift|spar)$/.test(a.mode)), np = Math.floor((tr.length - (tr.length >= 3 ? 1 : 0)) / 2);
     for (let p = 0; p < np; p++) { const A = tr[p * 2], B = tr[p * 2 + 1], ph = Math.random() * 9; A.mode = B.mode = "duel"; A.pt = B; B.pt = A; A.role = 0; B.role = 1; A.dph = B.dph = ph; A.stay = B.stay = true; } };
   rooms.forEach(mkActs);
+  /* 主：いちばん下の層の奥（降り口のマス）に座っている */
+  const addLord = () => { const L = typeof lordIdx === "function" ? lordIdx(S) : n - 1, Rm = rooms[L]; if (!Rm || (Rm.acts || []).some(a => a.lord)) return; const G = Rm.G30, z = -(G.H - 1) * Rm.CS + 0.6; (Rm.acts = Rm.acts || []).push({ lord: 1, hero: 0, m: { nick: "主", id: -999 }, sp: "lord", evo: 0, x: 0, z, r: 0, hx: 0, hz: z, tx: 0, tz: z, wait: 99, ph: 0, walking: false, dist: 0, mode: "idle", y: 0, stay: true, fixd: 1 }); };
+  addLord();
   /* 罠番は昼、自分の部屋の手前の通路で罠を手入れしている（罠が置いてあるだけに見えた） */
   const keepers = () => rooms.forEach(R => { const tp = (R.traps || [])[0]; if (!tp || typeof keeper24 !== "function") return; let k = null; try { k = keeper24(S, R.i); } catch (e) {} if (!k) return; const a = (R.acts || []).find(x => x.m && x.m.id === k.id); if (!a) return;
     a.x = a.hx = a.tx = tp.x + 0.9; a.z = a.hz = a.tz = tp.z - R.Z + 0.3; a.stay = true; a.walking = false; a.mode = "mine"; a.rk = null; a.look = [tp.x, tp.z - R.Z]; a.keep29 = 1; a.fixd = 1; });
@@ -13629,7 +13632,7 @@ function fpOpen30(){
   function tap(sx, sy){ if (!VP) return; let best = null;
     /* 「▼次の部屋へ／▲前の部屋へ」の札を押すと、そこまで自動で歩く */ { const D = (window.__fpDoor26 || []).find(d => Math.abs(sx - d.x) < 70 && Math.abs(sy - d.y) < 26); if (D) { P.auto = { to: curRoom + D.dir }; toast(D.dir > 0 ? "▼ 次の部屋へ歩く（スティックで止まる）" : "▲ 前の部屋へ歩く（スティックで止まる）"); return; } }
     rooms.forEach(R => { if (Math.abs(R.i - curRoom) > 1) return;
-      (R.acts || []).forEach(a => { if (a.hero || a.hide) return; const s = toScr(a.x, R.Y + (a.H || 2) * 0.5, R.Z + a.z); if (!s) return; const d = Math.hypot(s[0] - sx, s[1] - sy), wd = Math.hypot(a.x - P.x, R.Z + a.z - P.z); if (wd < 15 + (a.H || 0) && d < 70 + (a.H || 0) * 18 && (!best || d < best.d)) best = { d, a, R }; });
+      (R.acts || []).forEach(a => { if (a.hero || a.hide || a.lord) return; const s = toScr(a.x, R.Y + (a.H || 2) * 0.5, R.Z + a.z); if (!s) return; const d = Math.hypot(s[0] - sx, s[1] - sy), wd = Math.hypot(a.x - P.x, R.Z + a.z - P.z); if (wd < 15 + (a.H || 0) && d < 70 + (a.H || 0) * 18 && (!best || d < best.d)) best = { d, a, R }; });
       const s = toScr(R.sx, R.Y + 1.8, R.Z + R.sz); if (s) { const d = Math.hypot(s[0] - sx, s[1] - sy), wd = Math.hypot(R.sx - P.x, R.Z + R.sz - P.z); if (wd < 14 && d < 60 && (!best || d < best.d)) best = { d, sign: R }; } });
     if (!best) { menu.hidden = true; return; }
     if (best.sign) { menu.hidden = true; try { peekOpen24(best.sign.i); } catch (e) {} return; }
@@ -13760,7 +13763,7 @@ function fpOpen30(){
     TORCH.forEach((t, j) => { const d2 = (t[0] - EYE[0]) ** 2 + (t[2] - EYE[2]) ** 2; if (d2 > 900) return; const fl = 0.85 + 0.15 * Math.sin(now / 1000 * 13 + j * 3.7); gl.uniform1f(PB.U("LB"), 1.2 * fl); gl.uniform3f(PB.U("C"), t[0], t[1] - 0.35, t[2]); gl.uniform4f(PB.U("Q"), -0.22, 0, 0.44, 0.75 * fl); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); });
     gl.depthMask(true); gl.disable(gl.BLEND); gl.uniform1f(PB.U("AM"), 0);
     // 近くの子に「話しかける」ボタン（動く子をタップで当てるのは難しかった）
-    { const R = rooms[curRoom], fx = Math.sin(P.yaw), fz = -Math.cos(P.yaw); let best = null; (R.acts || []).forEach(a => { if (!a.m || a.hero || a.hide) return; const dx = a.x - P.x, dz = R.Z + a.z - P.z, d = Math.hypot(dx, dz); if (d < 5.5 + (a.H || 0) * 0.6 && (dx * fx + dz * fz) / (d || 1) > 0.3 && (!best || d < best.d)) best = { a, d }; });
+    { const R = rooms[curRoom], fx = Math.sin(P.yaw), fz = -Math.cos(P.yaw); let best = null; (R.acts || []).forEach(a => { if (!a.m || a.hero || a.hide || a.lord) return; const dx = a.x - P.x, dz = R.Z + a.z - P.z, d = Math.hypot(dx, dz); if (d < 5.5 + (a.H || 0) * 0.6 && (dx * fx + dz * fz) / (d || 1) > 0.3 && (!best || d < best.d)) best = { a, d }; });
       const tb = wrap.querySelector(".f26talk"); if (best && menu.hidden) { tb.hidden = false; if (tb.dataset.id != best.a.m.id) { tb.dataset.id = best.a.m.id; tb.textContent = `💬 ${best.a.m.nick || ""}に話しかける`; tb.onclick = () => monMenu(best.a, R, VW() / 2, VH() * 0.55); } } else tb.hidden = true; }
     // 名前の札（近くの子）。画面の外にいる子は、端に矢印
     { const lc = wrap.querySelector(".f26lab"), dp = Math.min(2, window.devicePixelRatio || 1); if (lc.width !== Math.round(VW() * dp)) { lc.width = Math.round(VW() * dp); lc.height = Math.round(VH() * dp); } const g = lc.getContext("2d"); g.setTransform(dp, 0, 0, dp, 0, 0); g.clearRect(0, 0, VW(), VH()); g.textAlign = "center"; g.font = "bold 12px system-ui,sans-serif"; const DOORS = window.__fpDoor26 = [], LBL = [], lfree = (x, y, w, h) => !LBL.some(r => x < r[0] + r[2] && x + w > r[0] && y < r[1] + r[3] && y + h > r[1]);   /* 名札どうしが重ならないように */
@@ -13843,7 +13846,7 @@ function fpOpen30(){
         const tx = bx, tz = Rm.Z + bz, k = Math.min(1, dt * 2.5); if (where(tx, tz)) { P.x += (tx - P.x) * k; P.z += (tz - P.z) * k; } const want = Math.atan2(at.x - P.x, -(Rm.Z + at.z - P.z)), d = Math.atan2(Math.sin(want - P.yaw), Math.cos(want - P.yaw)); P.yaw += d * Math.min(1, dt * 3); P.pit += (-0.25 - P.pit) * Math.min(1, dt * 2); } } }
   // ===== 掘る画面：いまいる層をマスで見て、道を掘る・広間にする・埋める・罠を動かす =====
   const digCost30 = (Rm, v) => v === 2 ? 60 + 15 * Rm.i : 20 + 6 * Rm.i;
-  const rebuild = Rm => { Rm.mb = null; Rm.G = null; try { g30sync(S, Rm.i); } catch (e) {} Rm.traps = trapSpots(Rm); for (let j = TORCH.length - 1; j >= 0; j--) if (TORCH[j][6] === Rm.i) TORCH.splice(j, 1); TORCH.push(...torchesFor(Rm)); loadRoom(Rm); mkActs(Rm); try { keepers(); } catch (e) {} };
+  const rebuild = Rm => { Rm.mb = null; Rm.G = null; try { g30sync(S, Rm.i); } catch (e) {} Rm.traps = trapSpots(Rm); for (let j = TORCH.length - 1; j >= 0; j--) if (TORCH[j][6] === Rm.i) TORCH.splice(j, 1); TORCH.push(...torchesFor(Rm)); loadRoom(Rm); mkActs(Rm); try { keepers(); addLord(); } catch (e) {} };
   function digOpen(){ const Rm = rooms[curRoom], G = Rm.G30, mid = (G.W - 1) / 2; let mode = "dig", selT = null;
     const ov = document.createElement("div"); ov.className = "dig30"; wrap.appendChild(ov);
     const conn = () => !!bfs30(G, [mid, 0], [mid, G.H - 1]);
