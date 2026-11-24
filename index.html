@@ -3278,7 +3278,7 @@ function dayJobs9(S, rep) {
     if (g.xp) { gainXp9(S, m, g.xp, rep); if (r.fac === "train") rep.trained.push(m); }
   });
   const base = 15 + 5 * S.floors.length; S.dp += base; rep.dp += base; rep.base = base;
-  S.lord.hp = Math.min(lordMax5(S), S.lord.hp + Math.round(lordMax5(S) * 0.1));
+  S.lord.hp = Math.min(lordMax5(S), S.lord.hp + Math.round(lordMax5(S) * 0.2));
 }
 // 次の襲撃
 let raidLevel9 = S => Math.round(1 + RAID_GROW9 * (S.raidNo || 0)) + 10 * ((S.contract || { lv: 1 }).lv - 1);
@@ -4235,7 +4235,7 @@ dayJobs9 = function (S, rep) {
     if (g.xp) { gainXp9(S, m, g.xp, rep); if (job === "train") rep.trained.push(m); }
   });
   const base = 15 + 5 * S.floors.length; S.dp += base; rep.dp += base; rep.base = base;
-  S.lord.hp = Math.min(lordMax5(S), S.lord.hp + Math.round(lordMax5(S) * 0.1));
+  S.lord.hp = Math.min(lordMax5(S), S.lord.hp + Math.round(lordMax5(S) * 0.2));
 };
 const watchers12 = S => S.mons.filter(m => m.home != null && jobOf12(S, m) === "watch" && !restLeft9(S, m));
 intel9 = S => watchers12(S).reduce((a, m) => a + 1 + Math.floor(m.lv / 5) + Math.round(skSum11(m).watch || 0), 0);
@@ -4594,7 +4594,7 @@ todo13 = (prev => function (S) {
 const fame17 = N => N.mons.reduce((a, m) => a + m.atk * 2 + m.max * 0.3, 0);
 // 11/24：勇者の強さは「こちらの戦力」ではなく「何回目の襲撃か」で決める（強くしても勇者が同じだけ強くなり、判断が効かなかった）
 // 目安の戦力＝ふつうに遊んだときの中央値（機械に何周も遊ばせて測った）。ふつうは少しやさしめ
-const expP28 = (S, n) => 700 * (1 + 0.6 * n + 0.17 * n * n) * ((S && (S.diff || 0)) === 0 ? 0.85 : 1);
+const expP28 = (S, n) => 700 * (1 + 0.6 * n + 0.08 * n * n)   /* 機械は魔物を30体以上並べるので、人より強めに出ていた。人の手ざわりに合わせて後半を下げる */ * ((S && (S.diff || 0)) === 0 ? 0.85 : 1);
 const expPM28 = (S, n) => Math.max(380, 380 + 300 * n - 8 * Math.min(n, 15) * Math.min(n, 15)) * ((S && (S.diff || 0)) === 0 ? 0.85 : 1);
 const heroPow17 = h => h.atk * 2 + h.max * 0.3;
 // 襲撃の何回目か（契約の中）で、勇者の強さの目安（ダンジョン全体の何割か）
@@ -4888,7 +4888,7 @@ function unlockOnClear18(S) {
 // 悪名の倍率（ダンジョンの強さに対して、どれだけ腕の立つ勇者が来るか）
 [1, 2.0, 2.4, 2.7, 2.9, 3.2].forEach((f, i) => { if (DIFF15[i]) DIFF15[i].fame = f; });
 [0, 3, 6, 7, 8, 9].forEach((v, i) => { if (DIFF15[i]) DIFF15[i].add = v; });   // 序盤（1〜2回目の襲撃）で何もできずに負けないように
-Object.assign(DIFF15[1], { text: "勇者がかなり強い。ダンジョンが強くなるほど、もっと強い勇者が来る" });
+Object.assign(DIFF15[1], { text: "勇者がかなり強い。襲撃を重ねるほど、もっと強い勇者が来る" });
 
 // ================= proto19：戦闘を深く =================
 // 1) 隊列：部屋で殴り合えるのは「前列」だけ（入口は2体、ふつうの部屋は3体、いちばん広い部屋は4体）
@@ -6168,8 +6168,8 @@ function digModal(){
 // ---------- 主 ----------
 function lordModal(){
   const M = metaOf8(S);
-  return `<h2>👑 主（あなた）</h2><div class="card"><div class="big">${img("lord", lordTier(), "sp", "width:112px;height:112px")}</div><div>Lv${S.lord.lv}<br>体力 ${S.lord.hp}/${lordMax5(S)}<br>攻撃 ${lordAtk5(S)}${lordNight18(S).atk > lordAtk5(S) ? `<span class="good">（夜は${lordNight18(S).atk}）</span>` : ""}<br>🔰結界 ${lordNight18(S).ward}<div class="hint">倒れたら転生（魂は残る。<b>💎と魔物とダンジョンは消える</b>）。毎朝10%回復。結界は襲撃ごとに張りなおし、先にダメージを吸う。魔物が強いほど結界も夜の攻撃も強くなる</div></div></div>
-    <div class="pk"><button data-a="heal" ${S.lord.hp >= lordMax5(S) ? "disabled" : ""}>回復（1体力＝1DP）</button><button data-a="train" ${S.dp < train5Cost(S) ? "disabled" : ""}>鍛える ${train5Cost(S)}</button></div>
+  return `<h2>👑 主（あなた）</h2><div class="card"><div class="big">${img("lord", lordTier(), "sp", "width:112px;height:112px")}</div><div>Lv${S.lord.lv}<br>体力 ${S.lord.hp}/${lordMax5(S)}<br>攻撃 ${lordAtk5(S)}${lordNight18(S).atk > lordAtk5(S) ? `<span class="good">（夜は${lordNight18(S).atk}）</span>` : ""}<br>🔰結界 ${lordNight18(S).ward}<div class="hint">倒れたら転生（魂は残る。<b>💎と魔物とダンジョンは消える</b>）。毎朝およそ2割回復。結界は襲撃ごとに張りなおし、先にダメージを吸う。魔物が強いほど結界も夜の攻撃も強くなる</div></div></div>
+    <div class="pk"><button data-a="healh28" ${S.lord.hp >= lordMax5(S) * 0.5 ? "disabled" : ""}>半分まで回復（💎${Math.max(0, Math.round(lordMax5(S) * 0.5 - S.lord.hp))}）</button><button data-a="heal" ${S.lord.hp >= lordMax5(S) ? "disabled" : ""}>全回復（💎${Math.min(S.dp, lordMax5(S) - S.lord.hp)}）</button><button data-a="train" ${S.dp < train5Cost(S) ? "disabled" : ""}>鍛える ${train5Cost(S)}</button></div>
     <div class="box">📜 契約：${CONTRACT_LEN9}日のあいだダンジョンを守りきる。${CONTRACT_LEN9}日目の夜に最後の大襲撃が来る</div>
     <div class="hint">👻魂 ${M.souls}（タイトルの🔮主に刻むで使う）</div>
     <div class="box">しのいだ襲撃 <b class="gold">${S.raidsWon || 0}</b>回・転生${M.runs}回</div>
@@ -6337,6 +6337,7 @@ document.addEventListener("click", ev => {
     case "release2": { const m = S.mons.find(o => o.id === +d.id); if (m && m.eq19) unequip19(S, m); } release5(S, +d.id); modal = null; save(); break;
     case "lord": modal = lordModal; break;
     case "heal": heal5(S); save(); break;
+    case "healh28": { const c = Math.min(S.dp, Math.max(0, Math.round(lordMax5(S) * 0.5 - S.lord.hp))); if (c > 0) { S.dp -= c; S.lord.hp += c; save(); } } break;
     case "train": train5(S); save(); break;
     case "dex": DX = null; modal = dexModal; break;
     case "dexsp": DX = d.v; modal = dexModal; break;
@@ -6355,7 +6356,7 @@ document.addEventListener("click", ev => {
     case "bakopen": modal = backupModal18; break;
     case "bakuse": { const L = backups18(), b = L[+d.v]; if (b) { backup18("戻す前"); try { applySave(JSON.parse(b.json)); save(); if (CLOUD) cloudPush(); toast("バックアップから戻した"); modal = null; title = true; } catch (e) { toast("戻せなかった"); } } } break;
     case "vpick": { const n = +d.v, at = VSEL18.indexOf(n); if (at >= 0) VSEL18.splice(at, 1); else if (VSEL18.length < vaultCap18(S)) VSEL18.push(n); else toast(`連れていけるのは${vaultCap18(S)}体まで（🏺主の器で増える）`); } break;
-    case "vgo": { const got = bringFromVault18(S, VSEL18); VSEL18 = []; modal = null; if (got.length) toast(`${got.map(m => m.nick).join("・")}がついてきた！`); CV.sig = ""; save(); } break;
+    case "vgo": { S.vaultAsked18 = 1; const got = bringFromVault18(S, VSEL18); VSEL18 = []; modal = null; if (got.length) toast(`${got.map(m => m.nick).join("・")}がついてきた！`); CV.sig = ""; save(); } break;
     case "giveup": modal = () => `<h2>転生する？</h2><div class="box gold">👻 魂 +${soulsRate15(S, soulsFor8(S) + contractBonus18(S))}${contractBonus18(S) ? "（契約の報酬こみ）" : ""}</div><div class="hint">魔物とダンジョンは消える。魂・魔王の書・図鑑は残る</div>${vaultOk22(S) ? `<div class="hint">🏺 1体だけ保管庫に残せる</div>` : `<div class="box bad21b">🏺 この周回はまだ契約を達成していないので、保管庫には<b>だれも残せない</b></div>`}${!S.ended && !S.contractDone ? `<div class="hint">契約の途中で転生すると、夜の分の魂は1/4になる</div>` : ""}<div class="pk"><button class="main" data-a="rebirth">転生する</button><button data-a="close">やめる</button></div>`; break;
     case "vsave": saveToVault18(S, +d.id);
     // fallthrough
@@ -6368,7 +6369,7 @@ document.addEventListener("click", ev => {
     case "awaydown": modal = rebirthModal; break;
     case "tut": title = false; tutStart(); return;
     case "start": if (freshRun15(S) && !diffScr && !S.diffOk23 && diffMax15(S) === 0) { setDiff15(S, 0); S.diffOk23 = true; save(); enterGame(); return; }
-      if (freshRun15(S) && !diffScr && !S.diffOk23) { diffScr = true; diffSel = Math.min(S.diff || 0, diffMax15(S)); break; } diffScr = false; enterGame(); return;
+      if (freshRun15(S) && !diffScr && !S.diffOk23) { diffScr = true; diffSel = Math.min(S.diff || metaOf8(S).lastDiff28 || 0, diffMax15(S)); break; } diffScr = false; enterGame(); return;
     case "diffsel": diffSel = +d.v; break;
     case "records": modal = recordModal15; break;
     case "diffgo": if (setDiff15(S, diffSel)) { S.diffOk23 = true; diffScr = false; save(); enterGame(); return; } break;
@@ -6770,7 +6771,7 @@ function diffScreen15(){
     <div class="altop"><button data-a="diffback">← もどる</button><span class="gold">難易度をえらぶ</span></div>
     <div class="dsel">${list}</div>
     <div class="ddesc"><div class="demb">${D.icon}</div><div class="h2">${D.name}</div><div>${D.text}</div>
-      <div class="dstats"><span>勇者の強さ <b>×${(D.fame || 1).toFixed(1)}</b></span><span>勇者の数 <b>+${D.party}</b></span><span>魂 <b class="gold">×${D.rate}</b></span></div>
+      <div class="dstats"><span>勇者の強さ <b>×${(D.fame || 1).toFixed(1)}${D.rate > (D.fame || 1) + 0.05 && DIFF15.indexOf(D) >= 2 ? `→×${D.rate}` : ""}</b></span><span>勇者の数 <b>+${D.party}</b></span><span>魂 <b class="gold">×${D.rate}</b></span></div>
       <div class="hint">契約を達成すると、次の難易度が開く</div></div>
     <button class="main big" data-a="diffgo" style="width:100%;max-width:340px">▶ ${D.name}ではじめる</button></div>`;
 }
@@ -6958,7 +6959,7 @@ function vaultBringModal18() {
     + `<div class="pk"><button class="main" data-a="vgo">${VSEL18.length ? VSEL18.length + "体を連れて始める" : "連れていかずに始める"}</button></div>`;
 }
 { const _eg = enterGame; enterGame = function () { _eg();
-  if (S && !S.vaultAsked18 && (S.day || 1) <= 1 && !(S.raidNo) && !(S.contract && S.contract.lv > 1)) { S.vaultAsked18 = 1; if (vaultOf18(S).length && !modal) { VSEL18 = vaultAutoPick18(); modal = vaultBringModal18; render(); } } }; }
+  if (S && !S.vaultAsked18 && (S.day || 1) <= 1 && !(S.raidNo) && !(S.contract && S.contract.lv > 1)) { if (vaultOf18(S).length && !modal) { VSEL18 = vaultAutoPick18(); modal = vaultBringModal18; render(); } } }; }
 // 配合：生まれる子の「生まれつき」のスキルは必ずつく。選ぶ枠を使わないので、選ぶ一覧からは外す
 function mixChildInn18(A, B) { try { const p = mixPreview7(S, A, B); return p && p.sp ? { sp: p.sp, k: INNATE10[p.sp], known: !p.special || S.dex.includes(p.sp) } : null; } catch (e) { return null; } }
 function mixPool18(A, B) { const c = mixChildInn18(A, B), pool = [...new Set([...Object.keys(skOf10(A)), ...Object.keys(skOf10(B))])]; return c && c.k ? pool.filter(k => k !== c.k) : pool; }
@@ -7472,7 +7473,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "No.341（11/24 12:17）";
+const VER20 = "No.342（11/24 13:29）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -8036,7 +8037,7 @@ const isSS22 = m => !!m && (MON[m.sp] || {}).rank === 3;
 
 // ---------- ズルを防ぐルール（11/15） ----------
 // 保管庫に残せるのは、その周回で契約を1つ以上達成したときだけ（店のSSRを買ってすぐ転生、のくり返しを防ぐ）
-function vaultOk22(S) { return !!S && ((S.contract && S.contract.lv > 1) || !!S.contractDone); }
+function vaultOk22(S) { return !!S && S.mons && S.mons.length > 0; }   /* 11/24：倒れたときも保管庫に残せる（前は契約を達成しないと出ず、育てた子を残し損ねた） */
 
 // ================= BGM（その場で合成する小さなループ）：昼はのんびり、夜は速くて不穏、ボスはもっと =================
 let BGMON19 = true; try { BGMON19 = localStorage.getItem("chika-bgm") !== "0"; } catch (e) {}
@@ -8160,13 +8161,13 @@ const DNG23 = [["🟢", "余裕", "入口で止まりそう"], ["🟡", "注意"
 { const _rb = raidBox; raidBox = function () {
   let h = _rb(); try { const dr = daysToRaid9(S); if (!h || dr == null || dr > 0 || N) return h;   // 前の日は顔ぶれが決まらず外れやすいので、襲撃の当日だけ出す
     const v = danger23(); if (!v) return h; if (dr === 0) S.dlv23 = { day: S.day, lv: v.lv }; const D = DNG23[v.lv], hurt = S.mons.filter(m => m.home != null && restLeft9(S, m)).length;
-    const add = `<div class="dng23 l${v.lv}"><b>${D[0]} 危ない度：${D[1]}</b><span>いまの並びで${v.n || 5}回ためすと：${v.why || D[2]}${v.downs ? `（${v.n || 5}回中${v.downs}回 主が倒れる）` : v.lord ? `（${v.n || 5}回中${v.lord}回 主が傷つく）` : ""}</span>${hurt ? `<span class="bad">💤 けがの子${hurt}体は、体力半分で戦う</span>` : ""}${v.lv >= 2 ? advice23(v) : ""}${v.lv >= 2 ? `<span class="bad">主が倒れると、この周回は終わり。DP（いま${fmt8(S.dp)}）は持ち帰れない。使うなら今のうち</span>` : ""}<span class="hint">並べかえ・罠・寝床・準備で変わる</span></div>` + (typeof prepBox23 === "function" ? prepBox23() : "");
+    const add = `<div class="dng23 l${v.lv}"><b>${D[0]} 危ない度：${D[1]}</b><span>いまの並びで${v.n || 5}回ためすと：${v.why || D[2]}${v.downs ? `（${v.n || 5}回中${v.downs}回 主が倒れる）` : v.lord ? `（${v.n || 5}回中${v.lord}回 主が傷つく）` : ""}</span>${hurt ? `<span class="bad">💤 けがの子${hurt}体は、体力半分で戦う</span>` : ""}${v.lv >= 2 ? advice23(v) : ""}${v.lv >= 2 ? `<span class="bad">主が倒れると、この周回は終わり。DP（いま${fmt8(S.dp)}）は転生すると魂になる（💎400で1）。いま使って守るか、残して魂にするか</span>` : ""}<span class="hint">並べかえ・罠・寝床・準備で変わる</span></div>` + (typeof prepBox23 === "function" ? prepBox23() : "");
     const at = h.lastIndexOf("</div>"); return h.slice(0, at) + add + h.slice(at);
   } catch (e) { console.error(e); return h; } }; }
 // ---------- 5) 楽勝が続くと、うわさが広まって勇者が強くなる（悪名の熱） ----------
 // 入口の部屋だけで全員倒せた夜が続くと、次の勇者は強く（そのぶんLvが上がり、落とすDPと経験も増える）。
 // 主まで届かれたら少し冷める。4回目の襲撃から。これで「9日目から先は何もしなくても勝てる」をなくす
-const heat23 = S => S.heat23 || 0;
+const heat23 = S => 0;   /* 11/24：「楽勝が続くと次の勇者が強くなる」をやめた（勇者は何回目の襲撃かで決める。完封の次に急に崩れる崖の原因だった） */
 { const _sr = startRaid9; startRaid9 = function (S, rnd) { const N = _sr.apply(this, arguments);
   try { const k0 = heat23(S); if (N && !N.scout && k0 > 0) { N.heroes.forEach(h => { const k = k0 * (h.boss && S.day < CONTRACT_LEN9 ? 0.6 : 1); h.max = Math.round(h.max * (1 + k)); h.hp = h.max; h.atk = Math.round(h.atk * (1 + k * 0.7)); }); N.heat23 = k0; } } catch (e) {}   /* 27：ボスの夜は全員の熱を4割引き→ボスだけ4割引き（ボスの夜だけ楽で、次の夜に急にきつくなる崖をなくす） */
   // 26：回を重ねるほど勇者を少しずつ強く（テストで30日・10回の襲撃が考えなしで全勝できたため）
@@ -8215,7 +8216,7 @@ const DMGN23 = { fight: ["⚔️", "戦う", "#d06040"], snipe: ["🏹", "狙撃
   const ks = Object.keys(DMGN23).filter(k => D[k] > 0).sort((a, b) => D[b] - D[a]);
   const add = `<div class="dmg23"><div class="lab2">何が効いた？（勇者へのダメージ）</div><div class="dbar23">${ks.map(k => `<i style="width:${D[k] / tot * 100}%;background:${DMGN23[k][2]}"></i>`).join("")}</div><div class="dl23">${ks.map(k => `<span>${DMGN23[k][0]}${DMGN23[k][1]} <b>${Math.round(D[k] / tot * 100)}%</b></span>`).join("")}</div>${(r.combo23 || []).length ? `<div class="hint">陣形：${r.combo23.map(c => COMBO19[c] ? COMBO19[c].icon + COMBO19[c].name : "").join("・")}</div>` : ""}</div>`;
   const at = h.indexOf('<div class="rs-grid">'); h = at >= 0 ? h.slice(0, at) + add + h.slice(at) : h + add;
-  if (S.heat23 != null && (S.raidNo || 0) >= 3) h += `<div class="hint" style="text-align:center">🔥 うわさの熱：${Math.round((S.heat23 || 0) * 100)}%（楽勝が続くと、次の勇者が強くなる）</div>`;
+  if (false && S.heat23 != null && (S.raidNo || 0) >= 3) h += `<div class="hint" style="text-align:center">🔥 うわさの熱：${Math.round((S.heat23 || 0) * 100)}%（楽勝が続くと、次の勇者が強くなる）</div>`;
 } catch (e) {} return h; }; }
 // 見おわった演出は、閉じて開き直しても出し直さない（次へ進むたびに保存）
 { const _ns = nextStage; nextStage = function () { const r = _ns.apply(this, arguments); try { save(); } catch (e) {} return r; }; }
@@ -8433,7 +8434,7 @@ try { const o = ORD16.nosteal; if (o) { const ok = o.ok; o.ok = (r, N) => ok(r, 
 resultStage15 = (prev => function (r) { let h = prev(r); try { if (S.ended || (S.lord && S.lord.hp <= 0)) h = h.replace(/(<small>地図<\/small><b class=")[^"]*(">)守った/, "$1bad$2主が倒れた"); } catch (e) {} return h; })(resultStage15);
 // けがの子を寝床のある部屋へ運ぶ（やることの「寝床のない部屋で寝ている」から1タップで）
 document.addEventListener("click", ev => { const b = ev.target.closest('[data-a="bedmove23"]'); if (!b || !S) return; ev.stopPropagation(); let n = 0;
-  try { S.mons.forEach(m => { if (!m.rest || (m.home != null && hasFac12(S.path[m.home], "bed"))) return; const i = S.path.findIndex((r, k) => hasFac12(r, "bed") && residents5(S, k).length < capOfSlot7(S, k)); if (i < 0) return; m.home = i; n++; }); } catch (e) { console.error(e); }
+  try { S.mons.forEach(m => { if (!m.rest || (m.home != null && hasFac12(S.path[m.home], "bed"))) return; const i = S.path.findIndex((r, k) => hasFac12(r, "bed") && residents5(S, k).length < capOfSlot7(S, k)); if (i < 0) return; if (m.home != null && m.home !== i && m.back27 == null) m.back27 = m.home; /* 治ったら元の部屋へ */ m.home = i; n++; }); } catch (e) { console.error(e); }
   toast(n ? `🛏 ${n}体を寝床へ運んだ（早く治る）` : "🛏 寝床に空きがない"); CV.sig = ""; save(); render(); }, true);
 // 夜の速さは、前に選んだ速さで始める（主の間・ボスで×1になっても、次の夜はもどす）
 { const _sr = startRaid9; startRaid9 = function (S) { const N = _sr.apply(this, arguments); try { if (!S.sim23) { const v = +localStorage.getItem("chika-spd"); if (v === 1 || v === 3) speed = v; } } catch (e) {} return N; }; }
@@ -13499,13 +13500,13 @@ function mid27(S2, N2) {
 { const _er = endRaid9; endRaid9 = function (S2, N2) { const r = _er.apply(this, arguments); try { const f = N2 && N2.lord && N2.lord.floor27; if (f && S2.lord) S2.lord.hp = Math.max(0, Math.round(N2.lord.hp / N2.lord.max * f.max)); } catch (e) {} return r; }; }
 // ================= 💎を戦力に：魔物の特訓（💎でLv+1） =================
 // 勇者は襲撃ごとに強くなるのに、こちらは💎がたまるだけで強くならなかった（15日目で💎1900）
-const tokCost27 = m => { const T = (S.tok27 && S.tok27.day === S.day) ? S.tok27.n : 0; return Math.round((10 * m.lv + 3 * m.lv * m.lv) * (1 + 0.5 * T) / 10) * 10; };
+const tokCost27 = m => { const T = (S.tok27 && S.tok27.day === S.day && S.tok27.by) ? (S.tok27.by[m.id] || 0) : 0; /* 11/24：値上がりは「同じ子を同じ日に」だけ（前は誰か1体を上げると全員の値段が上がった） */ return Math.round((10 * m.lv + 3 * m.lv * m.lv) * (1 + 0.5 * T) / 10) * 10; };
 monCard = (prev => function (id) { let h = prev(id); try { const m = S.mons.find(o => o.id === id); if (!m || N) return h; const c = tokCost27(m), ok = S.dp >= c;
-  const line = `<div class="tok27"><button data-a="tok27" data-v="${m.id}" ${ok ? "" : "disabled"}>🔥 💎で特訓：Lv${m.lv}→${m.lv + 1}（💎${fmt8(c)}）</button><span class="hint">その日のうちに続けると値段が上がる。勇者に追いつくための💎の使いみち</span></div>`;
+  const line = `<div class="tok27"><button data-a="tok27" data-v="${m.id}" ${ok ? "" : "disabled"}>🔥 💎で特訓：Lv${m.lv}→${m.lv + 1}（💎${fmt8(c)}）</button><span class="hint">同じ子を同じ日に続けると値段が上がる（ほかの子は上がらない）。勇者に追いつくための💎の使いみち</span></div>`;
   const i = h.indexOf('<div class="xp"'); if (i < 0) return h + line; const j = h.indexOf("</div>", i) + 6; return h.slice(0, j) + line + h.slice(j); } catch (e) { return h; } })(monCard);
 document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="tok27"]'); if (!b || !S) return; ev.stopImmediatePropagation(); ev.preventDefault(); if (performance.now() - (window.__tok27t || 0) < 700) return; window.__tok27t = performance.now();   /* 連打で2Lv上がらないように */
   const m = S.mons.find(o => o.id === +b.dataset.v); if (!m || N) return; const c = tokCost27(m); if (S.dp < c) { toast("💎が足りない"); return; }
-  S.dp -= c; S.tok27 = (S.tok27 && S.tok27.day === S.day) ? { day: S.day, n: S.tok27.n + 1 } : { day: S.day, n: 1 };
+  S.dp -= c; if (!(S.tok27 && S.tok27.day === S.day && S.tok27.by)) S.tok27 = { day: S.day, n: 0, by: {} }; S.tok27.n++; S.tok27.by[m.id] = (S.tok27.by[m.id] || 0) + 1;
   const rep = newRep9(); gainXp9(S, m, Math.max(1, expNext5(m) - (m.exp || 0)), rep); sfx16 && sfx16("lvup"); toast(`🔥 ${m.nick} が Lv${m.lv} になった`);
   try { dng23 = { key: "", v: null }; } catch (e) {}
   save(); const id = m.id; if (rep.evos.length) { modal = null; rep.evos.forEach(e => queue.push({ k: "evo", ...e })); if (!stage) nextStage(); else render(); } else { modal = () => monCard(id); render(); } }, true);
@@ -13610,7 +13611,7 @@ function optimize27(budget) { const t0 = performance.now(), out = {}, g = optSte
   S.mons.forEach(m => { if (m.home != null && !m.job) m.job19h = m.home; }); dng23 = { key: "", v: null };
   return { evals: out.evals, rounds: out.rounds, ms: Math.round(performance.now() - t0) }; }
 /* はっきり良くなり、予報も悪くならないときだけ並びを変える（押すたびに変わらないように） */
-const keep27 = (a, b) => b.total > a.total + Math.max(20, Math.abs(a.total) * 0.03) && !(a.d && b.d && b.d.lv > a.d.lv) && !(a.e && b.e && a.e.dp > 10 && b.e.dp < a.e.dp * 0.5 && !(a.d && b.d && b.d.lv < a.d.lv));   /* 予報が良くならないのに稼ぎを半分以下にする並びは選ばない */
+const keep27 = (a, b) => !(((typeof daysToRaid9 === "function" ? daysToRaid9(S) : 9) ?? 9) <= 2 && a.loss != null && b.loss != null && b.loss > a.loss * 1.02 + 20) /* 襲撃が近いのに守りを弱める並びは選ばない */ && b.total > a.total + Math.max(20, Math.abs(a.total) * 0.03) && !(a.d && b.d && b.d.lv > a.d.lv) && !(a.e && b.e && a.e.dp > 10 && b.e.dp < a.e.dp * 0.5 && !(a.d && b.d && b.d.lv < a.d.lv));   /* 予報が良くならないのに稼ぎを半分以下にする並びは選ばない */
 /* 先回りの試算：ふだんの画面のすきまに、写しのデータで少しずつ探しておく。押したときに答えが出ていれば待たずに見せる */
 const PRE27 = { key: null, done: false };
 const key27 = () => JSON.stringify([S.day, S.dp > 0, S.lord && S.lord.lv, S.lord && S.lord.hp, S.mons.map(m => [m.id, m.sp, m.evos, m.lv, m.home, m.job, m.job19, m.rest, m.hp]), S.path.map(r => r && [r.kind, r.fac, r.facs, r.pol, r.flv])]);
@@ -13783,6 +13784,22 @@ function fpAct28(a) { const b = document.createElement("button"); b.dataset.a = 
   if (!b) { b = document.createElement("button"); b.className = "fpret28"; b.innerHTML = "🚶 歩く画面にもどる"; document.body.appendChild(b);
     b.addEventListener("click", ev => { ev.stopPropagation(); const s = FPRET28 || { sel: null }; FPRET28 = null; b.remove(); page20 = null; roomSel = roomOpen = s.sel; modal = null; addPick = null; render(); fpOpen26(); }); }
 } catch (e) {} }; }
+
+// ---------- 3) 開き直したときに残っていた演出（宝箱・進化・卵）は、1枚にまとめて出す（開くたびに卵を3回たたく・進化を1枚ずつ、で操作がつまった） ----------
+{ const _eg = enterGame; enterGame = function () { const r = _eg.apply(this, arguments);
+  try { setTimeout(() => { if (!S || N || title) return; const all = (stage ? [stage] : []).concat(queue); const P = all.filter(q => q && ["chest", "evo", "egg"].includes(q.k) && !q.keep23);
+      if (P.length < 1 || (stage && !["chest", "evo", "egg"].includes(stage.k))) return;
+      const D = { ch: [], evo: [], kk: [], mem: [], book: 0 };
+      P.forEach(q => { if (q.k === "chest") { const o = q.out || openChest19(S, q.c); (o.evos || []).forEach(e => D.evo.push(e)); D.ch.push({ c: q.c, o }); }
+        else if (q.k === "evo" && q.m) { D.evo.push(q); (q.more23 || []).forEach(x => D.evo.push(x)); }
+        else if (q.k === "egg" && q.m) { const f = (() => { try { return formOf(q.m); } catch (e) { return [q.m.sp]; } })(); D.ch.push({ c: { tier: 2, kind: "egg" }, o: { sp: q.m.sp, text: `🥚 ${esc(q.m.nick)}（${esc(f[0])}）が生まれた`, sub: (q.inherit || []).length ? "受け継いだスキル " + q.inherit.map(k => (SK11[k] || {}).name || k).join("・") : "" } }); } });
+      queue = queue.filter(q => !P.includes(q)); D.book = S.bookNew27 && bkList27().length ? 1 : 0; if (D.book) delete S.bookNew27;
+      stage = { k: "result", step: 0, dawnOnly: 1, d28: D, day: S.day, dp: 0, lv: 0, resume28: 1 }; save(); render(); }, 700); } catch (e) { console.error(e); }
+  return r; }; }
+resultStage15 = (prev => function (r) { let h = prev(r); try { if (r.resume28) h = h.replace(/<small>\d+日目の朝<\/small><b>☀ 朝の収穫<\/b>/, "<small>閉じる前のつづき</small><b>✨ まだ見ていなかったもの</b>"); } catch (e) {} return h; })(resultStage15);
+// 結果を閉じた直後のタップは0.45秒止める（同じ場所の「⏩襲撃の日まで」が押されて2日飛んだ）
+document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="stagenext"]'); if (!b || !stage || stage.k !== "result") return;
+  setTimeout(() => { const d = document.createElement("div"); d.style.cssText = "position:fixed;inset:0;z-index:9998"; document.body.appendChild(d); setTimeout(() => d.remove(), 450); }, 0); }, true);
 
 // ================= proto28：魔物と話す（状況で変わるセリフ） =================
 // 性格（6種）ごとの話し方 × いまの状況（けが・空腹・襲撃前・仕事・仲間・倒した数・進化・好きなもの…）。
@@ -14047,7 +14064,7 @@ resultStage15 = (prev => function (r) { let h = prev(r); try {
 function tokList28() {
   if (!TOKL28 || !tokList28.ord) tokList28.ord = S.mons.slice().sort((a, b) => (b.home != null) - (a.home != null) || b.lv - a.lv).map(m => m.id);   /* 押しているあいだは並び順を変えない（進化で順番が動いて、別の子に払っていた） */
   const L = tokList28.ord.map(id => S.mons.find(m => m.id === id)).filter(Boolean).concat(S.mons.filter(m => !tokList28.ord.includes(m.id)));
-  return `<h2>🔥 💎で特訓</h2><div class="hint">💎を払って、すぐLvを1上げる。同じ日に続けると値段が上がる。いま 💎${fmt8(S.dp)}</div>` +
+  return `<h2>🔥 💎で特訓</h2><div class="hint">💎を払って、すぐLvを1上げる。同じ子を同じ日に続けると値段が上がる（ほかの子の値段は変わらない）。いま 💎${fmt8(S.dp)}</div>` +
     `<div class="tkl28">${L.map(m => { const c = tokCost27(m), ok = S.dp >= c; return `<div class="tkr28">${simg23(m, m.evos, "sp", "width:40px;height:40px")}<div class="tx"><b>${esc(m.nick)}</b><small>Lv${m.lv}${m.home == null ? "・控え" : ""}</small></div><button data-a="tok27" data-v="${m.id}" ${ok ? "" : "disabled"}>Lv${m.lv + 1}へ<small>💎${fmt8(c)}</small></button></div>`; }).join("")}</div>` +
     `<button data-a="close" style="width:100%;margin-top:8px">閉じる</button>`;
 }
@@ -14085,7 +14102,13 @@ function resume28() { try { resume28.t = Date.now();
   return r; }; }
 
 // 主の体力：毎朝すこし自然に戻る（瀕死のあと3日たっても戻らず、そのまま負けた）。💎で全部戻す手はそのまま
-{ const _cd = closeDay; closeDay = function () { const r = _cd.apply(this, arguments); try { if (S && S.lord && !S.ended) { const mx = lordMax5(S); if (S.lord.hp < mx) S.lord.hp = Math.min(mx, Math.round(S.lord.hp + mx * 0.12)); } } catch (e) {} return r; }; }
+/* 毎朝の回復は logic9/12 で 10%→20% に（⏩で日を飛ばしても効くように） */
+// 守る部屋がないまま危なくなったら、大きく案内（⏩で飛ばす人が、守る部屋が要ることに気づけず詰んだ）
+{ const _rb = raidBox; raidBox = function () { let h = _rb.apply(this, arguments); try { const v = dng23.v; const hasG = S.path.some((r, i) => typeof purpose19 === "function" && purpose19(S, i) === "guard");
+  if (h && v && v.lv >= 2 && !hasG && S.path.length < MAX_PATH) h += `<div class="note20 bad" style="margin-top:6px">🛡 守る部屋がない。<b>⛏ 部屋を掘る（💎${fmt8(digCost7(S))}）</b>で「守る」部屋を作ると、勇者を手前で止めやすくなる</div>`; } catch (e) {} return h; }; }
+
+// 保管庫から連れていく画面：選ぶまで何度でも出す（開き直したり、かけらの演出を閉じたタップで消えて、連れていけなかった）
+{ const _r = render; render = function () { _r.apply(this, arguments); try { if (S && !title && !N && !stage && !modal && !S.vaultAsked18 && (S.day || 1) <= 1 && !S.raidNo && !(S.contract && S.contract.lv > 1) && vaultOf18(S).length && !document.querySelector(".kk25ov")) { VSEL18 = vaultAutoPick18(); modal = vaultBringModal18; _r.apply(this, arguments); } } catch (e) {} }; }
 
 // ================= proto28：侵略の戦場を作り直す =================
 // テストで出たこと：①前列・後列を変えても強さが変わらない ②戦場で前列と後列が見分けられない ③魔物が門へ向かわず真ん中で止まる
@@ -14164,9 +14187,9 @@ rebirthModal = (prev => function () { let h = prev(); try { const n = dpSoul28(S
 
 // ---------- 2) 配合：子は強いほうの親と同じLv、世代を重ねるほど＋10%（前は子が親より弱く、配合を重ねる意味がなかった） ----------
 { const _br = breed5; breed5 = function (S0, a, b) {
-  const A = S0.mons.find(m => m.id === a), B = S0.mons.find(m => m.id === b); const lv = Math.max(A ? A.lv : 1, B ? B.lv : 1), pl = Math.max(A ? A.plus || 0 : 0, B ? B.plus || 0 : 0);
+  const A = S0.mons.find(m => m.id === a), B = S0.mons.find(m => m.id === b); const lv = Math.max(A ? A.lv : 1, B ? B.lv : 1), pl = Math.max(A ? A.plus || 0 : 0, B ? B.plus || 0 : 0), ev = Math.max(A ? A.evos || 0 : 0, B ? B.evos || 0 : 0), RK = ['N', 'R', 'SR', 'SSR'], rr = [A, B].filter(Boolean).map(x => x.rar19 || 'N').sort((x, y) => RK.indexOf(y) - RK.indexOf(x))[0];
   const r = _br.apply(this, arguments);
-  try { if (r && r.m) { const m = r.m; if (m.lv < lv) { m.lv = lv; m.exp = 0; } m.evos = Math.max(m.evos || 0, lv >= EVO_LV5[1] ? 2 : lv >= EVO_LV5[0] ? 1 : 0); m.plus = Math.max(m.plus || 0, pl + 1); m.gen28 = (m.plus || 0); } } catch (e) { console.error(e); }
+  try { if (r && r.m) { const m = r.m; if (m.lv < lv) { m.lv = lv; m.exp = 0; } m.evos = Math.max(m.evos || 0, lv >= EVO_LV5[1] ? 2 : lv >= EVO_LV5[0] ? 1 : 0); m.plus = Math.max(m.plus || 0, pl + 1); m.gen28 = (m.plus || 0); if (m.sp === (A && A.sp) || m.sp === (B && B.sp)) { m.evos = Math.max(m.evos || 0, ev); if (rr && RK.indexOf(rr) > RK.indexOf(m.rar19 || 'N')) m.rar19 = rr; }   /* 同じ種族どうしは、進化とレア度も強いほうの親から（子が親より弱かった） */ } } catch (e) { console.error(e); }
   return r; }; }
 mixConfirm = (prev => function () { let h = prev(); try { h = h.replace(/進化と倒した数は引きつがない/g, "Lvは強いほうの親と同じ。世代を重ねるほど＋10%（倒した数は引きつがない）"); } catch (e) {} return h; })(mixConfirm);
 
@@ -14174,6 +14197,12 @@ mixConfirm = (prev => function () { let h = prev(); try { h = h.replace(/進化�
 // 勇者の強さ＝こちらの戦力×ALPHA。前は 0.20→（7回目で）0.62 と急に上がり、試練1より上はさらに4回目から6回で倍率が跳ねた（2つが重なって崖）
 ALPHA17 = n => Math.min(0.62, 0.30 + 0.04 * n);
 /* むずかしいの強さはそのまま（勇者が日にちで決まるようになり、機械では18〜30日目に負けるくらいになった） */
+
+// 転生のあと、難易度の選択は前回の難易度から（毎回「ふつう」に戻っていた）
+{ const _sd = setDiff15; setDiff15 = function (S0, i) { const ok = _sd.apply(this, arguments); try { if (ok) metaOf8(S0).lastDiff28 = i; } catch (e) {} return ok; }; }
+// 店で呼んだ子は、群れの平均Lvの6割から（💎570のSRがLv1で来て、後半は💎を戦力に変えられなかった）
+{ const _b = buy5; buy5 = function (S0) { const L = S0.mons.filter(m => m.home != null), avg = L.length ? L.reduce((a, m) => a + m.lv, 0) / L.length : 1; const m = _b.apply(this, arguments);
+  try { if (m) { const lv = Math.max(m.lv || 1, Math.round(avg * 0.6)); if (lv > m.lv) { m.lv = lv; m.exp = 0; m.evos = Math.max(m.evos || 0, lv >= EVO_LV5[1] ? 2 : lv >= EVO_LV5[0] ? 1 : 0); } } } catch (e) {} return m; }; }
 
 </script>
 </body>
