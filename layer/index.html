@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層19／No.350（11/25 00:49）";
+const VER20 = "層20／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -13889,7 +13889,7 @@ function fpOpen30(){
     if (msg.isConnected && R0.mb) msg.remove(); if (R0.err) msg.textContent = R0.err;
     if (ft.length >= 20) { const fps = ft.length / ft.reduce((x, y) => x + y, 0); FPQ.t += dt; if (FPQ.t > 1.5) { FPQ.t = 0; if (fps < 26 && FPQ.q > 0.5) FPQ.q = Math.max(0.5, FPQ.q - 0.15); else if (fps > 50 && FPQ.q < 1) FPQ.q = Math.min(1, FPQ.q + 0.1); } }   /* 重い端末では自動で解像度を下げる（なめらかさを優先） */
     const dpr = Math.min(2, window.devicePixelRatio || 1) * FPQ.q, r = { width: cv.clientWidth, height: cv.clientHeight }; W = Math.round(r.width * dpr); H = Math.round(r.height * dpr); if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
-    gl.viewport(0, 0, W, H); gl.clearColor(0.01, 0.008, 0.008, 1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.viewport(0, 0, W, H); gl.clearColor(0.17, 0.135, 0.13, 1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     P.walk = (P.walk || 0) + ((mv.x || mv.y) ? Math.hypot(mv.x, mv.y) * dt * 8 : 0); const bob = (mv.x || mv.y) ? Math.sin(P.walk * 1.9) * 0.07 : 0; EYE = [P.x, P.y + P.eye + bob + SHK * Math.sin(now / 1000 * 47), P.z]; SHK *= Math.pow(0.02, dt); const dir = [Math.sin(P.yaw) * Math.cos(P.pit), Math.sin(P.pit), -Math.cos(P.yaw) * Math.cos(P.pit)];
     VP = mm(persp(1.15, W / H, 0.07, 120), look(EYE, [EYE[0] + dir[0], EYE[1] + dir[1], EYE[2] + dir[2]]));
     gl.enable(gl.DEPTH_TEST); gl.useProgram(PM.p); gl.uniformMatrix4fv(PM.U("VP"), false, new Float32Array(VP)); gl.uniform3fv(PM.U("EYE"), EYE);
