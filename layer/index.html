@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層9／No.350（11/25 00:49）";
+const VER20 = "層10／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -13601,6 +13601,45 @@ function fpOpen30(){
     let si = 0; const pick = () => { if (!spots.length) return null; const p = spots[(si * 7 + 3) % spots.length]; si++; return p; };
     L.forEach(([k, w, h, cnt, floor]) => { for (let q = 0; q < cnt; q++) { const p = floor ? (() => { const c = H0.cells[(q * 5 + 1) % H0.cells.length]; return { x: (c[0] - mid) * Rm.CS + ((q % 2) - 0.5) * 1.2, z: -c[1] * Rm.CS + ((q % 3) - 1) * 0.8 }; })() : pick(); if (!p) break; (floor ? out.floor : out.up).push({ k, x: p.x, z: p.z, w, h }); } });
     return out; }
+
+  /* ===== 広間の飾りを、板の絵ではなく立体で作る（洞窟と同じ作り方：頂点の色に光をつけておく） ===== */
+  function propMesh(Rm){ const P = [], C = [], I = [], pr = Rm.props || {}; if (Rm.classic) return null;
+    let rx = 0, rz = 0, ry = 0, rc = 1, rs = 0;   /* 置く位置・向き */
+    const tf = (x, y, z) => { const c = Math.cos(ry), sn = Math.sin(ry); return [rx + x * c - z * sn, y, rz + x * sn + z * c]; };
+    const shade = (col, nY, nX) => col.map(v => Math.min(255, v * (0.62 + 0.38 * Math.max(0, nY) + 0.12 * nX + 0.08 * (nz(rx, ry, rz, rs++ % 9) )))) ;
+    const tri = (a, b, c2, col) => { const u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], v = [c2[0] - a[0], c2[1] - a[1], c2[2] - a[2]], n = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]], L = Math.hypot(...n) || 1, cc = shade(col, n[1] / L, n[0] / L);
+      const b0 = P.length / 3; [a, b, c2].forEach(p => { P.push(p[0], p[1], p[2]); C.push(cc[0], cc[1], cc[2]); }); I.push(b0, b0 + 1, b0 + 2); };
+    const quad = (a, b, c2, d, col) => { tri(a, b, c2, col); tri(a, c2, d, col); };
+    const box = (x, y, z, w, h, d, col, a2 = 0) => { const pts = []; for (const dy of [0, h]) for (const [dx, dz] of [[-w / 2, -d / 2], [w / 2, -d / 2], [w / 2, d / 2], [-w / 2, d / 2]]) { const c = Math.cos(a2), sn = Math.sin(a2); pts.push(tf(x + dx * c - dz * sn, y + dy, z + dx * sn + dz * c)); }
+      const [a, b, c2, d2, e, f, g2, h2] = pts; quad(e, f, g2, h2, col); quad(a, d2, c2, b, col); quad(a, b, f, e, col); quad(b, c2, g2, f, col); quad(c2, d2, h2, g2, col); quad(d2, a, e, h2, col); };
+    const cyl = (x, y, z, r1, r2, h, col, seg = 8, cap = true, lay = 0) => { const ring = (yy, r) => Array.from({ length: seg }, (_, k) => { const an = k / seg * Math.PI * 2, px = Math.cos(an) * r, pz = Math.sin(an) * r; return lay ? tf(x + yy, y + px + r1, z + pz) : tf(x + px, y + yy, z + pz); });
+      const A = ring(0, r1), B = ring(h, r2); for (let k = 0; k < seg; k++) { const k2 = (k + 1) % seg; quad(A[k], A[k2], B[k2], B[k], col); } if (cap) { const top = lay ? tf(x + h, y + r1, z) : tf(x, y + h, z); for (let k = 0; k < seg; k++) tri(B[k], B[(k + 1) % seg], top, col); } };
+    const ball = (x, y, z, r, col, sy = 1, sz = 1) => { const st = 6, sl = 8, pt = (i, j) => { const th = i / st * Math.PI, ph = j / sl * Math.PI * 2; return tf(x + Math.sin(th) * Math.cos(ph) * r, y + Math.cos(th) * r * sy, z + Math.sin(th) * Math.sin(ph) * r * sz); };
+      for (let i = 0; i < st; i++) for (let j = 0; j < sl; j++) quad(pt(i, j), pt(i, j + 1), pt(i + 1, j + 1), pt(i + 1, j), col); };
+    const crystal = (x, z, h, r, col) => { const seg = 6, lean = 0.25 * nz(x, h, z, 2), base = Array.from({ length: seg }, (_, k) => { const an = k / seg * Math.PI * 2; return tf(x + Math.cos(an) * r, 0, z + Math.sin(an) * r); }), mid = Array.from({ length: seg }, (_, k) => { const an = k / seg * Math.PI * 2; return tf(x + lean * h + Math.cos(an) * r * 0.9, h * 0.75, z + Math.sin(an) * r * 0.9); }), tip = tf(x + lean * h * 1.3, h, z);
+      for (let k = 0; k < seg; k++) { const k2 = (k + 1) % seg; quad(base[k], base[k2], mid[k2], mid[k], col.map(v => v * (0.85 + 0.15 * (k % 2)))); tri(mid[k], mid[k2], tip, col.map(v => Math.min(255, v * 1.2))); } };
+    const WOOD = [118, 82, 48], DW = [84, 58, 34], IRON = [120, 124, 132], STONE = [104, 98, 92], STRAW = [200, 168, 92];
+    const MK = {
+      crystal: (w, h) => { const cs = [[110, 210, 255], [150, 230, 255], [90, 170, 235]]; for (let k = 0; k < 5; k++) { const a = k * 2.1, d = k ? 0.25 + 0.12 * k : 0; crystal(Math.cos(a) * d * w, Math.sin(a) * d * w, h * (k ? 0.45 + 0.1 * (k % 3) : 1), 0.13 * w + (k ? 0 : 0.06), cs[k % 3]); } box(0, 0, 0, w * 0.9, 0.12, w * 0.7, [70, 60, 52]); },
+      cart: (w, h) => { box(0, 0.35, 0, w, 0.55, w * 0.55, WOOD); box(0, 0.9, 0, w * 1.02, 0.08, w * 0.57, DW); for (const sx of [-1, 1]) for (const sz of [-1, 1]) cyl(sx * w * 0.32 - 0.06, 0.28, sz * w * 0.3, 0.28, 0.28, 0.12, [40, 38, 36], 10, true, 1); for (let k = 0; k < 6; k++) ball((k % 3 - 1) * w * 0.28, 0.95, (k > 2 ? 0.12 : -0.12) * w, 0.2, k % 2 ? [120, 130, 150] : [150, 160, 180]); },
+      pick: (w, h) => { box(0, 0, 0, 0.09, h, 0.09, WOOD, 0.3); box(0, h - 0.12, 0, w * 0.9, 0.12, 0.1, IRON, 0.3); },
+      dummy: (w, h) => { cyl(0, 0, 0, 0.07, 0.07, h * 0.45, DW, 6); cyl(0, h * 0.35, 0, w * 0.25, w * 0.22, h * 0.4, STRAW, 10); box(0, h * 0.62, 0, w * 0.95, 0.1, 0.1, DW); ball(0, h * 0.88, 0, w * 0.18, STRAW); box(0, h * 0.55, w * 0.24, 0.16, 0.16, 0.02, [170, 50, 40]); },
+      rack: (w, h) => { box(-w / 2, 0, 0, 0.12, h, 0.12, WOOD); box(w / 2, 0, 0, 0.12, h, 0.12, WOOD); box(0, h * 0.8, 0, w, 0.1, 0.14, DW); box(0, h * 0.3, 0, w, 0.1, 0.14, DW); for (let k = 0; k < 4; k++) { const x = -w * 0.33 + k * w * 0.22; box(x, 0.1, 0.1, 0.05, h * 1.05, 0.05, DW); box(x, h * 1.05, 0.1, 0.12, 0.25, 0.04, IRON); } },
+      bed: (w) => { cyl(0, 0, 0, w * 0.48, w * 0.42, 0.22, STRAW, 12); cyl(0, 0.2, 0, w * 0.36, w * 0.3, 0.06, [215, 188, 120], 12); ball(0, 0.32, -w * 0.25, w * 0.14, [180, 150, 110], 0.5); },
+      tower: (w, h) => { for (const sx of [-1, 1]) for (const sz of [-1, 1]) box(sx * w * 0.4, 0, sz * w * 0.4, 0.16, h, 0.16, WOOD); box(0, h * 0.72, 0, w * 1.0, 0.12, w * 1.0, DW); for (const sz of [-1, 1]) box(0, h * 0.72 + 0.5, sz * w * 0.48, w, 0.08, 0.08, WOOD); box(0, h * 0.3, w * 0.4, w * 0.9, 0.08, 0.08, DW, 0); cyl(0, h * 0.72 + 0.12, 0, 0.2, 0.25, 0.3, [60, 50, 44], 8); ball(0, h * 0.72 + 0.55, 0, 0.18, [255, 190, 80]); },
+      slit: (w, h) => { for (let k = 0; k < 4; k++) cyl(-w / 2, 0.22 + k * 0.42, 0, 0.22, 0.22, w, k % 2 ? WOOD : DW, 8, true, 1); for (const sx of [-0.45, 0.45]) box(sx * w, 0, 0.25, 0.14, h, 0.14, DW); },
+      bench: (w, h) => { box(0, h * 0.5, 0, w, 0.12, w * 0.45, WOOD); for (const sx of [-1, 1]) for (const sz of [-1, 1]) box(sx * w * 0.42, 0, sz * w * 0.18, 0.1, h * 0.5, 0.1, DW); box(-w * 0.2, h * 0.5 + 0.12, 0, 0.35, 0.1, 0.25, IRON); cyl(w * 0.25, h * 0.5 + 0.12, 0, 0.12, 0.12, 0.2, IRON, 8); },
+      pot: (w) => { for (let k = 0; k < 3; k++) box(Math.cos(k * 2.1) * w * 0.3, 0, Math.sin(k * 2.1) * w * 0.3, 0.06, 0.4, 0.06, [40, 38, 36]); for (let k = 0; k < 5; k++) crystal(Math.cos(k * 1.3) * 0.2, Math.sin(k * 1.3) * 0.2, 0.35 + 0.1 * (k % 2), 0.1, [255, 140 + k * 15, 40]); cyl(0, 0.35, 0, w * 0.32, w * 0.42, w * 0.45, [44, 44, 48], 12, false); cyl(0, 0.35 + w * 0.4, 0, w * 0.4, w * 0.4, 0.03, [100, 150, 60], 12); },
+      altar: (w, h) => { box(0, 0, 0, w, h * 0.45, w * 0.55, STONE); box(0, h * 0.45, 0, w * 1.1, 0.12, w * 0.65, [124, 116, 110]); ball(0, h * 0.75, 0, 0.25, [190, 120, 255]); for (const sx of [-1, 1]) { cyl(sx * w * 0.4, h * 0.57, 0, 0.05, 0.05, 0.25, [240, 230, 210], 6); ball(sx * w * 0.4, h * 0.57 + 0.3, 0, 0.05, [255, 200, 90]); } },
+      grave: (w, h) => { box(0, 0, 0, w * 0.75, h * 0.75, 0.18, STONE); ball(0, h * 0.75, 0, w * 0.375, STONE, 0.9, 0.24); box(0, h * 0.5, 0.1, 0.08, h * 0.25, 0.02, [70, 66, 62]); box(0, h * 0.58, 0.1, w * 0.3, 0.06, 0.02, [70, 66, 62]); ball(0, 0.02, 0.6, w * 0.5, [70, 58, 46], 0.25, 1.2); },
+      barrel: (w, h) => { cyl(0, 0, 0, w * 0.34, w * 0.4, h * 0.5, WOOD, 10, false); cyl(0, h * 0.5, 0, w * 0.4, w * 0.34, h * 0.5, WOOD, 10, true); for (const y of [0.15, 0.85]) cyl(0, h * y, 0, w * 0.37, w * 0.37, 0.06, [60, 60, 64], 10, false); },
+      bones: (w) => { box(0, 0.03, 0, w * 0.7, 0.07, 0.07, [226, 218, 196], 0.7); box(0.1, 0.03, 0.1, w * 0.5, 0.07, 0.07, [226, 218, 196], -0.5); ball(w * 0.3, 0.12, -0.1, 0.13, [230, 222, 200]); },
+      rock: (w, h) => { ball(0, h * 0.35, 0, w * 0.45, [86, 76, 66], h / w); ball(w * 0.3, h * 0.2, w * 0.2, w * 0.25, [74, 66, 58], 0.8); },
+      door: (w, h) => { box(0, 0, 0, w, h, 0.25, [70, 70, 78]); for (let k = 0; k < 4; k++) box(-w / 2 + w * (k + 0.5) / 4, 0, 0.14, w / 4 - 0.08, h * 0.96, 0.05, [96, 96, 106]); for (const y of [0.25, 0.75]) box(0, h * y, 0.18, w, 0.12, 0.05, [44, 44, 48]); ball(w * 0.3, h * 0.5, 0.22, 0.08, [200, 160, 70]); } };
+    [...(pr.up || []), ...(pr.floor || [])].forEach((q, k) => { const f = MK[q.k]; if (!f) return; rx = q.x; rz = q.z; ry = q.face ? 0 : (nz(q.x, k, q.z, 5) + 0.5) * Math.PI * 2; f(q.w, q.h); });
+    if (!I.length) return null; const pb = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, pb); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(P), gl.STATIC_DRAW);
+    const cb = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, cb); gl.bufferData(gl.ARRAY_BUFFER, new Uint8Array(C.map(v => Math.max(0, Math.min(255, Math.round(v))))), gl.STATIC_DRAW);
+    const ib = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint32Array(I), gl.STATIC_DRAW); return { pb, cb, ib, n: I.length }; }
   rooms.forEach(Rm => { Rm.props = propsFor(Rm); });
   const trapSpots = Rm => { if (Rm.classic) return ((typeof trapsOf24 === "function" ? trapsOf24(S.path[Rm.i]) : []) || []).map((tp, k) => ({ k: tp.k, lv: tp.lv || 0, x: 0, z: Rm.Z + 12 - 3 * k, y: Rm.Y })); try { g30sync(S, Rm.i); } catch (e) {} const G = Rm.G30, mid = (G.W - 1) / 2; return (G.t || []).map(t => ({ k: t[2], lv: t[3] || 0, x: (t[0] - mid) * Rm.CS, z: Rm.Z - t[1] * Rm.CS, y: Rm.Y, cell: [t[0], t[1]] })); };
   rooms.forEach(Rm => { Rm.traps = trapSpots(Rm); }); CORR.forEach(C => { C.traps = []; });
@@ -13769,7 +13808,7 @@ function fpOpen30(){
       gl.bindBuffer(gl.ARRAY_BUFFER, B.pb); gl.vertexAttribPointer(la, 3, short ? gl.SHORT : gl.FLOAT, false, 0, 0); gl.bindBuffer(gl.ARRAY_BUFFER, B.cb); gl.vertexAttribPointer(lc, 3, gl.UNSIGNED_BYTE, true, 0, 0);
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, B.ib); gl.drawElements(gl.TRIANGLES, B.n, gl.UNSIGNED_INT, 0); };
     const ID = { M: [1, 0, 0, 0, 1, 0, 0, 0, 1], O: [0, 0, 0] };
-    for (let i = Math.max(0, curRoom - 1); i <= Math.min(n - 1, curRoom + 1); i++) { const R = rooms[i]; if (R.mb) { if (R.classic) draw(R.mb, [0, R.Y, R.Z], 0.01, true, R.CM, i); else draw(R.mb, [0, R.Y, R.Z], 1, false, R.CM); } if (CORR[i]) draw(CORR[i], [0, 0, 0], 1, false, R.CM); if (i > 0 && CORR[i - 1]) draw(CORR[i - 1], [0, 0, 0], 1, false, rooms[i - 1].CM); }
+    for (let i = Math.max(0, curRoom - 1); i <= Math.min(n - 1, curRoom + 1); i++) { const R = rooms[i]; if (R.mb) { if (R.classic) draw(R.mb, [0, R.Y, R.Z], 0.01, true, R.CM, i); else { draw(R.mb, [0, R.Y, R.Z], 1, false, R.CM); if (R.pm === undefined) R.pm = propMesh(R); if (R.pm) draw(R.pm, [0, R.Y, R.Z], 1, false, R.CM); } } if (CORR[i]) draw(CORR[i], [0, 0, 0], 1, false, R.CM); if (i > 0 && CORR[i - 1]) draw(CORR[i - 1], [0, 0, 0], 1, false, rooms[i - 1].CM); }
     gl.disableVertexAttribArray(lc);
     // 魔物と看板
     gl.useProgram(PB.p); gl.uniformMatrix4fv(PB.U("VP"), false, new Float32Array(VP)); const lq = PB.A("aq"); gl.bindBuffer(gl.ARRAY_BUFFER, qb); gl.enableVertexAttribArray(lq); gl.vertexAttribPointer(lq, 2, gl.FLOAT, false, 0, 0);
@@ -13781,10 +13820,10 @@ function fpOpen30(){
     /* 通路の罠：床の絵（毒はゆらゆら光る） */
     for (let i = Math.max(0, curRoom - 1); i <= Math.min(n - 1, curRoom + 1); i++) (rooms[i].traps || []).forEach(tp => { const tx = TRT[tp.k]; if (!tx) return; const d = Math.hypot(tp.x - P.x, tp.z - P.z), sz = tp.k === "pit" ? 3.4 : tp.k === "net" ? 2.6 : 3.0;
       gl.bindTexture(gl.TEXTURE_2D, texOf(tx)); gl.uniform1f(PB.U("LB"), (0.45 + 0.8 * Math.exp(-d / 6)) * (tp.k === "poison" ? 0.85 + 0.25 * Math.sin(now / 300 + tp.z) : 1)); gl.uniform3f(PB.U("C"), tp.x, tp.y + 0.03, tp.z); gl.uniform4f(PB.U("Q"), -sz / 2, -sz / 2, sz, sz); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); });
-    for (let i = Math.max(0, curRoom - 1); i <= Math.min(n - 1, curRoom + 1); i++) ((rooms[i].props || {}).floor || []).forEach(q => { const tx = PROPT[q.k]; if (!tx) return; const R2 = rooms[i], d = Math.hypot(q.x - P.x, R2.Z + q.z - P.z); gl.bindTexture(gl.TEXTURE_2D, texOf(tx)); gl.uniform1f(PB.U("LB"), 0.45 + 0.8 * Math.exp(-d / 6)); gl.uniform3f(PB.U("C"), q.x, R2.Y + 0.04, R2.Z + q.z); gl.uniform4f(PB.U("Q"), -q.w / 2, -q.h / 2, q.w, q.h); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); });
+    for (let i = Math.max(0, curRoom - 1); i <= Math.min(n - 1, curRoom + 1); i++) ((rooms[i].props || {}).floorBB || []).forEach(q => { const tx = PROPT[q.k]; if (!tx) return; const R2 = rooms[i], d = Math.hypot(q.x - P.x, R2.Z + q.z - P.z); gl.bindTexture(gl.TEXTURE_2D, texOf(tx)); gl.uniform1f(PB.U("LB"), 0.45 + 0.8 * Math.exp(-d / 6)); gl.uniform3f(PB.U("C"), q.x, R2.Y + 0.04, R2.Z + q.z); gl.uniform4f(PB.U("Q"), -q.w / 2, -q.h / 2, q.w, q.h); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); });
     gl.uniform1f(PB.U("LB"), 1);
     gl.depthMask(true); gl.disable(gl.BLEND); gl.uniform1f(PB.U("AM"), 0); gl.uniform3f(PB.U("UPV"), 0, 1, 0);
-    for (let i = Math.max(0, curRoom - 1); i <= Math.min(n - 1, curRoom + 1); i++) ((rooms[i].props || {}).up || []).forEach(q => { const tx = PROPT[q.k]; if (!tx) return; const R2 = rooms[i], d = Math.hypot(q.x - P.x, R2.Z + q.z - P.z); gl.bindTexture(gl.TEXTURE_2D, texOf(tx)); gl.uniform1f(PB.U("LB"), 0.45 + 0.8 * Math.exp(-d / 6)); gl.uniform3fv(PB.U("R"), q.face ? [1, 0, 0] : Rr); gl.uniform3f(PB.U("C"), q.x, R2.Y, R2.Z + q.z); gl.uniform4f(PB.U("Q"), -q.w / 2, 0, q.w, q.h); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); });
+    for (let i = Math.max(0, curRoom - 1); i <= Math.min(n - 1, curRoom + 1); i++) ((rooms[i].props || {}).upBB || []).forEach(q => { const tx = PROPT[q.k]; if (!tx) return; const R2 = rooms[i], d = Math.hypot(q.x - P.x, R2.Z + q.z - P.z); gl.bindTexture(gl.TEXTURE_2D, texOf(tx)); gl.uniform1f(PB.U("LB"), 0.45 + 0.8 * Math.exp(-d / 6)); gl.uniform3fv(PB.U("R"), q.face ? [1, 0, 0] : Rr); gl.uniform3f(PB.U("C"), q.x, R2.Y, R2.Z + q.z); gl.uniform4f(PB.U("Q"), -q.w / 2, 0, q.w, q.h); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); });
     /* 通路の罠：立っている部分（トゲ・つるした網）。こちらを向く板 */
     for (let i = Math.max(0, curRoom - 1); i <= Math.min(n - 1, curRoom + 1); i++) (rooms[i].traps || []).forEach(tp => { const tx = TRU[tp.k]; if (!tx) return; const d = Math.hypot(tp.x - P.x, tp.z - P.z);
       gl.bindTexture(gl.TEXTURE_2D, texOf(tx)); gl.uniform1f(PB.U("LB"), 0.45 + 0.8 * Math.exp(-d / 6)); gl.uniform3fv(PB.U("R"), Rr);
@@ -13924,7 +13963,7 @@ function fpOpen30(){
         const tx = bx, tz = Rm.Z + bz, k = Math.min(1, dt * 2.5); if (where(tx, tz)) { P.x += (tx - P.x) * k; P.z += (tz - P.z) * k; } const want = Math.atan2(at.x - P.x, -(Rm.Z + at.z - P.z)), d = Math.atan2(Math.sin(want - P.yaw), Math.cos(want - P.yaw)); P.yaw += d * Math.min(1, dt * 3); P.pit += (-0.25 - P.pit) * Math.min(1, dt * 2); } } }
   // ===== 掘る画面：いまいる層をマスで見て、道を掘る・広間にする・埋める・罠を動かす =====
   const digCost30 = (Rm, v) => v === 2 ? 60 + 15 * Rm.i : 20 + 6 * Rm.i;
-  const rebuild = Rm => { Rm.mb = null; Rm.G = null; Rm.F = null; try { g30sync(S, Rm.i); } catch (e) {} Rm.traps = trapSpots(Rm); for (let j = TORCH.length - 1; j >= 0; j--) if (TORCH[j][6] === Rm.i) TORCH.splice(j, 1); TORCH.push(...torchesFor(Rm)); Rm.props = propsFor(Rm); loadRoom(Rm); mkActs(Rm); try { keepers(); addLord(); } catch (e) {} };
+  const rebuild = Rm => { Rm.mb = null; Rm.G = null; Rm.F = null; try { g30sync(S, Rm.i); } catch (e) {} Rm.traps = trapSpots(Rm); for (let j = TORCH.length - 1; j >= 0; j--) if (TORCH[j][6] === Rm.i) TORCH.splice(j, 1); TORCH.push(...torchesFor(Rm)); Rm.props = propsFor(Rm); Rm.pm = undefined; loadRoom(Rm); mkActs(Rm); try { keepers(); addLord(); } catch (e) {} };
   function digOpen(){ const Rm = rooms[curRoom], G = Rm.G30, mid = (G.W - 1) / 2; let mode = "dig", selT = null; if (Rm.classic) { try { toast("主の間は掘れない（ほかの層で掘る）"); } catch (e) {} return; }
     const ov = document.createElement("div"); ov.className = "dig30"; wrap.appendChild(ov);
     const conn = () => !!bfs30(G, [mid, 0], [mid, G.H - 1]);
