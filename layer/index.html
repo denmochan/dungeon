@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層12／No.350（11/25 00:49）";
+const VER20 = "層13／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -13415,7 +13415,7 @@ function fpOpen26(){
 document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="fp26"]'); if (!b) return; ev.stopImmediatePropagation(); ev.preventDefault(); fpOpen26(); }, true);
 
 /* 仕事の絵：13方向（行0手前〜12奥）×19コマ（待機4・攻撃4・掘る4・寝る1・歩く6。目の高さに近い角度。足のない子は待機4・攻撃4だけ）。[1コマの幅,高さ,左上x,y,焼いたマスS,コマ数,足もと,二本足,版] */
-const JOB29 = {"goblin_0":[77,80,30,48,128,19,126,1,"9fb964"],"mage_0":[71,92,36,36,128,19,126,1,"40393c"],"slime_0":[60,41,40,87,128,8,127,0,"2e31a9"]};
+const JOB29 = {"bat_0":[83,62,23,48,128,8,100,0,"de702b"],"berserker_0":[91,106,26,21,128,19,122,1,"806faf"],"bogtroll_0":[93,107,27,21,128,19,122,1,"cd2f35"],"bonedragon_0":[234,150,0,90,240,8,231,0,"f720e9"],"goblin_0":[77,80,30,48,128,19,126,1,"9fb964"],"hunter_0":[71,80,36,48,128,19,126,1,"39fe24"],"knight_0":[77,80,34,48,128,19,126,1,"d26b1a"],"mage_0":[71,92,36,36,128,19,126,1,"40393c"],"priest_0":[71,87,36,41,128,19,126,1,"a3e3ab"],"slime_0":[60,41,40,87,128,8,127,0,"2e31a9"],"thief_0":[71,80,36,48,128,19,126,1,"6c723b"],"warrior_0":[77,80,34,48,128,19,126,1,"51e7a1"]};
 
 // ================= layer30：部屋を「層」に。層の中の形をマスで持つ =================
 // S.path[i].g30 = { W, H, c: "0/1/2…" の文字列（0=岩 1=道 2=広間）, t: [[x, y, 罠の種類, 段]] }
@@ -13610,6 +13610,9 @@ function fpOpen30(){
     const put = (L, H0, salt) => { if (!L || !H0) return; const spots = []; H0.cells.forEach(c => { const x = (c[0] - mid) * Rm.CS, z = -c[1] * Rm.CS; for (let a = 0; a < 8; a++) { const dx = Math.cos(a * Math.PI / 4), dz = Math.sin(a * Math.PI / 4); for (let d = 0.6; d < 3; d += 0.3) if (F.f(x + dx * d, z + dz * d) < 0.55) { if (d > 1.0) spots.push({ x: x + dx * (d - 0.9), z: z + dz * (d - 0.9) }); break; } } });
       let si = salt; const pick = () => spots.length ? spots[(si++ * 7 + 3) % spots.length] : null;
       L.forEach(([k, w, h, cnt, floor]) => { for (let q = 0; q < cnt; q++) { const p = floor ? (() => { const c = H0.cells[(q * 5 + 1 + salt) % H0.cells.length]; return { x: (c[0] - mid) * Rm.CS + ((q % 2) - 0.5) * 1.4, z: -c[1] * Rm.CS + ((q % 3) - 1) * 1.0 }; })() : pick(); if (!p) break; (floor ? out.floor : out.up).push({ k, x: p.x, z: p.z, w, h }); } }); };
+    /* 鉱脈：採掘場の広間の壁に、掘る場所をはっきり置く（掘る子はここを掘る） */
+    out.veins = []; if (fac === "mine" && HL[0]) { const vs = []; HL[0].cells.forEach(c => { const x = (c[0] - mid) * Rm.CS, z = -c[1] * Rm.CS; for (let a = 0; a < 8; a++) { const dx = Math.cos(a * Math.PI / 4), dz = Math.sin(a * Math.PI / 4); for (let d = 0.6; d < 3.4; d += 0.15) if (F.f(x + dx * d, z + dz * d) < 0.5) { if (d > 1.2) vs.push({ x: x + dx * (d - 0.15), z: z + dz * (d - 0.15), nx: -dx, nz: -dz }); break; } } });
+      const nV = Math.max(3, S.mons.filter(m => m.home === Rm.i).length); for (let k = 0; k < vs.length && out.veins.length < nV; k++) { const v = vs[(k * 11 + 5) % vs.length]; if (out.veins.every(u => Math.hypot(u.x - v.x, u.z - v.z) > 2.6)) out.veins.push(v); } }
     HL.forEach((h, k) => put(k === 0 && FACPROP[fac] ? FACPROP[fac] : FACPROP._, h, k * 3 + Rm.i));
     return out;
     const L = FACPROP[fac], H0 = HL[0]; if (!L || !H0) return out;
@@ -13671,6 +13674,12 @@ function fpOpen30(){
       grave: (w, h) => { MK.grave(w, h); for (let k = 0; k < 4; k++) spike(nz(k, w, h, 1) * w, 0, 0.5 + k * 0.12, 0.05, 0.25, [70, 100, 50]); },
       barrel: (w, h) => MK.barrel(w, h), bones: (w) => MK.bones(w), rock: (w, h) => MK.rock(w, h), door: (w, h) => MK.door(w, h) };
     [...(pr.up || []), ...(pr.floor || [])].forEach((q, k) => { const f = MK2[q.k] || MK[q.k]; if (!f) return; rx = q.x; rz = q.z; ry = q.face ? 0 : (nz(q.x, k, q.z, 5) + 0.5) * Math.PI * 2; f(q.w, q.h); });
+    /* 鉱脈：壁から突き出た鉱石（光る）と、足もとのくず石・かご */
+    (pr.veins || []).forEach((v, k) => { rx = v.x; rz = v.z; ry = Math.atan2(v.nz, v.nx) - Math.PI / 2;   /* +z が壁から外向き */
+      ball(0, 1.0, -0.35, 1.0, [66, 56, 48], 1.15, 0.5); ball(-0.55, 0.55, -0.25, 0.6, [58, 50, 44], 1.0, 0.6); ball(0.6, 0.6, -0.3, 0.55, [72, 62, 52], 1.1, 0.6); glow(true);   /* 壁から盛り上がった岩（鉱脈の母岩） */
+      for (let j = 0; j < 7; j++) { const ox = (j % 4 - 1.5) * 0.35 + nz(k, j, 1, 1) * 0.15, oy = 0.55 + Math.floor(j / 4) * 0.6 + nz(j, k, 2, 2) * 0.2; ball(ox, oy, 0.12, 0.12 + 0.06 * (j % 3), j % 3 ? [255, 196, 70] : [120, 230, 255], 1, 0.7); }
+      glow(false); for (let j = 0; j < 8; j++) pebble(nz(k, j, 3, 3) * 0.9, 0.45 + Math.abs(nz(j, k, 4, 4)) * 0.6, 0.08 + 0.05 * (j % 3), j % 3 ? [86, 76, 66] : [150, 120, 60]);
+      cyl(0.75, 0, 0.6, 0.22, 0.28, 0.32, [130, 100, 60], 8, false); ball(0.75, 0.3, 0.6, 0.14, [230, 180, 70], 0.5); });
     /* 層ぜんたい：石筍（床から）・鍾乳石（天井から）・小石。壁ぎわに */
     { const G = Rm.G30, mid = (G.W - 1) / 2, F = layerField(Rm); ry = 0; let cnt = 0;
       for (let y = 0; y < G.H; y++) for (let x = 0; x < G.W; x++) { if (!g30at(G, x, y)) continue; for (let t2 = 0; t2 < 3; t2++) { const px = (x - mid + nz(x, y, t2, 1)) * Rm.CS, pz = (-y + nz(y, x, t2, 2)) * Rm.CS, f = F.f(px, pz); if (f < 0.5 || f > 0.75) continue; const hh = F.h(px, pz), k = (x * 7 + y * 3 + t2) % 5; rx = px; rz = pz;
@@ -13726,7 +13735,8 @@ function fpOpen30(){
     if (R.classic) { try { cast = HAI25.place(R.on, ms.map(m => ({ sp: m.sp, evo: m.evos || 0, n: 1, act: job(m), id: m.id })), 11 + R.i * 17); } catch (e) {} } else { /* 層の中に住まわせる（夜の計算と同じマス）。同じマスに2体目からは少しずらす */ const G = R.G30, mid = (G.W - 1) / 2, HM = g30home(S, R.i);
       cast = ms.map((m, k) => { const act = job(m), c = HM[m.id] || [mid, 1, 0], n2 = c[2] || 0, ox = n2 ? (n2 % 2 ? 0.9 : -0.9) : 0, oz = n2 > 1 ? 0.9 : 0;
         let x = (c[0] - mid) * R.CS + ox, z = -c[1] * R.CS + oz, look = null;
-        if (act === "mine") { const nb = [[1, 0], [-1, 0], [0, 1], [0, -1]].find(([dx, dy]) => !g30at(G, c[0] + dx, c[1] + dy)); if (nb) { x = (c[0] - mid) * R.CS + nb[0] * 0.55; z = -c[1] * R.CS - nb[1] * 0.55; look = [x + nb[0] * 2, z - nb[1] * 2]; } }   /* 掘る子は岩の壁を掘る */
+        const VN = ((R.props || {}).veins || []); if (act === "mine" && VN.length) { const vi = ms.filter(q => job(q) === "mine").indexOf(m), v = VN[(vi < 0 ? k : vi) % VN.length]; x = v.x + v.nx * 0.95; z = v.z + v.nz * 0.95; look = [v.x, v.z]; }   /* 鉱脈の前で、鉱脈を向いて掘る */
+        else if (act === "mine") { const nb = [[1, 0], [-1, 0], [0, 1], [0, -1]].find(([dx, dy]) => !g30at(G, c[0] + dx, c[1] + dy)); if (nb) { x = (c[0] - mid) * R.CS + nb[0] * 0.55; z = -c[1] * R.CS - nb[1] * 0.55; look = [x + nb[0] * 2, z - nb[1] * 2]; } }   /* 掘る子は岩の壁を掘る */
         const mode = act === "train" ? ["slash", "lift", "spar"][k % 3] : act; return { id: m.id, sp: m.sp, evo: m.evos || 0, o: [x, 0, -z], mode, look }; }); }
     R.acts = cast.map((c, k) => ({ m: ms.find(x => x.id === c.id) || ms[k],   /* 並べると順番が変わる：名前がちがう子に出ていた */ sp: c.sp, evo: c.evo || 0, x: c.o[0], z: -c.o[2], r: Math.random() * 6.28, hx: c.o[0], hz: -c.o[2], tx: c.o[0], tz: -c.o[2], wait: 1 + Math.random() * 3, ph: Math.random() * 6, walking: false, dist: 0, mode: c.mode || "idle", y: c.y || 0, look: c.look ? [c.look[0], -c.look[1]] : null, rk: c.rk ? [c.rk[0], -c.rk[1], c.rk[2], c.rk[3]] : null, boss: !!c.boss,
       mode: c.mode, look: c.look, stay: /^(mine|slash|lift|spar|sleep|nest|watch)$/.test(c.mode) || !!c.boss }));
@@ -13954,6 +13964,10 @@ function fpOpen30(){
           q.x += Math.sin(T * 0.3 + q.p) * 0.004; q.y += Math.sin(T * 0.21 + q.p * 2) * 0.002 - 0.0008; q.z += Math.cos(T * 0.27 + q.p) * 0.004; if (q.y < P.y + 0.1) q.dead = 1;
           let lt = 0; TORCH.forEach(t => { const d2 = (t[0] - q.x) ** 2 + (t[1] - q.y) ** 2 + (t[2] - q.z) ** 2; if (d2 < 30) lt = Math.max(lt, 1 - d2 / 30); }); const s = toScr(q.x, q.y, q.z); if (!s) return; const dd = Math.hypot(q.x - EYE[0], q.y - EYE[1], q.z - EYE[2]);
           g.globalAlpha = (0.12 + 0.55 * lt) * (0.6 + 0.4 * Math.sin(T * 2 + q.p * 5)); g.fillStyle = lt > 0.2 ? "#ffd9a0" : "#c8bba8"; const r = Math.max(0.6, 2.2 / Math.max(1, dd)); g.beginPath(); g.arc(s[0], s[1], r, 0, 7); g.fill(); }); g.restore(); }
+      /* 掘っている所から、かけらと火花が飛ぶ（どこを掘っているか分かるように） */
+      for (let i = Math.max(0, curRoom - 1); i <= Math.min(n - 1, curRoom + 1); i++) { const R2 = rooms[i]; (R2.acts || []).forEach(a => { if (a.mode !== "mine" || !a.look || a.hide || a.walking) return; a.chT = a.chT || now + Math.random() * 900; if (now < a.chT) return; a.chT = now + 850; const lx = a.look[0], lz = a.look[1];
+          for (let j = 0; j < 6; j++) CHIPS30.push({ x: lx + (Math.random() - 0.5) * 0.3, y: R2.Y + 0.9 + Math.random() * 0.5, z: R2.Z + lz + (Math.random() - 0.5) * 0.3, vx: (a.x - lx) * (0.6 + Math.random()) + (Math.random() - 0.5), vy: 1.5 + Math.random() * 2, vz: (a.z - lz) * (0.6 + Math.random()) + (Math.random() - 0.5), t: now, sp: j < 2 }); }); }
+      for (let j = CHIPS30.length - 1; j >= 0; j--) { const q = CHIPS30[j], t = (now - q.t) / 1000; if (t > 0.7) { CHIPS30.splice(j, 1); continue; } const s2 = toScr(q.x + q.vx * t, q.y + q.vy * t - 4.9 * t * t, q.z + q.vz * t); if (!s2) continue; g.fillStyle = q.sp ? `rgba(255,220,120,${1 - t / 0.7})` : `rgba(120,100,80,${1 - t / 0.7})`; const sz = q.sp ? 2.5 : 3.5; g.fillRect(s2[0] - sz / 2, s2[1] - sz / 2, sz, sz); }
       /* 夜：ダメージの数字・倒した印 */ POPS30.forEach(q => { const t = (now - q.t) / 900; if (t > 1) return; const s = toScr(q.x, q.y + t * 0.8, q.z); if (!s) return; g.save(); g.globalAlpha = Math.min(1, (1 - t) * 2); g.font = `bold ${q.big ? 20 : 15}px system-ui`; g.lineWidth = 3; g.strokeStyle = "rgba(20,10,5,.85)"; g.fillStyle = q.col; g.strokeText(q.txt, s[0], s[1]); g.fillText(q.txt, s[0], s[1]); g.restore(); });
       for (let j = POPS30.length - 1; j >= 0; j--) if (now - POPS30[j].t > 900) POPS30.splice(j, 1);
       g.font = "bold 12px system-ui,sans-serif";
@@ -13974,7 +13988,7 @@ function fpOpen30(){
       g.save(); g.translate(cx, cz); g.rotate(P.yaw); g.fillStyle = "#ffd36a"; g.beginPath(); g.moveTo(0, -13); g.lineTo(9, 9); g.lineTo(0, 4); g.lineTo(-9, 9); g.closePath(); g.fill(); g.restore(); }
   }
   // ===== 夜：勇者が層を進むのを、この画面で見る =====
-  const POPS30 = []; let NW30 = null;
+  const POPS30 = [], CHIPS30 = []; let NW30 = null;
   const cellW = (Rm, c) => [((c[0] - (Rm.G30.W - 1) / 2)) * Rm.CS, -c[1] * Rm.CS];   /* マス → 層のローカル (x, z) */
   const heroAt = h => { if (h.walk == null && h.pos != null && rooms[h.pos] && rooms[h.pos].classic) { const Rm = rooms[h.pos]; if (h.arr30 == null || h.arr30i !== h.pos) { h.arr30 = N.t; h.arr30i = h.pos; } return { i: h.pos, x: ((h.id % 3) - 1) * 1.4, z: Math.max(-6.5, Rm.ZS - 2 - (N.t - h.arr30) * 1.4) + (h.id % 2) * 0.8 }; }
     if (h.walk == null && h.pos != null && rooms[h.pos]) { const Rm = rooms[h.pos], c = (h.flee && h.p30f && h.p30f.i === h.pos ? h.p30f.path[h.p30f.k] : h.p30 && h.p30.i === h.pos && h.p30.path[h.p30.k]) || [(Rm.G30.W - 1) / 2, 0], w = cellW(Rm, c); return { i: h.pos, x: w[0] + ((h.id % 3) - 1) * 0.6, z: w[1] + ((h.id % 2) ? 0.4 : -0.4) }; }
