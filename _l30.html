@@ -13614,7 +13614,11 @@ function fpOpen30(){
     if(DET>1.5){ g=1.0; bc*=0.9+0.2*n3(vw*14.0); bc*=0.92+0.16*n3(vw*vec3(1.5,9.0,1.5)); }   /* 飾り：細かい木目・ざらつき（ドットの四角い模様は出さない） */
     else if(DET>0.5){ /* 岩肌：大きな色むら・細かい粒・ひび・床の砂利と湿り・壁の下の苔・天井のしみ（位置だけで決まる模様） */
       float big=fb(vw*0.3), mid=fb(vw*1.2+7.1);
-      float rel=vl.y-FY; bc*=0.86+0.3*big; bc*=0.94+0.12*mid; g=1.0;
+      float rel=vl.y-FY;
+      #ifdef HASN
+      { vec3 n0=normalize(cross(dFdx(vw),dFdy(vw))); if(dot(n0,EYE-vw)<0.0) n0=-n0; if(n0.y>0.72) rel=0.0; else if(n0.y<-0.6) rel=max(rel,3.4); else rel=clamp(rel,0.2,3.2); }   /* 床・壁・天井は面の向きで決める（坂の床にしまが出ていた） */
+      #endif
+      bc*=0.86+0.3*big; bc*=0.94+0.12*mid; g=1.0;
       if(rel>0.12){ float st=sin(vw.y*2.1+big*3.0+mid*1.2); float bd=smoothstep(-0.25,0.25,st); bc*=0.8+0.26*bd; bc=mix(bc*vec3(0.9,0.96,1.08),bc*vec3(1.08,1.0,0.9),bd); bc*=mix(0.62,1.0,smoothstep(0.0,0.1,abs(st+0.1))); }   /* 壁：地層のような横じま（段々の岩）と、暗いすき間 */
       if(rel<0.12){ float pb=n3(vw*vec3(5.5,1.0,5.5)); bc*=mix(1.0,1.15,smoothstep(0.72,0.8,pb)); float wet=fb(vw*0.5+11.0); bc=mix(bc,bc*vec3(0.78,0.8,0.9),smoothstep(0.55,0.75,wet)*0.6); }
       else if(rel<1.3){ float ms=fb(vw*1.1+21.0)*(1.0-rel/1.3); bc=mix(bc,vec3(0.22,0.36,0.2)*(0.8+0.4*mid),smoothstep(0.45,0.6,ms)*0.6); }
@@ -13643,9 +13647,10 @@ function fpOpen30(){
   // 通路（部屋 i の奥 → 部屋 i+1 の前）。岩の筒。階がかわるときは下りの段
   function corridor(a, b){ return stairs(a, b); }   /* 主の間へも同じなめらかな洞窟の坂（前の筒は岩の板が飛び出して見えた） */
   /* 下り坂：層の洞窟と同じ作り方（なめらかな壁）で、層のはしから次の層のはしまで。つなぎ目に口が見えないように */
-  function stairs(a, b){ const CS = a.CS, BC = !!b.classic, zA0 = a.Z + a.ZE - CS, zB0 = BC ? b.Z + b.ZS : b.Z + b.ZS + CS, OV = 1.6, zA = zA0 + OV, zB = zB0 - (BC ? 1.4 : OV), r = 0.4, X0 = -4.8, NX = Math.round(9.6 / r) + 1, NZ = Math.max(2, Math.round((zA - zB) / r) + 1), dz = (zA - zB) / (NZ - 1);   /* 層の洞窟と1.6m重ねて、つなぎ目のすき間（黒い筋）を隠す */
+  function stairs(a, b){ const CS = a.CS, BC = !!b.classic, zA0 = a.Z + a.ZE - CS, zB0 = BC ? b.Z + FPK26.RZ1 - 0.25 : b.Z + b.ZS + CS, OV = 1.6, zA = zA0 + OV, zB = zB0 - (BC ? 1.4 : OV), r = 0.4, X0 = -4.8, NX = Math.round(9.6 / r) + 1, NZ = Math.max(2, Math.round((zA - zB) / r) + 1), dz = (zA - zB) / (NZ - 1);   /* 層の洞窟と1.6m重ねて、つなぎ目のすき間（黒い筋）を隠す */
     const yAt = z => { const t = Math.max(0, Math.min(1, (zA0 - z) / (zA0 - zB0))); return a.Y + (b.Y - a.Y) * (t * t * (3 - 2 * t)); }, inOv = z => z > zA0 || z < zB0, cl = z => BC ? Math.max(0, Math.min(1, (zB0 + 3 - z) / 3)) : 0, HT = z => 3.8 - 0.3 * cl(z);   /* 主の間の側は部屋のトンネルより外へ広げる（門のわきから外の闇が見えた） */   /* 主の間の側は、部屋のトンネルの内側に収まるよう細く低く */
     const occ = new Float32Array(NX * NZ); for (let j = 0; j < NZ; j++) for (let i = 0; i < NX; i++) { const x = X0 + i * r, z = zA - j * dz, w0 = 1.75 + 0.25 * Math.sin(z * 0.7 + a.i), w = w0 + (3.0 - w0) * cl(z); occ[j * NX + i] = Math.max(0, Math.min(1, (w + 0.6 - Math.abs(x)) / 1.2)) + nz(x, 0, z, 7) * 0.12; }
+    if (true) return { n: 0, z0: a.Z + a.ZE, z1: b.Z + b.ZS, y0: a.Y, y1: b.Y, yAt, off: () => 0, i: a.i, cave: 1, det: 1, zA0, zB0, OV, BC, HT, wAt: z => { const w0 = 1.75 + 0.25 * Math.sin(z * 0.7 + a.i); return w0 + (3.2 - w0) * cl(z); } };   /* 坂は層の洞窟といっしょに1枚で作る（重ねたつなぎ目が見えていた） */
     const P = [], C = [], I = [], ISO = 0.5, FC = [124, 100, 74], CC = [52, 52, 60], WC = [104, 98, 98];
     const vtx = (x, y, z, col, amp) => { const q = jit(x, y, z, amp), sh = 0.8 + 0.4 * (nz(x * 3, y * 3, z * 3, 4) + 0.5); P.push(q[0], q[1], q[2]); C.push(...col.map(c => Math.min(255, c * sh))); return P.length / 3 - 1; };
     for (let j = 0; j < NZ - 1; j++) for (let i = 0; i < NX - 1; i++) { const Xs = [X0 + i * r, X0 + (i + 1) * r, X0 + (i + 1) * r, X0 + i * r], Zs = [zA - j * dz, zA - j * dz, zA - (j + 1) * dz, zA - (j + 1) * dz], V = [occ[j * NX + i], occ[j * NX + i + 1], occ[(j + 1) * NX + i + 1], occ[(j + 1) * NX + i]];
@@ -13845,14 +13850,29 @@ function fpOpen30(){
     const smp = (A, x, zl) => { const fi = (x - x0) / r, fj = (zt - zl) / r, i = Math.floor(fi), j = Math.floor(fj); if (i < 0 || j < 0 || i >= NX - 1 || j >= NZ - 1) return 0; const u = fi - i, v = fj - j; return A[j * NX + i] * (1 - u) * (1 - v) + A[j * NX + i + 1] * u * (1 - v) + A[(j + 1) * NX + i] * (1 - u) * v + A[(j + 1) * NX + i + 1] * u * v; };
     return Rm.F = { NX, NZ, r, x0, zt, occ, hal, f: (x, zl) => smp(occ, x, zl), h: (x, zl) => 3.8 + 3.6 * Math.min(1, smp(hal, x, zl) * 1.3) }; }
   const AMP = y => 0.18 + 0.3 * Math.min(1, Math.max(0, y) / 2.5);
-  function layerMesh(Rm){ const F = layerField(Rm), { NX, NZ, r, x0, zt, occ } = F, P = [], C = [], I = [], ISO = 0.5;
-    const vtx = (x, y, z, col, amp) => { const q = jit(x, y, z, amp == null ? AMP(y) : amp), sh = 0.8 + 0.4 * (nz(x * 3, y * 3, z * 3, 4) + 0.5); P.push(q[0], q[1], q[2]); C.push(...col.map(c => Math.min(255, c * sh))); return P.length / 3 - 1; };
-    const FC = [124, 100, 74], CC = [52, 52, 60], WC = [104, 98, 98];   /* 洞窟：壁は青みがかった灰色の岩、床は土の茶色、天井は暗い青 */
-    for (let j = 0; j < NZ - 1; j++) for (let i = 0; i < NX - 1; i++) { const X = [x0 + i * r, x0 + (i + 1) * r, x0 + (i + 1) * r, x0 + i * r], Z = [zt - j * r, zt - j * r, zt - (j + 1) * r, zt - (j + 1) * r], V = [occ[j * NX + i], occ[j * NX + i + 1], occ[(j + 1) * NX + i + 1], occ[(j + 1) * NX + i]];
+  /* 洞窟の形をダンジョン全体で1つの「場」にする：層の場と、層と層のあいだの坂。どの層の絵も同じ場から作るので、つなぎ目がぴったり合う */
+  function worldOcc(xw, zw){ let v = 0; for (let k = 0; k < n; k++) { const Rk = rooms[k]; if (Rk.classic) continue; const F = layerField(Rk), zl = zw - Rk.Z; if (zl <= F.zt + 0.01 && zl >= F.zt - (F.NZ - 1) * F.r - 0.01) v = Math.max(v, F.f(xw, zl)); }
+    for (let k = 0; k + 1 < n; k++) { const C = CORR[k]; if (!C || C.zA0 == null) continue; if (zw <= C.zA0 + C.OV && zw >= C.zB0 - (C.BC ? 3.2 : C.OV)) { const w = C.wAt(zw); v = Math.max(v, Math.max(0, Math.min(1, (w + 0.6 - Math.abs(xw)) / 1.2)) + nz(xw, 0, zw, 7) * 0.12); } } return v; }
+  function worldFloor(zw){ for (let k = 0; k < n; k++) { const Rk = rooms[k]; if (Rk.classic) continue; const F = layerField(Rk), zl = zw - Rk.Z; if (zl <= F.zt + 0.01 && zl >= F.zt - (F.NZ - 1) * F.r - 0.01) return Rk.Y; } for (let k = 0; k + 1 < n; k++) { const C = CORR[k]; if (C && zw <= C.zA0 + 0.01 && zw >= C.zB0 - 3.4) return C.yAt(zw); } return rooms[n - 1].Y; }
+  function worldCeil(xw, zw){ for (let k = 0; k < n; k++) { const Rk = rooms[k]; if (Rk.classic) continue; const F = layerField(Rk), zl = zw - Rk.Z, bot = F.zt - (F.NZ - 1) * F.r; if (zl <= F.zt + 0.01 && zl >= bot - 0.01) { const e = Math.min(1, Math.min(F.zt - zl, zl - bot) / (2 * F.r)); return 3.8 + (F.h(xw, zl) - 3.8) * e; } }   /* 層のはしでは坂と同じ高さにそろえる */
+    for (let k = 0; k + 1 < n; k++) { const C = CORR[k]; if (C && zw <= C.zA0 + 0.01 && zw >= C.zB0 - 3.4) return C.HT(zw); } return 3.8; }
+  function layerMesh(Rm){ const F = layerField(Rm), { NX, r, x0 } = F, P = [], C = [], I = [], ISO = 0.5, i0 = Rm.i, nx = rooms[i0 + 1], CR = CORR[i0];
+    const zTop = Rm.Z + F.zt, zFieldBot = Rm.Z + F.zt - (F.NZ - 1) * r, zBot = !nx ? zFieldBot : nx.classic ? CR.zB0 - 3.0 : nx.Z + layerField(nx).zt;
+    const ZS = []; for (let z = zTop; z > zBot + 0.05; z -= r) ZS.push(z); ZS.push(zBot); const NZ = ZS.length;
+    const occ = new Float32Array(NX * NZ); for (let j = 0; j < NZ; j++) for (let i = 0; i < NX; i++) occ[j * NX + i] = worldOcc(x0 + i * r, ZS[j]);
+    const vtx = (x, yw, zw, col, amp) => { const q = jit(x, yw, zw, amp == null ? AMP(yw - worldFloor(zw)) : amp), sh = 0.8 + 0.4 * (nz(x * 3, yw * 3, zw * 3, 4) + 0.5); P.push(q[0], q[1] - Rm.Y, q[2] - Rm.Z); C.push(...col.map(c => Math.min(255, c * sh))); return P.length / 3 - 1; };
+    const FC = [124, 100, 74], CC = [52, 52, 60], WC = [104, 98, 98];   /* 洞窟：壁は灰色の岩、床は土の茶色、天井は暗い色 */
+    for (let j = 0; j < NZ - 1; j++) for (let i = 0; i < NX - 1; i++) { const X = [x0 + i * r, x0 + (i + 1) * r, x0 + (i + 1) * r, x0 + i * r], Z = [ZS[j], ZS[j], ZS[j + 1], ZS[j + 1]], V = [occ[j * NX + i], occ[j * NX + i + 1], occ[(j + 1) * NX + i + 1], occ[(j + 1) * NX + i]];
       const poly = [], cross = []; for (let k = 0; k < 4; k++) { const k2 = (k + 1) % 4; if (V[k] >= ISO) poly.push([X[k], Z[k]]); if ((V[k] >= ISO) !== (V[k2] >= ISO)) { const t = (ISO - V[k]) / (V[k2] - V[k]), p = [X[k] + (X[k2] - X[k]) * t, Z[k] + (Z[k2] - Z[k]) * t]; poly.push(p); cross.push(p); } }
-      if (poly.length >= 3) { const fl = poly.map(p => vtx(p[0], 0, p[1], FC, 0.12)), ce = poly.map(p => vtx(p[0], F.h(p[0], p[1]), p[1], CC)); for (let k = 1; k + 1 < poly.length; k++) { I.push(fl[0], fl[k], fl[k + 1]); I.push(ce[0], ce[k + 1], ce[k]); } }
-      for (let k = 0; k + 1 < cross.length; k += 2) { const a = cross[k], b = cross[k + 1], ha = F.h(a[0], a[1]), hb = F.h(b[0], b[1]), L = 3, col = [];   /* 壁：3段に割って、でこぼこに */
-        for (let v = 0; v <= L; v++) { col.push([vtx(a[0], ha * v / L, a[1], WC), vtx(b[0], hb * v / L, b[1], WC)]); } for (let v = 0; v < L; v++) { const [p0, p1] = col[v], [q0, q1] = col[v + 1]; I.push(p0, q0, p1, p1, q0, q1); } } }
+      if (poly.length >= 3) { const fl = poly.map(p => vtx(p[0], worldFloor(p[1]), p[1], FC, 0.12)), ce = poly.map(p => vtx(p[0], worldFloor(p[1]) + worldCeil(p[0], p[1]), p[1], CC)); for (let k = 1; k + 1 < poly.length; k++) { I.push(fl[0], fl[k], fl[k + 1]); I.push(ce[0], ce[k + 1], ce[k]); } }
+      for (let k = 0; k + 1 < cross.length; k += 2) { const a = cross[k], b = cross[k + 1], fa = worldFloor(a[1]), fb2 = worldFloor(b[1]), ha = worldCeil(a[0], a[1]), hb = worldCeil(b[0], b[1]), L = 3, col = [];   /* 壁：3段に割って、でこぼこに */
+        for (let v = 0; v <= L; v++) { col.push([vtx(a[0], fa + ha * v / L, a[1], WC), vtx(b[0], fb2 + hb * v / L, b[1], WC)]); } for (let v = 0; v < L; v++) { const [p0, p1] = col[v], [q0, q1] = col[v + 1]; I.push(p0, q0, p1, p1, q0, q1); } } }
+    if (nx && nx.classic) { /* 主の間の門：坂の行き止まりの岩の壁に、門の形の穴（門の縁が洞窟に浮いて見えた） */ const zc = CR.zB0, yb = nx.Y, HW = 2.28, HH = 2.18, AR = 0.6, OX = 3.9, OY = yb + 4.3, out = [];
+      for (let k = 0; k <= 6; k++) out.push([HW, yb - 0.3 + (HH + 0.3) * k / 6, OX, null]); for (let k = 1; k < 12; k++) { const t = k / 12, x = HW - 2 * HW * t; out.push([x, yb + HH + AR * (1 - (x / HW) ** 2), x * OX / HW, OY]); } for (let k = 6; k >= 0; k--) out.push([-HW, yb - 0.3 + (HH + 0.3) * k / 6, -OX, null]);
+      const ring = out.map(([x, y, ox, oy]) => { const p1 = [x, y], p3 = oy == null ? [ox, y] : [ox, oy], p2 = [(p1[0] + p3[0]) / 2, (p1[1] + p3[1]) / 2]; return [p1, p2, p3]; });
+      const vv = ring.map((rg, k) => rg.map((p, q) => { const q2 = q ? jit(p[0], p[1], zc, 0.25 * q) : [p[0], p[1], zc]; P.push(q2[0], q2[1] - Rm.Y, zc - Rm.Z + (q ? nz(p[0], p[1], 3, 5) * 0.3 : 0)); C.push(...WC.map(c => c * (0.85 + 0.3 * (nz(p[0], p[1], zc, 4) + 0.5)))); return P.length / 3 - 1; }));
+      for (let k = 0; k + 1 < vv.length; k++) for (let q = 0; q < 2; q++) { const a = vv[k][q], b = vv[k][q + 1], c2 = vv[k + 1][q], d = vv[k + 1][q + 1]; I.push(a, c2, b, b, c2, d); }
+      /* 角（右上・左上）のすき間も岩で埋める */ const cornerFill = (sx) => { const a = vv[sx > 0 ? 6 : vv.length - 7][2], b = vv[sx > 0 ? 7 : vv.length - 8][2]; P.push(sx * OX, OY - Rm.Y, zc - Rm.Z); C.push(...WC); const c2 = P.length / 3 - 1; I.push(a, b, c2); }; cornerFill(1); cornerFill(-1); }
     const pb = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, pb); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(P), gl.STATIC_DRAW);
     const cb = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, cb); gl.bufferData(gl.ARRAY_BUFFER, new Uint8Array(C), gl.STATIC_DRAW);
     const ib = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint32Array(I), gl.STATIC_DRAW); return { pb, cb, ib, n: I.length, det: 1, fy: 0 }; }
@@ -13999,7 +14019,7 @@ function fpOpen30(){
       gl.bindBuffer(gl.ARRAY_BUFFER, B.pb); gl.vertexAttribPointer(la, 3, short ? gl.SHORT : gl.FLOAT, false, 0, 0); gl.bindBuffer(gl.ARRAY_BUFFER, B.cb); gl.vertexAttribPointer(lc, 3, gl.UNSIGNED_BYTE, true, 0, 0);
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, B.ib); gl.drawElements(gl.TRIANGLES, B.n, gl.UNSIGNED_INT, 0); };
     const ID = { M: [1, 0, 0, 0, 1, 0, 0, 0, 1], O: [0, 0, 0] };
-    for (let i = Math.max(0, curRoom - 1); i <= Math.min(n - 1, curRoom + 1); i++) { const R = rooms[i]; if (R.mb) { if (R.classic) draw(R.mb, [0, R.Y, R.Z], 0.01, true, R.CM, i); else { draw(R.mb, [0, R.Y, R.Z], 1, false, R.CM); if (R.pm === undefined) R.pm = propMesh(R); if (R.pm) { if (R.pm.a) draw(R.pm.a, [0, R.Y, R.Z], 1, false, R.CM); if (R.pm.g) draw(R.pm.g, [0, R.Y, R.Z], 1, false, R.CM); } } } if (CORR[i]) draw(CORR[i], [0, 0, 0], 1, false, R.CM); if (i > 0 && CORR[i - 1]) draw(CORR[i - 1], [0, 0, 0], 1, false, rooms[i - 1].CM); }
+    for (let i = Math.max(0, curRoom - 1); i <= Math.min(n - 1, curRoom + 1); i++) { const R = rooms[i]; if (R.mb) { if (R.classic) draw(R.mb, [0, R.Y, R.Z], 0.01, true, R.CM, i); else { draw(R.mb, [0, R.Y, R.Z], 1, false, R.CM); if (R.pm === undefined) R.pm = propMesh(R); if (R.pm) { if (R.pm.a) draw(R.pm.a, [0, R.Y, R.Z], 1, false, R.CM); if (R.pm.g) draw(R.pm.g, [0, R.Y, R.Z], 1, false, R.CM); } } } if (CORR[i] && CORR[i].n) draw(CORR[i], [0, 0, 0], 1, false, R.CM); if (i > 0 && CORR[i - 1] && CORR[i - 1].n) draw(CORR[i - 1], [0, 0, 0], 1, false, rooms[i - 1].CM); }
     gl.disableVertexAttribArray(lc);
     // 魔物と看板
     gl.useProgram(PB.p); gl.uniform1f(PB.U("OL"), 0); gl.uniformMatrix4fv(PB.U("VP"), false, new Float32Array(VP)); const lq = PB.A("aq"); gl.bindBuffer(gl.ARRAY_BUFFER, qb); gl.enableVertexAttribArray(lq); gl.vertexAttribPointer(lq, 2, gl.FLOAT, false, 0, 0);
@@ -14158,7 +14178,7 @@ function fpOpen30(){
         const tx = bx, tz = Rm.Z + bz, k = Math.min(1, dt * 2.5); if (where(tx, tz)) { P.x += (tx - P.x) * k; P.z += (tz - P.z) * k; } const want = Math.atan2(at.x - P.x, -(Rm.Z + at.z - P.z)), d = Math.atan2(Math.sin(want - P.yaw), Math.cos(want - P.yaw)); P.yaw += d * Math.min(1, dt * 3); P.pit += (-0.25 - P.pit) * Math.min(1, dt * 2); } } }
   // ===== 掘る画面：いまいる層をマスで見て、道を掘る・広間にする・埋める・罠を動かす =====
   const digCost30 = (Rm, v) => v === 2 ? 60 + 15 * Rm.i : 20 + 6 * Rm.i;
-  const rebuild = Rm => { Rm.mb = null; Rm.G = null; Rm.F = null; try { g30sync(S, Rm.i); } catch (e) {} Rm.traps = trapSpots(Rm); for (let j = TORCH.length - 1; j >= 0; j--) if (TORCH[j][6] === Rm.i) TORCH.splice(j, 1); TORCH.push(...torchesFor(Rm)); Rm.props = propsFor(Rm); Rm.pm = undefined; loadRoom(Rm); mkActs(Rm); try { keepers(); addLord(); } catch (e) {} };
+  const rebuild = Rm => { Rm.mb = null; Rm.G = null; Rm.F = null; { const pv = rooms[Rm.i - 1]; if (pv && !pv.classic) { pv.mb = null; setTimeout(() => loadRoom(pv), 0); } }   /* 上の層の絵は、この層の入口までつながっているので作り直す */ try { g30sync(S, Rm.i); } catch (e) {} Rm.traps = trapSpots(Rm); for (let j = TORCH.length - 1; j >= 0; j--) if (TORCH[j][6] === Rm.i) TORCH.splice(j, 1); TORCH.push(...torchesFor(Rm)); Rm.props = propsFor(Rm); Rm.pm = undefined; loadRoom(Rm); mkActs(Rm); try { keepers(); addLord(); } catch (e) {} };
   function digOpen(){ const Rm = rooms[curRoom], G = Rm.G30, mid = (G.W - 1) / 2; let mode = "dig", selT = null; if (Rm.classic) { try { toast("主の間は掘れない（ほかの層で掘る）"); } catch (e) {} return; }
     const ov = document.createElement("div"); ov.className = "dig30"; wrap.appendChild(ov);
     const conn = () => !!bfs30(G, [mid, 0], [mid, G.H - 1]);
