@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層23／No.350（11/25 00:49）";
+const VER20 = "層24／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -13485,7 +13485,7 @@ function fpOpen30(){
       const kind = roomKind25(i), on = {}; ROOMSET25[kind].forEach(k => on[k] = true); const th = (S.floors[f] || {}).theme;
       rooms.push({ i, kind, on, Z, Y, f, th, G30: G, ZS, ZE, CS, classic, OBS: [], CM: cssMat26((typeof THF25 !== "undefined" && THF25[th]) || ""), name: S.path[i].kind === "lord" ? "主の間" : i === 0 ? "入口の層" : "第" + i + "層" }); } }
   const wrap = document.createElement("div"); wrap.id = "fp26";
-  wrap.innerHTML = `<canvas></canvas><div class="f26top"><div class="f26where"><b></b><small></small></div><span class="f26fps"></span><button data-f="dig">⛏ 掘る</button><button data-f="x">🗺 見下ろしへ</button></div>
+  wrap.innerHTML = `<canvas></canvas><div class="f26top"><div class="f26where"><b></b><small></small></div><span class="f26fps"></span><button data-f="dig">🪤 罠と施設</button><button data-f="x">🗺 見下ろしへ</button></div>
     <div class="f26msg">ダンジョンを組み立てています…</div><div class="f26stick"><i></i></div><div class="f26hint">左で歩く・右をなぞって見回す・魔物や看板をタップ</div><div class="f26menu" hidden></div><canvas class="f26lab"></canvas><canvas class="f26map" width="300" height="220"></canvas><button class="f26talk" hidden></button>`;
   document.body.appendChild(wrap);
   /* 横持ち：スマホが縦のままなら、画面ごと90度まわして横長で出す（主の目は横の方が見通せる） */
@@ -14081,7 +14081,7 @@ function fpOpen30(){
   // ===== 掘る画面：いまいる層をマスで見て、道を掘る・広間にする・埋める・罠を動かす =====
   const digCost30 = (Rm, v) => v === 2 ? 60 + 15 * Rm.i : 20 + 6 * Rm.i;
   const rebuild = Rm => { Rm.mb = null; Rm.G = null; Rm.F = null; { const pv = rooms[Rm.i - 1]; if (pv && !pv.classic) { pv.mb = null; setTimeout(() => loadRoom(pv), 0); } }   /* 上の層の絵は、この層の入口までつながっているので作り直す */ try { g30sync(S, Rm.i); } catch (e) {} Rm.traps = trapSpots(Rm); for (let j = TORCH.length - 1; j >= 0; j--) if (TORCH[j][6] === Rm.i) TORCH.splice(j, 1); TORCH.push(...torchesFor(Rm)); Rm.props = propsFor(Rm); Rm.pm = undefined; loadRoom(Rm); mkActs(Rm); try { keepers(); addLord(); } catch (e) {} };
-  function digOpen(){ const Rm = rooms[curRoom], G = Rm.G30, mid = (G.W - 1) / 2; let mode = "dig", selT = null; if (Rm.classic) { try { toast("主の間は掘れない（ほかの層で掘る）"); } catch (e) {} return; }
+  function digOpen(){ const Rm = rooms[curRoom], G = Rm.G30, mid = (G.W - 1) / 2; let mode = "trap", selT = null; if (Rm.classic) { try { toast("主の間には動かせる物がない（ほかの層で）"); } catch (e) {} return; }   /* 自分で掘るのはやめた（情報が多すぎる）。層は部屋の拡張で1つ増える。ここでは罠と施設の場所だけ動かす */
     const ov = document.createElement("div"); ov.className = "dig30" + (wrap.clientWidth > wrap.clientHeight ? " wide" : ""); ov.style.background = "#120d0a"; wrap.appendChild(ov);
     const conn = () => !!bfs30(G, [mid, 0], [mid, G.H - 1]);
     const HELP = { dig: "光っているマスをタップで道を掘る（掘った所のとなりだけ掘れる）", hall: "光っているマスをタップで広間にする（天井が高く、魔物が住める）", fill: "×のマスをタップで埋める（降り口まで行けなくなる所は埋められない）", trap: "罠をタップ → 光っている道のマスをタップで動かす", fac: "施設（採掘場など）を置く広間をタップ。働く子はそこに住む" };
@@ -14093,9 +14093,9 @@ function fpOpen30(){
     let CZ = 20, OX = 0, OY = 0;
     const draw = (msg) => { const me = [Math.round(P.x / Rm.CS + mid), Math.round(-(P.z - Rm.Z) / Rm.CS)];
       const wide = ov.clientWidth > ov.clientHeight, OW = ov.clientWidth, OH = ov.clientHeight, SIDE = wide ? Math.min(300, Math.max(210, OW * 0.34)) : 0;
-      const modes = [["dig", "⛏ 道を掘る", `💎${digCost30(Rm, 1)}`], ["hall", "🏛 広間にする", `💎${digCost30(Rm, 2)}`], ["fill", "🪨 埋める", "無料"], ["trap", "🪤 罠を動かす", ""], ["fac", (g30fac(S, Rm.i) && FAC9[g30fac(S, Rm.i)] ? FAC9[g30fac(S, Rm.i)].icon : "🏛") + " 施設の場所", ""]];
+      const modes = [["trap", "🪤 罠を動かす", ""], ["fac", (g30fac(S, Rm.i) && FAC9[g30fac(S, Rm.i)] ? FAC9[g30fac(S, Rm.i)].icon : "🏛") + " 施設の場所", ""]];
       const btn = ([k, t, c]) => `<button data-g="m" data-v="${k}" style="all:unset;box-sizing:border-box;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:${wide ? "9px 12px" : "7px 10px"};border-radius:10px;font-size:14px;font-weight:700;${mode === k ? "background:#e8b84a;color:#1a1410" : "background:#2c221b;color:#efe3d3;box-shadow:inset 0 0 0 1px #5a4636"}"><span>${t}</span><small style="font-size:11px;opacity:.85">${c}</small></button>`;
-      const head = `<div style="display:flex;align-items:center;gap:8px;justify-content:space-between"><b style="font-size:15px">⛏ ${Rm.name}</b><span style="font-size:13px">💎${fmt8(S.dp)}</span><button data-g="x" style="all:unset;cursor:pointer;padding:6px 12px;border-radius:10px;background:#3a2c22;color:#fff;font-weight:700;font-size:14px">✕ 閉じる</button></div>`;
+      const head = `<div style="display:flex;align-items:center;gap:8px;justify-content:space-between"><b style="font-size:15px">🪤 ${Rm.name}の罠と施設</b><button data-g="x" style="all:unset;cursor:pointer;padding:6px 12px;border-radius:10px;background:#3a2c22;color:#fff;font-weight:700;font-size:14px">✕ 閉じる</button></div>`;
       const help = `<div class="dgx-help" style="font-size:13px;line-height:1.55;color:${msg ? "#ff9a86" : "#d9c9b4"}">${msg || HELP[mode]}</div><div style="font-size:11px;line-height:1.6;color:#a8977f"><span style="color:#ffd66e">■</span> 光るマス＝今さわれる所　<span style="color:#e05a8a">●</span> 魔物　<span style="color:#7cf08a">○</span> 自分</div>`;
       const avW = wide ? OW - SIDE - 36 : OW - 20, avH = wide ? OH - 20 : OH - 230;
       CZ = Math.max(12, Math.floor(Math.min(avW / G.W, avH / G.H)));
