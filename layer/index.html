@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層14／No.350（11/25 00:49）";
+const VER20 = "層15／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -13415,7 +13415,7 @@ function fpOpen26(){
 document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="fp26"]'); if (!b) return; ev.stopImmediatePropagation(); ev.preventDefault(); fpOpen26(); }, true);
 
 /* 仕事の絵：13方向（行0手前〜12奥）×19コマ（待機4・攻撃4・掘る4・寝る1・歩く6。目の高さに近い角度。足のない子は待機4・攻撃4だけ）。[1コマの幅,高さ,左上x,y,焼いたマスS,コマ数,足もと,二本足,版] */
-const JOB29 = {"bat_0":[83,62,23,48,128,8,100,0,"de702b"],"berserker_0":[91,106,26,21,128,19,122,1,"806faf"],"bogtroll_0":[93,107,27,21,128,19,122,1,"cd2f35"],"bonedragon_0":[234,150,0,90,240,8,231,0,"f720e9"],"bonewarden_0":[83,89,32,39,128,19,126,1,"2ea53b"],"chimera_0":[120,76,7,52,128,8,125,0,"6cc578"],"count_0":[92,108,22,18,128,19,121,1,"1b433a"],"dragon_0":[235,150,0,90,240,8,231,0,"4d0875"],"elderdragon_0":[150,142,46,90,240,8,227,0,"db7145"],"emberskel_0":[74,80,35,48,128,19,126,1,"221cf8"],"eye_0":[51,58,44,67,128,8,120,0,"3f81b0"],"eyebat_0":[78,49,26,57,128,8,101,0,"95cf8e"],"eyespider_0":[83,49,28,79,128,8,128,0,"48bb54"],"firebat_0":[83,62,23,48,128,8,100,0,"e71087"],"flamechimera_0":[146,100,49,137,240,8,232,0,"8c4f15"],"fortgolem_0":[97,105,17,23,128,19,123,1,"dda288"],"fungus_0":[58,53,41,75,128,8,125,0,"f3951b"],"gargoyle_0":[109,95,9,33,128,8,124,0,"ebe964"],"gemeater_0":[68,47,35,81,128,8,128,0,"171832"],"ghost_0":[53,46,41,69,128,8,111,0,"fd69d9"],"ghostslime_0":[60,41,40,87,128,8,127,0,"521d8d"],"ghoul_0":[82,85,28,43,128,19,127,1,"ac1528"],"goblin_0":[77,80,30,48,128,19,126,1,"9fb964"],"goldkobold_0":[77,81,30,47,128,19,126,1,"490c0a"],"golem_0":[75,83,28,42,128,19,121,1,"1ea1d1"],"hauntchest_0":[59,53,38,75,128,8,128,0,"f58007"],"hunter_0":[71,80,36,48,128,19,126,1,"39fe24"],"ifrit_0":[75,81,32,47,128,19,126,1,"a42460"],"imp_0":[75,81,32,47,128,19,126,1,"54b10b"],"jackal_0":[102,61,18,67,128,8,125,0,"bdd879"],"knight_0":[77,80,34,48,128,19,126,1,"d26b1a"],"kobold_0":[77,81,30,47,128,19,126,1,"1eb32e"],"lavaslime_0":[70,49,34,79,128,8,128,0,"63f2ff"],"lich_0":[72,101,35,26,128,19,123,1,"baf306"],"mage_0":[71,92,36,36,128,19,126,1,"40393c"],"mimic_0":[59,53,38,75,128,8,128,0,"777f45"],"priest_0":[71,87,36,41,128,19,126,1,"a3e3ab"],"slime_0":[60,41,40,87,128,8,127,0,"2e31a9"],"thief_0":[71,80,36,48,128,19,126,1,"6c723b"],"warrior_0":[77,80,34,48,128,19,126,1,"51e7a1"]};
+const JOB29 = {"bat_0":[83,62,23,48,128,8,100,0,"de702b"],"berserker_0":[91,106,26,21,128,19,122,1,"806faf"],"bogtroll_0":[93,107,27,21,128,19,122,1,"cd2f35"],"bonedragon_0":[234,150,0,90,240,8,231,0,"f720e9"],"bonewarden_0":[83,89,32,39,128,19,126,1,"2ea53b"],"chimera_0":[120,76,7,52,128,8,125,0,"6cc578"],"count_0":[92,108,22,18,128,19,121,1,"1b433a"],"dragon_0":[235,150,0,90,240,8,231,0,"4d0875"],"elderdragon_0":[150,142,46,90,240,8,227,0,"db7145"],"emberskel_0":[74,80,35,48,128,19,126,1,"221cf8"],"eye_0":[51,58,44,67,128,8,120,0,"3f81b0"],"eyebat_0":[78,49,26,57,128,8,101,0,"95cf8e"],"eyespider_0":[83,49,28,79,128,8,128,0,"48bb54"],"firebat_0":[83,62,23,48,128,8,100,0,"e71087"],"flamechimera_0":[146,100,49,137,240,8,232,0,"8c4f15"],"fortgolem_0":[97,105,17,23,128,19,123,1,"dda288"],"fungus_0":[58,53,41,75,128,8,125,0,"f3951b"],"gargoyle_0":[109,95,9,33,128,8,124,0,"ebe964"],"gemeater_0":[68,47,35,81,128,8,128,0,"171832"],"ghost_0":[53,46,41,69,128,8,111,0,"fd69d9"],"ghostslime_0":[60,41,40,87,128,8,127,0,"521d8d"],"ghoul_0":[82,85,28,43,128,19,127,1,"ac1528"],"goblin_0":[77,80,30,48,128,19,126,1,"9fb964"],"goldkobold_0":[77,81,30,47,128,19,126,1,"490c0a"],"golem_0":[75,83,28,42,128,19,121,1,"1ea1d1"],"hauntchest_0":[59,53,38,75,128,8,128,0,"f58007"],"hunter_0":[71,80,36,48,128,19,126,1,"39fe24"],"ifrit_0":[75,81,32,47,128,19,126,1,"a42460"],"imp_0":[75,81,32,47,128,19,126,1,"54b10b"],"jackal_0":[102,61,18,67,128,8,125,0,"bdd879"],"knight_0":[77,80,34,48,128,19,126,1,"d26b1a"],"kobold_0":[77,81,30,47,128,19,126,1,"1eb32e"],"lavaslime_0":[70,49,34,79,128,8,128,0,"63f2ff"],"lich_0":[72,101,35,26,128,19,123,1,"baf306"],"mage_0":[71,92,36,36,128,19,126,1,"40393c"],"maou_0":[166,150,48,90,240,19,229,1,"368c8a"],"mimic_0":[59,53,38,75,128,8,128,0,"777f45"],"mindlord_0":[72,95,34,33,128,8,122,0,"a7a444"],"minerorc_0":[88,102,29,25,128,19,122,1,"8a4483"],"myconid_0":[58,53,41,75,128,8,125,0,"335f38"],"nightspider_0":[80,43,27,85,128,8,128,0,"9b4c48"],"nightwolf_0":[102,61,18,67,128,8,125,0,"aac22d"],"ogremage_0":[89,120,27,7,128,19,121,1,"65ef80"],"orc_0":[84,98,31,29,128,19,121,1,"191b5e"],"priest_0":[71,87,36,41,128,19,126,1,"a3e3ab"],"rat_0":[100,38,12,90,128,8,125,0,"b85fb2"],"ratking_0":[95,65,13,63,128,8,128,0,"150286"],"rotlord_0":[81,81,28,47,128,8,124,0,"fc5292"],"rotslime_0":[60,41,40,87,128,8,127,0,"9be264"],"salamander_0":[108,38,9,90,128,8,127,0,"9f72bc"],"sapper_0":[77,92,30,36,128,19,126,1,"89d8d5"],"shaman_0":[77,83,30,45,128,19,126,1,"538206"],"slime_0":[60,41,40,87,128,8,127,0,"2e31a9"],"spider_0":[80,43,27,85,128,8,128,0,"ca1466"],"sporewraith_0":[62,52,39,63,128,8,111,0,"2040f2"],"stonespider_0":[91,49,21,79,128,8,128,0,"7ce21f"],"thief_0":[71,80,36,48,128,19,126,1,"6c723b"],"warrior_0":[77,80,34,48,128,19,126,1,"51e7a1"]};
 
 // ================= layer30：部屋を「層」に。層の中の形をマスで持つ =================
 // S.path[i].g30 = { W, H, c: "0/1/2…" の文字列（0=岩 1=道 2=広間）, t: [[x, y, 罠の種類, 段]] }
@@ -13499,9 +13499,10 @@ function fpOpen30(){
   const sh = (ty, s) => { const o = gl.createShader(ty); gl.shaderSource(o, s); gl.compileShader(o); if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(o)); return o; };
   const prog = (vs, fs) => { const p = gl.createProgram(); gl.attachShader(p, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(p, sh(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(p); const U = {}; return { p, U: k => U[k] !== undefined ? U[k] : (U[k] = gl.getUniformLocation(p, k)), A: k => gl.getAttribLocation(p, k) }; };
   // 部屋と通路：頂点の色（光は焼いてある）×主のまわりのほのかな明かり、遠くは闇
+  const DX30 = gl.getExtension("OES_standard_derivatives");
   const PM = prog(`attribute vec3 ap;attribute vec3 ac;uniform mat4 VP;uniform vec3 OFF;uniform float PSC;uniform vec3 SC;uniform mat3 CM;uniform vec3 CO;uniform vec3 EYE;uniform float YS;varying vec3 vc;varying vec3 vw;varying vec3 vl;varying float vd;
     void main(){vl=ap*PSC*SC;if(vl.y>3.6)vl.y=3.6+(vl.y-3.6)*YS;vec3 w=vl+OFF;gl_Position=VP*vec4(w,1.0);vc=clamp(CM*ac+CO,0.0,1.0);vw=w;vd=distance(w,EYE);}`,
-    `precision mediump float;varying vec3 vc;varying vec3 vw;varying vec3 vl;varying float vd;uniform vec4 DR;uniform vec3 LT[6];uniform float LF[6];
+    (DX30 ? "#extension GL_OES_standard_derivatives : enable\n#define HASN 1\n" : "") + `precision mediump float;varying vec3 vc;varying vec3 vw;varying vec3 vl;varying float vd;uniform vec4 DR;uniform vec3 LT[6];uniform float LF[6];uniform highp vec3 EYE;
     float h(vec3 p){return fract(sin(dot(p,vec3(12.9898,78.233,37.719)))*43758.5453);}
     uniform float DET;uniform float FY;
     float n3(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(mix(h(i),h(i+vec3(1,0,0)),f.x),mix(h(i+vec3(0,1,0)),h(i+vec3(1,1,0)),f.x),f.y),mix(mix(h(i+vec3(0,0,1)),h(i+vec3(1,0,1)),f.x),mix(h(i+vec3(0,1,1)),h(i+vec3(1,1,1)),f.x),f.y),f.z);}
@@ -13511,17 +13512,29 @@ function fpOpen30(){
     if(DET>2.5){ vec3 e=vc*1.25+vec3(0.05); e=mix(e,vec3(0.012,0.01,0.01),smoothstep(26.0,60.0,vd)*0.85); gl_FragColor=vec4(e,1.0); return; }   /* 光るもの：水晶・火・きのこ。暗がりでも暗くならない */
     if(DET>1.5){ g=1.0; bc*=0.9+0.2*n3(vw*14.0); bc*=0.92+0.16*n3(vw*vec3(1.5,9.0,1.5)); }   /* 飾り：細かい木目・ざらつき（ドットの四角い模様は出さない） */
     else if(DET>0.5){ /* 岩肌：大きな色むら・細かい粒・ひび・床の砂利と湿り・壁の下の苔・天井のしみ（位置だけで決まる模様） */
-      float big=fb(vw*0.35), mid=fb(vw*1.7+7.1), fine=n3(vw*9.0);
-      float rel=vl.y-FY; bc*=0.78+0.44*big; bc*=0.9+0.2*mid; bc*=0.93+0.14*fine; g=1.0;
-      float cr=abs(n3(vw*vec3(0.35,0.9,0.35)+3.3)-0.5); bc*=mix(0.72,1.0,smoothstep(0.0,0.012,cr));
-      if(rel<0.12){ float pb=n3(vw*vec3(5.5,1.0,5.5)); bc*=mix(1.0,1.25,smoothstep(0.72,0.8,pb)); float wet=fb(vw*0.5+11.0); bc=mix(bc,bc*vec3(0.55,0.58,0.62),smoothstep(0.55,0.75,wet)*0.8); }
-      else if(rel<1.3){ float ms=fb(vw*1.1+21.0)*(1.0-rel/1.3); bc=mix(bc,vec3(0.16,0.22,0.1)*(0.7+0.6*mid),smoothstep(0.42,0.62,ms)*0.75); }
+      float big=fb(vw*0.3), mid=fb(vw*1.2+7.1);
+      float rel=vl.y-FY; bc*=0.86+0.3*big; bc*=0.94+0.12*mid; g=1.0; bc=mix(bc,bc*vec3(1.08,0.98,0.9),smoothstep(0.45,0.7,big));   /* 絵の具のような大きな色むら（細かいざらつきは出さない） */
+      if(rel<0.12){ float pb=n3(vw*vec3(5.5,1.0,5.5)); bc*=mix(1.0,1.15,smoothstep(0.72,0.8,pb)); float wet=fb(vw*0.5+11.0); bc=mix(bc,bc*vec3(0.78,0.8,0.9),smoothstep(0.55,0.75,wet)*0.6); }
+      else if(rel<1.3){ float ms=fb(vw*1.1+21.0)*(1.0-rel/1.3); bc=mix(bc,vec3(0.3,0.46,0.18)*(0.8+0.4*mid),smoothstep(0.45,0.6,ms)*0.7); }
       if(rel>3.3){ bc*=0.8+0.25*n3(vw*vec3(3.0,0.4,3.0)); } }
+    if(DET>0.5){ /* トゥーン（セル）の光：面の向きで3段階の明るさ。空からの明るい光と、たいまつの暖かい光。色はあざやかに */
+      #ifdef HASN
+      vec3 nn=normalize(cross(dFdx(vw),dFdy(vw)));
+      #else
+      vec3 nn=vec3(0.0,1.0,0.0);
+      #endif
+      if(dot(nn,EYE-vw)<0.0) nn=-nn;
+      float kd=dot(nn,normalize(vec3(0.35,0.9,0.3))); float tb=kd>0.55?1.0:(kd>0.12?0.8:0.62);
+      vec3 hemi=mix(vec3(0.62,0.58,0.78),vec3(1.0,0.95,0.86),nn.y*0.5+0.5);
+      vec3 c=bc*tb*hemi*1.15*(0.8+0.3*exp(-vd/12.0));
+      vec3 L=vec3(0.0);for(int i=0;i<6;i++){vec3 q=LT[i]-vw;float dd=dot(q,q);float ld=dot(nn,q*inversesqrt(dd+0.0001));float tl=ld>0.35?1.0:(ld>0.05?0.6:0.3);L+=vec3(1.0,0.66,0.34)*LF[i]*tl/(1.0+0.1*dd);}
+      c+=bc*L*1.2;float lu=dot(c,vec3(0.3,0.59,0.11));c=mix(vec3(lu),c,1.22);c=1.0-exp(-c*1.4);
+      c=mix(c,vec3(0.11,0.09,0.16),smoothstep(26.0,66.0,vd));gl_FragColor=vec4(c,1.0);return; }
     vec3 c=bc*g*(0.55+0.8*exp(-vd/7.0));c+=vec3(0.05,0.03,0.012)*exp(-vd/4.0);
     vec3 L=vec3(0.0);for(int i=0;i<6;i++){vec3 q=vw-LT[i];L+=vec3(1.0,0.56,0.24)*LF[i]/(1.0+0.22*dot(q,q));}c+=bc*L*1.05+L*0.02;c=1.0-exp(-c*1.35);
     c=mix(c,vec3(0.012,0.01,0.01),smoothstep(18.0,48.0,vd));gl_FragColor=vec4(c,1.0);}`);   /* 部屋の出入口の壁をくりぬく（門の黒い板も）／たいまつの明かり */
   const PB = prog(`attribute vec2 aq;uniform mat4 VP;uniform vec3 C;uniform vec3 R;uniform vec3 UPV;uniform vec4 Q;varying vec2 uv;void main(){uv=vec2(aq.x,1.0-aq.y);vec3 p=C+R*(Q.x+aq.x*Q.z)+UPV*(Q.y+aq.y*Q.w);gl_Position=VP*vec4(p,1.0);}`,
-    `precision mediump float;uniform sampler2D tx;uniform float FL;uniform vec4 UR;uniform float LB;uniform float AM;varying vec2 uv;void main(){vec4 c=texture2D(tx,UR.xy+vec2(FL>0.5?1.0-uv.x:uv.x,uv.y)*UR.zw);if(AM>0.5){if(c.a<0.02)discard;gl_FragColor=vec4(c.rgb*LB,c.a);return;}if(c.a<0.5)discard;gl_FragColor=vec4(c.rgb*LB,1.0);}`);
+    `precision mediump float;uniform sampler2D tx;uniform float FL;uniform vec4 UR;uniform float LB;uniform float AM;uniform float OL;uniform vec2 TS;varying vec2 uv;void main(){vec2 u=UR.xy+vec2(FL>0.5?1.0-uv.x:uv.x,uv.y)*UR.zw;vec4 c=texture2D(tx,u);if(OL>0.5){ /* キャラ：黒いふちどりと、陰影を3段に（アニメ塗り） */ if(c.a<0.5){float a=max(max(texture2D(tx,u+vec2(TS.x*1.6,0.0)).a,texture2D(tx,u-vec2(TS.x*1.6,0.0)).a),max(texture2D(tx,u+vec2(0.0,TS.y*1.6)).a,texture2D(tx,u-vec2(0.0,TS.y*1.6)).a));if(a>0.5){gl_FragColor=vec4(vec3(0.1,0.07,0.08)*LB,1.0);return;}discard;}float l=dot(c.rgb,vec3(0.3,0.59,0.11));float q=l>0.6?1.0:(l>0.33?0.78:0.56);c.rgb=clamp(c.rgb/max(l,0.04)*mix(l,q*0.7,0.55)*1.12,0.0,1.0);gl_FragColor=vec4(c.rgb*LB,1.0);return;}if(AM>0.5){if(c.a<0.02)discard;gl_FragColor=vec4(c.rgb*LB,c.a);return;}if(c.a<0.5)discard;gl_FragColor=vec4(c.rgb*LB,1.0);}`);
   const qb = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, qb); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]), gl.STATIC_DRAW);
   const TX = new Map(); const texOf = im => { let t = TX.get(im); if (t) return t; t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, im);
     [gl.TEXTURE_MIN_FILTER, gl.TEXTURE_MAG_FILTER].forEach(k => gl.texParameteri(gl.TEXTURE_2D, k, im.__lin ? gl.LINEAR : gl.NEAREST)); [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T].forEach(k => gl.texParameteri(gl.TEXTURE_2D, k, gl.CLAMP_TO_EDGE)); TX.set(im, t); return t; };
@@ -13531,7 +13544,7 @@ function fpOpen30(){
   function stairs(a, b){ const CS = a.CS, zA0 = a.Z + a.ZE - CS, zB0 = b.Z + b.ZS + CS, OV = 1.6, zA = zA0 + OV, zB = zB0 - OV, r = 0.4, X0 = -3.2, NX = Math.round(6.4 / r) + 1, NZ = Math.max(2, Math.round((zA - zB) / r) + 1), dz = (zA - zB) / (NZ - 1);   /* 層の洞窟と1.6m重ねて、つなぎ目のすき間（黒い筋）を隠す */
     const yAt = z => { const t = Math.max(0, Math.min(1, (zA0 - z) / (zA0 - zB0))); return a.Y + (b.Y - a.Y) * (t * t * (3 - 2 * t)); }, inOv = z => z > zA0 || z < zB0;
     const occ = new Float32Array(NX * NZ); for (let j = 0; j < NZ; j++) for (let i = 0; i < NX; i++) { const x = X0 + i * r, z = zA - j * dz, w = 1.75 + 0.25 * Math.sin(z * 0.7 + a.i); occ[j * NX + i] = Math.max(0, Math.min(1, (w + 0.6 - Math.abs(x)) / 1.2)) + nz(x, 0, z, 7) * 0.12; }
-    const P = [], C = [], I = [], ISO = 0.5, FC = [50, 40, 32], CC = [22, 18, 15], WC = [36, 30, 25];
+    const P = [], C = [], I = [], ISO = 0.5, FC = [118, 96, 72], CC = [70, 60, 66], WC = [104, 86, 70];
     const vtx = (x, y, z, col, amp) => { const q = jit(x, y, z, amp), sh = 0.8 + 0.4 * (nz(x * 3, y * 3, z * 3, 4) + 0.5); P.push(q[0], q[1], q[2]); C.push(...col.map(c => Math.min(255, c * sh))); return P.length / 3 - 1; };
     for (let j = 0; j < NZ - 1; j++) for (let i = 0; i < NX - 1; i++) { const Xs = [X0 + i * r, X0 + (i + 1) * r, X0 + (i + 1) * r, X0 + i * r], Zs = [zA - j * dz, zA - j * dz, zA - (j + 1) * dz, zA - (j + 1) * dz], V = [occ[j * NX + i], occ[j * NX + i + 1], occ[(j + 1) * NX + i + 1], occ[(j + 1) * NX + i]];
       const poly = [], cross = []; for (let k = 0; k < 4; k++) { const k2 = (k + 1) % 4; if (V[k] >= ISO) poly.push([Xs[k], Zs[k]]); if ((V[k] >= ISO) !== (V[k2] >= ISO)) { const t = (ISO - V[k]) / (V[k2] - V[k]), p2 = [Xs[k] + (Xs[k2] - Xs[k]) * t, Zs[k] + (Zs[k2] - Zs[k]) * t]; poly.push(p2); cross.push(p2); } }
@@ -13714,7 +13727,7 @@ function fpOpen30(){
   const AMP = y => 0.18 + 0.3 * Math.min(1, Math.max(0, y) / 2.5);
   function layerMesh(Rm){ const F = layerField(Rm), { NX, NZ, r, x0, zt, occ } = F, P = [], C = [], I = [], ISO = 0.5;
     const vtx = (x, y, z, col, amp) => { const q = jit(x, y, z, amp == null ? AMP(y) : amp), sh = 0.8 + 0.4 * (nz(x * 3, y * 3, z * 3, 4) + 0.5); P.push(q[0], q[1], q[2]); C.push(...col.map(c => Math.min(255, c * sh))); return P.length / 3 - 1; };
-    const FC = [50, 40, 32], CC = [22, 18, 15], WC = [36, 30, 25];
+    const FC = [118, 96, 72], CC = [70, 60, 66], WC = [104, 86, 70];   /* あたたかい黄土色の岩（明るく、影は紫寄り） */
     for (let j = 0; j < NZ - 1; j++) for (let i = 0; i < NX - 1; i++) { const X = [x0 + i * r, x0 + (i + 1) * r, x0 + (i + 1) * r, x0 + i * r], Z = [zt - j * r, zt - j * r, zt - (j + 1) * r, zt - (j + 1) * r], V = [occ[j * NX + i], occ[j * NX + i + 1], occ[(j + 1) * NX + i + 1], occ[(j + 1) * NX + i]];
       const poly = [], cross = []; for (let k = 0; k < 4; k++) { const k2 = (k + 1) % 4; if (V[k] >= ISO) poly.push([X[k], Z[k]]); if ((V[k] >= ISO) !== (V[k2] >= ISO)) { const t = (ISO - V[k]) / (V[k2] - V[k]), p = [X[k] + (X[k2] - X[k]) * t, Z[k] + (Z[k2] - Z[k]) * t]; poly.push(p); cross.push(p); } }
       if (poly.length >= 3) { const fl = poly.map(p => vtx(p[0], 0, p[1], FC, 0.12)), ce = poly.map(p => vtx(p[0], F.h(p[0], p[1]), p[1], CC)); for (let k = 1; k + 1 < poly.length; k++) { I.push(fl[0], fl[k], fl[k + 1]); I.push(ce[0], ce[k + 1], ce[k]); } }
@@ -13869,11 +13882,11 @@ function fpOpen30(){
     for (let i = Math.max(0, curRoom - 1); i <= Math.min(n - 1, curRoom + 1); i++) { const R = rooms[i]; if (R.mb) { if (R.classic) draw(R.mb, [0, R.Y, R.Z], 0.01, true, R.CM, i); else { draw(R.mb, [0, R.Y, R.Z], 1, false, R.CM); if (R.pm === undefined) R.pm = propMesh(R); if (R.pm) { if (R.pm.a) draw(R.pm.a, [0, R.Y, R.Z], 1, false, R.CM); if (R.pm.g) draw(R.pm.g, [0, R.Y, R.Z], 1, false, R.CM); } } } if (CORR[i]) draw(CORR[i], [0, 0, 0], 1, false, R.CM); if (i > 0 && CORR[i - 1]) draw(CORR[i - 1], [0, 0, 0], 1, false, rooms[i - 1].CM); }
     gl.disableVertexAttribArray(lc);
     // 魔物と看板
-    gl.useProgram(PB.p); gl.uniformMatrix4fv(PB.U("VP"), false, new Float32Array(VP)); const lq = PB.A("aq"); gl.bindBuffer(gl.ARRAY_BUFFER, qb); gl.enableVertexAttribArray(lq); gl.vertexAttribPointer(lq, 2, gl.FLOAT, false, 0, 0);
+    gl.useProgram(PB.p); gl.uniform1f(PB.U("OL"), 0); gl.uniformMatrix4fv(PB.U("VP"), false, new Float32Array(VP)); const lq = PB.A("aq"); gl.bindBuffer(gl.ARRAY_BUFFER, qb); gl.enableVertexAttribArray(lq); gl.vertexAttribPointer(lq, 2, gl.FLOAT, false, 0, 0);
     const Rr = [Math.cos(P.yaw), 0, Math.sin(P.yaw)];
     // 足もとの影（ドット絵が浮いて見えた）
     gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(false); gl.uniform1f(PB.U("AM"), 1); gl.uniform1f(PB.U("FL"), 0); gl.uniform4f(PB.U("UR"), 0, 0, 1, 1); gl.uniform1f(PB.U("LB"), 1);
-    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, texOf(SHADOW)); gl.uniform1i(PB.U("tx"), 0); gl.uniform3f(PB.U("UPV"), 0, 0, 1); gl.uniform3f(PB.U("R"), 1, 0, 0);
+    gl.activeTexture(gl.TEXTURE0); gl.uniform1f(PB.U("OL"), 0); gl.bindTexture(gl.TEXTURE_2D, texOf(SHADOW)); gl.uniform1i(PB.U("tx"), 0); gl.uniform3f(PB.U("UPV"), 0, 0, 1); gl.uniform3f(PB.U("R"), 1, 0, 0);
     for (let i = Math.max(0, curRoom - 1); i <= Math.min(n - 1, curRoom + 1); i++) { const R = rooms[i]; (R.acts || []).forEach(a => { if (DHOV25[a.sp]) return; const ss = Math.max(1, (a.H || 1.6) * 0.42); gl.uniform3f(PB.U("C"), a.x, R.Y + floorY(R, a.x, a.z) + 0.05, R.Z + a.z); gl.uniform4f(PB.U("Q"), -0.9 * ss, -0.5 * ss, 1.8 * ss, 1.0 * ss); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); }); }
     /* 通路の罠：床の絵（毒はゆらゆら光る） */
     for (let i = Math.max(0, curRoom - 1); i <= Math.min(n - 1, curRoom + 1); i++) (rooms[i].traps || []).forEach(tp => { const tx = TRT[tp.k]; if (!tx) return; const d = Math.hypot(tp.x - P.x, tp.z - P.z), sz = tp.k === "pit" ? 3.4 : tp.k === "net" ? 2.6 : 3.0;
@@ -13926,11 +13939,11 @@ function fpOpen30(){
         const jobF = a.fr >= 0 || (a.mode === "spar" && a.look && !a.walking), fl2 = a.dir13 ? flip : jobF ? side : flip; let jx = 0, jz = 0; if (a.mode === "spar" && a.sq != null && a.sq < 0.34 && a.look) { const f = Math.sin(a.sq / 0.34 * Math.PI), dx = a.look[0] - a.x, dz = a.look[1] - a.z, L = Math.hypot(dx, dz) || 1; jx = dx / L * 0.4 * f; jz = dz / L * 0.4 * f; bob = 0.55 * f; }
         if (a.mode === "duel" && a.dq && a.pt) { const dx = a.pt.x - a.x, dz = a.pt.z - a.z, L = Math.hypot(dx, dz) || 1, pq = a.pt.dq; let k = 0; if (a.dq.mine) { k = Math.sin(Math.min(1, a.dq.lq / 0.7) * Math.PI) * (o.bip ? 0.28 : 0.45); if (!o.bip) bob = 0.5 * k; } else if (pq && pq.mine && pq.lq > 0.45 && pq.lq < 0.85) k = -Math.sin((pq.lq - 0.45) / 0.4 * Math.PI) * 0.16; jx = dx / L * k; jz = dz / L * k; }   /* 打つ側は踏みこみ、受ける側は少し下がる */
         const br = a.walking || jobF ? 1 : 1 + 0.018 * Math.sin(now / 1000 * 2.3 + a.ph), k = (a.mult || 1) / ppu, w = cw / hs, h = ch / hs, x0 = fl2 ? 64 - ox - w : ox - 64, d = Math.hypot(wx - P.x, wz - P.z);
-        gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, texOf(im)); gl.uniform1i(PB.U("tx"), 0); gl.uniform1f(PB.U("FL"), fl2 ? 1 : 0); gl.uniform4f(PB.U("UR"), cx / im.width, cy / im.height, cw / im.width, ch / im.height); gl.uniform1f(PB.U("LB"), 0.5 + 0.7 * Math.exp(-d / 7));
+        gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, texOf(im)); gl.uniform1i(PB.U("tx"), 0); gl.uniform1f(PB.U("OL"), im.__lin ? 1 : 0); gl.uniform2f(PB.U("TS"), 1 / im.width, 1 / im.height); gl.uniform1f(PB.U("FL"), fl2 ? 1 : 0); gl.uniform4f(PB.U("UR"), cx / im.width, cy / im.height, cw / im.width, ch / im.height); gl.uniform1f(PB.U("LB"), 0.5 + 0.7 * Math.exp(-d / 7));
         gl.uniform3f(PB.U("C"), wx + jx, R.Y + gy + (a.y || 0) + (DHOV25[a.sp] ? 0.9 : 0) + bob, wz + jz); gl.uniform3fv(PB.U("R"), Rr); gl.uniform4f(PB.U("Q"), x0 * k, (foot - (oy + h)) * k * br, w * k, h * k * br); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
         if (a.walking && (a.H || 0) > 3.6) { const st = Math.abs(Math.sin(a.dist * 1.4)); if (st > 0.97) SHK = Math.max(SHK, 0.09 * Math.min(1, (a.H - 3.6) / 1.6) * Math.exp(-d / 8)); }   /* 大きい子の足音で少しゆれる */ }); }
     // たいまつの火（足し算で光らせる）
-    gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE); gl.depthMask(false); gl.uniform1f(PB.U("AM"), 1); gl.uniform1f(PB.U("FL"), 0); gl.uniform4f(PB.U("UR"), 0, 0, 1, 1); gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, texOf(FLAME)); gl.uniform1i(PB.U("tx"), 0); gl.uniform3fv(PB.U("R"), Rr);
+    gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE); gl.depthMask(false); gl.uniform1f(PB.U("AM"), 1); gl.uniform1f(PB.U("FL"), 0); gl.uniform4f(PB.U("UR"), 0, 0, 1, 1); gl.activeTexture(gl.TEXTURE0); gl.uniform1f(PB.U("OL"), 0); gl.bindTexture(gl.TEXTURE_2D, texOf(FLAME)); gl.uniform1i(PB.U("tx"), 0); gl.uniform3fv(PB.U("R"), Rr);
     TORCH.forEach((t, j) => { const d2 = (t[0] - EYE[0]) ** 2 + (t[2] - EYE[2]) ** 2; if (d2 > 900) return; const fl = 0.85 + 0.15 * Math.sin(now / 1000 * 13 + j * 3.7); gl.uniform1f(PB.U("LB"), 1.2 * fl); gl.uniform3f(PB.U("C"), t[0], t[1] - 0.35, t[2]); gl.uniform4f(PB.U("Q"), -0.22, 0, 0.44, 0.75 * fl); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); });
     gl.depthMask(true); gl.disable(gl.BLEND); gl.uniform1f(PB.U("AM"), 0);
     // 近くの子に「話しかける」ボタン（動く子をタップで当てるのは難しかった）
