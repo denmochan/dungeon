@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層15／No.350（11/25 00:49）";
+const VER20 = "層16／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -13513,9 +13513,10 @@ function fpOpen30(){
     if(DET>1.5){ g=1.0; bc*=0.9+0.2*n3(vw*14.0); bc*=0.92+0.16*n3(vw*vec3(1.5,9.0,1.5)); }   /* 飾り：細かい木目・ざらつき（ドットの四角い模様は出さない） */
     else if(DET>0.5){ /* 岩肌：大きな色むら・細かい粒・ひび・床の砂利と湿り・壁の下の苔・天井のしみ（位置だけで決まる模様） */
       float big=fb(vw*0.3), mid=fb(vw*1.2+7.1);
-      float rel=vl.y-FY; bc*=0.86+0.3*big; bc*=0.94+0.12*mid; g=1.0; bc=mix(bc,bc*vec3(1.08,0.98,0.9),smoothstep(0.45,0.7,big));   /* 絵の具のような大きな色むら（細かいざらつきは出さない） */
+      float rel=vl.y-FY; bc*=0.86+0.3*big; bc*=0.94+0.12*mid; g=1.0;
+      if(rel>0.12){ float st=sin(vw.y*2.1+big*3.0+mid*1.2); float bd=smoothstep(-0.25,0.25,st); bc*=0.8+0.26*bd; bc=mix(bc*vec3(0.9,0.96,1.08),bc*vec3(1.08,1.0,0.9),bd); bc*=mix(0.62,1.0,smoothstep(0.0,0.1,abs(st+0.1))); }   /* 壁：地層のような横じま（段々の岩）と、暗いすき間 */
       if(rel<0.12){ float pb=n3(vw*vec3(5.5,1.0,5.5)); bc*=mix(1.0,1.15,smoothstep(0.72,0.8,pb)); float wet=fb(vw*0.5+11.0); bc=mix(bc,bc*vec3(0.78,0.8,0.9),smoothstep(0.55,0.75,wet)*0.6); }
-      else if(rel<1.3){ float ms=fb(vw*1.1+21.0)*(1.0-rel/1.3); bc=mix(bc,vec3(0.3,0.46,0.18)*(0.8+0.4*mid),smoothstep(0.45,0.6,ms)*0.7); }
+      else if(rel<1.3){ float ms=fb(vw*1.1+21.0)*(1.0-rel/1.3); bc=mix(bc,vec3(0.22,0.36,0.2)*(0.8+0.4*mid),smoothstep(0.45,0.6,ms)*0.6); }
       if(rel>3.3){ bc*=0.8+0.25*n3(vw*vec3(3.0,0.4,3.0)); } }
     if(DET>0.5){ /* トゥーン（セル）の光：面の向きで3段階の明るさ。空からの明るい光と、たいまつの暖かい光。色はあざやかに */
       #ifdef HASN
@@ -13524,12 +13525,12 @@ function fpOpen30(){
       vec3 nn=vec3(0.0,1.0,0.0);
       #endif
       if(dot(nn,EYE-vw)<0.0) nn=-nn;
-      float kd=dot(nn,normalize(vec3(0.35,0.9,0.3))); float tb=kd>0.55?1.0:(kd>0.12?0.8:0.62);
-      vec3 hemi=mix(vec3(0.62,0.58,0.78),vec3(1.0,0.95,0.86),nn.y*0.5+0.5);
-      vec3 c=bc*tb*hemi*1.15*(0.8+0.3*exp(-vd/12.0));
-      vec3 L=vec3(0.0);for(int i=0;i<6;i++){vec3 q=LT[i]-vw;float dd=dot(q,q);float ld=dot(nn,q*inversesqrt(dd+0.0001));float tl=ld>0.35?1.0:(ld>0.05?0.6:0.3);L+=vec3(1.0,0.66,0.34)*LF[i]*tl/(1.0+0.1*dd);}
-      c+=bc*L*1.2;float lu=dot(c,vec3(0.3,0.59,0.11));c=mix(vec3(lu),c,1.22);c=1.0-exp(-c*1.4);
-      c=mix(c,vec3(0.11,0.09,0.16),smoothstep(26.0,66.0,vd));gl_FragColor=vec4(c,1.0);return; }
+      float kd=dot(nn,normalize(vec3(0.3,0.9,0.35))); float tb=kd>0.55?1.0:(kd>0.12?0.78:0.6);
+      vec3 hemi=mix(vec3(0.42,0.44,0.56),vec3(0.8,0.8,0.86),nn.y*0.5+0.5);   /* 洞窟のつめたい青い光 */
+      vec3 c=bc*tb*hemi*(0.62+0.5*exp(-vd/11.0));
+      vec3 L=vec3(0.0);for(int i=0;i<6;i++){vec3 q=LT[i]-vw;float dd=dot(q,q);float ld=dot(nn,q*inversesqrt(dd+0.0001));float tl=ld>0.35?1.0:(ld>0.05?0.62:0.3);L+=vec3(1.0,0.62,0.3)*LF[i]*tl/(1.0+0.16*dd);}
+      c+=bc*L*1.7;float lu=dot(c,vec3(0.3,0.59,0.11));c=mix(vec3(lu),c,1.15);c=1.0-exp(-c*1.5);   /* たいまつのまわりだけ暖かく明るい */
+      c=mix(c,vec3(0.03,0.04,0.07),smoothstep(18.0,52.0,vd));gl_FragColor=vec4(c,1.0);return; }
     vec3 c=bc*g*(0.55+0.8*exp(-vd/7.0));c+=vec3(0.05,0.03,0.012)*exp(-vd/4.0);
     vec3 L=vec3(0.0);for(int i=0;i<6;i++){vec3 q=vw-LT[i];L+=vec3(1.0,0.56,0.24)*LF[i]/(1.0+0.22*dot(q,q));}c+=bc*L*1.05+L*0.02;c=1.0-exp(-c*1.35);
     c=mix(c,vec3(0.012,0.01,0.01),smoothstep(18.0,48.0,vd));gl_FragColor=vec4(c,1.0);}`);   /* 部屋の出入口の壁をくりぬく（門の黒い板も）／たいまつの明かり */
@@ -13544,7 +13545,7 @@ function fpOpen30(){
   function stairs(a, b){ const CS = a.CS, zA0 = a.Z + a.ZE - CS, zB0 = b.Z + b.ZS + CS, OV = 1.6, zA = zA0 + OV, zB = zB0 - OV, r = 0.4, X0 = -3.2, NX = Math.round(6.4 / r) + 1, NZ = Math.max(2, Math.round((zA - zB) / r) + 1), dz = (zA - zB) / (NZ - 1);   /* 層の洞窟と1.6m重ねて、つなぎ目のすき間（黒い筋）を隠す */
     const yAt = z => { const t = Math.max(0, Math.min(1, (zA0 - z) / (zA0 - zB0))); return a.Y + (b.Y - a.Y) * (t * t * (3 - 2 * t)); }, inOv = z => z > zA0 || z < zB0;
     const occ = new Float32Array(NX * NZ); for (let j = 0; j < NZ; j++) for (let i = 0; i < NX; i++) { const x = X0 + i * r, z = zA - j * dz, w = 1.75 + 0.25 * Math.sin(z * 0.7 + a.i); occ[j * NX + i] = Math.max(0, Math.min(1, (w + 0.6 - Math.abs(x)) / 1.2)) + nz(x, 0, z, 7) * 0.12; }
-    const P = [], C = [], I = [], ISO = 0.5, FC = [118, 96, 72], CC = [70, 60, 66], WC = [104, 86, 70];
+    const P = [], C = [], I = [], ISO = 0.5, FC = [124, 100, 74], CC = [52, 52, 60], WC = [104, 98, 98];
     const vtx = (x, y, z, col, amp) => { const q = jit(x, y, z, amp), sh = 0.8 + 0.4 * (nz(x * 3, y * 3, z * 3, 4) + 0.5); P.push(q[0], q[1], q[2]); C.push(...col.map(c => Math.min(255, c * sh))); return P.length / 3 - 1; };
     for (let j = 0; j < NZ - 1; j++) for (let i = 0; i < NX - 1; i++) { const Xs = [X0 + i * r, X0 + (i + 1) * r, X0 + (i + 1) * r, X0 + i * r], Zs = [zA - j * dz, zA - j * dz, zA - (j + 1) * dz, zA - (j + 1) * dz], V = [occ[j * NX + i], occ[j * NX + i + 1], occ[(j + 1) * NX + i + 1], occ[(j + 1) * NX + i]];
       const poly = [], cross = []; for (let k = 0; k < 4; k++) { const k2 = (k + 1) % 4; if (V[k] >= ISO) poly.push([Xs[k], Zs[k]]); if ((V[k] >= ISO) !== (V[k2] >= ISO)) { const t = (ISO - V[k]) / (V[k2] - V[k]), p2 = [Xs[k] + (Xs[k2] - Xs[k]) * t, Zs[k] + (Zs[k2] - Zs[k]) * t]; poly.push(p2); cross.push(p2); } }
@@ -13727,7 +13728,7 @@ function fpOpen30(){
   const AMP = y => 0.18 + 0.3 * Math.min(1, Math.max(0, y) / 2.5);
   function layerMesh(Rm){ const F = layerField(Rm), { NX, NZ, r, x0, zt, occ } = F, P = [], C = [], I = [], ISO = 0.5;
     const vtx = (x, y, z, col, amp) => { const q = jit(x, y, z, amp == null ? AMP(y) : amp), sh = 0.8 + 0.4 * (nz(x * 3, y * 3, z * 3, 4) + 0.5); P.push(q[0], q[1], q[2]); C.push(...col.map(c => Math.min(255, c * sh))); return P.length / 3 - 1; };
-    const FC = [118, 96, 72], CC = [70, 60, 66], WC = [104, 86, 70];   /* あたたかい黄土色の岩（明るく、影は紫寄り） */
+    const FC = [124, 100, 74], CC = [52, 52, 60], WC = [104, 98, 98];   /* 洞窟：壁は青みがかった灰色の岩、床は土の茶色、天井は暗い青 */
     for (let j = 0; j < NZ - 1; j++) for (let i = 0; i < NX - 1; i++) { const X = [x0 + i * r, x0 + (i + 1) * r, x0 + (i + 1) * r, x0 + i * r], Z = [zt - j * r, zt - j * r, zt - (j + 1) * r, zt - (j + 1) * r], V = [occ[j * NX + i], occ[j * NX + i + 1], occ[(j + 1) * NX + i + 1], occ[(j + 1) * NX + i]];
       const poly = [], cross = []; for (let k = 0; k < 4; k++) { const k2 = (k + 1) % 4; if (V[k] >= ISO) poly.push([X[k], Z[k]]); if ((V[k] >= ISO) !== (V[k2] >= ISO)) { const t = (ISO - V[k]) / (V[k2] - V[k]), p = [X[k] + (X[k2] - X[k]) * t, Z[k] + (Z[k2] - Z[k]) * t]; poly.push(p); cross.push(p); } }
       if (poly.length >= 3) { const fl = poly.map(p => vtx(p[0], 0, p[1], FC, 0.12)), ce = poly.map(p => vtx(p[0], F.h(p[0], p[1]), p[1], CC)); for (let k = 1; k + 1 < poly.length; k++) { I.push(fl[0], fl[k], fl[k + 1]); I.push(ce[0], ce[k + 1], ce[k]); } }
