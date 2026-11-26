@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層59／No.350（11/25 00:49）";
+const VER20 = "層60／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -14648,6 +14648,7 @@ const DM30 = [["room30", "🏠", "部屋"], ["g20", "🧭", "育成"], ["mixopen
 const DM30X = [["dex", "📖", "図鑑"], ["trap24go", "🪤", "罠を作らせる"], ["openroom", "🚪", "部屋を開く"], ["skipraid", "⏩", "襲撃の日まで飛ばす"]];
 setInterval(() => { try {
   if (typeof S === "undefined" || !S) return; const fp = document.getElementById("fp26"), inTut = typeof TUT !== "undefined" && S.tut < TUT.length;
+  if (!fp && N && !N.scout && !modal && !(typeof stage !== "undefined" && stage) && !document.querySelector(".kk25ov")) { fpOpen26(); return; }   /* 夜なのに歩く画面が閉じていたら開く（層を作り直した直後に夜になると、2Dのまま夜になっていた） */
   if (!fp) { if (!N && view === "day" && !modal && !inTut && !(typeof stage !== "undefined" && stage) && !document.querySelector(".kk25ov") && document.querySelector('#app [data-a="nextday"]')) fpOpen26(); return; }
   if (!N && window.__fp26 && window.__fp26.rooms && window.__fp26.rooms.length !== S.path.length && !document.body.classList.contains("pan30")) { const x = fp.querySelector('[data-f="x"]'); if (x) { x.click(); return; } }   /* 掘って層が増えたら、歩く画面を作り直す（新しい層が出ていなかった） */
   let bar = fp.querySelector(".dm30"); if (N) { if (bar) bar.remove(); return; }
@@ -14774,7 +14775,14 @@ ${p} .top{min-height:0!important}`;
    歩く画面が出ているときは、窓をいちばん外（bodyの直下）へ移して、必ず手前に出す。押したときの処理は document で受けているので動く */
 { const st = document.createElement("style"); st.textContent = `body>.modal.mv30{z-index:70!important}
 #fp26 .f26menu{z-index:35!important;max-width:min(260px,60%)}`; document.head.appendChild(st); }
-{ const _r = render; render = function () { document.querySelectorAll("body>.modal.mv30").forEach(e => e.remove()); const out = _r.apply(this, arguments); try { if (document.getElementById("fp26") && !document.body.classList.contains("pan30")) { const m = document.querySelector("#app>.modal"); if (m) { m.classList.add("mv30"); document.body.appendChild(m); } } } catch (e) {} return out; }; }
+{ const _r = render; render = function () { try { return _r.apply(this, arguments); } finally { try { const fresh = document.querySelector("#app>.modal"), useFp = document.getElementById("fp26") && !document.body.classList.contains("pan30");
+    if (fresh) { document.querySelectorAll("body>.modal.mv30").forEach(e => e.remove()); if (useFp) { fresh.classList.add("mv30"); document.body.appendChild(fresh); } }
+    else if (typeof modal === "undefined" || !modal) document.querySelectorAll("body>.modal.mv30").forEach(e => e.remove()); } catch (e) {} } }; }   /* 描き直しの途中で止まっても、窓が消えたままにならないように */
+/* 窓が出ているあいだは「✕ 歩く画面へ」を隠す（保管庫の窓の上に重なり、押しても何も起きなかった） */
+{ const st = document.createElement("style"); st.textContent = `body:has(.modal) .pan30x{display:none!important}`; document.head.appendChild(st); }
+/* 窓の「閉じる」はいつも下に見えるように（主の窓などが長くて、閉じるが画面の外に出ていた） */
+{ const st = document.createElement("style"); st.textContent = `.mbox>button[data-a="close"]:last-of-type,.mbox>button[data-a="close"]{position:sticky;bottom:-8px;z-index:30;box-shadow:0 -8px 16px #000c}`; document.head.appendChild(st); }
+
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------
