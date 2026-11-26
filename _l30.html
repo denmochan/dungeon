@@ -14863,6 +14863,10 @@ ${p} .mbox .mixrow{padding:4px 6px!important}
 ${p} .mbox>button:last-child,${p} .mbox>button[data-a="close"]{min-height:36px!important;padding:6px!important}
 ${p} .top{min-height:0!important}`;
   st.textContent = css(L) + `${Q}{${css("")}}`; document.head.appendChild(st); }
+/* 背の低い画面で、結果画面の中身が縮んで重なっていた（「つづける」がほかのボタンの上にかぶる）→ 縮ませず、はみ出したらスクロール */
+{ const st = document.createElement("style"); st.textContent = `.stage>*{flex-shrink:0!important}.stage.result{padding-bottom:90px!important}.stage>button[data-a="stagenext"]{box-shadow:0 -10px 24px #000c}
+/* オフラインの札は、保存が終わったら消す（窓のすみにかぶっていた） */
+#off26.ok{display:none!important}`; document.head.appendChild(st); }
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------
