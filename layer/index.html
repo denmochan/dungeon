@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層47／No.350（11/25 00:49）";
+const VER20 = "層48／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -14506,14 +14506,16 @@ document.addEventListener("click", ev => { const b = ev.target.closest && ev.tar
 #fp26 .sens30 h4{margin:0;font-size:15px}#fp26 .sens30 label{display:grid;grid-template-columns:7em 1fr 2.4em;align-items:center;gap:8px;font-size:13px}#fp26 .sens30 input{width:100%}#fp26 .sens30 b{text-align:right}`; document.head.appendChild(st); }
 /* 行きたい層へすぐ行く（本人「行きたい層に行きづらい」）：左上の層の名前を押すと、層の一覧から選んで飛べる */
 document.addEventListener("click", ev => { const w = document.getElementById("fp26"); if (!w) return; const hit = ev.target.closest && ev.target.closest("#fp26 .f26where"); const pick = ev.target.closest && ev.target.closest("#fp26 .lj30 [data-li]");
+  const swb = ev.target.closest && ev.target.closest("#fp26 .lj30 [data-sw]");
+  if (swb) { ev.stopPropagation(); const a = +swb.dataset.sw, b = +swb.dataset.sw2; let ok = false; try { ok = swapRoom7(S, a, b); } catch (e) {} if (!ok) { try { toast("この2つは入れ替えられない（本道と脇道どうしは不可）"); } catch (e) {} return; } try { save(); toast(`🔀 第${Math.min(a, b)}層と第${Math.max(a, b)}層を入れ替えた`); } catch (e) {} window.__fpLast26 = null; const x = w.querySelector('[data-f="x"]'); if (x) x.click(); return; }   /* 層の入れ替え：中身ごと入れ替えて、歩く画面を作り直す */
   if (pick) { ev.stopPropagation(); const F = window.__fp26, i = +pick.dataset.li, R = F && F.rooms[i]; w.querySelector(".lj30") && w.querySelector(".lj30").remove(); if (!R) return; if (window.__ovh30 && window.__ovh30.free) { const G = g30(S, i); window.__ovh30.t = R.classic ? [0, R.Y, R.Z + (FPK26.RZ0 || -10) * 0.5] : [0, R.Y, R.Z - (G.H - 1) / 2 * L30.CS]; window.__ovh30.li = i; return; }
     F.P.auto = null; if (F.go) F.go(i); F.P.x = 0; F.P.z = R.classic ? R.Z + (R.ZS || 0) - 1 : R.Z - L30.CS * 0.6; F.P.y = R.Y; F.P.yaw = 0; if (!R.classic) { try { const G = g30(S, i), mid = (G.W - 1) >> 1, pth = bfs30(G, [mid, 0], [mid, G.H - 1]); const c = pth && pth[Math.min(2, pth.length - 1)]; if (c) { const tx = (c[0] - mid) * L30.CS, tz = R.Z - c[1] * L30.CS; F.P.yaw = Math.atan2(tx - F.P.x, -(tz - F.P.z)); } } catch (e) {} }   /* 道の続くほうを向く */ try { toast(`🚶 ${R.name}へ`); } catch (e) {} return; }
   if (!hit) { if (!(ev.target.closest && ev.target.closest("#fp26 .lj30"))) { const o = w.querySelector(".lj30"); if (o) o.remove(); } return; }
   ev.stopPropagation(); let o = w.querySelector(".lj30"); if (o) { o.remove(); return; } const F = window.__fp26; if (!F) return;
-  o = document.createElement("div"); o.className = "lj30"; o.innerHTML = `<b>どの層へ行く？</b>` + F.rooms.map((R, i) => `<button data-li="${i}">${R.classic ? "👑" : i === 0 ? "🚪" : "⛏"} ${esc(R.name)}<small>B${(R.f || 0) + 1}</small></button>`).join(""); o.addEventListener("pointerdown", e => e.stopPropagation()); w.appendChild(o); }, true);
+  o = document.createElement("div"); o.className = "lj30"; const sw = i => typeof swappable7 === "function" && swappable7(S, i); o.innerHTML = `<b>どの層へ行く？</b><small class="ljh">⇅で層の順番を入れ替え（入口と主の間は動かせない）</small>` + F.rooms.map((R, i) => `<div class="ljr"><button data-li="${i}">${R.classic ? "👑" : i === 0 ? "🚪" : "⛏"} ${esc(R.name)}<small>B${(R.f || 0) + 1}${R.sub ? "・" + R.sub : ""}</small></button>${sw(i) && sw(i - 1) ? `<button class="sw" data-sw="${i}" data-sw2="${i - 1}" title="上と入れ替え">▲</button>` : '<i class="sw0"></i>'}${sw(i) && sw(i + 1) ? `<button class="sw" data-sw="${i}" data-sw2="${i + 1}" title="下と入れ替え">▼</button>` : '<i class="sw0"></i>'}</div>`).join(""); o.addEventListener("pointerdown", e => e.stopPropagation()); w.appendChild(o); }, true);
 { const st = document.createElement("style"); st.textContent = `#fp26 .f26where{cursor:pointer;pointer-events:auto}#fp26 .f26where b::after{content:" ▾";font-size:11px;opacity:.7}
 #fp26 .lj30{position:absolute;left:max(8px,env(safe-area-inset-left));top:44px;z-index:60;background:rgba(20,14,10,.95);border:1px solid #6a5444;border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:5px;max-height:calc(100% - 60px);overflow:auto;min-width:180px}
-#fp26 .lj30 b{font-size:13px;color:#f3e6cf;padding:2px 4px}#fp26 .lj30 button{display:flex;justify-content:space-between;gap:10px;padding:7px 10px;font-size:14px;text-align:left}#fp26 .lj30 small{opacity:.7}`; document.head.appendChild(st); }
+#fp26 .lj30 b{font-size:13px;color:#f3e6cf;padding:2px 4px}#fp26 .lj30 .ljh{font-size:10.5px;opacity:.75;padding:0 4px 2px}#fp26 .lj30 .ljr{display:flex;gap:4px}#fp26 .lj30 .ljr>button:first-child{flex:1}#fp26 .lj30 .sw{width:34px;padding:0;justify-content:center;font-size:12px}#fp26 .lj30 .sw0{width:34px;display:inline-block}#fp26 .lj30 button{display:flex;justify-content:space-between;gap:10px;padding:7px 10px;font-size:14px;text-align:left}#fp26 .lj30 small{opacity:.7}`; document.head.appendChild(st); }
 
 // ================= night30：夜、勇者は層の中の道を1マスずつ進む =================
 // 計算の中身（戦い・罠の強さ）は今までのものを使う。そのうえで：
