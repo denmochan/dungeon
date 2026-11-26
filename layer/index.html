@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層46／No.350（11/25 00:49）";
+const VER20 = "層47／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -14129,7 +14129,7 @@ function fpOpen30(){
     /* 近くに来たら足を止めて、こちらを向く（気づいたら ♪） */ { const dx = P.x - a.x, dz = P.z - (R.Z + a.z), d = Math.hypot(dx, dz); if (R.i === curRoom && d < 3.4 + (a.H || 0) * 0.45) { a.walking = false; a.wait = Math.max(a.wait, 1.5); const tr = Math.atan2(dx, dz), dr = ((tr - a.r) % 6.2832 + 9.4248) % 6.2832 - 3.1416; a.r += dr * Math.min(1, dt * 5); if (!a.nt) a.nt = performance.now(); return; } else if (d > 6 + (a.H || 0) * 0.45) a.nt = 0; }
     if (!a.walking) { a.wait -= dt; if (a.wait <= 0) { for (let k = 0; k < 8; k++) { const ang = Math.random() * 6.28, d = 2 + Math.random() * 5, x = a.hx + Math.cos(ang) * d, z = a.hz + Math.sin(ang) * d; let okp = fitsM(R, a, x, z) && sepOK(R, a, x, z, 1); for (let t = 0.25; okp && t < 1; t += 0.25) okp = fitsM(R, a, a.x + (x - a.x) * t, a.z + (z - a.z) * t); if (okp) { a.tx = x; a.tz = z; a.walking = true; break; }   /* 体の大きさで通れる所だけ（大きい子が壁にめりこんでいた） */ } a.wait = 2 + Math.random() * 4; } return; }
     const dx = a.tx - a.x, dz = a.tz - a.z, L = Math.hypot(dx, dz); if (L < 0.1) { a.walking = false; return; } const s = Math.min(L, 2.2 * Math.sqrt(a.mult || 1) * dt); a.x += dx / L * s; a.z += dz / L * s; a.dist += s; a.r = Math.atan2(dx, dz); }); }
-  let curRoom = 0, lastT = performance.now(), ft = [];
+  let curRoom = rooms.reduce((b, R, i) => { const zc = R.Z + ((R.ZS || 0) + (R.ZE || 0)) / 2, zb = rooms[b].Z + ((rooms[b].ZS || 0) + (rooms[b].ZE || 0)) / 2; return Math.abs(zc - P.z) < Math.abs(zb - P.z) ? i : b; }, 0), lastT = performance.now()   /* 始まりの層を、立っている場所から決める（層が増えたあと、まっ暗なところに出ていた） */, ft = [];
   const FPQ = window.__FPQ29 = window.__FPQ29 || { q: 1, t: 0 };
   function loop(now){ if (now - (loop.t30 || 0) > 700) (loop.t30 = now, rooms).forEach(Rm => { if (!Rm.classic && Rm.mb && Rm.ck !== Rm.G30.c) rebuild(Rm); });   /* 部屋の画面で広げたら、層の絵も作り直す */ if (!alive) return; requestAnimationFrame(loop);
     let dt = Math.max(0.001, Math.min(0.1, (now - lastT) / 1000)); lastT = now; ft.push(dt); if (ft.length > 20) ft.shift(); fpsEl.textContent = Math.round(ft.length / ft.reduce((x, y) => x + y, 0)) + "fps"; if (now < FXS.hs) dt *= 0.04; else if (now < FXS.slo) dt *= 0.3;   /* ヒットストップとスロー */
@@ -14635,12 +14635,13 @@ const DM30 = [["room30", "🏠", "部屋"], ["g20", "🧭", "育成"], ["mixopen
 setInterval(() => { try {
   if (typeof S === "undefined" || !S) return; const fp = document.getElementById("fp26"), inTut = typeof TUT !== "undefined" && S.tut < TUT.length;
   if (!fp) { if (!N && view === "day" && !modal && !inTut && !(typeof stage !== "undefined" && stage) && !document.querySelector(".kk25ov") && document.querySelector('#app [data-a="nextday"]')) fpOpen26(); return; }
+  if (!N && window.__fp26 && window.__fp26.rooms && window.__fp26.rooms.length !== S.path.length && !document.body.classList.contains("pan30")) { const x = fp.querySelector('[data-f="x"]'); if (x) { x.click(); return; } }   /* 掘って層が増えたら、歩く画面を作り直す（新しい層が出ていなかった） */
   let bar = fp.querySelector(".dm30"); if (N) { if (bar) bar.remove(); return; }
   if (!bar) { bar = document.createElement("div"); bar.className = "dm30"; fp.appendChild(bar); bar.addEventListener("click", ev => { const b = ev.target.closest("[data-d]"); if (!b) return; ev.stopPropagation(); const d = b.dataset.d;
     if (d === "g20" || d === "room30") { let ri = null; if (d === "room30") { try { const F = window.__fp26, Rs = (F && F.rooms) || []; ri = Rs.slice().sort((a, c) => Math.abs(a.Z - F.P.z) - Math.abs(c.Z - F.P.z))[0].i; } catch (e) {} }
       if (d === "room30" && ri != null && S.path[ri] && S.path[ri].kind === "den") { page20 = null; roomSel = roomOpen = ri; } else { page20 = "grow"; roomSel = roomOpen = null; } modal = null; pan30(true); render(); return; }
     const t = document.querySelector('#app [data-a="' + d + '"]'); if (t) t.click(); else if (typeof fpAct28 === "function") fpAct28(d); }); }
-  const L = DM30.filter(([a]) => a === "room30" || a === "g20" || document.querySelector('#app [data-a="' + a + '"]')), raid = (() => { try { return isRaid9(S); } catch (e) { return false; } })(), key = L.map(x => x[0]).join(",") + (raid ? "!" : "");
+  const L = DM30.filter(([a]) => !/^(trap24go|openroom|skipraid)$/.test(a) || document.querySelector('#app [data-a="' + a + '"]'))   /* いつも出すボタンは固定（2Dの画面の状態で消えていた） */, raid = (() => { try { return isRaid9(S); } catch (e) { return false; } })(), key = L.map(x => x[0]).join(",") + (raid ? "!" : "");
   if (bar.dataset.k !== key) { bar.dataset.k = key; bar.innerHTML = L.map(([a, i, t]) => a === "nextday" && raid ? `<button data-d="${a}" class="main raid">⚔<small>迎え撃つ</small></button>` : `<button data-d="${a}"${a === "nextday" ? ' class="main"' : ""}>${i}<small>${t}</small></button>`).join(""); }
 } catch (e) {} }, 400);
 /* 育成・部屋は、歩く画面の上に重ねて出す（歩く画面は閉じない）。✕でもどる */
