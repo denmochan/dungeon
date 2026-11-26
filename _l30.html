@@ -13745,6 +13745,39 @@ document.addEventListener("click", ev => { const b = ev.target.closest && ev.tar
 // 前のセーブで、ほかの種族の名前（狼に「ホネ」など）がついている子は、一度だけ種族に合う名前に直す（自分でつけた名前はそのまま）
 applySave = (prev => function () { const r = prev.apply(this, arguments); try { if (S && S.mons && !S.nm30fix) { S.nm30fix = 1; const all = {}; Object.keys(NAMES30).forEach(k => NAMES30[k].forEach(n => { (all[n] = all[n] || []).push(k); })); const used = new Set(S.mons.map(m => m.nick)); S.mons.forEach(m => { if (m.named30) return; const ks = all[m.nick]; if (ks && !ks.includes(nameKind30(m.sp))) { used.delete(m.nick); m.nick = name30(m.sp, used); used.add(m.nick); } }); } } catch (e) {} return r; })(applySave);
 
+// ================= pact30：縛り（本人「難しさを選べるとよい。何を難しくするかを選べるとよし」）。重い縛りほど魂が多い =================
+const P30 = [
+  { id: "hp", ic: "🛡", n: "勇者が硬い", d: "勇者の体力 +40%", w: 1 },
+  { id: "atk", ic: "🗡", n: "勇者が鋭い", d: "勇者の攻撃 +30%", w: 1 },
+  { id: "many", ic: "👥", n: "勇者が多い", d: "勇者がいつも1人多い", w: 2 },
+  { id: "poor", ic: "💎", n: "稼ぎが細い", d: "掘る💎 -30%", w: 1 },
+  { id: "trap", ic: "🪤", n: "罠が効きにくい", d: "罠のダメージ -40%", w: 1 },
+  { id: "lord", ic: "👑", n: "主が弱る", d: "夜の主の体力 -40%", w: 2 },
+];
+const pact30 = k => !!(typeof S !== "undefined" && S && (S.pact30 || []).includes(k));
+const pactW30 = T => P30.filter(p => (T.pact30 || []).includes(p.id)).reduce((a, p) => a + p.w, 0);
+const pactRate30 = T => 1 + 0.25 * pactW30(T);
+let PSEL30 = null;
+partySize5 = (prev => S0 => prev(S0) + ((S0.pact30 || []).includes("many") ? 1 : 0))(partySize5);
+makeParty5 = (prev => function (S0, rnd) { const out = prev.apply(this, arguments); try { const P = S0.pact30 || []; if (P.length) out.forEach(h => { if (P.includes("hp")) { h.hp = Math.round(h.hp * 1.4); h.max = h.hp; } if (P.includes("atk")) h.atk = Math.round(h.atk * 1.3); }); } catch (e) {} return out; })(makeParty5);
+jobGain9 = (prev => function (S0, m, i) { const g = prev.apply(this, arguments); try { if (g && g.dp && (S0.pact30 || []).includes("poor")) return { ...g, dp: Math.max(1, Math.round(g.dp * 0.7)) }; } catch (e) {} return g; })(jobGain9);
+startNight8 = (prev => function (S0, rnd) { const N0 = prev.apply(this, arguments); try { if ((S0.pact30 || []).includes("lord") && N0 && N0.lord) { N0.lord.max = Math.round(N0.lord.max * 0.6); N0.lord.hp = Math.min(N0.lord.hp, N0.lord.max); } } catch (e) {} return N0; })(startNight8);
+/* 魂：縛りの重さぶん多くもらえる（転生・契約達成のとき） */
+rebirth8 = (prev => function (S0) { const M = metaOf8(S0), b = M.souls, r = (pactW30(S0)); const T = prev.apply(this, arguments); try { const got = M.souls - b; if (got > 0 && r) M.souls += Math.round(got * 0.25 * r); } catch (e) {} return T; })(rebirth8);
+nextContract9 = (prev => function (S0) { const M = metaOf8(S0), b = M.souls, r = pactW30(S0); const out = prev.apply(this, arguments); try { const got = M.souls - b; if (got > 0 && r) M.souls += Math.round(got * 0.25 * r); } catch (e) {} return out; })(nextContract9);
+/* 難易度の画面に縛りを足す（2周目から。はじめての主さまには出さない） */
+diffScreen15 = (prev => function () { let h = prev.apply(this, arguments); try { if (!PSEL30) PSEL30 = new Set(S.pact30 || metaOf8(S).lastPact30 || []); const T = { pact30: [...PSEL30] }, D = DIFF15[diffSel];
+  const box = `<div class="pact30"><div class="ph"><b>⛓ 縛り</b><small>好きに組み合わせる。重いほど魂が多い</small><span class="gold">魂 ×${D.rate}${PSEL30.size ? ` ×${pactRate30(T).toFixed(2)}` : ""}</span></div><div class="pl">${P30.map(p => `<button data-a="pc30" data-v="${p.id}" class="${PSEL30.has(p.id) ? "on" : ""}"><div class="r1"><span>${p.ic}</span><b>${p.n}</b><i>${"⛓".repeat(p.w)}</i></div><small>${p.d}</small></button>`).join("")}</div></div>`;
+  const at = h.indexOf('<button class="main big" data-a="diffgo"'); return at > 0 ? h.slice(0, at) + box + h.slice(at) : h + box; } catch (e) { return h; } })(diffScreen15);
+document.addEventListener("click", ev => { const t = ev.target.closest && ev.target.closest('[data-a="pc30"],[data-a="diffgo"],[data-a="start"]'); if (!t || typeof S === "undefined" || !S) return; const a = t.dataset.a;
+  if (a === "pc30") { ev.stopImmediatePropagation(); ev.preventDefault(); const k = t.dataset.v; PSEL30 = PSEL30 || new Set(); PSEL30.has(k) ? PSEL30.delete(k) : PSEL30.add(k); render(); return; }
+  if (a === "diffgo") { if (freshRun15(S)) { S.pact30 = [...(PSEL30 || [])]; metaOf8(S).lastPact30 = S.pact30.slice(); PSEL30 = null; } return; }
+  if (a === "start") { try { if (freshRun15(S) && !diffScr && !S.diffOk23 && diffMax15(S) === 0 && (metaOf8(S).runs || 0) >= 1) { ev.stopImmediatePropagation(); ev.preventDefault(); diffScr = true; diffSel = 0; render(); } } catch (e) {} } }, true);
+{ const st = document.createElement("style"); st.textContent = `.pact30{width:100%;max-width:560px;margin:8px auto;text-align:left}.pact30 .ph{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}.pact30 .ph small{opacity:.75;font-size:11px}.pact30 .ph .gold{margin-left:auto}
+.pact30 .pl{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:5px;margin-top:5px}.pact30 .pl button{display:flex!important;flex-direction:column;align-items:stretch;text-align:left;padding:5px 8px;font-size:13px;gap:1px}.pact30 .pl .r1{display:flex;align-items:center;gap:5px}.pact30 .pl .r1 span{font-size:16px}.pact30 .pl .r1 i{margin-left:auto;font-style:normal;font-size:10px;opacity:.8}.pact30 .pl button small{font-size:10.5px;opacity:.8}.pact30 .pl button.on{background:#7a2a1e!important;border-color:#e8b84a!important;color:#fff}`; document.head.appendChild(st); }
+/* 夜の画面のすみに、いまの縛りを出す */
+document.addEventListener("click", ev => { const t = ev.target.closest && ev.target.closest('[data-a="rebirth"]'); if (!t || typeof S === "undefined" || !S) return; try { const w = pactW30(S); if (!w) return; const M = metaOf8(S), b = M.souls; setTimeout(() => { try { const got = M.souls - b; if (got > 0) { const add = Math.round(got * 0.25 * w); M.souls += add; save(); toast(`⛓ 縛りの分 👻+${add}`); } } catch (e) {} }, 0); } catch (e) {} }, true);
+
 // ================= fp30：層を歩く（fp26 を層用に作り替えたもの） =================
 function bfs30(G, a, b){ const W = G.W, H = G.H, k = (x, y) => y * W + x, prev = new Int32Array(W * H).fill(-2); if (!g30at(G, a[0], a[1])) return null; const q = [k(a[0], a[1])]; prev[q[0]] = -1;
   while (q.length) { const c = q.shift(), x = c % W, y = (c / W) | 0; if (x === b[0] && y === b[1]) { const out = []; let t = c; while (t >= 0) { out.unshift([t % W, (t / W) | 0]); t = prev[t]; } return out; }
@@ -14581,7 +14614,7 @@ function path30(S0, N0, h, i) { const G = g30(S0, i), mid = (G.W - 1) >> 1, main
 function los30(G, a, b) { const n = Math.max(Math.abs(b[0] - a[0]), Math.abs(b[1] - a[1])) * 3; for (let k = 0; k <= n; k++) { const t = n ? k / n : 0, x = a[0] + (b[0] - a[0]) * t, y = a[1] + (b[1] - a[1]) * t; for (const [ox, oy] of [[0.3, 0.3], [-0.3, 0.3], [0.3, -0.3], [-0.3, -0.3]]) if (!g30at(G, Math.round(x + ox * 0.5), Math.round(y + oy * 0.5))) return false; } return true; }
 function trapHit30(S0, N0, h, R, t) { const D = TRAP24[t[2]]; if (!D) return; const rnd = N0.rnd || Math.random, L = TLV24[t[3] || 0] || 1;
   const dis = 0.35 * ((h.sk && h.sk.disarm) || 0) + (typeof known10 === "function" && known10(S0, h.pos) ? 0.3 : 0); if (rnd() < dis) { say5(N0, h.name, "罠を外したぜ", h.pos); return; }
-  const keep = typeof keeper24 === "function" && keeper24(S0, h.pos) ? 1.3 : 1, prep = N0.prep23 && N0.prep23.trap ? 1.6 : 1, d = Math.round(trapBase24(S0) * D.dmg * L * 1.5 * keep * prep * (0.85 + rnd() * 0.3));
+  const keep = (typeof keeper24 === "function" && keeper24(S0, h.pos) ? 1.3 : 1) * ((S0.pact30 || []).includes("trap") ? 0.6 : 1), prep = N0.prep23 && N0.prep23.trap ? 1.6 : 1, d = Math.round(trapBase24(S0) * D.dmg * L * 1.5 * keep * prep * (0.85 + rnd() * 0.3));
   const cor0 = h.cor; h.cor = h.pos; const wk = h.walk; h.walk = 0; (h.off = h.off || {})['c' + h.pos] = 1; N0.tseen29 && delete N0.tseen29[h.id + ':' + h.pos]; const tn0 = (N0.trap29 || []).length; hurtHero5(S0, N0, h, d, null); h.walk = wk; h.cor = cor0; (N0.trap29 || []).slice(tn0).forEach(e => { if (e.b === 'h' + h.id) e.ks = [t[2]]; });   /* 踏んだ罠だけを出す（その部屋の罠がぜんぶ同時に出ていた） */   /* 3Dの罠の演出が拾えるように、通路にいるあつかいで当てる */
   /* 落石：まわり（1マス以内）の勇者にも当たる。かたまって歩く隊列に強い */ if (D.aoe) { const G = g30(S0, h.pos); N0.heroes.forEach(o => { if (o === h || o.st !== "in" || o.pos !== h.pos || !o.c30 || !h.c30) return; if (Math.abs(o.c30[0] - h.c30[0]) + Math.abs(o.c30[1] - h.c30[1]) <= 1) { hurtHero5(S0, N0, o, Math.round(d * 0.7), null); if (o.st === "in" && D.stuck) o.stuck = Math.max(o.stuck || 0, 1); (N0.trap29 || (N0.trap29 = [])).push({ b: "h" + o.id, ks: ["rock"], t: N0.t }); } }); }
   /* 鳴子：魔物が気づいて、しばらくその勇者は大きく傷つく（不意打ち） */ if (D.amb && h.st === "in") { h.amb30 = Math.max(h.amb30 || 0, Math.round(D.amb * L)); }
