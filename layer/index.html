@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層49／No.350（11/25 00:49）";
+const VER20 = "層50／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -14103,7 +14103,7 @@ function fpOpen30(){
   let VP = null, W = 1, H = 1, EYE = [0, 0, 0], SHK = 0;
   const toScr = (x, y, z) => { const v = [x, y, z, 1], o = [0, 0, 0, 0]; for (let i = 0; i < 4; i++) for (let k = 0; k < 4; k++) o[i] += VP[k * 4 + i] * v[k]; if (o[3] <= 0.1) return null; return [(o[0] / o[3] * 0.5 + 0.5) * VW(), (0.5 - o[1] / o[3] * 0.5) * VH(), o[3]]; };
   // タップ：近くの魔物 → その場のメニュー、看板 → 部屋の画面
-  function tap(sx, sy){ if (!VP) return; let best = null;
+  function tap(sx, sy){ if (!VP) return; let best = null; if (typeof N !== "undefined" && N && !N.scout) { menu.hidden = true; return; }   /* 夜の戦いの最中は、タップで会話を開かない（戦いが隠れていた） */
     /* 「▼次の部屋へ／▲前の部屋へ」の札を押すと、そこまで自動で歩く */ { const D = (window.__fpDoor26 || []).find(d => Math.abs(sx - d.x) < 70 && Math.abs(sy - d.y) < 26); if (D) { P.auto = { to: curRoom + D.dir }; toast(D.dir > 0 ? "▼ 次の部屋へ歩く（スティックで止まる）" : "▲ 前の部屋へ歩く（スティックで止まる）"); return; } }
     rooms.forEach(R => { if (Math.abs(R.i - curRoom) > 1) return;
       (R.acts || []).forEach(a => { if (a.hero || a.hide || a.lord) return; const s = toScr(a.x, R.Y + (a.H || 2) * 0.5, R.Z + a.z); if (!s) return; const d = Math.hypot(s[0] - sx, s[1] - sy), wd = Math.hypot(a.x - P.x, R.Z + a.z - P.z); if (wd < 15 + (a.H || 0) && d < 70 + (a.H || 0) * 18 && (!best || d < best.d)) best = { d, a, R }; });
@@ -14625,15 +14625,18 @@ tick = function () { clearTimeout(timer); if (!N) return; timer = setTimeout(() 
 /* 昼も歩く画面だけにする（本人「昼の画面は歩く画面に一本化」）。2Dの画面は出さず、育成・配合・店・掘る・主・次の日へは下のボタンから */
 { const st = document.createElement("style"); st.textContent = `#fp26 [data-f="x"]{display:none!important}
 #fp26 .dm30{position:absolute;right:max(8px,env(safe-area-inset-right));bottom:8px;z-index:30;display:flex;gap:3px;align-items:flex-end;background:rgba(14,10,8,.72);padding:5px 6px;border-radius:12px;max-width:calc(100% - 165px);flex-wrap:wrap;justify-content:flex-end}
-#fp26 .dm30 button{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:40px;padding:4px 3px;font-size:16px;line-height:1.1;border-radius:9px}
-#fp26 .dm30 button small{font-size:9.5px;letter-spacing:-.02em;opacity:.9;white-space:nowrap}
+#fp26 .dm30 button{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:50px;padding:4px 5px;font-size:18px;line-height:1.1;border-radius:9px}
+#fp26 .dm30 button small{font-size:11.5px;opacity:.9;white-space:nowrap}
 #fp26 .dm30 button.main{background:#e8b84a!important;color:#1a1410!important;font-weight:700;min-width:56px}
-#fp26.night30 .dm30{display:none}
+#fp26.night30 .dm30,#fp26.night30 .dmx30{display:none}
+#fp26 .dmx30{position:absolute;right:max(8px,env(safe-area-inset-right));bottom:70px;z-index:31;display:flex;flex-direction:column;gap:5px;background:rgba(14,10,8,.92);padding:6px;border-radius:12px;border:1px solid #6a5444}#fp26 .dmx30 button{padding:9px 14px;font-size:14px;text-align:left}
 #fp26 .f26nav,.fpret28{display:none!important}
 body.pan30 #app{position:fixed;inset:0;z-index:45;overflow:auto;background:#140f0c}
 body.panst30 .pan30x{display:none}
 .pan30x{position:fixed;right:max(10px,env(safe-area-inset-right));top:8px;z-index:48;padding:8px 14px;border-radius:10px;background:#e8b84a;color:#1a1410;font-weight:700;border:0;font-size:14px}`; document.head.appendChild(st); }
-const DM30 = [["room30", "🏠", "部屋"], ["g20", "🧭", "育成"], ["mixopen", "🥚", "配合"], ["shop", "🛒", "店"], ["dig", "⛏", "掘る"], ["trap24go", "🪤", "罠を作る"], ["openroom", "🚪", "部屋を開く"], ["lord", "👑", "主"], ["dex", "📖", "図鑑"], ["tut", "❓", "遊び方"], ["skipraid", "⏩", "襲撃の日へ"], ["nextday", "☀️", "次の日へ"]];
+const DM30 = [["room30", "🏠", "部屋"], ["g20", "🧭", "育成"], ["mixopen", "🥚", "配合"], ["shop", "🛒", "店"], ["dig", "⛏", "掘る"], ["lord", "👑", "主"], ["more30", "⋯", "ほか"], ["nextday", "☀️", "次の日へ"]];
+/* 使う回数の少ないものは「⋯ほか」にまとめる（12個並んで文字が小さすぎた） */
+const DM30X = [["dex", "📖", "図鑑"], ["trap24go", "🪤", "罠を作らせる"], ["openroom", "🚪", "部屋を開く"], ["skipraid", "⏩", "襲撃の日まで飛ばす"]];
 setInterval(() => { try {
   if (typeof S === "undefined" || !S) return; const fp = document.getElementById("fp26"), inTut = typeof TUT !== "undefined" && S.tut < TUT.length;
   if (!fp) { if (!N && view === "day" && !modal && !inTut && !(typeof stage !== "undefined" && stage) && !document.querySelector(".kk25ov") && document.querySelector('#app [data-a="nextday"]')) fpOpen26(); return; }
@@ -14642,8 +14645,9 @@ setInterval(() => { try {
   if (!bar) { bar = document.createElement("div"); bar.className = "dm30"; fp.appendChild(bar); bar.addEventListener("click", ev => { const b = ev.target.closest("[data-d]"); if (!b) return; ev.stopPropagation(); const d = b.dataset.d;
     if (d === "g20" || d === "room30") { let ri = null; if (d === "room30") { try { const F = window.__fp26, Rs = (F && F.rooms) || []; ri = Rs.slice().sort((a, c) => Math.abs(a.Z - F.P.z) - Math.abs(c.Z - F.P.z))[0].i; } catch (e) {} }
       if (d === "room30" && ri != null && S.path[ri] && S.path[ri].kind === "den") { page20 = null; roomSel = roomOpen = ri; } else { page20 = "grow"; roomSel = roomOpen = null; } modal = null; pan30(true); render(); return; }
+    if (d === "more30") { let m = fp.querySelector(".dmx30"); if (m) { m.remove(); return; } m = document.createElement("div"); m.className = "dmx30"; m.innerHTML = DM30X.filter(([a]) => !/^(trap24go|openroom|skipraid)$/.test(a) || document.querySelector('#app [data-a="' + a + '"]')).map(([a, i, t]) => `<button data-d="${a}">${i} ${t}</button>`).join(""); m.addEventListener("pointerdown", e => e.stopPropagation()); m.addEventListener("click", e => { const b2 = e.target.closest("[data-d]"); if (!b2) return; e.stopPropagation(); m.remove(); const t2 = document.querySelector('#app [data-a="' + b2.dataset.d + '"]'); if (t2) t2.click(); else if (typeof fpAct28 === "function") fpAct28(b2.dataset.d); }); fp.appendChild(m); return; }
     const t = document.querySelector('#app [data-a="' + d + '"]'); if (t) t.click(); else if (typeof fpAct28 === "function") fpAct28(d); }); }
-  const L = DM30.filter(([a]) => !/^(trap24go|openroom|skipraid)$/.test(a) || document.querySelector('#app [data-a="' + a + '"]'))   /* いつも出すボタンは固定（2Dの画面の状態で消えていた） */, raid = (() => { try { return isRaid9(S); } catch (e) { return false; } })(), key = L.map(x => x[0]).join(",") + (raid ? "!" : "");
+  const L = DM30   /* いつも出すボタンは固定（2Dの画面の状態で消えていた） */, raid = (() => { try { return isRaid9(S); } catch (e) { return false; } })(), key = L.map(x => x[0]).join(",") + (raid ? "!" : "");
   if (bar.dataset.k !== key) { bar.dataset.k = key; bar.innerHTML = L.map(([a, i, t]) => a === "nextday" && raid ? `<button data-d="${a}" class="main raid">⚔<small>迎え撃つ</small></button>` : `<button data-d="${a}"${a === "nextday" ? ' class="main"' : ""}>${i}<small>${t}</small></button>`).join(""); }
 } catch (e) {} }, 400);
 /* 育成・部屋は、歩く画面の上に重ねて出す（歩く画面は閉じない）。✕でもどる */
@@ -14669,14 +14673,22 @@ body.pan30 #app .tabs20,body.pan30 #app .sub20{margin-bottom:6px;gap:6px}
 body.pan30 #app .gh20{margin:2px 0 4px}
 body.pan30 #app .ghb27 button{height:32px;min-height:0;padding:2px 10px;font-size:13px}
 body.pan30 #app .flow20{margin-top:6px}`; document.head.appendChild(st); }
-{ const _r = render; render = function () { _r.apply(this, arguments); try { if (document.body.classList.contains("pan30")) document.querySelectorAll('#app [data-a="pgback"]').forEach(b => { b.textContent = "◀ 歩く画面へ"; }); } catch (e) {} }; }
+{ const _r = render; render = function () { _r.apply(this, arguments); try { if (document.body.classList.contains("pan30") && !PANST30 && page20 == null && roomSel == null && !modal && !(typeof stage !== "undefined" && stage)) { pan30(false); return; }   /* ◀で2Dの画面を閉じたら、上に重ねた画面も閉じる（閉じずに歩く画面のボタンが押せなくなっていた） */ if (document.body.classList.contains("pan30")) document.querySelectorAll('#app [data-a="pgback"]').forEach(b => { b.textContent = "◀ 歩く画面へ"; }); } catch (e) {} }; }
 /* 縦持ちでも、ぜんぶ横向きで出す（本人「横持ちと縦持ちの二つ使いはしんどい」）：歩く画面だけでなく、タイトル・育成・店・お話も90度まわす */
 { const st = document.createElement("style"); st.textContent = `html.land30,html.land30 body{overflow:hidden;height:100%}
 html.land30 body{position:fixed;left:0;top:0;margin:0;max-width:none!important;max-height:none!important;min-height:0!important;transform-origin:0 0;transform:rotate(90deg) translateY(-100%)}
 html.land30 #app{height:100%;max-width:none!important;overflow-y:auto;-webkit-overflow-scrolling:touch}
-html.land30 #fp26.rot{transform:none!important;left:0;top:0}`; document.head.appendChild(st); }
+html.land30 #fp26.rot{transform:none!important;left:0;top:0}
+html.land30 .modal{padding:6px}html.land30 .mbox{max-height:100%!important}`; document.head.appendChild(st); }
 function land30() { const p = innerHeight > innerWidth, b = document.body; document.documentElement.classList.toggle("land30", p); if (!b) return; if (p) { b.style.width = innerHeight + "px"; b.style.height = innerWidth + "px"; } else { b.style.width = b.style.height = ""; } }
 addEventListener("resize", land30); addEventListener("orientationchange", () => setTimeout(land30, 200)); setTimeout(land30, 0); setInterval(land30, 1000);
+/* 縦持ちで90度まわしたときに、画面の作りも「横持ち用」を使う（タイトルの「はじめる」が画面の外に出ていた・お知らせの上が切れていた）。
+   縦持ちのときは必ず横にまわすので、縦持ち用・幅のせまい用の作りは使わず、横持ち用の作りをいつも使う */
+function media30() { try { for (const sh of document.styleSheets) { let rules; try { rules = sh.cssRules; } catch (e) { continue; } for (const r of rules) { if (!r.media || r.__m30) continue; const t = r.media.mediaText.replace(/\s+/g, ""); r.__m30 = 1;
+  if (/^\(orientation:portrait\)$/.test(t) || /^\(max-width:(340|360|420)px\)$/.test(t)) r.media.mediaText = "not all";
+  else if (/^\(orientation:landscape\)$/.test(t)) r.media.mediaText = "all";
+  else if (/^\(orientation:landscape\)and\(max-height:(500|520)px\)$/.test(t)) r.media.mediaText = "(orientation:portrait), " + r.media.mediaText; } } } catch (e) {} }
+media30(); addEventListener("load", media30); setTimeout(media30, 1500);
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------
