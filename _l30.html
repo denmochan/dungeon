@@ -14869,9 +14869,10 @@ ${p} .top{min-height:0!important}`;
 #off26.ok{display:none!important}`; document.head.appendChild(st); }
 
 /* 歩く画面の上で窓（配合・店・掘る・主など）が開かない（iPhone）：窓は2Dの画面の中にあり、2Dの画面ごと歩く画面のうしろに隠れていた。
-   窓が開いているあいだは2Dの画面を前に出し、窓以外は見えなくする */
-{ const st = document.createElement("style"); st.textContent = `body.mod30 #app{position:relative;z-index:46!important;background:transparent!important}body.mod30 #app>:not(.modal){visibility:hidden!important}body.mod30 #app>.modal{z-index:60}`; document.head.appendChild(st); }
-{ const fix = () => { try { const on = !!(document.getElementById("fp26") && document.querySelector("#app>.modal") && !document.body.classList.contains("pan30")); document.body.classList.toggle("mod30", on); } catch (e) {} }; new MutationObserver(fix).observe(document.documentElement, { childList: true, subtree: true }); setInterval(fix, 300); }
+   歩く画面が出ているときは、窓をいちばん外（bodyの直下）へ移して、必ず手前に出す。押したときの処理は document で受けているので動く */
+{ const st = document.createElement("style"); st.textContent = `body>.modal.mv30{z-index:70!important}
+#fp26 .f26menu{z-index:35!important;max-width:min(260px,60%)}`; document.head.appendChild(st); }
+{ const _r = render; render = function () { document.querySelectorAll("body>.modal.mv30").forEach(e => e.remove()); const out = _r.apply(this, arguments); try { if (document.getElementById("fp26") && !document.body.classList.contains("pan30")) { const m = document.querySelector("#app>.modal"); if (m) { m.classList.add("mv30"); document.body.appendChild(m); } } } catch (e) {} return out; }; }
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------
