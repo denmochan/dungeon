@@ -8591,9 +8591,9 @@ const TRAP24 = {
   poison: { n: "毒沼",     ic: "🟢", dmg: 0.45, psn: 0.06, text: "毒がしみこみ、そのあとも削れ続ける（数が多い夜に強い）" },
   pit:    { n: "落とし穴", ic: "🕳", dmg: 0.7,  stuck: 2, text: "落ちた勇者は足止め。そのあいだ狙撃台・後ろの部屋が有利" },
   net:    { n: "網",       ic: "🕸", dmg: 0.25, stuck: 3, thief: 3, text: "からまって動けない。盗賊はとくに抜けにくい（逃げられ対策）" },
-  rock:   { n: "落石",     ic: "🪨", dmg: 0.6,  stuck: 1, aoe: 1, text: "岩が落ちて、まわりの勇者にも当たる。かたまって歩く隊列に強い" },
-  fire:   { n: "炎の床",   ic: "🔥", dmg: 0.5,  psn: 0.05, text: "焼けて、そのあともしばらく燃え続ける" },
-  alarm:  { n: "鳴子",     ic: "🔔", dmg: 0.1,  amb: 3, text: "痛みは小さいが、魔物が気づいてしばらく勇者が大きく傷つく。広間の手前に"},
+  rock:   { n: "落石",     ic: "🪨", dmg: 0.75,  stuck: 1, aoe: 1, text: "岩が落ちて、まわりの勇者にも当たる。かたまって歩く隊列に強い" },
+  fire:   { n: "炎の床",   ic: "🔥", dmg: 0.6,  psn: 0.09, text: "焼けて、そのあともしばらく燃え続ける" },
+  alarm:  { n: "鳴子",     ic: "🔔", dmg: 0.2,  amb: 5, text: "痛みは小さいが、魔物が気づいてしばらく勇者が大きく傷つく。広間の手前に"},
 };
 const TLV24 = [1, 1.5, 2.1], TLVN24 = ["", "改", "極"];
 const trapsOf24 = R => (R && R.trap24) || [];
@@ -14235,8 +14235,9 @@ function fpOpen30(){
     const busy = !!document.querySelector("#peek24[style*='flex'], .modal") ; if (busy) return;
     // 歩く（壁で止まったら、横すべり）
     /* 重い端末でも同じ速さで歩けるように、1コマで進む量は細かく分けて当たりを見る（前は10fps以下だとほとんど進まなかった） */
+    if (P.turn30 != null) { const dy = Math.atan2(Math.sin(P.turn30 - P.yaw), Math.cos(P.turn30 - P.yaw)); P.yaw += dy * Math.min(1, dt * 6); if (Math.abs(dy) < 0.02) P.turn30 = null; }
     if (P.auto && P.auto.pt) { const Rc = rooms[curRoom], G = Rc.G30, mid = (G.W - 1) / 2, [gx, gz] = P.auto.pt, dd = Math.hypot(gx - P.x, gz - P.z);
-      if (dd < 0.7 || (P.auto.lz != null && Math.hypot(P.z - P.auto.lz, P.x - P.auto.lx) < 0.03 && (P.auto.st = (P.auto.st || 0) + dt) > 0.8)) { P.auto = null; mv.x = mv.y = 0; FLAG30 = null; }
+      if (dd < 0.7 || (P.auto.lz != null && Math.hypot(P.z - P.auto.lz, P.x - P.auto.lx) < 0.03 && (P.auto.st = (P.auto.st || 0) + dt) > 0.8)) { P.auto = null; mv.x = mv.y = 0; FLAG30 = null; const free = a => { let d = 0; while (d < 14 && where(P.x + Math.sin(a) * (d + 0.5), P.z - Math.cos(a) * (d + 0.5))) d += 0.5; return d; }; if (free(P.yaw) < 3) { let bA = P.yaw, bS = -1; for (let k = 0; k < 24; k++) { const a = P.yaw + (k - 12) * Math.PI / 12, sc = free(a) - Math.abs(k - 12) * 0.15; if (sc > bS) { bS = sc; bA = a; } } P.turn30 = bA; } }   /* 着いた先で壁を向いていたら、ひらけた方を向く */
       else { let tx = gx, tz = gz; const c0 = [Math.round(P.x / Rc.CS + mid), Math.round(-(P.z - Rc.Z) / Rc.CS)], c1 = [Math.round(gx / Rc.CS + mid), Math.round(-(gz - Rc.Z) / Rc.CS)]; if (c0[0] !== c1[0] || c0[1] !== c1[1]) { const path = bfs30(G, c0, c1); if (path && path.length > 2) { tx = (path[1][0] - mid) * Rc.CS; tz = Rc.Z - path[1][1] * Rc.CS; } }
         const want = Math.atan2(tx - P.x, -(tz - P.z)), dy = Math.atan2(Math.sin(want - P.yaw), Math.cos(want - P.yaw)); P.yaw += dy * Math.min(1, dt * 5); mv.x = 0; mv.y = Math.abs(dy) > 1.2 ? -0.25 : -Math.min(1, 0.35 + dd / 3);
         if (P.auto.lz == null || Math.hypot(P.z - P.auto.lz, P.x - P.auto.lx) >= 0.03) { P.auto.lz = P.z; P.auto.lx = P.x; P.auto.st = 0; } } }
@@ -14838,7 +14839,7 @@ setInterval(() => { const fp = document.getElementById("fp26"); if (!fp) return;
 #fp26 .ncs30{position:absolute;left:50%;top:max(8px,env(safe-area-inset-top));transform:translateX(-50%);z-index:30;background:rgba(14,10,8,.7);border:1px solid #6a5444;border-radius:10px;padding:4px 10px;font-size:13px;white-space:nowrap;pointer-events:none;color:#f3e6cf}#fp26:not(.night30) .ncs30{display:none}`; document.head.appendChild(st); }
 /* 昼の上のまん中に、いま大事な数字だけ（歩く画面では💎も日にちも見えなかった）：日にち・次の襲撃まで・💎。押すと育成へ */
 { const st = document.createElement("style"); st.textContent = `#fp26 .dst30{position:absolute;left:50%;top:max(8px,env(safe-area-inset-top));transform:translateX(-50%);z-index:30;display:flex;gap:10px;align-items:center;background:rgba(14,10,8,.7);border:1px solid #6a5444;border-radius:10px;padding:4px 12px;font-size:13px;white-space:nowrap;color:#f3e6cf}
-#fp26 .dst30 b{color:#ffd36a}#fp26 .dst30 .r{color:#ff9a7a;font-weight:700}#fp26.night30 .dst30{display:none}`; document.head.appendChild(st); }
+#fp26 .dst30 b{color:#ffd36a;padding:0;margin:0 1px;font-size:inherit}#fp26 .dst30 .r{color:#ff9a7a;font-weight:700}#fp26.night30 .dst30{display:none}`; document.head.appendChild(st); }
 setInterval(() => { try { const fp = document.getElementById("fp26"); if (!fp || typeof S === "undefined" || !S) return; let d = fp.querySelector(".dst30"); if (!d) { d = document.createElement("div"); d.className = "dst30"; fp.appendChild(d); }
   const dr = daysToRaid9(S), CL = (S.contract && S.contract.days) || 30, t = `📅 <b>${S.day}</b>/${CL}日　${dr === 0 ? '<span class="r">⚔ 今夜 襲撃</span>' : `⚔ 襲撃まで<b>${dr}</b>日`}　💎 <b>${fmt8 ? fmt8(S.dp) : S.dp}</b>`; if (d.innerHTML !== t) d.innerHTML = t; } catch (e) {} }, 500);
 
