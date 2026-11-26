@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層38／No.350（11/25 00:49）";
+const VER20 = "層39／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -13557,6 +13557,12 @@ function apex30() { try { const ids = HYB_IDS5.filter(k => MON[k].rank === Math.
   return `<div class="box" style="background:linear-gradient(135deg,#2a1d12,#1a120c);border:1px solid #8a6a3a;margin:8px 0"><div style="display:flex;align-items:baseline;gap:8px"><b>🏔 配合の頂点</b><small class="hint">いちばん上の魔物。まだ姿は見えない</small></div><div style="display:flex;gap:18px;flex-wrap:wrap;margin-top:6px">${ids.map(k => { const d = dep(k), nm = known(k) ? MON[k].forms[0][0] : MON[k].forms[0][0].slice(0, 1) + "？".repeat(Math.max(1, MON[k].forms[0][0].length - 1)), P = MON[k].parents;
     return `<div style="display:flex;align-items:center;gap:8px">${known(k) ? img(k, 0, "sp", "width:54px;height:54px") : sil(k)}<div><b style="font-size:15px">${esc(nm)}</b><div class="hint">${d ? `あと<b>${d}</b>世代` : "作れる！"}</div><div style="display:flex;gap:4px;align-items:center;margin-top:3px">${face(P[0])}<small>＋</small>${face(P[1])}</div></div></div>`; }).join("")}</div></div>`; } catch (e) { return ""; } }
 mixScreen = (prev => function () { const h = prev.apply(this, arguments); try { return h.replace("</div>", "</div>" + apex30()); } catch (e) { return h; } })(mixScreen);
+/* 教師の効き目を見せる（本人「教師役を作ってもどれだけ伸びたか分からない」）：朝の報告に、だれがだれに教えて経験が何倍になったかを出す */
+function teachNote30() { try { const out = []; S.path.forEach((r, i) => { const t = teacher18(S, i); if (!t) return; const kids = S.mons.filter(m => m.home === i && m !== t && !restLeft9(S, m) && jobOf12(S, m) === "train"); if (!kids.length) { out.push(`🎓 <b>${esc(t.nick)}</b>：教える子がいない（📚鍛える役の子を同じ部屋に）`); return; }
+    const mul = kids.map(m => teachMul18(t, m)), av = mul.reduce((a, b) => a + b, 0) / mul.length; let add = 0; kids.forEach(m => { try { const g = jobGain9(S, m, i); if (g && g.xp) add += g.xp - Math.round(g.xp / teachMul18(t, m)); } catch (e) {} });
+    out.push(`🎓 <b>${esc(t.nick)}</b>が${kids.map(m => esc(m.nick)).join("・")}に教えた：経験 <b>×${av.toFixed(2)}</b>${add > 0 ? `（教えた分 +${add}）` : ""}`); });
+  return out.length ? `<div class="box" style="text-align:left;margin:6px auto;max-width:520px;font-size:13px;line-height:1.6">${out.join("<br>")}</div>` : ""; } catch (e) { return ""; } }
+resultStage15 = (prev => function (r) { let h = prev(r); try { if (r.dawnOnly || r.d28) { const n = teachNote30(); if (n) { const at = h.indexOf('<button class="main big" data-a="stagenext"'); h = at > 0 ? h.slice(0, at) + n + h.slice(at) : h + n; } } } catch (e) {} return h; })(resultStage15);
 
 // ================= trait30：特技を増やす（本人「スキルの数を増やしてほしい。書で保存できるから増えても大丈夫」） =================
 // 武器の道（剣術→剣豪→剣聖…）とは別に持つ「特技」。効果は今までの部品の組み合わせ
