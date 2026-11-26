@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層35／No.350（11/25 00:49）";
+const VER20 = "層36／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -14543,6 +14543,22 @@ setInterval(() => { try { const fp = document.getElementById("fp26"), on = docum
   document.body.classList.toggle("panst30", !!(PANST30 && st)); if (fp && !N && st && !on) { PANST30 = 1; page20 = null; pan30(true); render(); return; }   /* 朝の報告などは、歩く画面の上に重ねて見せる */
   if (on && PANST30 && !st && !modal && !(typeof queue !== "undefined" && queue.length)) { PANST30 = 0; pan30(false); page20 = null; roomSel = roomOpen = null; render(); } } catch (e) {} }, 400);
 document.addEventListener("click", ev => { if (!document.body.classList.contains("pan30")) return; const b = ev.target.closest && ev.target.closest('[data-a="pgback"]'); if (!b) return; ev.stopImmediatePropagation(); ev.preventDefault(); const x = document.querySelector(".pan30x"); if (x) x.click(); }, true);
+/* 育成・部屋を横持ち用に：下のボタン列を左の縦の列にして、中身を右に広く。上の帯は細く */
+{ const st = document.createElement("style"); st.textContent = `
+body.pan30 #app .top{height:30px;min-height:0;padding:2px 10px;margin:4px 6px}
+body.pan30 #app .top>button{display:none}
+body.pan30:has(#app .bar20) .pan30x{display:none}
+body.pan30 #app .main-area{display:block;margin:0;padding:0}
+body.pan30 #app .bar20{position:fixed;left:max(6px,env(safe-area-inset-left));top:40px;bottom:32px;width:128px;display:flex;flex-direction:column;gap:6px;margin:0;padding:0;z-index:46}
+body.pan30 #app .bar20>button{flex:1 1 0;width:100%;min-height:0;font-size:13px;padding:4px 6px;border-radius:10px}
+body.pan30 #app .bar20>button small{font-size:10px}
+body.pan30 #app .pg20{position:fixed;left:calc(max(6px,env(safe-area-inset-left)) + 136px);right:max(6px,env(safe-area-inset-right));top:40px;bottom:6px;overflow:auto;margin:0;padding:0 2px 10px}
+body.pan30 #app .tabs20 button,body.pan30 #app .sub20 button{min-height:0;height:32px;padding:2px 8px;font-size:13px}
+body.pan30 #app .tabs20,body.pan30 #app .sub20{margin-bottom:6px;gap:6px}
+body.pan30 #app .gh20{margin:2px 0 4px}
+body.pan30 #app .ghb27 button{height:32px;min-height:0;padding:2px 10px;font-size:13px}
+body.pan30 #app .flow20{margin-top:6px}`; document.head.appendChild(st); }
+{ const _r = render; render = function () { _r.apply(this, arguments); try { if (document.body.classList.contains("pan30")) document.querySelectorAll('#app [data-a="pgback"]').forEach(b => { b.textContent = "◀ 歩く画面へ"; }); } catch (e) {} }; }
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------
