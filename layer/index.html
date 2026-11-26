@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層62／No.350（11/25 00:49）";
+const VER20 = "層63／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -14785,6 +14785,52 @@ ${p} .top{min-height:0!important}`;
 
 /* 窓の下に貼った「閉じる」の陰に、下のほうのボタン（店の「💎で呼ぶ」など）がもぐらないように、下に余白をとる */
 { const st = document.createElement("style"); st.textContent = `.mbox{scroll-padding-bottom:64px;padding-bottom:4px}`; document.head.appendChild(st); }
+
+/* ================= 横持ちの小さい画面で、窓と2Dの画面を詰める（本人「狭い画面の整理は必須」） =================
+   ・説明の文は1行で切る（押すと全部出る）。見出しは小さく
+   ・縦に1つずつ並んでいたもの（魔物の行・配合の行・稼ぐ子・部屋の役目）は横に並べて、1画面で見える数を増やす
+   ・層が1つしかないときの「入口の層」だけのタブと、部屋の見出しを1行にまとめる */
+{ const st = document.createElement("style"); st.textContent = `@media (orientation:landscape) and (max-height:500px){
+.mbox h2{font-size:15px!important;margin:0 0 4px!important;padding-bottom:3px!important}
+.mbox>.hint:not(.box),.pg20 .gh20 .hint,.cnt20 .hint,.lane20 .lh .hint{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;max-width:100%;cursor:pointer}
+.mbox>.hint.op30,.cnt20 .hint.op30,.lane20 .lh .hint.op30{white-space:normal}
+.cnt20 .hint+.hint{display:none}
+.mbox .pk{margin:4px 0!important}.mbox .pk button{padding:4px 6px!important;min-height:0!important}
+.mf21{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;gap:12px;overflow-x:auto;padding:4px 6px!important;margin:4px 0!important;scrollbar-width:none}
+.mf21 .chips20{flex-wrap:nowrap!important;flex-shrink:0;margin:0!important}
+.mf21 .chip20{padding:2px 7px!important;min-height:0!important}
+.mbox>*{flex-shrink:0}
+.mbox:has(>.row),.mbox:has(>.mixrow){flex-direction:row!important;flex-wrap:wrap!important;align-content:flex-start;align-items:stretch}
+.mbox:has(>.row)>*,.mbox:has(>.mixrow)>*{flex:0 0 100%;box-sizing:border-box}
+.mbox>.row{flex:0 0 calc(50% - 3px)!important;margin:0!important;padding:3px!important;box-sizing:border-box}
+.mbox>.row img.sp{width:40px!important;height:40px!important}
+.mbox>.row .tx{min-width:0}.mbox>.row .sks{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.big29 button{flex-direction:row!important;gap:8px;padding:6px!important;min-height:0!important}.big29 small{display:none}
+.shopc18 .sim{width:56px!important;height:56px!important}.shopc18 .why{display:none}
+.shopc18 .sline{display:inline-block;margin-right:8px}
+.shopc18 .sb{display:flex!important;gap:4px;flex-wrap:wrap}.shopc18 .sb button{flex:1;padding:5px 4px!important}
+.mbox .box{padding:5px 8px!important;margin:4px 0!important}
+.mbox>.mixrow{flex:0 0 calc(50% - 3px)!important;margin:0!important;padding:2px!important}
+.mbox>.mixrow img.sp{width:36px!important;height:36px!important}.mbox>.mixrow .tx{min-width:0;flex:1}.mbox>.mixrow>.hint{font-size:11px}
+.pg20{display:grid!important;grid-template-columns:auto 1fr;column-gap:6px;align-content:start}
+.pg20>*{grid-column:1/-1}.pg20>.tabs20{grid-column:1}.pg20>.tabs20+.sub20{grid-column:2}
+.pg20>.tabs20 .tab20,.pg20>.sub20 button{padding:3px 10px!important;min-height:0!important;height:30px}
+.pg20>.tabs20,.pg20>.sub20{margin:0 0 4px!important}
+.pgb20{display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;gap:4px;align-content:flex-start}
+.pgb20>*{flex:1 1 100%!important;margin:0!important}.pgb20>.lane20{flex:1 1 calc(50% - 4px)!important;min-width:0;padding:4px 6px!important}
+.pgb20 .tok20{min-height:0!important}.combo19 small{display:none}
+.pg20 .gh20{display:none}.ghb27{margin:0 0 4px!important}.ghb27 button{padding:4px 8px!important;min-height:0!important}
+.col20{display:flex!important;flex-direction:row!important;flex-wrap:wrap;gap:4px;align-items:flex-start;padding:5px!important}
+.col20>h4,.col20>.cr20{flex:1 1 100%;margin:0!important}
+.col20>.mini20{flex:0 0 auto;width:auto!important;margin:0!important}
+.inv25top{flex-wrap:nowrap!important;padding:4px 8px!important;gap:10px!important;min-height:0!important;align-items:center}
+.inv25top .kk25mapc{width:auto!important;flex:0 0 auto;margin:0!important}.inv25top .inv25cl{padding:5px 12px!important;margin-left:auto;order:9}
+.inv25top>*{white-space:nowrap}
+.inv25svg{width:min(56vw,560px)!important}
+.inv25sheet{top:46px!important;width:min(400px,40vw)!important;z-index:3}
+.inv25map::after{content:"村や街をタップ → くわしく・攻める";position:absolute;right:0;width:40vw;top:50%;text-align:center;color:#bfae98;font-size:13px;opacity:.8;pointer-events:none}
+}`; document.head.appendChild(st); media30();
+  document.addEventListener("click", e => { const h = e.target.closest && e.target.closest(".mbox>.hint,.cnt20 .hint,.lane20 .lh .hint"); if (h) h.classList.toggle("op30"); }, true); }
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------
