@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層55／No.350（11/25 00:49）";
+const VER20 = "層56／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -14744,6 +14744,27 @@ setInterval(() => { const fp = document.getElementById("fp26"); if (!fp) return;
 #fp26 .dst30 b{color:#ffd36a;padding:0;margin:0 1px;font-size:inherit}#fp26 .dst30 .r{color:#ff9a7a;font-weight:700}#fp26.night30 .dst30{display:none}`; document.head.appendChild(st); }
 setInterval(() => { try { const fp = document.getElementById("fp26"); if (!fp || typeof S === "undefined" || !S) return; let d = fp.querySelector(".dst30"); if (!d) { d = document.createElement("div"); d.className = "dst30"; fp.appendChild(d); }
   const dr = daysToRaid9(S), CL = (S.contract && S.contract.days) || 30, t = `📅 <b>${S.day}</b>/${CL}日　${dr === 0 ? '<span class="r">⚔ 今夜 襲撃</span>' : `⚔ 襲撃まで<b>${dr}</b>日`}　💎 <b>${fmt8 ? fmt8(S.dp) : S.dp}</b>`; if (d.innerHTML !== t) d.innerHTML = t; } catch (e) {} }, 500);
+/* 横持ち（縦持ちで回したときも）の小さい画面用に、大きすぎる所を締める（本人「左のUIとかデカく感じる」）
+   ・育成／部屋の左の列：ボタンを縦に引きのばさない。細くして上に寄せ、「次の日へ」だけ下
+   ・窓（店・配合・主など）：横に広く使う。店は魔物を横に並べる。見出しと余白を小さく */
+{ const st = document.createElement("style"); const L = "html.land30", Q = "@media (orientation:landscape) and (max-height:520px)";
+  const css = (p) => `
+${p} body.pan30 #app .bar20{width:92px!important;justify-content:flex-start;gap:6px!important;bottom:8px!important}
+${p} body.pan30 #app .bar20>button{flex:0 0 auto!important;height:auto!important;min-height:44px!important;padding:6px 4px!important;font-size:12px!important;line-height:1.25}
+${p} body.pan30 #app .bar20>button:last-child{margin-top:auto}
+${p} body.pan30 #app .bar20>button small{font-size:10px!important}
+${p} body.pan30 #app .pg20{left:calc(max(6px,env(safe-area-inset-left)) + 100px)!important}
+${p} .modal{padding:6px!important}
+${p} .mbox{max-width:min(900px,98%)!important;padding:8px 10px!important;gap:6px!important}
+${p} .mbox h2{font-size:16px!important;margin:0!important;padding-bottom:4px!important}
+${p} .mbox .hint{font-size:11.5px!important}
+${p} .mbox .shop18{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:6px}
+${p} .mbox .shopc18{margin:0!important}
+${p} .mbox .big29 button,${p} .mbox .pk button{padding:6px 8px!important;min-height:0!important}
+${p} .mbox .mixrow{padding:4px 6px!important}
+${p} .mbox>button:last-child,${p} .mbox>button[data-a="close"]{min-height:36px!important;padding:6px!important}
+${p} .top{min-height:0!important}`;
+  st.textContent = css(L) + `${Q}{${css("")}}`; document.head.appendChild(st); }
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------
