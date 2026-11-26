@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層41／No.350（11/25 00:49）";
+const VER20 = "層42／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -14358,7 +14358,7 @@ function fpOpen30(){
     rooms.forEach(Rm => (Rm.acts || []).forEach(a => { const t = a.hero ? a.face : a.tg; if (a.bt && t) { a.r = Math.atan2(t.x - a.x, t.z - a.z); } }));   /* 戦っている相手のほうを向く */
     /* 罠：踏んだ瞬間（トゲが飛び出す・穴に落ちる・網がかぶさる・毒がわく）と、外された瞬間 */ { const TL = N.trap29 || []; NW30.ti = NW30.ti ?? TL.length; while (NW30.ti < TL.length) { const e = TL[NW30.ti++]; let A = null, RA = null; rooms.forEach(Rm => (Rm.acts || []).forEach(a => { if (a.hid === e.b) { A = a; RA = Rm; } })); if (!A) continue; const T0 = performance.now();
         e.ks.forEach((k, j) => FX30.push({ k: "trap", tk: k, who: A, Rm: RA, x: A.x, z: A.z, t0: T0 + j * 220, life: 1500 })); if (e.ks.includes("pit")) A.pit30 = T0; if (e.ks.includes("net")) A.net30 = T0; A.fl = T0 + 120; A.kb = { t0: T0, dx: 0, dz: 0.001, k: 0 };
-        const TN = { spike: "トゲ床！", pit: "落とし穴！", net: "網！", poison: "毒沼！", rock: "落石！", fire: "炎の床！", alarm: "鳴子！魔物が気づいた" }; POPS30.push({ x: A.x, y: RA.Y + 2.4, z: RA.Z + A.z, txt: e.ks.map(k => TN[k] || "罠！").join(""), col: "#ffb070", big: 1, t: T0 }); SHK = Math.max(SHK, 0.15); try { noise16(0, 0.12, 0.08, 500); } catch (er) {} }
+        const TN = { spike: "トゲ床！", pit: "落とし穴！", net: "網！", poison: "毒沼！", rock: "落石！", fire: "炎の床！", alarm: "🔔魔物が気づいた！" }; POPS30.push({ x: A.x, y: RA.Y + 3.3, z: RA.Z + A.z, txt: e.ks.map(k => TN[k] || "罠！").join(""), col: "#ffb070", big: 1, t: T0 }); SHK = Math.max(SHK, 0.15); try { noise16(0, 0.12, 0.08, 500); } catch (er) {} }
       const EV = N.events || []; NW30.ei = NW30.ei ?? EV.length; while (NW30.ei < EV.length) { const ev = EV[NW30.ei++]; if (!ev || ev.text !== "罠を外したぜ") continue; const h = N.heroes.find(x => x.name === ev.who); let A = null, RA = null; rooms.forEach(Rm => (Rm.acts || []).forEach(a => { if (h && a.hid === "h" + h.id) { A = a; RA = Rm; } })); if (!A) continue; const T0 = performance.now(); A.dis30 = T0; FX30.push({ k: "trap", tk: "disarm", who: A, Rm: RA, x: A.x, z: A.z, t0: T0, life: 1400 }); POPS30.push({ x: A.x, y: RA.Y + 2.4, z: RA.Z + A.z, txt: "🔧 罠を外された", col: "#9fd0ff", big: 0, t: T0 }); } }
     // 当たった：数字と、たたいた子の動き
     const H = N.hit25 || []; while (NW30.hi < H.length) { const e = H[NW30.hi++]; const find = key => { let o = null; rooms.forEach(Rm => (Rm.acts || []).forEach(a => { if ((key[0] === "h" && a.hid === key) || (key[0] === "m" && a.m && !a.hero && "m" + a.m.id === key)) o = [a, Rm]; })); return o; };
@@ -14472,7 +14472,7 @@ function los30(G, a, b) { const n = Math.max(Math.abs(b[0] - a[0]), Math.abs(b[1
 function trapHit30(S0, N0, h, R, t) { const D = TRAP24[t[2]]; if (!D) return; const rnd = N0.rnd || Math.random, L = TLV24[t[3] || 0] || 1;
   const dis = 0.35 * ((h.sk && h.sk.disarm) || 0) + (typeof known10 === "function" && known10(S0, h.pos) ? 0.3 : 0); if (rnd() < dis) { say5(N0, h.name, "罠を外したぜ", h.pos); return; }
   const keep = typeof keeper24 === "function" && keeper24(S0, h.pos) ? 1.3 : 1, prep = N0.prep23 && N0.prep23.trap ? 1.6 : 1, d = Math.round(trapBase24(S0) * D.dmg * L * 1.5 * keep * prep * (0.85 + rnd() * 0.3));
-  const cor0 = h.cor; h.cor = h.pos; const wk = h.walk; h.walk = 0; (h.off = h.off || {})['c' + h.pos] = 1; N0.tseen29 && delete N0.tseen29[h.id + ':' + h.pos]; hurtHero5(S0, N0, h, d, null); h.walk = wk; h.cor = cor0;   /* 3Dの罠の演出が拾えるように、通路にいるあつかいで当てる */
+  const cor0 = h.cor; h.cor = h.pos; const wk = h.walk; h.walk = 0; (h.off = h.off || {})['c' + h.pos] = 1; N0.tseen29 && delete N0.tseen29[h.id + ':' + h.pos]; const tn0 = (N0.trap29 || []).length; hurtHero5(S0, N0, h, d, null); h.walk = wk; h.cor = cor0; (N0.trap29 || []).slice(tn0).forEach(e => { if (e.b === 'h' + h.id) e.ks = [t[2]]; });   /* 踏んだ罠だけを出す（その部屋の罠がぜんぶ同時に出ていた） */   /* 3Dの罠の演出が拾えるように、通路にいるあつかいで当てる */
   /* 落石：まわり（1マス以内）の勇者にも当たる。かたまって歩く隊列に強い */ if (D.aoe) { const G = g30(S0, h.pos); N0.heroes.forEach(o => { if (o === h || o.st !== "in" || o.pos !== h.pos || !o.c30 || !h.c30) return; if (Math.abs(o.c30[0] - h.c30[0]) + Math.abs(o.c30[1] - h.c30[1]) <= 1) { hurtHero5(S0, N0, o, Math.round(d * 0.7), null); if (o.st === "in" && D.stuck) o.stuck = Math.max(o.stuck || 0, 1); (N0.trap29 || (N0.trap29 = [])).push({ b: "h" + o.id, ks: ["rock"], t: N0.t }); } }); }
   /* 鳴子：魔物が気づいて、しばらくその勇者は大きく傷つく（不意打ち） */ if (D.amb && h.st === "in") { h.amb30 = Math.max(h.amb30 || 0, Math.round(D.amb * L)); }
   if (h.st !== "in") return; if (D.stuck) h.stuck = Math.max(h.stuck || 0, Math.round(D.stuck * L + (h.job === "thief" && D.thief ? D.thief : 0))); if (D.psn) h.poison = (h.poison || 0) + Math.round(trapBase24(S0) * D.psn * L);
