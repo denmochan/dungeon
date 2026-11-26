@@ -14784,7 +14784,7 @@ body.pan30 #app .flow20{margin-top:6px}`; document.head.appendChild(st); }
 /* 縦持ちでも、ぜんぶ横向きで出す（本人「横持ちと縦持ちの二つ使いはしんどい」）：歩く画面だけでなく、タイトル・育成・店・お話も90度まわす */
 { const st = document.createElement("style"); st.textContent = `html.land30,html.land30 body{overflow:hidden;height:100%}
 html.land30 body{position:fixed;left:0;top:0;margin:0;max-width:none!important;max-height:none!important;min-height:0!important;transform-origin:0 0;transform:rotate(90deg) translateY(-100%)}
-html.land30 #app{height:100%;max-width:none!important;overflow-y:auto;-webkit-overflow-scrolling:touch}
+html.land30 #app{height:100%;max-width:none!important;overflow-y:auto}
 html.land30 #fp26.rot{transform:none!important;left:0;top:0}
 html.land30 .modal{padding:6px}html.land30 .mbox{max-height:100%!important}`; document.head.appendChild(st); }
 function land30() { const p = innerHeight > innerWidth, b = document.body; document.documentElement.classList.toggle("land30", p); if (!b) return; if (p) { b.style.width = innerHeight + "px"; b.style.height = innerWidth + "px"; } else { b.style.width = b.style.height = ""; } }
@@ -14867,6 +14867,11 @@ ${p} .top{min-height:0!important}`;
 { const st = document.createElement("style"); st.textContent = `.stage>*{flex-shrink:0!important}.stage.result{padding-bottom:90px!important}.stage>button[data-a="stagenext"]{box-shadow:0 -10px 24px #000c}
 /* オフラインの札は、保存が終わったら消す（窓のすみにかぶっていた） */
 #off26.ok{display:none!important}`; document.head.appendChild(st); }
+
+/* 歩く画面の上で窓（配合・店・掘る・主など）が開かない（iPhone）：窓は2Dの画面の中にあり、2Dの画面ごと歩く画面のうしろに隠れていた。
+   窓が開いているあいだは2Dの画面を前に出し、窓以外は見えなくする */
+{ const st = document.createElement("style"); st.textContent = `body.mod30 #app{position:relative;z-index:46!important;background:transparent!important}body.mod30 #app>:not(.modal){visibility:hidden!important}body.mod30 #app>.modal{z-index:60}`; document.head.appendChild(st); }
+{ const fix = () => { try { const on = !!(document.getElementById("fp26") && document.querySelector("#app>.modal") && !document.body.classList.contains("pan30")); document.body.classList.toggle("mod30", on); } catch (e) {} }; new MutationObserver(fix).observe(document.documentElement, { childList: true, subtree: true }); setInterval(fix, 300); }
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------
