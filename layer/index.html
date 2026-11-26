@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層60／No.350（11/25 00:49）";
+const VER20 = "層61／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -14725,7 +14725,7 @@ media30(); addEventListener("load", media30); setTimeout(media30, 1500);
 #fp26 .lj30{top:50px!important}
 #fp26 .nc30{bottom:max(8px,env(safe-area-inset-bottom))!important}
 body:has(#fp26) .lay30tag,body:has(#fp26) #off26{display:none!important}
-@media (max-height:350px){#fp26 .dm30{grid-auto-rows:40px}#fp26 .dm30 button{height:40px}#fp26 .dm30 button small{display:none}#fp26 .f26map{width:96px!important;height:70px!important}}
+@media (max-height:350px){#fp26 .dm30{grid-auto-rows:40px}#fp26 .dm30 button{height:40px}#fp26 .dm30 button:not(.main) small{display:none}#fp26 .f26map{width:96px!important;height:70px!important}}
 html.land30 #fp26 .dm30{grid-auto-rows:46px}`; document.head.appendChild(st); }
 /* ⋯ に「⚙ 感度」「🪤 罠と施設を動かす」を入れる */
 DM30X.unshift(["fpdig30", "🪤", "罠と施設を動かす"], ["fpsens30", "⚙", "操作の感度"]);

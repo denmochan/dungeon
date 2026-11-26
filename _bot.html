@@ -14879,7 +14879,8 @@ ${p} .top{min-height:0!important}`;
 /* 窓が出ているあいだは「✕ 歩く画面へ」を隠す（保管庫の窓の上に重なり、押しても何も起きなかった） */
 { const st = document.createElement("style"); st.textContent = `body:has(.modal) .pan30x{display:none!important}`; document.head.appendChild(st); }
 /* 窓の「閉じる」はいつも下に見えるように（主の窓などが長くて、閉じるが画面の外に出ていた） */
-{ const st = document.createElement("style"); st.textContent = `.mbox>button[data-a="close"]:last-of-type,.mbox>button[data-a="close"]{position:sticky;bottom:-8px;z-index:5;box-shadow:0 -8px 16px #000c}`; document.head.appendChild(st); }
+{ const st = document.createElement("style"); st.textContent = `.mbox>button[data-a="close"]:last-of-type,.mbox>button[data-a="close"]{position:sticky;bottom:-8px;z-index:30;box-shadow:0 -8px 16px #000c}`; document.head.appendChild(st); }
+
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------
