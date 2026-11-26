@@ -14768,6 +14768,13 @@ body.pan30 #app .gh20{margin:2px 0 4px}
 body.pan30 #app .ghb27 button{height:32px;min-height:0;padding:2px 10px;font-size:13px}
 body.pan30 #app .flow20{margin-top:6px}`; document.head.appendChild(st); }
 { const _r = render; render = function () { _r.apply(this, arguments); try { if (document.body.classList.contains("pan30")) document.querySelectorAll('#app [data-a="pgback"]').forEach(b => { b.textContent = "◀ 歩く画面へ"; }); } catch (e) {} }; }
+/* 縦持ちでも、ぜんぶ横向きで出す（本人「横持ちと縦持ちの二つ使いはしんどい」）：歩く画面だけでなく、タイトル・育成・店・お話も90度まわす */
+{ const st = document.createElement("style"); st.textContent = `html.land30,html.land30 body{overflow:hidden;height:100%}
+html.land30 body{position:fixed;left:0;top:0;margin:0;max-width:none!important;max-height:none!important;min-height:0!important;transform-origin:0 0;transform:rotate(90deg) translateY(-100%)}
+html.land30 #app{height:100%;max-width:none!important;overflow-y:auto;-webkit-overflow-scrolling:touch}
+html.land30 #fp26.rot{transform:none!important;left:0;top:0}`; document.head.appendChild(st); }
+function land30() { const p = innerHeight > innerWidth, b = document.body; document.documentElement.classList.toggle("land30", p); if (!b) return; if (p) { b.style.width = innerHeight + "px"; b.style.height = innerWidth + "px"; } else { b.style.width = b.style.height = ""; } }
+addEventListener("resize", land30); addEventListener("orientationchange", () => setTimeout(land30, 200)); setTimeout(land30, 0); setInterval(land30, 1000);
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------

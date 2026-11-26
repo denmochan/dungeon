@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層48／No.350（11/25 00:49）";
+const VER20 = "層49／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -14670,6 +14670,13 @@ body.pan30 #app .gh20{margin:2px 0 4px}
 body.pan30 #app .ghb27 button{height:32px;min-height:0;padding:2px 10px;font-size:13px}
 body.pan30 #app .flow20{margin-top:6px}`; document.head.appendChild(st); }
 { const _r = render; render = function () { _r.apply(this, arguments); try { if (document.body.classList.contains("pan30")) document.querySelectorAll('#app [data-a="pgback"]').forEach(b => { b.textContent = "◀ 歩く画面へ"; }); } catch (e) {} }; }
+/* 縦持ちでも、ぜんぶ横向きで出す（本人「横持ちと縦持ちの二つ使いはしんどい」）：歩く画面だけでなく、タイトル・育成・店・お話も90度まわす */
+{ const st = document.createElement("style"); st.textContent = `html.land30,html.land30 body{overflow:hidden;height:100%}
+html.land30 body{position:fixed;left:0;top:0;margin:0;max-width:none!important;max-height:none!important;min-height:0!important;transform-origin:0 0;transform:rotate(90deg) translateY(-100%)}
+html.land30 #app{height:100%;max-width:none!important;overflow-y:auto;-webkit-overflow-scrolling:touch}
+html.land30 #fp26.rot{transform:none!important;left:0;top:0}`; document.head.appendChild(st); }
+function land30() { const p = innerHeight > innerWidth, b = document.body; document.documentElement.classList.toggle("land30", p); if (!b) return; if (p) { b.style.width = innerHeight + "px"; b.style.height = innerWidth + "px"; } else { b.style.width = b.style.height = ""; } }
+addEventListener("resize", land30); addEventListener("orientationchange", () => setTimeout(land30, 200)); setTimeout(land30, 0); setInterval(land30, 1000);
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------
