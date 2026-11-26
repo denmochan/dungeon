@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層31／No.350（11/25 00:49）";
+const VER20 = "層32／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -13445,7 +13445,12 @@ function g30make(i, R) {
   T.forEach((tp, k) => { const q = cor[Math.min(cor.length - 1, Math.floor((k + 0.5) * cor.length / Math.max(1, T.length)))]; if (q && !t.some(z => z[0] === q[0] && z[1] === q[1])) t.push([q[0], q[1], tp.k, tp.lv || 0]); });
   return { W, H, V: L30.V, c: c.join(""), t };
 }
-const g30 = (S0, i) => { const R = S0.path[i]; if (!R) return null; if (!R.g30 || R.g30.W !== L30.W || R.g30.V !== L30.V) R.g30 = g30make(i, R); return R.g30; };
+const g30 = (S0, i) => { const R = S0.path[i]; if (!R) return null; if (!R.g30 || R.g30.W !== L30.W || R.g30.V !== L30.V) R.g30 = g30make(i, R); if (!R.g30.e30 && R.kind !== "lord") g30ent(R.g30); return R.g30; };
+/* 入口すぐ（3マス）は細い道だけにする。広間が入口に接していると、層に入った瞬間に戦いが始まっていた */
+function g30ent(G) { G.e30 = 1; const W = G.W, H = G.H, mid = (W - 1) >> 1, NEAR = 4; const walk = () => { const d = g30dist(G, mid, 0); let n = 0, all = 0; for (let k = 0; k < W * H; k++) { if (+G.c[k]) { all++; if (d[k] >= 0) n++; } } return n === all && d[(H - 1) * W + mid] >= 0; };
+  const main = bfs30(G, [mid, 0], [mid, H - 1]) || [], onMain = new Set(main.map(([x, y]) => y * W + x));
+  for (let y = 0; y < NEAR; y++) for (let x = 0; x < W; x++) { if (g30at(G, x, y) !== 2) continue; if (onMain.has(y * W + x)) { g30set(G, x, y, 1); continue; } g30set(G, x, y, 0); if (!walk()) g30set(G, x, y, 1); }
+  G.t = (G.t || []).filter(t => g30at(G, t[0], t[1]) === 1); }
 const g30at = (G, x, y) => x < 0 || y < 0 || x >= G.W || y >= G.H ? 0 : +G.c[y * G.W + x];
 const g30set = (G, x, y, v) => { const a = G.c.split(""); a[y * G.W + x] = String(v); G.c = a.join(""); };
 // 層の罠：置いた罠（R.trap24）と g30.t をそろえる（新しく作った罠は空いている道へ、消えた罠は消す）
@@ -13479,7 +13484,7 @@ function g30grow(G, seed) { const W = G.W, H = G.H, rnd = g30rnd(5113 + seed * 9
 // ※同じ名前の関数を上書きしている（後に書いたほうが使われる）
 function g30grow(G, seed) { const W = G.W, H = G.H, trapAt = (x, y) => (G.t || []).some(q => q[0] === x && q[1] === y), rnd = g30rnd(5113 + seed * 977), mid = (W - 1) >> 1, main = bfs30(G, [mid, 0], [mid, H - 1]) || [], onMain = new Set(main.map(([x, y]) => y * W + x));
   for (const [hw, hh] of [[4, 3], [3, 4], [3, 3], [3, 2], [2, 3], [2, 2]]) { let best = null;
-    for (let y0 = 2; y0 + hh <= H - 2; y0++) for (let x0 = 1; x0 + hw <= W - 1; x0++) { let mp = 0, hall = 0, rock = 0; for (let y = y0; y < y0 + hh; y++) for (let x = x0; x < x0 + hw; x++) { const v = g30at(G, x, y); if (onMain.has(y * W + x)) mp++; if (trapAt(x, y)) hall += 99; if (v === 2) hall++; if (!v) rock++; }
+    for (let y0 = 4; y0 + hh <= H - 2; y0++) for (let x0 = 1; x0 + hw <= W - 1; x0++) { let mp = 0, hall = 0, rock = 0; for (let y = y0; y < y0 + hh; y++) for (let x = x0; x < x0 + hw; x++) { const v = g30at(G, x, y); if (onMain.has(y * W + x)) mp++; if (trapAt(x, y)) hall += 99; if (v === 2) hall++; if (!v) rock++; }
       let nearHall = 0; for (let y = y0 - 1; y <= y0 + hh; y++) for (let x = x0 - 1; x <= x0 + hw; x++) if (g30at(G, x, y) === 2 && (x < x0 || x >= x0 + hw || y < y0 || y >= y0 + hh)) nearHall = 1;
       if (!mp || hall || nearHall || rock < hw * hh * 0.4) continue; const sc = -rock - mp * 0.5 + rnd() * 1.5; if (!best || sc < best.sc) best = { sc, x0, y0 }; }
     if (best) { for (let y = best.y0; y < best.y0 + hh; y++) for (let x = best.x0; x < best.x0 + hw; x++) g30set(G, x, y, 2); return true; } }
@@ -13657,7 +13662,8 @@ function fpOpen30(){
     uniform float DET;uniform float FY;uniform float CUT;
     float n3(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(mix(h(i),h(i+vec3(1,0,0)),f.x),mix(h(i+vec3(0,1,0)),h(i+vec3(1,1,0)),f.x),f.y),mix(mix(h(i+vec3(0,0,1)),h(i+vec3(1,0,1)),f.x),mix(h(i+vec3(0,1,1)),h(i+vec3(1,1,1)),f.x),f.y),f.z);}
     float fb(vec3 p){return 0.55*n3(p)+0.3*n3(p*2.03+1.7)+0.15*n3(p*4.1+3.1);}
-    void main(){if(vw.y>CUT)discard;if(DR.z>0.5){if(DR.y>0.5&&abs(vl.x)<2.3&&vl.y>0.12&&vl.y<2.2+0.62*(1.0-vl.x*vl.x/5.3)&&vl.z<DR.w)discard;if(DR.x>0.5&&vl.z>7.0&&vl.z<11.5&&abs(vl.x)<2.6&&vl.y>-0.6&&vl.y<3.5&&max(vc.r,max(vc.g,vc.b))<0.1)discard;}
+    void main(){if(vw.y>CUT)discard;if(CUT<1.0e8&&!gl_FrontFacing){float r=0.85+0.3*fb(vw*vec3(0.45,0.1,0.45));gl_FragColor=vec4(vec3(0.24,0.19,0.16)*r,1.0);return;}   /* 上から見るとき：切った岩の断面は岩の色でふさぐ（暗い板に見えていた） */
+    if(DR.z>0.5){if(DR.y>0.5&&abs(vl.x)<2.3&&vl.y>0.12&&vl.y<2.2+0.62*(1.0-vl.x*vl.x/5.3)&&vl.z<DR.w)discard;if(DR.x>0.5&&vl.z>7.0&&vl.z<11.5&&abs(vl.x)<2.6&&vl.y>-0.6&&vl.y<3.5&&max(vc.r,max(vc.g,vc.b))<0.1)discard;}
     float g=0.9+0.2*h(floor(vw*13.0));vec3 bc=vc;
     if(DET>2.5){ vec3 e=vc*1.25+vec3(0.05); e=mix(e,vec3(0.012,0.01,0.01),smoothstep(26.0,60.0,vd)*0.85); gl_FragColor=vec4(e,1.0); return; }   /* 光るもの：水晶・火・きのこ。暗がりでも暗くならない */
     if(DET>1.5){ g=1.0; bc*=0.9+0.2*n3(vw*14.0); bc*=0.92+0.16*n3(vw*vec3(1.5,9.0,1.5)); }   /* 飾り：細かい木目・ざらつき（ドットの四角い模様は出さない） */
@@ -14065,7 +14071,7 @@ function fpOpen30(){
     if (msg.isConnected && R0.mb) msg.remove(); if (R0.err) msg.textContent = R0.err;
     if (ft.length >= 20) { const fps = ft.length / ft.reduce((x, y) => x + y, 0); FPQ.t += dt; if (FPQ.t > 1.5) { FPQ.t = 0; if (fps < 26 && FPQ.q > 0.5) FPQ.q = Math.max(0.5, FPQ.q - 0.15); else if (fps > 50 && FPQ.q < 1) FPQ.q = Math.min(1, FPQ.q + 0.1); } }   /* 重い端末では自動で解像度を下げる（なめらかさを優先） */
     const dpr = Math.min(2, window.devicePixelRatio || 1) * FPQ.q, r = { width: cv.clientWidth, height: cv.clientHeight }; W = Math.round(r.width * dpr); H = Math.round(r.height * dpr); if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
-    gl.viewport(0, 0, W, H); gl.clearColor(0.17, 0.135, 0.13, 1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.viewport(0, 0, W, H); gl.clearColor(...(window.__ovh30 ? [0.2, 0.16, 0.135] : [0.17, 0.135, 0.13]), 1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     P.walk = (P.walk || 0) + ((mv.x || mv.y) ? Math.hypot(mv.x, mv.y) * dt * 8 : 0); const bob = (mv.x || mv.y) ? Math.sin(P.walk * 1.9) * 0.07 : 0; EYE = [P.x, P.y + P.eye + bob + SHK * Math.sin(now / 1000 * 47), P.z]; SHK *= Math.pow(0.02, dt); const dir = [Math.sin(P.yaw) * Math.cos(P.pit), Math.sin(P.pit), -Math.cos(P.yaw) * Math.cos(P.pit)];
     const OVH = window.__ovh30; let TGT = [EYE[0] + dir[0], EYE[1] + dir[1], EYE[2] + dir[2]]; if (OVH) { const by = OVH.yaw != null ? OVH.yaw : P.yaw, back0 = OVH.back || 7.5, up0 = OVH.up || 11; let tq = (NW30 && NW30.tgt) || [P.x, P.y, P.z]; if (OVH.free && OVH.t) tq = OVH.t; const ZM = OVH.free ? (OVH.z || 1) : 1; if (OVH.fix && typeof N !== "undefined" && N) { const hh = N.heroes.find(h => h.st === "in" || h.st === "hold30"), li = hh ? hh.pos : (OVH._li || 0); OVH._li = li; const R0 = rooms[li]; if (R0) { const G0 = g30(S, li); tq = [0, R0.Y, R0.Z - (G0.H - 1) / 2 * L30.CS]; } }   /* 動画用：層ぜんたいを真上から、動かさずに見る */ TGT = [tq[0], tq[1] + 0.8, tq[2]]; { const back = back0 * ZM, up = up0 * ZM; EYE = [tq[0] - Math.sin(by) * back, tq[1] + up, tq[2] + Math.cos(by) * back]; } }   /* 俯瞰：天井と壁の上を切って、上から見下ろす */
     FXS.zm *= Math.pow(0.15, dt); VP = mm(persp(1.15 - 0.28 * FXS.zm, W / H, 0.07, 160), look(EYE, TGT));
