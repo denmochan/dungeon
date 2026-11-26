@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層34／No.350（11/25 00:49）";
+const VER20 = "層35／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -13637,7 +13637,7 @@ function fpOpen30(){
       const kind = roomKind25(i), on = {}; ROOMSET25[kind].forEach(k => on[k] = true); const th = (S.floors[f] || {}).theme;
       rooms.push({ i, kind, on, Z, Y, f, th, G30: G, ZS, ZE, CS, classic, OBS: [], CM: cssMat26((typeof THF25 !== "undefined" && THF25[th]) || ""), name: S.path[i].kind === "lord" ? "主の間" : i === 0 ? "入口の層" : "第" + i + "層" }); } }
   const wrap = document.createElement("div"); wrap.id = "fp26";
-  wrap.innerHTML = `<canvas></canvas><div class="f26top"><div class="f26where"><b></b><small></small></div><span class="f26fps"></span><button data-f="dig">🪤 罠と施設</button><button data-f="x">🗺 見下ろしへ</button></div>
+  wrap.innerHTML = `<canvas></canvas><div class="f26top"><div class="f26where"><b></b><small></small></div><span class="f26fps"></span><button data-f="sens">⚙</button><button data-f="dig">🪤 罠と施設</button><button data-f="x">🗺 見下ろしへ</button></div>
     <div class="f26msg">ダンジョンを組み立てています…</div><div class="f26stick"><i></i></div><div class="f26hint">左で歩く・右をなぞって見回す・魔物や看板をタップ</div><div class="f26menu" hidden></div><canvas class="f26lab"></canvas><canvas class="f26map" width="300" height="220"></canvas><button class="f26talk" hidden></button>`;
   document.body.appendChild(wrap);
   /* 横持ち：スマホが縦のままなら、画面ごと90度まわして横長で出す（主の目は横の方が見通せる） */
@@ -13995,12 +13995,12 @@ function fpOpen30(){
     if (left) { stick.style.left = (ex - 60) + "px"; stick.style.top = (ey - 60) + "px"; stick.classList.add("on"); } });
   wrap.addEventListener("pointermove", e => { const T = touches.get(e.pointerId); if (!T) return; const [ex, ey] = loc(e), dx = ex - T.x, dy = ey - T.y; T.moved += Math.abs(dx) + Math.abs(dy); T.x = ex; T.y = ey;
     if (T.left) { let ax = T.x - T.x0, ay = T.y - T.y0; const L = Math.hypot(ax, ay), m = 50; if (L > m) { ax *= m / L; ay *= m / L; } mv.x = ax / m; mv.y = ay / m; knob.style.transform = `translate(${ax}px,${ay}px)`; }
-    else if (window.__ovh30 && window.__ovh30.free) { const O = window.__ovh30; if (touches.size >= 2) { const ps = [...touches.values()], dd = Math.hypot(ps[0].x - ps[1].x, ps[0].y - ps[1].y); if (O.pd) O.z = Math.max(0.45, Math.min(2.6, O.z * O.pd / Math.max(20, dd))); O.pd = dd; } else { O.pd = 0; const k = 0.0034 * Math.hypot(O.up, O.back) * O.z * 390 / VH(), f = [Math.sin(O.yaw), -Math.cos(O.yaw)], r = [-f[1], f[0]]; camPan30(-(r[0] * dx) * k + f[0] * dy * k, -(r[1] * dx) * k + f[1] * dy * k); } }   /* 夜：1本指でずらす・2本指で寄る／引く */
-    else { P.yaw += dx * 0.0022; P.pit = Math.max(-0.9, Math.min(0.6, P.pit - dy * 0.002)); } });
+    else if (window.__ovh30 && window.__ovh30.free) { const O = window.__ovh30; if (touches.size >= 2) { const ps = [...touches.values()], dd = Math.hypot(ps[0].x - ps[1].x, ps[0].y - ps[1].y); if (O.pd) O.z = Math.max(0.45, Math.min(2.6, O.z * O.pd / Math.max(20, dd))); O.pd = dd; } else { O.pd = 0; const k = 0.0034 * SENS30().pan * Math.hypot(O.up, O.back) * O.z * 390 / VH(), f = [Math.sin(O.yaw), -Math.cos(O.yaw)], r = [-f[1], f[0]]; camPan30(-(r[0] * dx) * k + f[0] * dy * k, -(r[1] * dx) * k + f[1] * dy * k); } }   /* 夜：1本指でずらす・2本指で寄る／引く */
+    else { const k = SENS30().look; P.yaw += dx * 0.0022 * k; P.pit = Math.max(-0.9, Math.min(0.6, P.pit - dy * 0.002 * k)); } });
   wrap.addEventListener("wheel", e => { const O = window.__ovh30; if (!O || !O.free) return; e.preventDefault(); O.z = Math.max(0.45, Math.min(2.6, O.z * Math.exp(e.deltaY * 0.0015))); }, { passive: false });   /* 見回しはゆっくり */
   const up = e => { const T = touches.get(e.pointerId); if (!T) return; touches.delete(e.pointerId); if (window.__ovh30) window.__ovh30.pd = 0;
     if (T.left) { mv.x = mv.y = 0; knob.style.transform = ""; stick.classList.remove("on"); stick.style.left = stick.style.top = ""; }
-    if (T.moved < 10 && performance.now() - T.t0 < 400) { const [ex, ey] = loc(e); tap(ex, ey); } };
+    if (T.moved < 22 && performance.now() - T.t0 < 500) { const [ex, ey] = loc(e); tap(ex, ey); } };   /* 歩きながらでもタップできるように：少し指がずれてもタップ扱い */
   wrap.addEventListener("pointerup", up); wrap.addEventListener("pointercancel", up);
   /* 夜のカメラ：ダンジョンの奥から少し斜め上に見下ろす。勇者は追わない。ずらす・寄るは自分で */
   function layerAtZ30(z) { let best = 0, bd = 1e9; rooms.forEach((R, i) => { const G = g30(S, i), z0 = R.Z, z1 = R.classic ? R.Z + (FPK26.RZ0 || 0) : R.Z - (G.H - 0.5) * L30.CS, d = z > z0 ? z - z0 : z < z1 ? z1 - z : 0; if (d < bd) { bd = d; best = i; } }); return best; }
@@ -14057,7 +14057,7 @@ function fpOpen30(){
           const want = Math.atan2(tx - P.x, -(tz - P.z)), dy = Math.atan2(Math.sin(want - P.yaw), Math.cos(want - P.yaw)); P.yaw += dy * Math.min(1, dt * 5); mv.x = 0; mv.y = Math.abs(dy) > 1.2 ? -0.25 : -1;
           if (P.auto.lz == null || Math.hypot(P.z - P.auto.lz, P.x - (P.auto.lx || 0)) >= 0.04) { P.auto.lz = P.z; P.auto.lx = P.x; P.auto.st = 0; } } } }
     const dtw = Math.min(0.3, Math.max(0.001, (now - (P.lastW || now)) / 1000)); P.lastW = now; const nSub = Math.max(1, Math.ceil(8 * dtw / 0.3));
-    for (let sub = 0; sub < nSub; sub++) { const sp = 8 * dtw / nSub, fx = Math.sin(P.yaw), fz = -Math.cos(P.yaw), rx = Math.cos(P.yaw), rz = Math.sin(P.yaw);
+    for (let sub = 0; sub < nSub; sub++) { const sp = 8 * SENS30().walk * dtw / nSub, fx = Math.sin(P.yaw), fz = -Math.cos(P.yaw), rx = Math.cos(P.yaw), rz = Math.sin(P.yaw);
     if (mv.x || mv.y) { const dx = (-mv.y * fx + mv.x * rx) * sp, dz = (-mv.y * fz + mv.x * rz) * sp;
       const hitM = (x, z) => { const R = rooms[curRoom]; if (P.auto) return false; return (R.acts || []).some(a => !a.hide && !a.hero && Math.hypot(R.Z + a.z - z, a.x - x) < Math.max(0.8, (a.H || 0) * 0.25) && Math.hypot(R.Z + a.z - z, a.x - x) < Math.hypot(R.Z + a.z - P.z, a.x - P.x)); };   /* 魔物に重ならない */
       if (!where(P.x, P.z)) { for (let r = 0.25; r < 6; r += 0.25) { let f = 0; for (let k = 0; k < 16; k++) { const an = k / 16 * 6.2832; if (where(P.x + Math.cos(an) * r, P.z + Math.sin(an) * r)) { P.x += Math.cos(an) * r; P.z += Math.sin(an) * r; f = 1; break; } } if (f) break; } }   /* 岩の中に立っていたら外へ出す */
@@ -14399,6 +14399,15 @@ function fpOpen30(){
 // 昼の画面に入口ボタン
 { const _cs = caveShell; caveShell = function (){ let h = _cs.apply(this, arguments); try { if (!N && caveFloor >= 0) h = h.replace('<div class="ctabs">', '<button class="d3t fp26go" data-a="fp26">👁 歩く</button><div class="ctabs">'); } catch (e) {} return h; }; }
 document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="fp26"]'); if (!b) return; ev.stopImmediatePropagation(); ev.preventDefault(); fpOpen26(); }, true);
+/* 操作の感度（本人「歩く・見回すの感度が悪い→設定できるべき」）。この端末に覚えておく */
+function SENS30() { if (!SENS30.v) { let v = {}; try { v = JSON.parse(localStorage.getItem("dm30sens") || "{}"); } catch (e) {} SENS30.v = { look: v.look || 1, walk: v.walk || 1, pan: v.pan || 1 }; } return SENS30.v; }
+document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('#fp26 [data-f="sens"]'); if (!b) return; ev.stopPropagation(); const w = document.getElementById("fp26"); let pn = w.querySelector(".sens30"); if (pn) { pn.remove(); return; }
+  const V = SENS30(), row = (k, t) => `<label>${t}<input type="range" min="0.4" max="2.5" step="0.1" value="${V[k]}" data-k="${k}"><b>${V[k].toFixed(1)}</b></label>`;
+  pn = document.createElement("div"); pn.className = "sens30"; pn.innerHTML = `<h4>⚙ 操作の感度</h4>${row("look", "見回す速さ")}${row("walk", "歩く速さ")}${row("pan", "夜にずらす速さ")}<button data-k="ok">閉じる</button>`; w.appendChild(pn);
+  pn.addEventListener("pointerdown", e => e.stopPropagation()); pn.addEventListener("input", e => { const i = e.target; if (!i.dataset.k) return; V[i.dataset.k] = +i.value; i.nextElementSibling.textContent = (+i.value).toFixed(1); try { localStorage.setItem("dm30sens", JSON.stringify(V)); } catch (er) {} });
+  pn.addEventListener("click", e => { e.stopPropagation(); if (e.target.dataset.k === "ok") pn.remove(); }); }, true);
+{ const st = document.createElement("style"); st.textContent = `#fp26 .sens30{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60;background:rgba(20,14,10,.94);border:1px solid #6a5444;border-radius:14px;padding:12px 16px;display:flex;flex-direction:column;gap:10px;min-width:280px;color:#f3e6cf}
+#fp26 .sens30 h4{margin:0;font-size:15px}#fp26 .sens30 label{display:grid;grid-template-columns:7em 1fr 2.4em;align-items:center;gap:8px;font-size:13px}#fp26 .sens30 input{width:100%}#fp26 .sens30 b{text-align:right}`; document.head.appendChild(st); }
 
 // ================= night30：夜、勇者は層の中の道を1マスずつ進む =================
 // 計算の中身（戦い・罠の強さ）は今までのものを使う。そのうえで：
@@ -14505,10 +14514,10 @@ tick = function () { clearTimeout(timer); if (!N) return; timer = setTimeout(() 
 { const _ex = expand18; expand18 = function (S0, i) { const r = _ex.apply(this, arguments); if (r) { try { const G = g30(S0, i); if (G && S0.path[i].kind !== "lord") { G.gn = (G.gn || 0) + 1; g30grow(G, i * 31 + G.gn); } } catch (e) { console.error(e); } } return r; }; }
 /* 昼も歩く画面だけにする（本人「昼の画面は歩く画面に一本化」）。2Dの画面は出さず、育成・配合・店・掘る・主・次の日へは下のボタンから */
 { const st = document.createElement("style"); st.textContent = `#fp26 [data-f="x"]{display:none!important}
-#fp26 .dm30{position:absolute;right:max(8px,env(safe-area-inset-right));bottom:10px;z-index:30;display:flex;gap:5px;align-items:flex-end;background:rgba(14,10,8,.72);padding:5px 6px;border-radius:12px;max-width:calc(100% - 190px);flex-wrap:wrap;justify-content:flex-end}
-#fp26 .dm30 button{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:46px;padding:5px 6px;font-size:18px;line-height:1.1;border-radius:9px}
-#fp26 .dm30 button small{font-size:10px;opacity:.9;white-space:nowrap}
-#fp26 .dm30 button.main{background:#e8b84a!important;color:#1a1410!important;font-weight:700;min-width:64px}
+#fp26 .dm30{position:absolute;right:max(8px,env(safe-area-inset-right));bottom:8px;z-index:30;display:flex;gap:3px;align-items:flex-end;background:rgba(14,10,8,.72);padding:5px 6px;border-radius:12px;max-width:calc(100% - 165px);flex-wrap:wrap;justify-content:flex-end}
+#fp26 .dm30 button{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:40px;padding:4px 3px;font-size:16px;line-height:1.1;border-radius:9px}
+#fp26 .dm30 button small{font-size:9.5px;letter-spacing:-.02em;opacity:.9;white-space:nowrap}
+#fp26 .dm30 button.main{background:#e8b84a!important;color:#1a1410!important;font-weight:700;min-width:56px}
 #fp26.night30 .dm30{display:none}
 #fp26 .f26nav,.fpret28{display:none!important}
 body.pan30 #app{position:fixed;inset:0;z-index:45;overflow:auto;background:#140f0c}
