@@ -6,7 +6,7 @@
 (()=>{try{const ls=window.localStorage,P="lab1_",pr=Storage.prototype,g=pr.getItem,st=pr.setItem,rm=pr.removeItem,ky=pr.key;
  if(g.call(ls,P+"__init")!=="1"){const ks=[];for(let i=0;i<ls.length;i++)ks.push(ky.call(ls,i));ks.forEach(k=>{if(k&&!k.startsWith(P))st.call(ls,P+k,g.call(ls,k));});st.call(ls,P+"__init","1");}
  pr.getItem=function(k){return g.call(this,P+k)};pr.setItem=function(k,v){return st.call(this,P+k,v)};pr.removeItem=function(k){return rm.call(this,P+k)};}catch(e){}
- window.__R2=1;})();
+ window.__R2=2;})();
 </script>
 <base href="../">
 <meta charset="utf-8">
@@ -13727,7 +13727,7 @@ function fpOpen30(){
     float fb(vec3 p){return 0.55*n3(p)+0.3*n3(p*2.03+1.7)+0.15*n3(p*4.1+3.1);}
     void main(){if(vw.y>CUT)discard;if(CUT<1.0e8&&!gl_FrontFacing){float r=0.85+0.3*fb(vw*vec3(0.45,0.1,0.45));gl_FragColor=vec4(vec3(0.24,0.19,0.16)*r,1.0);return;}   /* 上から見るとき：切った岩の断面は岩の色でふさぐ（暗い板に見えていた） */
     if(DR.z>0.5){if(DR.y>0.5&&abs(vl.x)<2.3&&vl.y>0.12&&vl.y<2.2+0.62*(1.0-vl.x*vl.x/5.3)&&vl.z<DR.w)discard;if(DR.x>0.5&&vl.z>7.0&&vl.z<11.5&&abs(vl.x)<2.6&&vl.y>-0.6&&vl.y<3.5&&max(vc.r,max(vc.g,vc.b))<0.1)discard;}
-    float g=0.9+0.2*h(floor(vw*13.0));vec3 bc=vc;float hh=0.5;
+    float g=0.9+0.2*h(floor(vw*13.0));vec3 bc=vc;float hh=0.5;vec3 cellN=vec3(0.0);float cellOn=0.0;float inkA=0.0;
     if(DET>2.5){ vec3 e=vc*1.25+vec3(0.05); e=mix(e,vec3(0.012,0.01,0.01),smoothstep(26.0,60.0,vd)*0.85); gl_FragColor=vec4(e,1.0); return; }   /* 光るもの：水晶・火・きのこ。暗がりでも暗くならない */
     if(DET>1.5){ g=1.0; bc*=0.9+0.2*n3(vw*14.0); bc*=0.92+0.16*n3(vw*vec3(1.5,9.0,1.5)); }   /* 飾り：細かい木目・ざらつき（ドットの四角い模様は出さない） */
     else if(DET>0.5){ /* 岩肌：大きな色むら・細かい粒・ひび・床の砂利と湿り・壁の下の苔・天井のしみ（位置だけで決まる模様） */
@@ -13738,31 +13738,24 @@ function fpOpen30(){
       #endif
       bc*=0.86+0.3*big; bc*=0.94+0.12*mid; g=1.0;
       if(rel>0.12&&R2<1.5){ float st=sin(vw.y*2.1+big*3.0+mid*1.2); float bd=smoothstep(-0.25,0.25,st); bc*=0.8+0.26*bd; bc=mix(bc*vec3(0.9,0.96,1.08),bc*vec3(1.08,1.0,0.9),bd); bc*=mix(0.62,1.0,smoothstep(0.0,0.1,abs(st+0.1))); }
-      if(R2>1.5){ /* 新しい岩肌：地層の線に太さ・色・切れ目の変化、所々のひび、面の中の細かい凹凸 */
-        vec3 P=R2>1.5?floor(vw*10.0+0.5)/10.0:vw;   /* ドット寄り：8cmの升目で模様を止める */
-        float gr=fb(P*2.4+2.3), fine=n3(P*7.0);
-        hh=0.55*gr+0.12*fine+0.33*mid;
-        if(rel>0.12){
-          float wy=P.y+(fb(vec3(P.x*0.28,0.0,P.z*0.28)+4.0)-0.5)*1.4+big*0.6;
-          float l1=abs(fract(wy*0.95)-0.5), l2=abs(fract(wy*2.35+0.37)-0.5), l3=abs(fract(wy*0.38+0.11)-0.5);
-          float th=0.018+0.05*n3(vec3(P.x*0.4,P.y*3.0,P.z*0.4));                      /* 線の太さが場所でかわる */
-          float brk=smoothstep(0.32,0.46,n3(vec3(P.x*0.7,wy*3.0,P.z*0.7)));            /* 線が所々で切れる */
-          float seam=(1.0-smoothstep(th,th+0.03,l1))*brk;
-          float thin=(1.0-smoothstep(0.006,0.02,l2))*smoothstep(0.45,0.6,n3(P*0.6+9.0));
-          float band=smoothstep(0.1,0.4,l3);                                         /* 層ごとの色：黄土・灰・赤土 */
-          float lay=floor(wy*0.95+0.5); float pick=h(vec3(lay,1.7,3.1));
-          vec3 tint=pick<0.33?vec3(1.1,1.0,0.82):(pick<0.66?vec3(0.92,0.95,1.04):vec3(1.12,0.9,0.8));
-          bc*=mix(vec3(1.0),tint,0.25); bc*=0.95+0.08*band;
-          bc*=1.0-0.18*seam-0.15*thin;
-          bc=mix(bc,bc*vec3(1.35,1.2,0.85),(1.0-smoothstep(0.0,0.03,abs(l1-th-0.035)))*brk*0.5);   /* 線のすぐ上は明るい縁（段の角） */
-          hh-=seam*0.6;
-        }
-        float cr=abs(fb(P*vec3(1.4,2.0,1.4)+vec3(3.1,0.0,5.2))-0.5);
-        float crack=(1.0-smoothstep(0.005,0.018,cr))*smoothstep(0.6,0.72,fb(P*0.5+vec3(9.0)));
-        bc*=1.0-0.4*crack; hh-=crack*0.7;
-        bc*=0.97+0.06*gr;                                                             /* 粒 */
-        if(rel<0.12){ float pb=n3(P*vec3(7.0,1.0,7.0)); bc*=1.0+0.18*smoothstep(0.76,0.82,pb)-0.15*smoothstep(0.7,0.76,pb)*(1.0-smoothstep(0.76,0.82,pb)); hh+=0.4*smoothstep(0.76,0.82,pb); }
-      }   /* 壁：地層のような横じま（段々の岩）と、暗いすき間 */
+      if(R2>1.5&&UN>0.5&&rel>0.12&&rel<3.3){ /* 新・岩の塊：壁を丸く盛り上がった大きな岩の積み重なりにする。境目はゴブリンの輪郭線と同じ黒い線 */
+        highp vec3 sn=normalize(vnn); highp vec2 tn=normalize(vec2(-sn.z,sn.x)+vec2(1e-4,0.0));
+        highp vec2 q=vec2(dot(vw.xz,tn)/1.7, vw.y/1.05); q+=vec2(n3(vec3(q*0.7,3.1))-0.5,n3(vec3(q*0.7,8.3))-0.5)*0.55;   /* ゆがめて石積みに見えないように */
+        highp vec2 ip=floor(q),fp=fract(q); float f1=9.0,f2=9.0; vec2 bo=vec2(0.0),bi=vec2(0.0);
+        for(int j=-1;j<=1;j++)for(int i=-1;i<=1;i++){vec2 g=vec2(float(i),float(j));vec2 o=0.5+0.38*vec2(h(vec3(ip+g,1.3))-0.5,h(vec3(ip+g,7.1))-0.5)*2.0;vec2 r=g+o-fp;float d=dot(r,r);
+          if(d<f1){f2=f1;f1=d;bo=r;bi=ip+g;}else if(d<f2){f2=d;}}
+        f1=sqrt(f1);f2=sqrt(f2);float ed=f2-f1;
+        float pick=h(vec3(bi,4.7)); vec3 tint=pick<0.3?vec3(1.06,1.0,0.9):(pick<0.6?vec3(0.93,0.95,1.0):(pick<0.85?vec3(1.0,0.96,0.92):vec3(1.1,0.98,0.84)));
+        bc*=tint;
+        
+#ifdef HASN
+        float fw=fwidth(ed)*1.2+0.004;
+#else
+        float fw=0.02;
+#endif
+         float lw=0.022+0.022*h(vec3(bi,9.9)); float ink=(1.0-smoothstep(lw,lw+fw,ed))*0.8;   /* 境目の黒い線 */
+        cellOn=1.0; cellN=-(vec3(tn.x,0.0,tn.y)*bo.x*1.7+vec3(0.0,1.0,0.0)*bo.y*1.05)*0.9*smoothstep(0.0,0.3,ed);   /* 塊ごとに丸くふくらんだ陰 */
+        inkA=ink; }   /* 壁：地層のような横じま（段々の岩）と、暗いすき間 */
       if(rel<0.12){ float pb=n3(vw*vec3(5.5,1.0,5.5)); bc*=mix(1.0,1.15,smoothstep(0.72,0.8,pb)); float wet=fb(vw*0.5+11.0); bc=mix(bc,bc*vec3(0.78,0.8,0.9),smoothstep(0.55,0.75,wet)*0.6); }
       else if(rel<1.3){ float ms=fb(vw*1.1+21.0)*(1.0-rel/1.3); bc=mix(bc,vec3(0.22,0.36,0.2)*(0.8+0.4*mid),smoothstep(0.45,0.6,ms)*0.6); }
       if(rel>3.3){ bc*=0.8+0.25*n3(vw*vec3(3.0,0.4,3.0)); } }
@@ -13774,6 +13767,7 @@ function fpOpen30(){
       #endif
       if(dot(nn,EYE-vw)<0.0) nn=-nn;
       if(UN>0.5){vec3 sn=normalize(vnn);if(dot(sn,EYE-vw)<0.0)sn=-sn;nn=sn;}   /* 新しい壁はなめらかな陰（ゴブリンと同じ） */
+      if(cellOn>0.5){nn=normalize(nn+cellN);}
       #ifdef HASN
       if(R2>1.5&&DET>0.5&&DET<1.5&&vd<24.0){ vec3 dpx=dFdx(vw),dpy=dFdy(vw); float bs=R2>1.5?0.12:0.18; float dhx=dFdx(hh)*bs,dhy=dFdy(hh)*bs; vec3 r1=cross(dpy,nn),r2=cross(nn,dpx); float det=dot(dpx,r1); vec3 gd=sign(det)*(dhx*r1+dhy*r2); nn=normalize(mix(nn,normalize(abs(det)*nn-gd),smoothstep(24.0,10.0,vd))); }
       #endif
@@ -13782,7 +13776,7 @@ function fpOpen30(){
       vec3 c=bc*tb*hemi*(0.62+0.5*exp(-vd/11.0));
       vec3 L=vec3(0.0);for(int i=0;i<6;i++){vec3 q=LT[i]-vw;float dd=dot(q,q);float ld=dot(nn,q*inversesqrt(dd+0.0001));float tl=ld>0.35?1.0:(ld>0.05?0.62:0.3);L+=LC*LF[i]*tl/(1.0+0.16*dd);}
       c+=bc*L*(R2>0.5?1.55:2.3);float lu=dot(c,vec3(0.3,0.59,0.11));c=mix(vec3(lu),c,1.15);c=1.0-exp(-c*1.5);   /* たいまつのまわりだけ暖かく明るい */
-      c=mix(c,vec3(0.03,0.04,0.07),smoothstep(18.0,52.0,vd));gl_FragColor=vec4(c,1.0);return; }
+      c=mix(c,vec3(0.03,0.04,0.07),smoothstep(18.0,52.0,vd));c=mix(c,vec3(0.07,0.05,0.04),inkA*smoothstep(30.0,8.0,vd)*0.9);gl_FragColor=vec4(c,1.0);return; }
     vec3 c=bc*g*(0.55+0.8*exp(-vd/7.0));c+=vec3(0.05,0.03,0.012)*exp(-vd/4.0);
     vec3 L=vec3(0.0);for(int i=0;i<6;i++){vec3 q=vw-LT[i];L+=LC*0.95*LF[i]/(1.0+0.22*dot(q,q));}c+=bc*L*1.05+L*0.02;c=1.0-exp(-c*1.35);
     c=mix(c,vec3(0.012,0.01,0.01),smoothstep(18.0,48.0,vd));gl_FragColor=vec4(c,1.0);}`);   /* 部屋の出入口の壁をくりぬく（門の黒い板も）／たいまつの明かり */
@@ -16012,8 +16006,8 @@ overlay25 = (prev => function (now) { prev.apply(this, arguments);
 <div id="lab27" style="position:fixed;z-index:2147483000;left:50%;top:calc(env(safe-area-inset-top,0px) + 44px);transform:translateX(-50%);display:flex;gap:4px;align-items:center;background:#140c07d9;border:1px solid #8a6440;border-radius:10px;padding:4px 6px;font:700 12px system-ui,sans-serif;color:#f6ead6">
 <span style="padding:0 4px">試し場・岩肌</span>
 <button data-r="0" style="height:30px;border-radius:8px;border:1px solid #8a6440;background:#2a1b10;color:#f6ead6;font:700 12px system-ui;padding:0 8px">今</button>
-<button data-r="1" style="height:30px;border-radius:8px;border:1px solid #ffcf8f;background:#b06a2c;color:#fff;font:700 12px system-ui;padding:0 8px">新</button>
-<button data-r="2" style="height:30px;border-radius:8px;border:1px solid #8a6440;background:#2a1b10;color:#f6ead6;font:700 12px system-ui;padding:0 8px">新・ドット寄り</button></div>
+<button data-r="1" style="height:30px;border-radius:8px;border:1px solid #8a6440;background:#2a1b10;color:#f6ead6;font:700 12px system-ui;padding:0 8px">新・しま</button>
+<button data-r="2" style="height:30px;border-radius:8px;border:1px solid #ffcf8f;background:#b06a2c;color:#fff;font:700 12px system-ui;padding:0 8px">新・岩の塊</button></div>
 <script>document.querySelectorAll("#lab27 [data-r]").forEach(b=>b.onclick=e=>{e.stopPropagation();window.__R2=+b.dataset.r;document.querySelectorAll("#lab27 [data-r]").forEach(x=>{const on=x===b;x.style.background=on?"#b06a2c":"#2a1b10";x.style.borderColor=on?"#ffcf8f":"#8a6440";x.style.color=on?"#fff":"#f6ead6";});});</script>
 <script>
 /* 試し場：洞窟の飾り（丸い大岩・小石・つらら石・天井のこぶ）。ゴブリンと同じセル塗り＋輪郭線で描く */
