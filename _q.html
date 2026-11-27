@@ -14998,6 +14998,8 @@ diffScreen15 = (prev => function () { const h = prev.apply(this, arguments); try
 .title.diff .dright30 .dsel,.title.diff .dright30 .pact30{margin:0;max-width:none;flex-shrink:0}
 }`; document.head.appendChild(st); media30(); }
 { const _r = render; render = function () { const d = document.querySelector(".dright30"), y = d ? d.scrollTop : 0; const o = _r.apply(this, arguments); if (y) { const n = document.querySelector(".dright30"); if (n) n.scrollTop = y; } return o; }; }
+/* 部屋の設備：見出し（入口の層 B1）が止まったとき、上のすき間から下の文字が透けていた */
+{ const st = document.createElement("style"); st.textContent = `.rshead{background:#140f0c!important;box-shadow:0 -12px 0 #140f0c,0 6px 8px -4px #000a}`; document.head.appendChild(st); }
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------
