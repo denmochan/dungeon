@@ -18,19 +18,41 @@ with sync_playwright() as p:
     N=np.ceil((hi-lo)/GS).astype(int)+1;NX,NY,NZ=map(int,N);print('grid',NX,NY,NZ)
     pg2=b.new_page();pg2.goto('file://'+__import__('os').path.abspath('sampler.html')+'');pg2.evaluate('([s,p])=>init(s,p)',[sh,pack]);pg2.evaluate('p=>{window.__P=p}',pack)
     # sampler setRig uses tool=0, deb zeros
-    D=np.zeros((NZ,NY,NX),np.float32);M=np.zeros((NZ,NY,NX),np.uint8);step=12;t=time.time()
-    for z0 in range(0,NZ,step):
-        nz=min(step,NZ-z0)
-        s=pg2.evaluate('([r,L,G0,GS,NX,NY,z0,nz])=>sample(window.__P,r,L,G0,GS,NX,NY,z0,nz)',[rig,L,lo.tolist(),GS,NX,NY,z0,nz])
-        a=np.frombuffer(base64.b64decode(s),np.uint8).reshape(nz,NY,NX,4).astype(np.float32)
-        D[z0:z0+nz]=(a[...,0]/255+a[...,1]/255/255)*0.5-0.25;M[z0:z0+nz]=np.round(a[...,2]/255*20).astype(np.uint8)
-    print('sampled',round(time.time()-t,1),'inside',(D<0).sum())
+    def grid(tool):
+        rig['tool']=tool
+        D=np.zeros((NZ,NY,NX),np.float32);M=np.zeros((NZ,NY,NX),np.uint8);step=12
+        for z0 in range(0,NZ,step):
+            nz=min(step,NZ-z0)
+            s=pg2.evaluate('([r,L,G0,GS,NX,NY,z0,nz])=>sample(window.__P,r,L,G0,GS,NX,NY,z0,nz)',[rig,L,lo.tolist(),GS,NX,NY,z0,nz])
+            a=np.frombuffer(base64.b64decode(s),np.uint8).reshape(nz,NY,NX,4).astype(np.float32)
+            D[z0:z0+nz]=(a[...,0]/255+a[...,1]/255/255)*0.5-0.25;M[z0:z0+nz]=np.round(a[...,2]/255*20).astype(np.uint8)
+        return D,M
+    t=time.time();D,M=grid(0)
+    TOOL=info['tool'] if len(sys.argv)<=3 else float(sys.argv[3])
+    DW=None
+    if TOOL and TOOL!=0:
+        Dt,_=grid(TOOL);DW=np.maximum(Dt,-D+0.004)   # 道具だけ：道具ありの形から体を引く
+        if (DW<0).sum()<30: DW=None
+    rig['tool']=0
+    print('sampled',round(time.time()-t,1),'inside',(D<0).sum(),'tool',TOOL,'wpn',None if DW is None else int((DW<0).sum()))
     verts,faces,norms,_=measure.marching_cubes(D,0.0,spacing=(GS,GS,GS))
+    if len(verts)>60000: print('TOO_MANY',len(verts));b.close();sys.exit(3)
     verts=verts[:,::-1]+lo;faces=faces[:,::-1]
     print('mesh',len(verts),len(faces))
+    wpn=np.zeros(len(verts),np.uint8)
+    if DW is not None:
+        vw,fw,_,_=measure.marching_cubes(DW,0.0,spacing=(GS,GS,GS));vw=vw[:,::-1]+lo;fw=fw[:,::-1]
+        faces=np.concatenate([faces,fw+len(verts)]);verts=np.concatenate([verts,vw]);wpn=np.concatenate([wpn,np.ones(len(vw),np.uint8)])
+        print('weapon verts',len(vw))
+        if len(verts)>60000: print('TOO_MANY',len(verts));b.close();sys.exit(3)
     pos=verts.astype(np.float32)
-    s=pg2.evaluate('([r,L,pb,nv])=>colors(window.__P,r,L,pb,nv)',[rig,L,base64.b64encode(pos.tobytes()).decode(),len(pos)])
-    c=np.frombuffer(base64.b64decode(s),np.uint8).reshape(-1,4)
-    np.savez(f'{sp}_mesh.npz',pos=pos,faces=faces.astype(np.int32),col=c[:,:3],mat=np.round(c[:,3]/255*20).astype(np.uint8),J=np.array(info['J']),scl=info['scl'])
+    def cols(tool):
+        rig['tool']=tool
+        s=pg2.evaluate('([r,L,pb,nv])=>colors(window.__P,r,L,pb,nv)',[rig,L,base64.b64encode(pos.tobytes()).decode(),len(pos)])
+        return np.frombuffer(base64.b64decode(s),np.uint8).reshape(-1,4)
+    c=cols(0)
+    if DW is not None: c2=cols(TOOL);c=np.where(wpn[:,None]>0,c2,c)
+    rig['tool']=0
+    np.savez(f'{sp}_mesh.npz',pos=pos,faces=faces.astype(np.int32),col=c[:,:3],mat=np.round(c[:,3]/255*20).astype(np.uint8),J=np.array(info['J']),scl=info['scl'],kit=info['kit'],wpn=wpn,tool=TOOL,J33=np.array(info['J']))
     b.close()
 print('saved')
