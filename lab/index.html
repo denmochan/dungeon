@@ -6,7 +6,7 @@
 (()=>{try{const ls=window.localStorage,P="lab1_",pr=Storage.prototype,g=pr.getItem,st=pr.setItem,rm=pr.removeItem,ky=pr.key;
  if(g.call(ls,P+"__init")!=="1"){const ks=[];for(let i=0;i<ls.length;i++)ks.push(ky.call(ls,i));ks.forEach(k=>{if(k&&!k.startsWith(P))st.call(ls,P+k,g.call(ls,k));});st.call(ls,P+"__init","1");}
  pr.getItem=function(k){return g.call(this,P+k)};pr.setItem=function(k,v){return st.call(this,P+k,v)};pr.removeItem=function(k){return rm.call(this,P+k)};}catch(e){}
- window.__R2=2;window.__labCove=1;})();
+ window.__R2=2;window.__labCove=1;window.__labNoSign=true;})();
 </script>
 <base href="../">
 <meta charset="utf-8">
@@ -13243,7 +13243,7 @@ function fpOpen26(){
     /* 「▼次の部屋へ／▲前の部屋へ」の札を押すと、そこまで自動で歩く */ { const D = (window.__fpDoor26 || []).find(d => Math.abs(sx - d.x) < 70 && Math.abs(sy - d.y) < 26); if (D) { P.auto = { to: curRoom + D.dir }; toast(D.dir > 0 ? "▼ 次の部屋へ歩く（スティックで止まる）" : "▲ 前の部屋へ歩く（スティックで止まる）"); return; } }
     rooms.forEach(R => { if (Math.abs(R.i - curRoom) > 1) return;
       (R.acts || []).forEach(a => { const s = toScr(a.x, R.Y + (a.H || 2) * 0.5, R.Z + a.z); if (!s) return; const d = Math.hypot(s[0] - sx, s[1] - sy), wd = Math.hypot(a.x - P.x, R.Z + a.z - P.z); if (wd < 15 + (a.H || 0) && d < 70 + (a.H || 0) * 18 && (!best || d < best.d)) best = { d, a, R }; });
-      const s = toScr(R.sx, R.Y + 1.8, R.Z + R.sz); if (s) { const d = Math.hypot(s[0] - sx, s[1] - sy), wd = Math.hypot(R.sx - P.x, R.Z + R.sz - P.z); if (wd < 14 && d < 60 && (!best || d < best.d)) best = { d, sign: R }; } });
+      const s = window.__labNoSign ? null : toScr(R.sx, R.Y + 1.8, R.Z + R.sz); if (s) { const d = Math.hypot(s[0] - sx, s[1] - sy), wd = Math.hypot(R.sx - P.x, R.Z + R.sz - P.z); if (wd < 14 && d < 60 && (!best || d < best.d)) best = { d, sign: R }; } });
     if (!best) { menu.hidden = true; return; }
     if (best.sign) { menu.hidden = true; try { peekOpen24(best.sign.i); } catch (e) {} return; }
     monMenu(best.a, best.R, sx, sy); }
@@ -13322,7 +13322,7 @@ function fpOpen26(){
       else { gl.uniform3f(PB.U("C"), tp.x, tp.y, tp.z); gl.uniform4f(PB.U("Q"), -1.4, 1.1, 2.8, 2.2); }
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); });
     for (let i = Math.max(0, curRoom - 1); i <= Math.min(n - 1, curRoom + 1); i++) { const R = rooms[i];
-      { const d = Math.hypot(R.sx - P.x, R.Z + R.sz - P.z); gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, texOf(R.sign)); gl.uniform1i(PB.U("tx"), 0); gl.uniform1f(PB.U("FL"), 0); gl.uniform4f(PB.U("UR"), 0, 0, 1, 1); gl.uniform1f(PB.U("LB"), 0.55 + 0.6 * Math.exp(-d / 6));
+      if (!window.__labNoSign) { const d = Math.hypot(R.sx - P.x, R.Z + R.sz - P.z); gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, texOf(R.sign)); gl.uniform1i(PB.U("tx"), 0); gl.uniform1f(PB.U("FL"), 0); gl.uniform4f(PB.U("UR"), 0, 0, 1, 1); gl.uniform1f(PB.U("LB"), 0.55 + 0.6 * Math.exp(-d / 6));
         gl.uniform3f(PB.U("C"), R.sx, R.Y, R.Z + R.sz); gl.uniform3fv(PB.U("R"), Rr); gl.uniform4f(PB.U("Q"), -1.3, 0, 2.6, 1.95); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); }
       (R.acts || []).forEach(a => { const o = dspr25(a.sp, a.evo); if (!o || !o.ok) return;
         /* 大きい種族はもっと大きく（ドラゴンが人の背丈くらいでがっかりした）。天井 6.6 の手前で止める */
@@ -14248,7 +14248,7 @@ function fpOpen30(){
     /* 「▼次の部屋へ／▲前の部屋へ」の札を押すと、そこまで自動で歩く */ { const D = (window.__fpDoor26 || []).find(d => Math.abs(sx - d.x) < 70 && Math.abs(sy - d.y) < 26); if (D) { P.auto = { to: curRoom + D.dir }; toast(D.dir > 0 ? "▼ 次の部屋へ歩く（スティックで止まる）" : "▲ 前の部屋へ歩く（スティックで止まる）"); return; } }
     rooms.forEach(R => { if (Math.abs(R.i - curRoom) > 1) return;
       (R.acts || []).forEach(a => { if (a.hero || a.hide || a.lord) return; const s = toScr(a.x, R.Y + (a.H || 2) * 0.5, R.Z + a.z); if (!s) return; const d = Math.hypot(s[0] - sx, s[1] - sy), wd = Math.hypot(a.x - P.x, R.Z + a.z - P.z); if (wd < 15 + (a.H || 0) && d < 70 + (a.H || 0) * 18 && (!best || d < best.d)) best = { d, a, R }; });
-      const s = toScr(R.sx, R.Y + 1.8, R.Z + R.sz); if (s) { const d = Math.hypot(s[0] - sx, s[1] - sy), wd = Math.hypot(R.sx - P.x, R.Z + R.sz - P.z); if (wd < 14 && d < 60 && (!best || d < best.d)) best = { d, sign: R }; } });
+      const s = window.__labNoSign ? null : toScr(R.sx, R.Y + 1.8, R.Z + R.sz); if (s) { const d = Math.hypot(s[0] - sx, s[1] - sy), wd = Math.hypot(R.sx - P.x, R.Z + R.sz - P.z); if (wd < 14 && d < 60 && (!best || d < best.d)) best = { d, sign: R }; } });
     if (!best) { menu.hidden = true; /* 床をタップすると、そこまで歩く（スティックを使わなくても動ける） */ try { const Rc = rooms[curRoom]; if (Rc && !Rc.classic && Rc.G30) { const f = [TGT0[0] - EYE[0], TGT0[1] - EYE[1], TGT0[2] - EYE[2]], fl = Math.hypot(...f); f[0] /= fl; f[1] /= fl; f[2] /= fl; const r = [-f[2], 0, f[0]], rl = Math.hypot(r[0], r[2]) || 1; r[0] /= rl; r[2] /= rl; const u = [r[1] * f[2] - r[2] * f[1], r[2] * f[0] - r[0] * f[2], r[0] * f[1] - r[1] * f[0]], th = Math.tan((1.15 - 0.28 * FXS.zm) / 2), nx = (sx / VW()) * 2 - 1, ny = 1 - (sy / VH()) * 2, as = VW() / VH(), d = [0, 1, 2].map(k => f[k] + r[k] * nx * th * as + u[k] * ny * th);
           if (d[1] < -0.02) { const t = (Rc.Y - EYE[1]) / d[1], wx = EYE[0] + d[0] * t, wz = EYE[2] + d[2] * t; if (t > 0 && t < 30 && where(wx, wz)) { P.auto = { pt: [wx, wz] }; FLAG30 = { x: wx, z: wz, y: Rc.Y, t: performance.now() }; } } } } catch (e) {} return; }
     if (best.sign) { menu.hidden = true; try { peekOpen24(best.sign.i); } catch (e) {} return; }
@@ -14348,7 +14348,7 @@ function fpOpen30(){
       else { gl.uniform3f(PB.U("C"), tp.x, tp.y, tp.z); gl.uniform4f(PB.U("Q"), -1.4, 1.1, 2.8, 2.2); }
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); });
     for (let i = Math.max(0, curRoom - 1); i <= Math.min(n - 1, curRoom + 1); i++) { const R = rooms[i];
-      { const d = Math.hypot(R.sx - P.x, R.Z + R.sz - P.z); gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, texOf(R.sign)); gl.uniform1i(PB.U("tx"), 0); gl.uniform1f(PB.U("FL"), 0); gl.uniform4f(PB.U("UR"), 0, 0, 1, 1); gl.uniform1f(PB.U("LB"), 0.55 + 0.6 * Math.exp(-d / 6));
+      if (!window.__labNoSign) { const d = Math.hypot(R.sx - P.x, R.Z + R.sz - P.z); gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, texOf(R.sign)); gl.uniform1i(PB.U("tx"), 0); gl.uniform1f(PB.U("FL"), 0); gl.uniform4f(PB.U("UR"), 0, 0, 1, 1); gl.uniform1f(PB.U("LB"), 0.55 + 0.6 * Math.exp(-d / 6));
         gl.uniform3f(PB.U("C"), R.sx, R.Y, R.Z + R.sz); gl.uniform3fv(PB.U("R"), Rr); gl.uniform4f(PB.U("Q"), -1.3, 0, 2.6, 1.95); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); }
       (R.acts || []).forEach(a => { if (a.hide || a.al30 === 0) return; const o = dspr25(a.sp, a.evo); if (!o || !o.ok) return;
         /* 大きい種族はもっと大きく（ドラゴンが人の背丈くらいでがっかりした）。天井 6.6 の手前で止める */
@@ -16206,13 +16206,23 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[];let seed=1;
   const t=(window.__labT!=null?window.__labT:o.now)/1000,G=R.G,free=(x,z)=>gFree(G,x,z-R.Z,0.45,1.7);
   if(!g){let x=P.x,z=P.z-3;for(let k=0;k<200&&!free(x,z);k++){x=P.x+(rnd()-0.5)*6;z=P.z-1-rnd()*6;}g={x,z,tx:x,tz:z,yaw:Math.PI,wait:0,lt:t};}
   const dt=Math.min(0.1,Math.max(0,t-g.lt));g.lt=t;
+  if(window.__labTour&&!g.path){const T=window.__labTour,S=0.5,X0=-20,Z0=R.Z-56,NX=88,NZ=118,F=new Uint8Array(NX*NZ);for(let j=0;j<NZ;j++)for(let i=0;i<NX;i++)F[j*NX+i]=free(X0+i*S,Z0+j*S)?1:0;   /* 撮影用：見どころを順にめぐる道を、歩ける所だけでさがす */
+   const cell=(x,z)=>{let bi=-1,bd=1e9;for(let j=0;j<NZ;j++)for(let i=0;i<NX;i++){if(!F[j*NX+i])continue;const d=(X0+i*S-x)**2+(Z0+j*S-z)**2;if(d<bd){bd=d;bi=j*NX+i;}}return bi;};
+   const bfs=(a,b)=>{const pr=new Int32Array(NX*NZ).fill(-1),q=[a];pr[a]=a;for(let h=0;h<q.length;h++){const c=q[h];if(c===b)break;const i=c%NX,j=(c-i)/NX;for(const[di,dj]of[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]){const ii=i+di,jj=j+dj;if(ii<0||jj<0||ii>=NX||jj>=NZ)continue;const n2=jj*NX+ii;if(!F[n2]||pr[n2]>=0)continue;pr[n2]=c;q.push(n2);}}if(pr[b]<0)return[];const out=[];for(let c=b;c!==a;c=pr[c])out.push(c);return out.reverse();};
+   let cur=cell(g.x,g.z);const raw=[];for(const p2 of T){const b=cell(p2[0],R.Z+p2[1]);bfs(cur,b).forEach(c=>{const i=c%NX;raw.push([X0+i*S,Z0+(c-i)/NX*S]);});cur=b;}
+   const los=(a,b)=>{const n=Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1])/0.2);for(let k=1;k<n;k++){if(!free(a[0]+(b[0]-a[0])*k/n,a[1]+(b[1]-a[1])*k/n))return false;}return true;};
+   const sm=[];let k=0;while(k<raw.length){let m=Math.min(raw.length-1,k+12);while(m>k+1&&!los(raw[k],raw[m]))m--;sm.push(raw[m]);k=m===k?k+1:m;}g.path=sm;g.pi=0;}
+  if(g.path&&g.pi<g.path.length){const p2=g.path[g.pi];if(Math.hypot(p2[0]-g.x,p2[1]-g.z)<0.35)g.pi++;g.tx=p2[0];g.tz=p2[1];g.wait=0;}
   let moving=false;
   if(g.wait>0)g.wait-=dt;else{const dx=g.tx-g.x,dz=g.tz-g.z,d=Math.hypot(dx,dz);
    if(d<0.15){g.wait=0.8+rnd()*1.2;for(let k=0;k<60;k++){const a=rnd()*6.283,r=2.5+rnd()*4,x=g.x+Math.sin(a)*r,z=g.z+Math.cos(a)*r;let ok=true;for(let q=1;q<=8;q++){if(!free(g.x+(x-g.x)*q/8,g.z+(z-g.z)*q/8)){ok=false;break;}}if(ok){g.tx=x;g.tz=z;break;}}}
-   else{const st=Math.min(d,1.25*dt),nx=g.x+dx/d*st,nz=g.z+dz/d*st;if(free(nx,nz)){g.x=nx;g.z=nz;moving=true;const ty=Math.atan2(dx,dz);let dd=ty-g.yaw;dd=Math.atan2(Math.sin(dd),Math.cos(dd));g.yaw+=dd*Math.min(1,dt*8);}else{g.tx=g.x;g.tz=g.z;}}}
+   else{const st=Math.min(d,(window.__labSpd||1.25)*dt),nx=g.x+dx/d*st,nz=g.z+dz/d*st;if(free(nx,nz)){g.x=nx;g.z=nz;moving=true;const ty=Math.atan2(dx,dz);let dd=ty-g.yaw;dd=Math.atan2(Math.sin(dd),Math.cos(dd));g.yaw+=dd*Math.min(1,dt*8);}else{g.tx=g.x;g.tz=g.z;}}}
   const gy=R.Y+floorY(R,g.x,g.z-R.Z);
   if(window.__labEye)P.eye=window.__labEye;
-  if(window.__labCam){if(g.ph==null)g.ph=Math.atan2(P.x-g.x,P.z-g.z);g.ph+=dt*0.3;let rad=window.__labRad||3.2,cx,cz;for(;rad>0.9;rad-=0.1){cx=g.x+Math.sin(g.ph)*rad;cz=g.z+Math.cos(g.ph)*rad;if(gFree(G,cx,cz-R.Z,0.35,1.6))break;}
+  if(window.__labChase){const fx=Math.sin(g.yaw),fz=Math.cos(g.yaw);let rad=window.__labRad||3.4,cx=g.x,cz=g.z;for(;rad>1.0;rad-=0.1){const sd=Math.sin(t*0.25)*0.9;cx=g.x-fx*rad+fz*sd;cz=g.z-fz*rad-fx*sd;if(gFree(G,cx,cz-R.Z,0.35,1.6))break;}   /* 撮影用：うしろから追いかけるカメラ */
+   g.cx=g.cx==null?cx:g.cx+(cx-g.cx)*Math.min(1,dt*1.6);g.cz=g.cz==null?cz:g.cz+(cz-g.cz)*Math.min(1,dt*1.6);P.x=g.cx;P.z=g.cz;const ly=Math.atan2(g.x-P.x,-(g.z-P.z));g.ly=g.ly==null?ly:g.ly+Math.atan2(Math.sin(ly-g.ly),Math.cos(ly-g.ly))*Math.min(1,dt*3);P.yaw=g.ly;
+   const dd=Math.hypot(g.x-P.x,g.z-P.z);P.pit=Math.atan2(gy+(window.__labTY??0.7)-(P.y+P.eye),dd)-0.05;}
+  else if(window.__labCam){if(g.ph==null)g.ph=Math.atan2(P.x-g.x,P.z-g.z);g.ph+=dt*0.3;let rad=window.__labRad||3.2,cx,cz;for(;rad>0.9;rad-=0.1){cx=g.x+Math.sin(g.ph)*rad;cz=g.z+Math.cos(g.ph)*rad;if(gFree(G,cx,cz-R.Z,0.35,1.6))break;}
    if(rad<=0.9){g.ph+=dt*1.2;if(g.cx==null){g.cx=P.x;g.cz=P.z;}}else{g.cx=g.cx==null?cx:g.cx+(cx-g.cx)*Math.min(1,dt*3);g.cz=g.cz==null?cz:g.cz+(cz-g.cz)*Math.min(1,dt*3);}P.x=g.cx??cx;P.z=g.cz??cz;P.yaw=Math.atan2(g.x-P.x,-(g.z-P.z));
    const dd=Math.hypot(g.x-P.x,g.z-P.z);P.pit=Math.atan2(gy+(window.__labTY??0.85)-(P.y+P.eye),dd);}
   /* 影 */
