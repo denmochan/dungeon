@@ -14283,7 +14283,7 @@ function fpOpen30(){
     const dpr = Math.min(2, window.devicePixelRatio || 1) * FPQ.q, r = { width: cv.clientWidth, height: cv.clientHeight }; W = Math.round(r.width * dpr); H = Math.round(r.height * dpr); if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
     gl.viewport(0, 0, W, H); gl.clearColor(...(window.__ovh30 ? [0.2, 0.16, 0.135] : [0.17, 0.135, 0.13]), 1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     P.walk = (P.walk || 0) + ((mv.x || mv.y) ? Math.hypot(mv.x, mv.y) * dt * 8 : 0); const bob = (mv.x || mv.y) ? Math.sin(P.walk * 1.9) * 0.07 : 0; EYE = [P.x, P.y + P.eye + bob + SHK * Math.sin(now / 1000 * 47), P.z]; SHK *= Math.pow(0.02, dt); const dir = [Math.sin(P.yaw) * Math.cos(P.pit), Math.sin(P.pit), -Math.cos(P.yaw) * Math.cos(P.pit)];
-    const OVH = window.__ovh30; let TGT = [EYE[0] + dir[0], EYE[1] + dir[1], EYE[2] + dir[2]]; TGT0 = TGT; if (OVH) { const by = OVH.yaw != null ? OVH.yaw : P.yaw, back0 = OVH.back || 7.5, up0 = OVH.up || 11; let tq = (NW30 && NW30.tgt) || [P.x, P.y, P.z]; if (OVH.free && OVH.t) tq = OVH.t; const ZM = OVH.free ? (OVH.z || 1) : 1, CLS = OVH.free && rooms[OVH.li ?? curRoom] && rooms[OVH.li ?? curRoom].classic;   /* 主の間は上から見下ろし気味に（手前の子が大きく映って見えなかった） */ if (OVH.fix && typeof N !== "undefined" && N) { const hh = N.heroes.find(h => h.st === "in" || h.st === "hold30"), li = hh ? hh.pos : (OVH._li || 0); OVH._li = li; const R0 = rooms[li]; if (R0) { const G0 = g30(S, li); tq = [0, R0.Y, R0.Z - (G0.H - 1) / 2 * L30.CS]; } }   /* 動画用：層ぜんたいを真上から、動かさずに見る */ TGT = [tq[0], tq[1] + 0.8, tq[2]]; { const back = back0 * ZM * (CLS ? 0.55 : 1), up = up0 * ZM * (CLS ? 1.45 : 1); EYE = [tq[0] - Math.sin(by) * back, tq[1] + up, tq[2] + Math.cos(by) * back]; } }   /* 俯瞰：天井と壁の上を切って、上から見下ろす */
+    const OVH = window.__ovh30; let TGT = [EYE[0] + dir[0], EYE[1] + dir[1], EYE[2] + dir[2]]; TGT0 = TGT; if (OVH) { const by = OVH.yaw != null ? OVH.yaw : P.yaw, back0 = OVH.back || 7.5, up0 = OVH.up || 11; let tq = (NW30 && NW30.tgt) || [P.x, P.y, P.z]; if (OVH.free && OVH.t) tq = OVH.t; const ZM = OVH.free ? (OVH.z || 1) : 1, CLS = OVH.free && rooms[OVH.li ?? curRoom] && rooms[OVH.li ?? curRoom].classic;   /* 主の間は上から見下ろし気味に（手前の子が大きく映って見えなかった） */ if (OVH.fix && typeof N !== "undefined" && N) { const hh = N.heroes.find(h => h.st === "in" || h.st === "hold30"), li = hh ? hh.pos : (OVH._li || 0); OVH._li = li; const R0 = rooms[li]; if (R0) { const G0 = g30(S, li); tq = [0, R0.Y, R0.Z - (G0.H - 1) / 2 * L30.CS]; } }   /* 動画用：層ぜんたいを真上から、動かさずに見る */ TGT = [tq[0], tq[1] + 0.8, tq[2]]; { const st30 = OVH.free && !CLS ? 1 : 0, back = back0 * ZM * (CLS ? 0.55 : st30 ? 0.78 : 1), up = up0 * ZM * (CLS ? 1.45 : st30 ? 1.18 : 1);   /* 夜は少し真上寄りから（手前の岩が画面にかぶっていた） */ EYE = [tq[0] - Math.sin(by) * back, tq[1] + up, tq[2] + Math.cos(by) * back]; } }   /* 俯瞰：天井と壁の上を切って、上から見下ろす */
     FXS.zm *= Math.pow(0.15, dt); VP = mm(persp(1.15 - 0.28 * FXS.zm, W / H, 0.07, 160), look(EYE, TGT));
     gl.enable(gl.DEPTH_TEST); gl.useProgram(PM.p); gl.uniformMatrix4fv(PM.U("VP"), false, new Float32Array(VP)); gl.uniform3fv(PM.U("EYE"), EYE); gl.uniform1f(PM.U("DOV"), OVH && OVH.fix ? Math.max(0, (OVH.up || 11) - 8) : 0); gl.uniform1f(PM.U("CUT"), OVH ? (TGT[1] - 0.8) + (OVH.cut || 2.6) : 1e9);
     /* 出入口のたいまつは、地図が読めたら本当の壁の位置へ（宙に浮いていた） */ TORCH.forEach(t => { if (t[3] == null || t[5]) return; const R = rooms[t[3]]; if (!R.G) return; t[5] = 1; const sg = t[4], z0 = sg < 0 ? -2.8 : 7.3; for (let k = 0; k < 60; k++) { const zl = z0 + sg * k * 0.25, j = gAt(R.G, t[0], zl); if (j < 0 || R.G.fl[j] === 255 || R.G.cl[j] / 20 < 2.6) { t[2] = R.Z + zl - sg * 0.55; return; } } });
@@ -14412,8 +14412,8 @@ function fpOpen30(){
           for (let j = 0; j < 6; j++) CHIPS30.push({ x: lx + (Math.random() - 0.5) * 0.3, y: R2.Y + 0.9 + Math.random() * 0.5, z: R2.Z + lz + (Math.random() - 0.5) * 0.3, vx: (a.x - lx) * (0.6 + Math.random()) + (Math.random() - 0.5), vy: 1.5 + Math.random() * 2, vz: (a.z - lz) * (0.6 + Math.random()) + (Math.random() - 0.5), t: now, sp: j < 2 }); }); }
       for (let j = CHIPS30.length - 1; j >= 0; j--) { const q = CHIPS30[j], t = (now - q.t) / 1000; if (t > 0.7) { CHIPS30.splice(j, 1); continue; } const s2 = toScr(q.x + q.vx * t, q.y + q.vy * t - 4.9 * t * t, q.z + q.vz * t); if (!s2) continue; g.fillStyle = q.sp ? `rgba(255,220,120,${1 - t / 0.7})` : `rgba(120,100,80,${1 - t / 0.7})`; const sz = q.sp ? 2.5 : 3.5; g.fillRect(s2[0] - sz / 2, s2[1] - sz / 2, sz, sz); }
       /* 夜：ダメージの数字・倒した印 */ if (FX30.f !== now) { FX30.f = now; drawFx(g, now); } if (FLAG30 && P.auto && P.auto.pt) { const sF = toScr(FLAG30.x, FLAG30.y + 0.05, FLAG30.z); if (sF) { const ph = (now - FLAG30.t) / 600, rr = 10 + 4 * Math.sin(ph * 3); g.strokeStyle = 'rgba(255,220,120,.9)'; g.lineWidth = 2; g.beginPath(); g.ellipse(sF[0], sF[1], rr * 1.6, rr * 0.6, 0, 0, 7); g.stroke(); g.fillStyle = '#ffd860'; g.font = 'bold 18px system-ui'; g.textAlign = 'center'; g.fillText('▼', sF[0], sF[1] - 14 - 4 * Math.abs(Math.sin(ph * 2))); } }   /* 歩いていく先の印 */
-      POPS30.forEach(q => { const t = (now - q.t) / 900; if (t > 1) return; const s = toScr(q.x, q.y + t * 0.8, q.z); if (!s) return; g.save(); g.globalAlpha = Math.min(1, (1 - t) * 2); const bz = 1 + 0.8 * Math.max(0, 1 - t * 6); g.textAlign = "center"; g.font = `900 ${Math.round((q.big === 2 ? 30 : q.big ? 24 : 18) * bz)}px system-ui`; g.lineWidth = 3; g.strokeStyle = "rgba(20,10,5,.85)"; g.fillStyle = q.col; g.strokeText(q.txt, s[0], s[1]); g.fillText(q.txt, s[0], s[1]); g.restore(); });
-      for (let j = POPS30.length - 1; j >= 0; j--) if (now - POPS30[j].t > 900) POPS30.splice(j, 1);
+      POPS30.forEach(q => { const t = (now - q.t) / (q.life || 900); if (t > 1) return; const s = toScr(q.x, q.y + (q.cue ? Math.min(t, 0.15) * 1.5 : t * 0.8), q.z); if (!s) return; g.save(); g.globalAlpha = Math.min(1, (1 - t) * (q.cue ? 4 : 2)); if (q.cue) { g.font = "800 16px system-ui"; const w = g.measureText(q.txt).width + 18, x0 = s[0] - w / 2, y0 = s[1] - 20; g.fillStyle = "rgba(20,12,8,.88)"; g.strokeStyle = q.col; g.lineWidth = 2; g.beginPath(); g.roundRect ? g.roundRect(x0, y0, w, 26, 9) : g.rect(x0, y0, w, 26); g.fill(); g.stroke(); g.beginPath(); g.moveTo(s[0] - 6, y0 + 26); g.lineTo(s[0], y0 + 33); g.lineTo(s[0] + 6, y0 + 26); g.fill(); g.fillStyle = q.col; g.textAlign = "center"; g.fillText(q.txt, s[0], y0 + 18); g.restore(); return; }   /* 駆け引きの声は吹き出しで、少し長く出す */ const bz = 1 + 0.8 * Math.max(0, 1 - t * 6); g.textAlign = "center"; g.font = `900 ${Math.round((q.big === 2 ? 30 : q.big ? 24 : 18) * bz)}px system-ui`; g.lineWidth = 3; g.strokeStyle = "rgba(20,10,5,.85)"; g.fillStyle = q.col; g.strokeText(q.txt, s[0], s[1]); g.fillText(q.txt, s[0], s[1]); g.restore(); });
+      for (let j = POPS30.length - 1; j >= 0; j--) if (now - POPS30[j].t > (POPS30[j].life || 900)) POPS30.splice(j, 1);
       g.font = "bold 12px system-ui,sans-serif";
       (R.acts || []).slice().sort((p, q) => Math.hypot(p.x - P.x, R.Z + p.z - P.z) - Math.hypot(q.x - P.x, R.Z + q.z - P.z)).forEach(a => { if (!a.m) return; const wx = a.x, wz = R.Z + a.z, d = Math.hypot(wx - P.x, wz - P.z); const s = toScr(wx, R.Y + (a.y || 0) + (a.H || 2) + 0.45, wz);
         if (s && s[0] > 0 && s[0] < VW() && s[1] > 40 && s[1] < VH()) { if (d > 22 || !los(wx, wz)) return; const t = (a.hero && ((a.h && a.h.loot > 0) || a.bag30) ? "💰" : "") + (a.m.nick || ""), w = g.measureText(t).width + 10; let ly = s[1]; for (let k = 0; k < 3 && !lfree(s[0] - w / 2, ly - 15, w, 18); k++) ly -= 19; if (!lfree(s[0] - w / 2, ly - 15, w, 18)) return; LBL.push([s[0] - w / 2, ly - 15, w, 18]); s[1] = ly; g.globalAlpha = Math.max(0.35, 1 - d / 22); g.fillStyle = "rgba(14,10,8,.7)"; g.fillRect(s[0] - w / 2, s[1] - 15, w, 18); g.fillStyle = "#e8f5d8"; g.fillText(t, s[0], s[1] - 2); g.globalAlpha = 1; }
@@ -14519,6 +14519,21 @@ function fpOpen30(){
         else if (rg === 1) { const fr = H.filter(o => o !== h && RANGED30(o) === 0)[0]; if (fr) { const fx = fr.x - nm.x, fz = fr.z - nm.z, fl = Math.hypot(fx, fz) || 1; tx = fr.x + fx / fl * 2.2; tz = fr.z + fz / fl * 2.2; } else if (L < 4) { tx = h.x + dx / L * 1.5; tz = h.z + dz / L * 1.5; } }   /* 僧侶：前衛のうしろ */
         else { tx = nm.x + dx / L * 1.3; tz = nm.z + dz / L * 1.3; }   /* 前衛：いちばん近い敵に打ちかかる */
         if (okAt(Rm, tx, tz)) h.bt = [tx, tz]; h.face = nm; });
+      /* 駆け引き（計算側で決めた組）を動きにする：打ち合いは押し合い、横腹へは回りこみ、止めに入る子はその前に立ちはだかる */
+      { const MA = {}, HA = {}; Ms.forEach(a => { const M = N.mons.find(q => q.ref && q.ref.id === a.m.id); if (M) { a.M30 = M; MA[M.ref.id] = a; } }); H.forEach(a => { if (a.h) HA[a.h.id] = a; });
+        const tnow = now / 1000, put = (a, x, z) => { if (okAt(Rm, x, z)) a.bt = [x, z]; };
+        const cue = (a, k, txt, col) => { if (a.cue30 === k) return; a.cue30 = k; window.__cue30 = (window.__cue30 || 0) + 1; POPS30.push({ x: a.x, y: Rm.Y + 4.2, z: Rm.Z + a.z, txt, col, big: 0, t: now, cue: 1, life: 2000 }); try { tone16 && tone16(a.hero ? 520 : 330, 0, 0.08, "square", 0.04); } catch (e) {} };
+        H.forEach(ha => { const h = ha.h; if (!h) return; const ma = h.vsM30 != null && MA[h.vsM30]; if (!ma || !ma.M30 || ma.M30.vsH30 !== h.id) return;   /* 押し合い：体力の残りが多いほうが押しこむ。少し前後にゆれる */
+          const ax = ma.x - ha.x, az = ma.z - ha.z, L = Math.hypot(ax, az) || 1, ux = ax / L, uz = az / L, hr = h.hp / h.max, mr = ma.M30.hp / ma.M30.max, ph = (ha.ph || 0) + h.id;
+          const sh = Math.max(-0.9, Math.min(0.9, (hr - mr) * 1.6)) + Math.sin(tnow * 2.1 + ph) * 0.22, cx = (ha.x + ma.x) / 2 + ux * sh * dt * 2, cz = (ha.z + ma.z) / 2 + uz * sh * dt * 2;
+          put(ha, cx - ux * 0.62, cz - uz * 0.62); put(ma, cx + ux * 0.62, cz + uz * 0.62); ha.face = ma; ma.tg = ha; if (!eng.includes(ma)) eng.push(ma); });
+        Ms.forEach(ma => { const M = ma.M30; if (!M) return;
+          if (M.icp30 != null && HA[M.icp30]) { const ga = HA[M.icp30]; ma.tg = ga; if (!eng.includes(ma)) eng.push(ma); ga.face = ma; const ax = ma.x - ga.x, az = ma.z - ga.z, L = Math.hypot(ax, az) || 1; if (L > 1.4) put(ga, ma.x - ax / L * 1.1, ma.z - az / L * 1.1); cue(ga, "icp" + M.ref.id, "🛡 させるか！", "#9fd0ff"); return; }
+          if (M.flk30 != null && HA[M.flk30]) { const ta = HA[M.flk30], op = ta.face || (ta.h && ta.h.vsM30 != null && MA[ta.h.vsM30]); let nx = 1, nz = 0; if (op) { const ax = op.x - ta.x, az = op.z - ta.z, L = Math.hypot(ax, az) || 1; nx = -az / L; nz = ax / L; if ((ma.x - ta.x) * nx + (ma.z - ta.z) * nz < 0) { nx = -nx; nz = -nz; } }
+            ma.tg = ta; if (!eng.includes(ma)) eng.push(ma); put(ma, ta.x + nx * 1.15, ta.z + nz * 1.15); cue(ma, "flk" + M.flk30, "⚡ 横から！", "#ffb070"); } });
+        H.forEach(ha => { const h = ha.h; if (!h || h.flkM30 == null || !MA[h.flkM30]) return; const ma = MA[h.flkM30], op = ma.tg; let nx = 1, nz = 0; if (op) { const ax = op.x - ma.x, az = op.z - ma.z, L = Math.hypot(ax, az) || 1; nx = -az / L; nz = ax / L; if ((ha.x - ma.x) * nx + (ha.z - ma.z) * nz < 0) { nx = -nx; nz = -nz; } }
+          if (h.icpH30 != null && MA[h.icpH30]) { const fa = MA[h.icpH30]; ha.face = fa; fa.tg = ha; if (!eng.includes(fa)) eng.push(fa); put(fa, ha.x + (ma.x - ha.x) * 0.5, ha.z + (ma.z - ha.z) * 0.5); cue(fa, "I" + h.id, "🛡 通さない！", "#ff9a8a"); return; }
+          ha.face = ma; put(ha, ma.x + nx * 1.15, ma.z + nz * 1.15); cue(ha, "F" + ma.m.id, "⚡ 回りこめ！", "#a9ccff"); }); }
       /* 見通しがないのに撃って、壁に当たる */ const wallShot = (a, t) => { if (!t || now - (a.ws30 || 0) < 1400 || Math.random() < 0.6) return; a.ws30 = now; const F = layerField(Rm), L = Math.hypot(t.x - a.x, t.z - a.z); let hx = a.x, hz = a.z; for (let d = 0.3; d < L; d += 0.2) { const x = a.x + (t.x - a.x) * d / L, z = a.z + (t.z - a.z) * d / L; if (F.f(x, z) < 0.55) break; hx = x; hz = z; } const kind = a.hero ? (a.h && a.h.job === "hunter" ? "bow" : "magic") : (MAGIC30.test(a.sp || "") ? "magic" : "bow"), y = Rm.Y + 1.4, A0 = [a.x, y, Rm.Z + a.z], B0 = [hx, y, Rm.Z + hz], dur = 120 + Math.hypot(hx - a.x, hz - a.z) * 28; a.r = Math.atan2(t.x - a.x, t.z - a.z); a.mode = "slash"; setTimeout(() => { if (a.mode === "slash") a.mode = "idle"; }, 500); FX30.push({ k: "proj", a: A0, b: B0, t0: now, dur, kind });
           PEND30.push({ t: now + dur, f: () => { for (let q = 0; q < 14; q++) { const an = Math.random() * 6.283, sp = 2 + Math.random() * 3; FX30.push({ k: "sp", x: B0[0], y: B0[1], z: B0[2], vx: Math.cos(an) * sp, vy: 1 + Math.random() * 2.5, vz: Math.sin(an) * sp, t0: performance.now(), life: 350 + Math.random() * 300, col: "170,150,120", w: 2.2 }); } FX30.push({ k: "boom", x: B0[0], y: B0[1], z: B0[2], t0: performance.now(), life: 200, r: 0.5, col: "200,180,150" }); POPS30.push({ x: B0[0], y: B0[1] + 0.6, z: B0[2], txt: "ミス", col: "#c8bca8", big: 0, t: performance.now() }); try { noise16(0, 0.05, 0.05, 900); } catch (e) {} } }); };
       eng.forEach(m => { if (RANGED30(m) === 2 && m.tg && !losL(Rm, m.x, m.z, m.tg.x, m.tg.z)) wallShot(m, m.tg); }); H.forEach(h => { if (RANGED30(h) === 2 && h.face && !losL(Rm, h.x, h.z, h.face.x, h.face.z)) wallShot(h, h.face); });
@@ -14730,6 +14745,7 @@ stepNight5 = (prev => function (S0, N0) {
   heroes.forEach(h => { if (h.st !== "in" || !h.c30 || engaged.has(h)) return; if (h.job === "priest" && heroes.some(o => o.pos === h.pos && engaged.has(o))) return; if (heroes.some(o => o !== h && o.pos === h.pos && engaged.has(o))) { h.st = "hold30"; held.push(h); } });
   heroes.forEach(h => { if (h.amb30 > 0) h.amb30--; h.flank30 = 0; if (!h.c30) return; h.flank30 = N0.mons.filter(m => !m.down && m.pos === h.pos && m.c30 && Math.abs(m.c30[0] - h.c30[0]) + Math.abs(m.c30[1] - h.c30[1]) <= 1).length; });   /* 囲まれた勇者は受けるダメージが増える（広間で待ちかまえると有利） */
   N0.fight30 = {}; N0.mons.forEach(m => { if (!m.down && m.d30 != null && m.d30 <= T30.range) N0.fight30[m.pos] = 1; });
+  try { tac30(S0, N0, heroes); } catch (e) { console.warn('tac30', e); }
   const r = prev.apply(this, arguments);
   hid.forEach(m => { if (m._h30) { m.down = false; m._h30 = 0; } });
   held.forEach(h => { if (h.st === "hold30") h.st = "in"; });
@@ -14750,6 +14766,53 @@ stepNight5 = (prev => function (S0, N0) { const r = prev.apply(this, arguments);
   const live = () => N0.heroes.filter(h => h.st === "in" || h.st === "hold30" || (h.walk != null && h.st !== "dead" && h.st !== "escaped" && h.st !== "down"));
   const blank = () => { const L = live(); if (!L.length || N0.done) return false; const LI = typeof lordIdx === "function" ? lordIdx(S0) : -1; if (L.some(h => h.pos === LI)) return false; if (L.every(h => h.flee)) return !N0.mons.some(m => !m.down && L.some(h => m.pos === h.pos && m.d30 != null && m.d30 <= 3)); return false; };
   while (blank() && guard++ < 300) prev.call(this, S0, N0); } catch (e) {} return r; })(stepNight5);
+
+/* ===================== 戦いの駆け引き（本人：戦闘はこだわる。拮抗したら横腹を突きに行く、それを止めにも行く） =====================
+   ・打ち合い：となりのマスどうしの勇者と魔物は1対1で組み、その相手だけを叩きあう（だれが誰と戦っているか分かる）
+   ・拮抗：組んで2手以上、体力の残りが近いとき。あいている魔物が勇者の横へ回りこむ（横腹は1.5倍）。逆に、あいている勇者が魔物の横を突く（1.4倍）
+   ・阻止：横へ回りこもうとする子には、あいている相手側の子が止めに入る。止められたら横腹にはならず、止めた子と打ち合う */
+function tac30(S0, N0, heroes) { const T = N0.tac30 || (N0.tac30 = { duel: {}, said: {} });
+  N0.mons.forEach(m => { m.vsH30 = null; m.flk30 = null; m.icp30 = null; }); N0.heroes.forEach(h => { h.vsM30 = null; h.flkM30 = null; h.icp30 = null; h.icpH30 = null; });
+  const say = (k, who, txt, i, kind) => { if (T.said[k]) return; T.said[k] = N0.t; try { say5(N0, who, txt, i); pop10(N0, i, txt, kind || "info"); } catch (e) {} (N0.tac30ev = N0.tac30ev || []).push({ t: N0.t, k, txt }); };
+  const md = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]);
+  const rangedM = m => m.role === "bow" || (m.s11 && m.s11.shot > 0) || m.job === "snipe";
+  const meleeH = h => !(h.job === "hunter" || h.job === "mage" || h.job === "priest");
+  const seen = {}, nextDuel = {};
+  heroes.forEach(h => { if (!h.c30 || seen[h.pos]) return; seen[h.pos] = 1; const i = h.pos, G = g30(S0, i);
+    const Hs = heroes.filter(x => x.pos === i && x.c30 && !x.flee && x.hp > 0 && (x.st === "in" || x.st === "hold30"));
+    const Ms = N0.mons.filter(m => m.pos === i && m.c30 && m.hp > 0 && (!m.down || m._h30) && !(m.sleep > 0));
+    if (!Hs.length || !Ms.length) return;
+    // 1) 打ち合いの組（近い順に1対1）
+    const cand = []; Hs.forEach(x => Ms.forEach(m => { if (!m._h30 && !rangedM(m) && md(x.c30, m.c30) <= 1) cand.push([md(x.c30, m.c30) + (T.duel[x.id + ":" + m.ref.id] ? -0.5 : 0), x, m]); })); cand.sort((p, q) => p[0] - q[0]);
+    const usedH = new Set(), usedM = new Set(), pairs = [];
+    cand.forEach(([, x, m]) => { if (usedH.has(x) || usedM.has(m)) return; usedH.add(x); usedM.add(m); x.vsM30 = m.ref.id; m.vsH30 = x.id; const k = x.id + ":" + m.ref.id; nextDuel[k] = (T.duel[k] || 0) + 1; pairs.push([x, m, nextDuel[k]]); });
+    // 2) 拮抗している組を1つ選ぶ（長く続いている順）
+    const even = pairs.filter(([x, m, n]) => n >= 2 && Math.abs(x.hp / x.max - m.hp / m.max) < 0.35).sort((p, q) => q[2] - p[2])[0]; if (!even) return;
+    const [x, m] = even, D = g30dist(G, x.c30[0], x.c30[1]);
+    // 3) 魔物が横腹へ
+    const freeM = Ms.filter(f => !usedM.has(f) && !rangedM(f) && f.job !== "watch" && D[f.c30[1] * G.W + f.c30[0]] >= 0 && D[f.c30[1] * G.W + f.c30[0]] <= T30.aggro).sort((p, q) => D[p.c30[1] * G.W + p.c30[0]] - D[q.c30[1] * G.W + q.c30[0]]);
+    const f = freeM[0];
+    if (f) { f.flk30 = x.id; usedM.add(f);
+      if (md(f.c30, x.c30) > 1) { const occ = q => N0.mons.some(o => o !== f && o.hp > 0 && !o.down && o.pos === i && o.c30 && o.c30[0] === q[0] && o.c30[1] === q[1]); const cur = D[f.c30[1] * G.W + f.c30[0]];
+        const nb = [[1, 0], [-1, 0], [0, 1], [0, -1]].map(([a, b]) => [f.c30[0] + a, f.c30[1] + b]).filter(q => g30at(G, q[0], q[1]) && D[q[1] * G.W + q[0]] >= 0 && D[q[1] * G.W + q[0]] < cur && !occ(q)).sort((p, q) => D[p[1] * G.W + p[0]] - D[q[1] * G.W + q[0]])[0]; if (nb) f.c30 = nb; }
+      if (f._h30) { f.down = false; f._h30 = 0; } f.d30 = md(f.c30, x.c30);
+      say("f" + f.ref.id + ":" + x.id, f.ref.nick, "横ががら空きだ！", i, "bad");
+      // 4) 勇者が止めに入る
+      const g = Hs.filter(y => !usedH.has(y) && y !== x).sort((p, q) => (meleeH(q) - meleeH(p)) || md(p.c30, f.c30) - md(q.c30, f.c30))[0];
+      if (g) { g.icp30 = f.ref.id; f.icp30 = g.id; usedH.add(g); if (g.st === "hold30") g.st = "in"; say("i" + g.id + ":" + f.ref.id, g.name, "させるか！", i); }
+      return; }
+    // 5) 魔物があいていなければ、勇者が魔物の横腹へ。あいている魔物（弓でも）が止めに入る
+    const g2 = Hs.filter(y => !usedH.has(y) && y !== x).sort((p, q) => (meleeH(q) - meleeH(p)) || md(p.c30, m.c30) - md(q.c30, m.c30))[0];
+    if (g2) { g2.flkM30 = m.ref.id; usedH.add(g2); if (g2.st === "hold30") g2.st = "in"; say("F" + g2.id + ":" + m.ref.id, g2.name, "回りこめ！", i);
+      const f2 = Ms.filter(o => !usedM.has(o) && o.job !== "watch")[0]; if (f2) { f2.icp30 = g2.id; g2.icpH30 = f2.ref.id; if (f2._h30) { f2.down = false; f2._h30 = 0; } say("I" + f2.ref.id + ":" + g2.id, f2.ref.nick, "通さない！", i, "info"); } } });
+  T.duel = nextDuel; }
+/* 叩く相手を、組んだ相手にする（前は部屋の勇者からでたらめに選んでいた） */
+monHit11 = (prev => function (S, N, m, h, d) { try { if (m && !m.aoe && !(m.fx && (m.fx.all || m.fx.two))) { const by = id => N.heroes.find(o => o.id === id && o.st === "in" && o.pos === m.pos && o.walk == null);
+  let t = null; if (m.icp30 != null) t = by(m.icp30); if (!t && m.flk30 != null) { t = by(m.flk30); if (t) d *= 1.5; } if (!t && m.vsH30 != null) t = by(m.vsH30); if (t) h = t; } } catch (e) {} return prev.call(this, S, N, m, h, d); })(monHit11);
+target19 = (prev => function (S, N, h, foes, rnd) { try { const f = id => foes.find(m => m.ref && m.ref.id === id); const t = (h.icpH30 != null && f(h.icpH30)) || (h.icp30 != null && f(h.icp30)) || (h.flkM30 != null && f(h.flkM30)) || (h.vsM30 != null && f(h.vsM30)); if (t) return t; } catch (e) {} return prev.apply(this, arguments); })(target19);
+hitMon5 = (prev => function (S, N, m, d, h) { try { if (h && m && m.ref && h.flkM30 === m.ref.id && h.icpH30 == null) d *= 1.4; } catch (e) {} return prev.call(this, S, N, m, d, h); })(hitMon5);
+/* 横へ回りこむ子・止めに入る子は、前列の数に入っていなくても戦う */
+front19 = (prev => function (S, N) { const r = prev.apply(this, arguments); try { N.mons.forEach(m => { if (!m.down && (m.flk30 != null || m.icp30 != null)) { m.idle19 = false; m.front19 = true; } }); } catch (e) {} return r; })(front19);
 
 // ================= main30：層の試作版のつなぎ =================
 fpOpen26 = fpOpen30;   /* fp26 のすぐ後に入る（上に重ねたボタンなどはそのまま効く） */
