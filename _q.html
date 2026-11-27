@@ -14973,6 +14973,15 @@ setInterval(() => { try { if (!window.__dig30) return; if (Date.now() - window._
 /* 部屋・育成などの左の列：「◀ 歩く画面へ」は左下（戻るはいつもの場所）。「次の日へ」は歩く画面だけに置く（大事な操作なので、ついでに押せる所に置かない） */
 { const st = document.createElement("style"); st.textContent = `body.pan30 .bar20 [data-a="nextday"]{display:none!important}
 body.pan30 .bar20 [data-a="pgback"]{order:99;margin-top:auto!important}`; document.head.appendChild(st); }
+/* タイトル（横持ち）：右の列が縦に長く、下のボタンが見えなかった → 2列にして説明は1行に */
+{ const st = document.createElement("style"); st.textContent = `@media (orientation:landscape) and (max-height:500px){
+.title .tmenu{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));box-sizing:border-box;gap:6px!important;align-content:start}
+.title .tmenu>button{margin:0!important;width:auto!important;min-width:0!important;height:auto!important;line-height:1.3!important;overflow:hidden;padding:7px 9px!important;font-size:13px!important;min-height:0!important;text-align:left}
+.title .tmenu>button.big{grid-column:1/-1;text-align:center;font-size:16px!important;padding:10px!important}
+.title .tmenu>button>*{flex-shrink:0}.title .tmenu>button small{display:block;flex-shrink:0;line-height:1.3!important;font-size:10px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.title .tmenu>button.dim{padding:5px 8px!important;font-size:12px!important}
+.title .tmenu>button.dim small{display:none}
+}`; document.head.appendChild(st); media30(); }
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------
