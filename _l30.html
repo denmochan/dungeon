@@ -15043,6 +15043,8 @@ diffScreen15 = (prev => function () { const h = prev.apply(this, arguments); try
 .mbox:has(>.bkrow27){flex-direction:row!important;flex-wrap:wrap!important;align-content:flex-start}
 .mbox:has(>.bkrow27)>*{width:100%}.mbox:has(>.bkrow27)>.bkrow27{width:calc(50% - 3px)!important;margin:0!important}
 }`; document.head.appendChild(st); media30(); }
+/* 主に刻む（横持ち）：刻印の円が小さく、名前が読めなかった → 左の列いっぱいに */
+{ const st = document.createElement("style"); st.textContent = `@media (orientation:landscape) and (max-height:500px){.title.altar>.tlord{zoom:.75!important;margin-top:-6px!important}}`; document.head.appendChild(st); media30(); }
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------

@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層82／No.350（11/25 00:49）";
+const VER20 = "層83／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -14945,6 +14945,8 @@ diffScreen15 = (prev => function () { const h = prev.apply(this, arguments); try
 .mbox:has(>.bkrow27){flex-direction:row!important;flex-wrap:wrap!important;align-content:flex-start}
 .mbox:has(>.bkrow27)>*{width:100%}.mbox:has(>.bkrow27)>.bkrow27{width:calc(50% - 3px)!important;margin:0!important}
 }`; document.head.appendChild(st); media30(); }
+/* 主に刻む（横持ち）：刻印の円が小さく、名前が読めなかった → 左の列いっぱいに */
+{ const st = document.createElement("style"); st.textContent = `@media (orientation:landscape) and (max-height:500px){.title.altar>.tlord{zoom:.75!important;margin-top:-6px!important}}`; document.head.appendChild(st); media30(); }
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------
