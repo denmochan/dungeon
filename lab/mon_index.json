@@ -186,13 +186,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 0.4,
-  "bytes": 80899,
+  "bytes": 89450,
   "verts": 7000,
-  "tris": 13920,
+  "tris": 13812,
   "full": {
    "file": "mon_eyebat.bin.gz",
    "fmt": "GB02",
-   "bytes": 246464
+   "bytes": 310258
   }
  },
  "eyespider": {
@@ -242,13 +242,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 2.8,
-  "bytes": 110121,
+  "bytes": 109851,
   "verts": 7000,
-  "tris": 13996,
+  "tris": 13985,
   "full": {
    "file": "mon_fortgolem.bin.gz",
    "fmt": "GB01",
-   "bytes": 441029
+   "bytes": 590479
   }
  },
  "fungus": {
@@ -256,13 +256,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 0.8,
-  "bytes": 95627,
+  "bytes": 108405,
   "verts": 7000,
-  "tris": 13879,
+  "tris": 13890,
   "full": {
    "file": "mon_fungus.bin.gz",
    "fmt": "GB02",
-   "bytes": 285457
+   "bytes": 441252
   }
  },
  "gargoyle": {
@@ -327,13 +327,13 @@
   "fmt": "GB03",
   "kind": "biped+weapon",
   "scale": 1.0,
-  "bytes": 108558,
+  "bytes": 105239,
   "verts": 7000,
   "tris": 14000,
   "full": {
    "file": "mon_ghoul.bin.gz",
    "fmt": "GB1W",
-   "bytes": 558576
+   "bytes": 511376
   }
  },
  "gobx": {
@@ -383,13 +383,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 1.0,
-  "bytes": 92643,
+  "bytes": 98460,
   "verts": 7000,
-  "tris": 14004,
+  "tris": 14040,
   "full": {
    "file": "mon_hauntchest.bin.gz",
    "fmt": "GB02",
-   "bytes": 341070
+   "bytes": 393044
   }
  },
  "human": {
@@ -425,13 +425,13 @@
   "fmt": "GB03",
   "kind": "biped+weapon",
   "scale": 1.6,
-  "bytes": 110005,
-  "verts": 7000,
-  "tris": 13987,
+  "bytes": 120694,
+  "verts": 8000,
+  "tris": 15980,
   "full": {
    "file": "mon_ifrit.bin.gz",
    "fmt": "GB1W",
-   "bytes": 632783
+   "bytes": 562445
   }
  },
  "imp": {
@@ -451,15 +451,15 @@
  "jackal": {
   "file": "lite/mon_jackal.bin.gz",
   "fmt": "GB03",
-  "kind": "pointskin",
+  "kind": "biped+weapon",
   "scale": 0.8,
-  "bytes": 98296,
+  "bytes": 109042,
   "verts": 7000,
   "tris": 13996,
   "full": {
    "file": "mon_jackal.bin.gz",
-   "fmt": "GB02",
-   "bytes": 314557
+   "fmt": "GB1W",
+   "bytes": 583788
   }
  },
  "knight": {
@@ -943,13 +943,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 1.8,
-  "bytes": 130131,
+  "bytes": 130352,
   "verts": 8000,
-  "tris": 15916,
+  "tris": 15936,
   "full": {
    "file": "mon_underlord.bin.gz",
    "fmt": "GB01",
-   "bytes": 638903
+   "bytes": 976681
   }
  },
  "vampire": {
@@ -971,13 +971,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 2.0,
-  "bytes": 92013,
+  "bytes": 105938,
   "verts": 7000,
-  "tris": 14004,
+  "tris": 13942,
   "full": {
    "file": "mon_vaultkeeper.bin.gz",
    "fmt": "GB02",
-   "bytes": 342390
+   "bytes": 477817
   }
  },
  "warrior": {
