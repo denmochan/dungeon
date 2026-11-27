@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層78／No.350（11/25 00:49）";
+const VER20 = "層79／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -14913,6 +14913,18 @@ diffScreen15 = (prev => function () { const h = prev.apply(this, arguments); try
 .stage .dw28>.dr28{margin:0!important}.stage .dw28:not(:has(.dr28~.dr28)){max-width:min(480px,94vw)!important;grid-template-columns:1fr}
 .stage .dm28h{flex-direction:row!important;flex-wrap:wrap;justify-content:center;align-items:baseline;gap:4px 10px!important;margin-bottom:2px!important}
 .stage .dm28h b{font-size:20px!important}
+}`; document.head.appendChild(st); media30(); }
+/* 夜の結果（横持ち）：1列で縦に長かった（画面3枚半ぶん）→ 2列に流す。見出しとMVPは横並び */
+{ const st = document.createElement("style"); st.textContent = `@media (orientation:landscape) and (max-height:500px){
+.stage:has(>.raidban){flex-direction:row!important;flex-wrap:wrap!important;justify-content:center!important;align-content:flex-start!important;align-items:flex-start!important;gap:6px 8px!important;padding-left:max(10px,env(safe-area-inset-left))!important;padding-right:max(10px,env(safe-area-inset-right))!important}
+.stage:has(>.raidban)>*{margin-top:0!important;margin-bottom:0!important}
+.stage:has(>.raidban)>.raidban,.stage:has(>.raidban)>.mvp{flex:0 0 auto}
+.stage:has(>.raidban)>.dw28,.stage:has(>.raidban)>[data-a="stagenext"]{flex:0 0 100%}
+.stage:has(>.raidban)>[data-a="stagenext"]{flex:0 0 420px!important;max-width:420px!important;margin:0 calc((100% - 420px) / 2)!important}
+.stage:has(>.raidban)>.tip23,.stage:has(>.raidban)>.dmg23,.stage:has(>.raidban)>.rs-grid,.stage:has(>.raidban)>.order,.stage:has(>.raidban)>div:not([class]){flex:0 0 calc(50% - 4px);max-width:calc(50% - 4px)!important;box-sizing:border-box}
+.stage:has(>.raidban)>.hint,.stage:has(>.raidban)>.achpop{flex:0 0 auto}
+.stage:has(>.raidban)::after{flex:0 0 100%!important;height:64px}
+.stage:has(>.raidban) .rs-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
 }`; document.head.appendChild(st); media30(); }
 
 // ================= 第6回テストのあと：壊れの修正 =================
