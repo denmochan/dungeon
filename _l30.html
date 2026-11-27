@@ -14982,6 +14982,22 @@ body.pan30 .bar20 [data-a="pgback"]{order:99;margin-top:auto!important}`; docume
 .title .tmenu>button.dim{padding:5px 8px!important;font-size:12px!important}
 .title .tmenu>button.dim small{display:none}
 }`; document.head.appendChild(st); media30(); }
+/* 難易度の画面（横持ち）：左＝もどる・説明・はじめる、右＝難易度と縛り（右だけ動かせる）。前は説明に「はじめる」がかぶり、左が空いていた */
+diffScreen15 = (prev => function () { const h = prev.apply(this, arguments); try { const T = document.createElement("template"); T.innerHTML = h.trim(); const root = T.content.firstElementChild; if (!root) return h;
+  const L = document.createElement("div"), R = document.createElement("div"); L.className = "dleft30"; R.className = "dright30";
+  [...root.children].forEach(e => { (e.matches(".altop,.ddesc,[data-a='diffgo']") ? L : R).appendChild(e); }); root.append(L, R); return root.outerHTML; } catch (e) { return h; } })(diffScreen15);
+{ const st = document.createElement("style"); st.textContent = `.dleft30,.dright30{display:contents}
+.title.diff .altop{order:1}.title.diff .dsel{order:2}.title.diff .ddesc{order:3}.title.diff .pact30{order:4}.title.diff [data-a="diffgo"]{order:5}
+@media (orientation:landscape) and (max-height:500px){
+.title.diff{display:flex!important;flex-direction:row!important;gap:12px;overflow:hidden!important;height:100%;box-sizing:border-box;align-items:stretch!important}
+.title.diff .dleft30{display:flex;flex-direction:column;gap:8px;flex:0 0 42%;min-width:0;justify-content:space-between}
+.title.diff .dright30{display:flex;flex-direction:column;gap:6px;flex:1 1 0;min-width:0;overflow-y:auto;padding-bottom:8px}
+.title.diff .dleft30 .altop{width:100%;margin:0}
+.title.diff .dleft30 .ddesc{max-width:none;margin:0;flex:1 1 auto;overflow-y:auto}
+.title.diff .dleft30 [data-a="diffgo"]{position:static!important;max-width:none!important;margin:0!important;flex-shrink:0}
+.title.diff .dright30 .dsel,.title.diff .dright30 .pact30{margin:0;max-width:none;flex-shrink:0}
+}`; document.head.appendChild(st); media30(); }
+{ const _r = render; render = function () { const d = document.querySelector(".dright30"), y = d ? d.scrollTop : 0; const o = _r.apply(this, arguments); if (y) { const n = document.querySelector(".dright30"); if (n) n.scrollTop = y; } return o; }; }
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------
