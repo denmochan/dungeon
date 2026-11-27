@@ -15000,6 +15000,14 @@ diffScreen15 = (prev => function () { const h = prev.apply(this, arguments); try
 { const _r = render; render = function () { const d = document.querySelector(".dright30"), y = d ? d.scrollTop : 0; const o = _r.apply(this, arguments); if (y) { const n = document.querySelector(".dright30"); if (n) n.scrollTop = y; } return o; }; }
 /* 部屋の設備：見出し（入口の層 B1）が止まったとき、上のすき間から下の文字が透けていた */
 { const st = document.createElement("style"); st.textContent = `.rshead{background:#140f0c!important;box-shadow:0 -12px 0 #140f0c,0 6px 8px -4px #000a}`; document.head.appendChild(st); }
+/* 朝の収穫（横持ち）：1列で縦に長く「つづける」が中身にかぶっていた → 横に広げて2列 */
+{ const st = document.createElement("style"); st.textContent = `@media (orientation:landscape) and (max-height:500px){
+.stage .dw28{max-width:min(760px,94vw)!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:4px 0 8px!important;padding:6px 8px 8px!important}
+.stage .dw28>.dh28,.stage .dw28>.db28{grid-column:1/-1}
+.stage .dw28>.dr28{margin:0!important}.stage .dw28:not(:has(.dr28~.dr28)){max-width:min(480px,94vw)!important;grid-template-columns:1fr}
+.stage .dm28h{flex-direction:row!important;flex-wrap:wrap;justify-content:center;align-items:baseline;gap:4px 10px!important;margin-bottom:2px!important}
+.stage .dm28h b{font-size:20px!important}
+}`; document.head.appendChild(st); media30(); }
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------
