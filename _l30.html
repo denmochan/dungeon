@@ -15059,6 +15059,8 @@ document.addEventListener("click", ev => { const b = ev.target.closest && ev.tar
 { const _dm = dexModal; dexModal = function () { if (DXFROM30 !== "shop" || !DX || !(S.shop || []).some(o => o.sp === DX)) return _dm.apply(this, arguments);
   const had = (S.dex || []).includes(DX); if (!had) (S.dex = S.dex || []).push(DX); let h; try { h = _dm.apply(this, arguments); } finally { if (!had) S.dex = S.dex.filter(k => k !== DX); }
   return h.replace('<button data-a="dex">← 図鑑</button>', '<button data-a="shop">← 店</button>'); }; }
+/* ほか →「部屋を開く」：押しても何も出なかった（部屋の画面を歩く画面の上に重ねていなかった） */
+document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('.dmx30 [data-d="openroom"]'); if (!b) return; setTimeout(() => { try { if (roomSel != null) { page20 = null; modal = null; pan30(true); render(); } const m = document.querySelector(".dmx30"); if (m) m.remove(); } catch (e) {} }, 30); }, true);
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------
