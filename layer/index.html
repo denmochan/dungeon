@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層88／No.350（11/25 00:49）";
+const VER20 = "層89／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -14196,7 +14196,7 @@ function fpOpen30(){
     // 足もとの影（ドット絵が浮いて見えた）
     gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(false); gl.uniform1f(PB.U("AM"), 1); gl.uniform1f(PB.U("FL"), 0); gl.uniform4f(PB.U("UR"), 0, 0, 1, 1); gl.uniform1f(PB.U("LB"), 1);
     gl.activeTexture(gl.TEXTURE0); gl.uniform1f(PB.U("OL"), 0); gl.bindTexture(gl.TEXTURE_2D, texOf(SHADOW)); gl.uniform1i(PB.U("tx"), 0); gl.uniform3f(PB.U("UPV"), 0, 0, 1); gl.uniform3f(PB.U("R"), 1, 0, 0);
-    for (let i = Math.max(0, curRoom - 1); i <= Math.min(n - 1, curRoom + 1); i++) { const R = rooms[i]; (R.acts || []).forEach(a => { if (DHOV25[a.sp]) return; const ss = Math.max(1, (a.H || 1.6) * 0.42); gl.uniform3f(PB.U("C"), a.x, R.Y + floorY(R, a.x, a.z) + 0.05, R.Z + a.z); gl.uniform4f(PB.U("Q"), -0.9 * ss, -0.5 * ss, 1.8 * ss, 1.0 * ss); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); }); }
+    for (let i = Math.max(0, curRoom - 1); i <= Math.min(n - 1, curRoom + 1); i++) { const R = rooms[i]; (R.acts || []).forEach(a => { const ss = Math.max(1, (a.H || 1.6) * 0.42) * (DHOV25[a.sp] ? 0.7 : 1);   /* 飛ぶ子にも床に影（宙に立っているように見えた） */ gl.uniform3f(PB.U("C"), a.x, R.Y + floorY(R, a.x, a.z) + 0.05, R.Z + a.z); gl.uniform4f(PB.U("Q"), -0.9 * ss, -0.5 * ss, 1.8 * ss, 1.0 * ss); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); }); }
     /* 通路の罠：床の絵（毒はゆらゆら光る） */
     for (let i = Math.max(0, curRoom - 1); i <= Math.min(n - 1, curRoom + 1); i++) (rooms[i].traps || []).forEach(tp => { const tx = TRT[tp.k]; if (!tx) return; const d = Math.hypot(tp.x - P.x, tp.z - P.z), sz = tp.k === "pit" ? 3.4 : tp.k === "net" ? 2.6 : 3.0;
       gl.bindTexture(gl.TEXTURE_2D, texOf(tx)); gl.uniform1f(PB.U("LB"), (0.45 + 0.8 * Math.exp(-d / 6)) * (tp.k === "poison" ? 0.85 + 0.25 * Math.sin(now / 300 + tp.z) : 1)); gl.uniform3f(PB.U("C"), tp.x, tp.y + 0.03, tp.z); gl.uniform4f(PB.U("Q"), -sz / 2, -sz / 2, sz, sz); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); });
@@ -14253,8 +14253,8 @@ function fpOpen30(){
         if (a.dis30) { const q = (now - a.dis30) / 1200; if (q >= 0 && q < 1) bob -= 0.35 * Math.sin(q * Math.PI); else a.dis30 = 0; }   /* 罠を外す：しゃがむ */
         const br = a.walking || jobF ? 1 : 1 + 0.018 * Math.sin(now / 1000 * 2.3 + a.ph), k = (a.mult || 1) / ppu, w = cw / hs, h = ch / hs, x0 = fl2 ? 64 - ox - w : ox - 64, d = Math.hypot(wx - P.x, wz - P.z);
         gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, texOf(im)); gl.uniform1i(PB.U("tx"), 0); gl.uniform1f(PB.U("OL"), im.__lin ? 1 : 0); gl.uniform2f(PB.U("TS"), 1 / im.width, 1 / im.height); gl.uniform1f(PB.U("FL"), fl2 ? 1 : 0); gl.uniform4f(PB.U("UR"), cx / im.width, cy / im.height, cw / im.width, ch / im.height); gl.uniform1f(PB.U("LB"), a.fl && now < a.fl ? 3.4 : 0.5 + 0.7 * Math.exp(-d / 7));
-        gl.uniform3f(PB.U("C"), wx + jx, R.Y + gy + (a.y || 0) + (DHOV25[a.sp] ? 0.9 : 0) + bob, wz + jz); { const vk = window.__ovh30 && window.__ovh30.big && !a.lord ? window.__ovh30.big : 1; gl.uniform4f(PB.U("Q"), x0 * k * vk, (foot - (oy + h)) * k * br * vk, w * k * vk, h * k * br * vk);
-          if (im.__lin && d < 14) { /* 厚みを出す（近くのキャラだけ。遠くは見えないので描かない＝軽くする）：絵を向いている側へ少しひねって、うしろに暗い層を重ねる（板に見えていた） */ const th = fl2 ? 0.42 : -0.42, cs = Math.cos(th), sn = Math.sin(th), R2 = [Rr[0] * cs - Rr[2] * sn, 0, Rr[0] * sn + Rr[2] * cs], F2 = [R2[2], 0, -R2[0]], dep = 0.13 * h * k * br * vk, NL = 3, C0 = [wx + jx, R.Y + gy + (a.y || 0) + (DHOV25[a.sp] ? 0.9 : 0) + bob, wz + jz]; gl.uniform3fv(PB.U("R"), R2);
+        gl.uniform3f(PB.U("C"), wx + jx, R.Y + gy + (a.y || 0) + (DHOV25[a.sp] ? 0.8 + 0.14 * Math.sin(now / 1000 * 2.6 + (a.ph || 0) * 7) : 0) + bob, wz + jz); { const vk = window.__ovh30 && window.__ovh30.big && !a.lord ? window.__ovh30.big : 1; gl.uniform4f(PB.U("Q"), x0 * k * vk, (foot - (oy + h)) * k * br * vk, w * k * vk, h * k * br * vk);
+          if (im.__lin && d < 14) { /* 厚みを出す（近くのキャラだけ。遠くは見えないので描かない＝軽くする）：絵を向いている側へ少しひねって、うしろに暗い層を重ねる（板に見えていた） */ const th = fl2 ? 0.42 : -0.42, cs = Math.cos(th), sn = Math.sin(th), R2 = [Rr[0] * cs - Rr[2] * sn, 0, Rr[0] * sn + Rr[2] * cs], F2 = [R2[2], 0, -R2[0]], dep = 0.13 * h * k * br * vk, NL = 3, C0 = [wx + jx, R.Y + gy + (a.y || 0) + (DHOV25[a.sp] ? 0.8 + 0.14 * Math.sin(now / 1000 * 2.6 + (a.ph || 0) * 7) : 0) + bob, wz + jz]; gl.uniform3fv(PB.U("R"), R2);
             for (let j = NL; j >= 1; j--) { const t = dep * j / NL; gl.uniform1f(PB.U("DK"), j === NL ? 1.4 : 2.0); gl.uniform3f(PB.U("C"), C0[0] + F2[0] * t, C0[1], C0[2] + F2[2] * t); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); }
             gl.uniform1f(PB.U("DK"), 0); gl.uniform3f(PB.U("C"), C0[0], C0[1], C0[2]); }
           else gl.uniform3fv(PB.U("R"), Rr); } gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); gl.uniform3fv(PB.U("R"), Rr);
