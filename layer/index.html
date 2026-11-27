@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層91／No.350（11/25 00:49）";
+const VER20 = "層92／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -14983,6 +14983,9 @@ html.land30 .dg30g{width:min(92vh,62vw,420px)}html.land30 .main-area>.sheet20{ma
 .stage:has(>.raidban)>.mvp img,.stage:has(>.raidban)>.mvp .sp{width:40px!important;height:40px!important}
 }
 html.land30 .raidban{max-width:calc(100vh - 24px)!important}`; document.head.appendChild(st); media30(); }
+/* 結果・朝の画面：下に止まる「つづける」の後ろに暗い帯を敷く（下の中身と重なって、ちぎれて見えていた。帯の下は続きがあると分かる） */
+{ const st = document.createElement("style"); st.textContent = `.stage.result>button[data-a="stagenext"]{isolation:isolate}
+.stage.result>button[data-a="stagenext"]::before{content:"";position:absolute;left:-60vmax;right:-60vmax;top:-16px;bottom:-12px;background:linear-gradient(#140a0800,#140a08e6 45%,#140a08);z-index:-2;pointer-events:none}.stage.result>button[data-a="stagenext"]{background:none!important}.stage.result>button[data-a="stagenext"]::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(#a8402c,#6e1f15);z-index:-1;pointer-events:none}`; document.head.appendChild(st); }
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------
