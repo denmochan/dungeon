@@ -13742,23 +13742,23 @@ function fpOpen30(){
         highp vec3 sn=normalize(vnn); highp vec2 tn=normalize(vec2(-sn.z,sn.x)+vec2(1e-4,0.0));
         float kw=(rel>0.12&&rel<3.3)?1.0:0.0, kc=rel>=3.3?1.0:0.0;
         highp vec3 T1=kw>0.5?vec3(tn.x,0.0,tn.y):vec3(1.0,0.0,0.0), T2=kw>0.5?vec3(0.0,1.0,0.0):vec3(0.0,0.0,1.0);
-        highp vec2 cs=kw>0.5?vec2(2.0,1.25):(kc>0.5?vec2(2.3,2.3):vec2(1.5,1.5));
-        highp vec2 q=vec2(dot(vw,T1),dot(vw,T2))/cs; q+=vec2(n3(vec3(q*0.6,3.1))-0.5,n3(vec3(q*0.6,8.3))-0.5)*0.75;   /* 大きくゆがめて石垣に見えないように */
-        highp vec2 ip=floor(q),fp=fract(q); float f1=9.0,f2=9.0; vec2 bo=vec2(0.0),bi=vec2(0.0);
-        for(int j=-1;j<=1;j++)for(int i=-1;i<=1;i++){vec2 g=vec2(float(i),float(j));vec2 o=0.5+0.45*vec2(h(vec3(ip+g,1.3))-0.5,h(vec3(ip+g,7.1))-0.5)*2.0;vec2 r=g+o-fp;float d=dot(r,r);
+        highp vec3 cs=kw>0.5?vec3(2.0,1.25,2.0):(kc>0.5?vec3(2.3,1.6,2.3):vec3(1.5,1.2,1.5));
+        highp vec3 q=vw/cs; q+=vec3(n3(q*0.6+3.1)-0.5,n3(q*0.6+8.3)-0.5,n3(q*0.6+5.7)-0.5)*0.75;   /* 3Dの塊で切る（向きに頼る写し方だと、奥の壁で渦の模様になった） */
+        highp vec3 ip=floor(q),fp=fract(q); float f1=9.0,f2=9.0; vec3 bo=vec3(0.0),bi=vec3(0.0);
+        for(int k=-1;k<=1;k++)for(int j=-1;j<=1;j++)for(int i=-1;i<=1;i++){vec3 g=vec3(float(i),float(j),float(k));vec3 o=0.5+0.45*(vec3(h(ip+g+1.3),h(ip+g+7.1),h(ip+g+4.9))-0.5)*2.0;vec3 r=g+o-fp;float d=dot(r,r);
           if(d<f1){f2=f1;f1=d;bo=r;bi=ip+g;}else if(d<f2){f2=d;}}
         f1=sqrt(f1);f2=sqrt(f2);float ed=f2-f1;
-        float pick=h(vec3(bi,4.7)); bc*=1.0+(pick-0.5)*0.07;   /* 塊ごとの明るさの差はごく少し（色味は変えない） */
+        float pick=h(bi+4.7); bc*=1.0+(pick-0.5)*0.07;   /* 塊ごとの明るさの差はごく少し（色味は変えない） */
 #ifdef HASN
         float fw=fwidth(ed)*2.5+0.016;
 #else
         float fw=0.022;
 #endif
-        float lw=0.01+0.012*h(vec3(bi,9.9)); float ink=1.0-smoothstep(lw,lw+fw,ed);
-        ink*=smoothstep(0.3,0.55,n3(vec3(q*1.8,5.0)));   /* 線はところどころ途切れさせる（全部閉じた線だと石垣・タイルに見える） */
+        float lw=0.01+0.012*h(bi+9.9); float ink=1.0-smoothstep(lw,lw+fw,ed);
+        ink*=smoothstep(0.3,0.55,n3(q*1.8+5.0));   /* 線はところどころ途切れさせる（全部閉じた線だと石垣・タイルに見える） */
         ink*=kw>0.5?0.5:(kc>0.5?0.35:0.0);
         float pw=kw>0.5?0.28:(kc>0.5?0.3:0.07);
-        cellOn=1.0; cellN=-(T1*bo.x*cs.x+T2*bo.y*cs.y)*pw*smoothstep(0.0,0.35,ed);   /* 塊ごとに丸くふくらんだ陰 */
+        cellOn=1.0; cellN=-(bo*cs)*pw*smoothstep(0.0,0.35,ed); cellN-=sn*dot(cellN,sn);   /* 塊ごとに丸くふくらんだ陰 */
         inkA=ink; }   /* 壁：地層のような横じま（段々の岩）と、暗いすき間 */
       if(rel<0.12){ float pb=n3(vw*vec3(5.5,1.0,5.5)); if(R2<1.5) bc*=mix(1.0,1.15,smoothstep(0.72,0.8,pb)); float wet=fb(vw*0.5+11.0); bc=mix(bc,bc*vec3(0.78,0.8,0.9),smoothstep(0.55,0.75,wet)*0.6); }
       else if(rel<1.3){ float ms=fb(vw*1.1+21.0)*(1.0-rel/1.3); bc=mix(bc,vec3(0.22,0.36,0.2)*(0.8+0.4*mid),smoothstep(0.45,0.6,ms)*0.6); }
@@ -13771,7 +13771,7 @@ function fpOpen30(){
       #endif
       if(dot(nn,EYE-vw)<0.0) nn=-nn;
       if(UN>0.5){vec3 sn=normalize(vnn);if(dot(sn,EYE-vw)<0.0)sn=-sn;nn=sn;}   /* 新しい壁はなめらかな陰（ゴブリンと同じ） */
-      if(cellOn>0.5){nn=normalize(nn+cellN);}
+      float pil=cellOn>0.5?clamp(dot(cellN,normalize(vec3(0.3,0.9,0.35)))*0.9,-0.14,0.09):0.0;   /* 塊のふくらみは明るさをなめらかに変えるだけ（段の陰にすると目玉のような輪ができた） */
       #ifdef HASN
       if(R2>1.5&&DET>0.5&&DET<1.5&&vd<24.0){ vec3 dpx=dFdx(vw),dpy=dFdy(vw); float bs=R2>1.5?0.12:0.18; float dhx=dFdx(hh)*bs,dhy=dFdy(hh)*bs; vec3 r1=cross(dpy,nn),r2=cross(nn,dpx); float det=dot(dpx,r1); vec3 gd=sign(det)*(dhx*r1+dhy*r2); nn=normalize(mix(nn,normalize(abs(det)*nn-gd),smoothstep(24.0,10.0,vd))); }
       #endif
@@ -13779,7 +13779,7 @@ function fpOpen30(){
       vec3 hemi=mix(vec3(0.3,0.32,0.44),vec3(0.72,0.72,0.8),nn.y*0.5+0.5);   /* 洞窟のつめたい青い光 */
       vec3 c=bc*tb*hemi*(0.62+(R2>1.5?0.3:0.5)*exp(-vd/11.0));
       vec3 L=vec3(0.0);for(int i=0;i<6;i++){vec3 q=LT[i]-vw;float dd=dot(q,q);float ld=dot(nn,q*inversesqrt(dd+0.0001));float tl=ld>0.35?1.0:(ld>0.05?0.62:0.3);L+=LC*LF[i]*tl/(1.0+0.16*dd);}
-      c+=bc*L*(R2>1.5?1.15:(R2>0.5?1.55:2.3));float lu=dot(c,vec3(0.3,0.59,0.11));c=mix(vec3(lu),c,R2>1.5?1.3:1.15);c=1.0-exp(-c*1.5);   /* たいまつのまわりだけ暖かく明るい */
+      c*=1.0+pil;c+=bc*L*(1.0+pil*1.5)*(R2>1.5?1.15:(R2>0.5?1.55:2.3));float lu=dot(c,vec3(0.3,0.59,0.11));c=mix(vec3(lu),c,R2>1.5?1.3:1.15);c=1.0-exp(-c*1.5);   /* たいまつのまわりだけ暖かく明るい */
       c=mix(c,vec3(0.03,0.04,0.07),smoothstep(18.0,52.0,vd));c=mix(c,c*vec3(0.42,0.38,0.36),inkA*smoothstep(20.0,5.0,vd));gl_FragColor=vec4(c,1.0);return; }
     vec3 c=bc*g*(0.55+0.8*exp(-vd/7.0));c+=vec3(0.05,0.03,0.012)*exp(-vd/4.0);
     vec3 L=vec3(0.0);for(int i=0;i<6;i++){vec3 q=vw-LT[i];L+=LC*0.95*LF[i]/(1.0+0.22*dot(q,q));}c+=bc*L*1.05+L*0.02;c=1.0-exp(-c*1.35);
@@ -13896,23 +13896,24 @@ function fpOpen30(){
 
   /* ===== 広間の飾りを、板の絵ではなく立体で作る（洞窟と同じ作り方：頂点の色に光をつけておく） ===== */
   function propMesh(Rm){ let P = [], C = [], I = []; const pr = Rm.props || {}; if (Rm.classic) return null; const GL = { P: [], C: [], I: [] }, NM = { P, C, I }; const glow = on => { const t = on ? GL : NM; P = t.P; C = t.C; I = t.I; };
-    let rx = 0, rz = 0, ry = 0, rc = 1, rs = 0, rk = 1;   /* 置く位置・向き */
+    let rx = 0, rz = 0, ry = 0, rc = 1, rs = 0, rk = 1, ctr = null, noT3 = false; const T3 = { P: [], N: [], C: [] };   /* T3：ゴブリンと同じ描き方（トゥーン＋輪郭線）用に、焼いた陰なしの色と面の向きも取っておく */   /* 置く位置・向き */
     const tf = (x, y, z) => { const c = Math.cos(ry), sn = Math.sin(ry); x *= rk; y *= rk; z *= rk; return [rx + x * c - z * sn, y, rz + x * sn + z * c]; };
     const shade = (col, nY, nX) => col.map(v => Math.min(255, v * (0.62 + 0.38 * Math.max(0, nY) + 0.12 * nX + 0.08 * (nz(rx, ry, rz, rs++ % 9) )))) ;
     const tri = (a, b, c2, col) => { const u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], v = [c2[0] - a[0], c2[1] - a[1], c2[2] - a[2]], n = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]], L = Math.hypot(...n) || 1, cc = shade(col, n[1] / L, n[0] / L);
-      const b0 = P.length / 3; [a, b, c2].forEach(p => { P.push(p[0], p[1], p[2]); C.push(cc[0], cc[1], cc[2]); }); I.push(b0, b0 + 1, b0 + 2); };
+      const b0 = P.length / 3; [a, b, c2].forEach(p => { P.push(p[0], p[1], p[2]); C.push(cc[0], cc[1], cc[2]); }); I.push(b0, b0 + 1, b0 + 2);
+      if (P !== GL.P && !noT3 && L > 1e-9) { let nx = n[0] / L, ny = n[1] / L, nz2 = n[2] / L, B = b, D = c2; if (ctr) { const mx = (a[0] + b[0] + c2[0]) / 3 - ctr[0], my = (a[1] + b[1] + c2[1]) / 3 - ctr[1], mz = (a[2] + b[2] + c2[2]) / 3 - ctr[2]; if (nx * mx + ny * my + nz2 * mz < 0) { nx = -nx; ny = -ny; nz2 = -nz2; B = c2; D = b; } } [a, B, D].forEach(p => { T3.P.push(p[0], p[1], p[2]); T3.N.push(nx, ny, nz2); T3.C.push(col[0], col[1], col[2]); }); } };
     const quad = (a, b, c2, d, col) => { tri(a, b, c2, col); tri(a, c2, d, col); };
-    const box = (x, y, z, w, h, d, col, a2 = 0) => { const pts = []; for (const dy of [0, h]) for (const [dx, dz] of [[-w / 2, -d / 2], [w / 2, -d / 2], [w / 2, d / 2], [-w / 2, d / 2]]) { const c = Math.cos(a2), sn = Math.sin(a2); pts.push(tf(x + dx * c - dz * sn, y + dy, z + dx * sn + dz * c)); }
+    const box = (x, y, z, w, h, d, col, a2 = 0) => { ctr = tf(x, y + h / 2, z); const pts = []; for (const dy of [0, h]) for (const [dx, dz] of [[-w / 2, -d / 2], [w / 2, -d / 2], [w / 2, d / 2], [-w / 2, d / 2]]) { const c = Math.cos(a2), sn = Math.sin(a2); pts.push(tf(x + dx * c - dz * sn, y + dy, z + dx * sn + dz * c)); }
       const [a, b, c2, d2, e, f, g2, h2] = pts; quad(e, f, g2, h2, col); quad(a, d2, c2, b, col); quad(a, b, f, e, col); quad(b, c2, g2, f, col); quad(c2, d2, h2, g2, col); quad(d2, a, e, h2, col); };
-    const cyl = (x, y, z, r1, r2, h, col, seg = 8, cap = true, lay = 0) => { const ring = (yy, r) => Array.from({ length: seg }, (_, k) => { const an = k / seg * Math.PI * 2, px = Math.cos(an) * r, pz = Math.sin(an) * r; return lay ? tf(x + yy, y + px + r1, z + pz) : tf(x + px, y + yy, z + pz); });
+    const cyl = (x, y, z, r1, r2, h, col, seg = 8, cap = true, lay = 0) => { ctr = lay ? tf(x + h / 2, y + r1, z) : tf(x, y + h / 2, z); const ring = (yy, r) => Array.from({ length: seg }, (_, k) => { const an = k / seg * Math.PI * 2, px = Math.cos(an) * r, pz = Math.sin(an) * r; return lay ? tf(x + yy, y + px + r1, z + pz) : tf(x + px, y + yy, z + pz); });
       const A = ring(0, r1), B = ring(h, r2); for (let k = 0; k < seg; k++) { const k2 = (k + 1) % seg; quad(A[k], A[k2], B[k2], B[k], col); } if (cap) { const top = lay ? tf(x + h, y + r1, z) : tf(x, y + h, z); for (let k = 0; k < seg; k++) tri(B[k], B[(k + 1) % seg], top, col); } };
-    const ball = (x, y, z, r, col, sy = 1, sz = 1) => { const st = 6, sl = 8, pt = (i, j) => { const th = i / st * Math.PI, ph = j / sl * Math.PI * 2; return tf(x + Math.sin(th) * Math.cos(ph) * r, y + Math.cos(th) * r * sy, z + Math.sin(th) * Math.sin(ph) * r * sz); };
+    const ball = (x, y, z, r, col, sy = 1, sz = 1) => { ctr = tf(x, y, z); const st = 6, sl = 8, pt = (i, j) => { const th = i / st * Math.PI, ph = j / sl * Math.PI * 2; return tf(x + Math.sin(th) * Math.cos(ph) * r, y + Math.cos(th) * r * sy, z + Math.sin(th) * Math.sin(ph) * r * sz); };
       for (let i = 0; i < st; i++) for (let j = 0; j < sl; j++) quad(pt(i, j), pt(i, j + 1), pt(i + 1, j + 1), pt(i + 1, j), col); };
-    const crystal = (x, z, h, r, col) => { const seg = 6, lean = 0.25 * nz(x, h, z, 2), base = Array.from({ length: seg }, (_, k) => { const an = k / seg * Math.PI * 2; return tf(x + Math.cos(an) * r, 0, z + Math.sin(an) * r); }), mid = Array.from({ length: seg }, (_, k) => { const an = k / seg * Math.PI * 2; return tf(x + lean * h + Math.cos(an) * r * 0.9, h * 0.75, z + Math.sin(an) * r * 0.9); }), tip = tf(x + lean * h * 1.3, h, z);
+    const crystal = (x, z, h, r, col) => { ctr = tf(x, h * 0.3, z); const seg = 6, lean = 0.25 * nz(x, h, z, 2), base = Array.from({ length: seg }, (_, k) => { const an = k / seg * Math.PI * 2; return tf(x + Math.cos(an) * r, 0, z + Math.sin(an) * r); }), mid = Array.from({ length: seg }, (_, k) => { const an = k / seg * Math.PI * 2; return tf(x + lean * h + Math.cos(an) * r * 0.9, h * 0.75, z + Math.sin(an) * r * 0.9); }), tip = tf(x + lean * h * 1.3, h, z);
       for (let k = 0; k < seg; k++) { const k2 = (k + 1) % seg; quad(base[k], base[k2], mid[k2], mid[k], col.map(v => v * (0.85 + 0.15 * (k % 2)))); tri(mid[k], mid[k2], tip, col.map(v => Math.min(255, v * 1.2))); } };
     const WOOD = [118, 82, 48], DW = [84, 58, 34], IRON = [120, 124, 132], STONE = [104, 98, 92], STRAW = [200, 168, 92];
     const MK = {
-      crystal: (w, h) => { const cs = [[110, 210, 255], [150, 230, 255], [90, 170, 235]]; for (let k = 0; k < 5; k++) { const a = k * 2.1, d = k ? 0.25 + 0.12 * k : 0; crystal(Math.cos(a) * d * w, Math.sin(a) * d * w, h * (k ? 0.45 + 0.1 * (k % 3) : 1), 0.13 * w + (k ? 0 : 0.06), cs[k % 3]); } box(0, 0, 0, w * 0.9, 0.12, w * 0.7, [70, 60, 52]); },
+      crystal: (w, h) => { const cs = [[110, 210, 255], [150, 230, 255], [90, 170, 235]]; for (let k = 0; k < 5; k++) { const a = k * 2.1, d = k ? 0.25 + 0.12 * k : 0; crystal(Math.cos(a) * d * w, Math.sin(a) * d * w, h * (k ? 0.45 + 0.1 * (k % 3) : 1), 0.13 * w + (k ? 0 : 0.06), cs[k % 3]); } noT3 = true; box(0, 0, 0, w * 0.9, 0.12, w * 0.7, [70, 60, 52]); noT3 = false; for (let k = 0; k < 10; k++) { const a = k * 0.63 + 0.4, d = w * (0.44 + 0.05 * (k % 2)); ellT(Math.cos(a) * d, 0.06, Math.sin(a) * d * 0.78, 0.24 + 0.06 * (k % 3), 0.2, 0.2, k % 2 ? [78, 70, 64] : [92, 84, 76], 5, 9); } },   /* 根もと：四角い板をやめて丸い石で囲む */
       cart: (w, h) => { box(0, 0.35, 0, w, 0.55, w * 0.55, WOOD); box(0, 0.9, 0, w * 1.02, 0.08, w * 0.57, DW); for (const sx of [-1, 1]) for (const sz of [-1, 1]) cyl(sx * w * 0.32 - 0.06, 0.28, sz * w * 0.3, 0.28, 0.28, 0.12, [40, 38, 36], 10, true, 1); for (let k = 0; k < 6; k++) ball((k % 3 - 1) * w * 0.28, 0.95, (k > 2 ? 0.12 : -0.12) * w, 0.2, k % 2 ? [120, 130, 150] : [150, 160, 180]); },
       pick: (w, h) => { box(0, 0, 0, 0.09, h, 0.09, WOOD, 0.3); box(0, h - 0.12, 0, w * 0.9, 0.12, 0.1, IRON, 0.3); },
       dummy: (w, h) => { cyl(0, 0, 0, 0.07, 0.07, h * 0.45, DW, 6); cyl(0, h * 0.35, 0, w * 0.25, w * 0.22, h * 0.4, STRAW, 10); box(0, h * 0.62, 0, w * 0.95, 0.1, 0.1, DW); ball(0, h * 0.88, 0, w * 0.18, STRAW); box(0, h * 0.55, w * 0.24, 0.16, 0.16, 0.02, [170, 50, 40]); },
@@ -13930,16 +13931,41 @@ function fpOpen30(){
       door: (w, h) => { box(0, 0, 0, w, h, 0.25, [70, 70, 78]); for (let k = 0; k < 4; k++) box(-w / 2 + w * (k + 0.5) / 4, 0, 0.14, w / 4 - 0.08, h * 0.96, 0.05, [96, 96, 106]); for (const y of [0.25, 0.75]) box(0, h * y, 0.18, w, 0.12, 0.05, [44, 44, 48]); ball(w * 0.3, h * 0.5, 0.22, 0.08, [200, 160, 70]); } };
     /* 細かい飾りを足す（形の上書き） */
     const cone = (x, y, z, r, h, col, seg = 6) => cyl(x, y, z, r, r * 0.08, h, col, seg, true);
-    const spike = (x, y, z, r, h, col) => { const seg = 6, B = Array.from({ length: seg }, (_, k) => { const an = k / seg * Math.PI * 2 + x; return tf(x + Math.cos(an) * r * (0.8 + 0.3 * nz(x, k, z, 3)), y, z + Math.sin(an) * r); }), T = tf(x + 0.08 * nz(x, y, z, 1), y + h, z); for (let k = 0; k < seg; k++) tri(B[k], B[(k + 1) % seg], T, col.map(v => v * (0.85 + 0.2 * (k % 2)))); };
-    const pebble = (x, z, r, col) => { const seg = 5, B = Array.from({ length: seg }, (_, k) => { const an = k / seg * Math.PI * 2; return tf(x + Math.cos(an) * r * (0.7 + 0.5 * Math.abs(nz(x, k, z, 2))), 0.01, z + Math.sin(an) * r); }), T = tf(x, r * 0.6, z); for (let k = 0; k < seg; k++) tri(B[k], B[(k + 1) % seg], T, col); };
+    const spike = (x, y, z, r, h, col) => { ctr = tf(x, y + h * 0.2, z); const seg = 6, B = Array.from({ length: seg }, (_, k) => { const an = k / seg * Math.PI * 2 + x; return tf(x + Math.cos(an) * r * (0.8 + 0.3 * nz(x, k, z, 3)), y, z + Math.sin(an) * r); }), T = tf(x + 0.08 * nz(x, y, z, 1), y + h, z); for (let k = 0; k < seg; k++) tri(B[k], B[(k + 1) % seg], T, col.map(v => v * (0.85 + 0.2 * (k % 2)))); };
+    const pebble = (x, z, r, col) => { ctr = tf(x, -r * 0.3, z); const seg = 5, B = Array.from({ length: seg }, (_, k) => { const an = k / seg * Math.PI * 2; return tf(x + Math.cos(an) * r * (0.7 + 0.5 * Math.abs(nz(x, k, z, 2))), 0.01, z + Math.sin(an) * r); }), T = tf(x, r * 0.6, z); for (let k = 0; k < seg; k++) tri(B[k], B[(k + 1) % seg], T, col); };
+
+    /* なめらかな形（ゴブリンと同じ描き方の版だけに入る）：回転体・楕円体・管 */
+    const rotN = n => { const c = Math.cos(ry), sn = Math.sin(ry); return [n[0] * c - n[2] * sn, n[1], n[0] * sn + n[2] * c]; };
+    const sv = (p, n, col) => { T3.P.push(p[0], p[1], p[2]); const l = Math.hypot(...n) || 1; T3.N.push(n[0] / l, n[1] / l, n[2] / l); T3.C.push(col[0], col[1], col[2]); };
+    const grid = (pts, nrm, cols, rows, segs) => { for (let i = 0; i < rows; i++) for (let j = 0; j < segs; j++) { const a = i * (segs + 1) + j, b = a + 1, c = a + segs + 1, d = c + 1; [[a, c, b], [b, c, d]].forEach(t => t.forEach(k => sv(pts[k], nrm[k], cols[k]))); } };
+    const lathe = (x, y, z, prof, col, segs = 18, wob = 0) => { const pts = [], nrm = [], cols = []; prof.forEach(([r, yy], i) => { const pr = prof[Math.max(0, i - 1)], nx2 = prof[Math.min(prof.length - 1, i + 1)], dr = nx2[0] - pr[0], dy = nx2[1] - pr[1];
+        for (let j = 0; j <= segs; j++) { const an = j / segs * Math.PI * 2, k = 1 + wob * nz(Math.round(Math.cos(an) * 9), i, Math.round(Math.sin(an) * 9), 4), ca = Math.cos(an), sa = Math.sin(an); pts.push(tf(x + ca * r * k, y + yy, z + sa * r * k)); nrm.push(rotN([ca * dy, -dr, sa * dy])); cols.push(Array.isArray(col[0]) ? col[i] : col); } });
+      grid(pts, nrm, cols, prof.length - 1, segs); };
+    const ellT = (x, y, z, rx, ry2, rz, col, la = 8, lo = 14) => { const pts = [], nrm = [], cols = []; for (let i = 0; i <= la; i++) for (let j = 0; j <= lo; j++) { const th = i / la * Math.PI, ph = j / lo * Math.PI * 2, ux = Math.sin(th) * Math.cos(ph), uy = -Math.cos(th), uz = Math.sin(th) * Math.sin(ph);
+        pts.push(tf(x + ux * rx, y + uy * ry2, z + uz * rz)); nrm.push(rotN([ux / rx, uy / ry2, uz / rz])); cols.push(col); } grid(pts, nrm, cols, la, lo); };
+    const tube = (p0, p1, r0, r1, col, segs = 12) => { const d = [p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]], L = Math.hypot(...d), u = d.map(v => v / L), a = Math.abs(u[1]) < 0.9 ? [0, 1, 0] : [1, 0, 0], e1 = [u[1] * a[2] - u[2] * a[1], u[2] * a[0] - u[0] * a[2], u[0] * a[1] - u[1] * a[0]], l1 = Math.hypot(...e1), E1 = e1.map(v => v / l1), E2 = [E1[1] * u[2] - E1[2] * u[1], E1[2] * u[0] - E1[0] * u[2], E1[0] * u[1] - E1[1] * u[0]];
+      const pts = [], nrm = [], cols = [], sl = (r1 - r0) / L; for (let i = 0; i <= 1; i++) for (let j = 0; j <= segs; j++) { const an = j / segs * Math.PI * 2, r = i ? r1 : r0, c = Math.cos(an), sn = Math.sin(an), dir = [E1[0] * c + E2[0] * sn, E1[1] * c + E2[1] * sn, E1[2] * c + E2[2] * sn], b = i ? p1 : p0;
+        pts.push(tf(b[0] + dir[0] * r, b[1] + dir[1] * r, b[2] + dir[2] * r)); nrm.push(rotN([dir[0] - u[0] * sl, dir[1] - u[1] * sl, dir[2] - u[2] * sl])); cols.push(col); } grid(pts, nrm, cols, 1, segs); ellT(p0[0], p0[1], p0[2], r0, r0, r0, col, 5, 10); ellT(p1[0], p1[1], p1[2], r1, r1, r1, col, 5, 10); };
+    /* 石像（ゴブリンと同じ丸い形で作り直し）：苔むした台座、フードのローブ、地についた剣 */
+    const rubbleT3 = (w, h, k) => { const RC = [[92, 84, 76], [78, 72, 66], [104, 94, 82]]; const n2 = 3 + (k % 3); for (let j = 0; j < n2; j++) { const an = j * 2.3 + k, d = j ? 0.25 + 0.15 * (j % 2) : 0, rr = (j ? 0.22 : 0.38) * (0.8 + 0.4 * Math.abs(nz(k, j, 1, 2))); ellT(Math.cos(an) * d, rr * 0.55, Math.sin(an) * d, rr * 1.15, rr * 0.8, rr, RC[(j + k) % 3], 6, 10); } };   /* がれき：角ばった既製品の代わりに丸い石の山 */
+    const statueT3 = () => { const ST = [112, 106, 100], SD = [88, 83, 80], SL = [130, 126, 120], MS = [66, 86, 52];
+      lathe(0, 0, 0, [[1.15, -0.05], [1.18, 0.12], [1.1, 0.3], [0.98, 0.36], [0.95, 0.4], [0.93, 0.62], [0.82, 0.7], [0.7, 0.72], [0, 0.73]], SD, 10, 0.05);   /* 台座：角を丸めた二段 */
+      lathe(0, 0.7, 0, [[0.6, 0.0], [0.66, 0.12], [0.64, 0.4], [0.56, 0.95], [0.48, 1.45], [0.42, 1.72], [0.36, 1.82], [0.0, 1.86]], ST, 20, 0.04);   /* ローブ：すそが広がる */
+      for (let k = 0; k < 5; k++) { const an = -0.9 + k * 0.45; tube([Math.cos(an) * 0.6, 0.78, Math.sin(an) * 0.6], [Math.cos(an) * 0.47, 2.1, Math.sin(an) * 0.47], 0.06, 0.04, SD, 8); }   /* ローブのひだ */
+      ellT(0, 2.62, -0.02, 0.5, 0.36, 0.46, ST);   /* 肩 */
+      ellT(0, 3.0, -0.12, 0.4, 0.48, 0.38, SD); ellT(0, 2.97, 0.1, 0.25, 0.29, 0.16, [34, 30, 28]);   /* フードと、顔の暗いくぼみ */
+      for (const sx of [-1, 1]) { tube([sx * 0.42, 2.6, 0.02], [sx * 0.3, 2.15, 0.32], 0.15, 0.12, ST); tube([sx * 0.3, 2.15, 0.32], [sx * 0.08, 2.32, 0.46], 0.12, 0.11, ST); ellT(sx * 0.06, 2.33, 0.48, 0.1, 0.09, 0.09, SL); }   /* 腕：両手で剣のつかをにぎる */
+      tube([0, 0.75, 0.48], [0, 2.18, 0.48], 0.05, 0.07, SL, 6); ellT(0, 0.8, 0.48, 0.05, 0.14, 0.02, SL); tube([-0.3, 2.2, 0.48], [0.3, 2.2, 0.48], 0.05, 0.05, SD); ellT(0, 2.46, 0.48, 0.08, 0.08, 0.08, SL);   /* 剣・つば・柄頭 */
+      for (let k = 0; k < 7; k++) { const an = k * 0.9 + 0.3, r = 0.7 + 0.35 * (k % 2); ellT(Math.cos(an) * r, 0.7 + (k % 2 ? -0.32 : 0.02), Math.sin(an) * r, 0.2, 0.05, 0.15, MS, 4, 8); }   /* 苔 */
+      for (let k = 0; k < 9; k++) { const an = k * 0.7 + 0.2, r = 1.35 + 0.2 * (k % 3), rr = 0.14 + 0.06 * (k % 3); ellT(Math.cos(an) * r, rr * 0.5, Math.sin(an) * r * 0.9, rr * 1.2, rr * 0.75, rr, k % 3 ? [96, 90, 84] : [80, 76, 72], 5, 9); } };   /* 足もとの石 */
     /* 既製の小物（KayKit・CC0）を置く。面ごとに光をつけておく */
     const KKC = window.__kkc30 || (window.__kkc30 = {}); const kkGet = nm => { if (KKC[nm]) return KKC[nm]; const d = typeof KK30 !== "undefined" && KK30[nm]; if (!d) return null; const b64 = s2 => Uint8Array.from(atob(s2), ch => ch.charCodeAt(0)); const pb2 = b64(d.p), cb2 = b64(d.c), ib2 = b64(d.i); return KKC[nm] = { p: new Int16Array(pb2.buffer), c: cb2, i: new Uint16Array(ib2.buffer), b: d.b }; };
-    const mdl = (nm, sc, x = 0, y = 0, z = 0, a2 = 0, gl2) => { const m = kkGet(nm); if (!m) return false; const c = Math.cos(a2), sn = Math.sin(a2), V = k => { const px = m.p[k * 3] / 1000 * sc, py = m.p[k * 3 + 1] / 1000 * sc, pz = m.p[k * 3 + 2] / 1000 * sc; return tf(x + px * c - pz * sn, y + py, z + px * sn + pz * c); };
+    const mdl = (nm, sc, x = 0, y = 0, z = 0, a2 = 0, gl2) => { const m = kkGet(nm); if (!m) return false; ctr = null; const c = Math.cos(a2), sn = Math.sin(a2), V = k => { const px = m.p[k * 3] / 1000 * sc, py = m.p[k * 3 + 1] / 1000 * sc, pz = m.p[k * 3 + 2] / 1000 * sc; return tf(x + px * c - pz * sn, y + py, z + px * sn + pz * c); };
       if (gl2) glow(true); for (let t = 0; t + 2 < m.i.length; t += 3) { const a = m.i[t], b = m.i[t + 1], d = m.i[t + 2], col = [0, 1, 2].map(q => (m.c[a * 3 + q] + m.c[b * 3 + q] + m.c[d * 3 + q]) / 3 * 0.86); tri(V(a), V(b), V(d), col); } if (gl2) glow(false); return true; };
     const KS = 0.62;   /* KayKitの大きさ → この洞窟の大きさ */
     const MK3 = {
       barrel: (w, h, k) => { const L = [["barrel_large", 0.62], ["barrel_small_stack", 0.6], ["crates_stacked", 0.55], ["box_small_decorated", 0.62], ["keg_decorated", 0.45], ["trunk_large_A", 0.7], ["chest", 0.6]]; const [nm, sc] = L[k % L.length]; return mdl(nm, sc); },
-      rock: (w, h, k) => mdl(k % 2 ? "rubble_half" : "rubble_large", k % 2 ? 0.3 : 0.22) && (MK.rock(w * 0.5, h * 0.5), true),
+      rock: (w, h, k) => { noT3 = true; let ok = false; try { ok = mdl(k % 2 ? "rubble_half" : "rubble_large", k % 2 ? 0.3 : 0.22); if (ok) MK.rock(w * 0.5, h * 0.5); } finally { noT3 = false; } if (ok) rubbleT3(w, h, k); return ok; },
       bed: (w, h, k) => { MK2.bed(w); if (k % 2 === 0) mdl(k % 4 ? "barrel_small_stack" : "box_small_decorated", 0.4, w * 0.65, 0, -w * 0.2, 0.7); return true; },
       rack: (w, h, k) => { mdl("sword_shield", 0.75, 0, 0, 0); mdl(k % 2 ? "barrel_small_stack" : "crates_stacked", 0.45, w * 0.75, 0, 0.3, 0.4); return true; },
       bench: (w, h, k) => { mdl("table_medium_decorated_A", 0.62); mdl("stool", 0.62, w * 0.55, 0, 0.2); return true; },
@@ -13963,7 +13989,7 @@ function fpOpen30(){
       lm_spring: (w, h) => { for (let k = 0; k < 12; k++) { const a = k / 12 * Math.PI * 2; ball(Math.cos(a) * w * 0.48, 0.12, Math.sin(a) * w * 0.36, 0.32 + 0.08 * (k % 3), [92, 88, 84], 0.6); } glow(true); cyl(0, 0.04, 0, w * 0.45, w * 0.45, 0.06, [80, 180, 220], 16); for (let k = 0; k < 5; k++) ball(Math.cos(k * 1.3) * w * 0.2, 0.14, Math.sin(k * 1.3) * w * 0.15, 0.05, [200, 250, 255]); glow(false); cyl(0, 0, -w * 0.42, 0.35, 0.25, h * 0.7, [86, 82, 78], 8); glow(true); box(0, h * 0.35, -w * 0.33, 0.18, h * 0.35, 0.06, [140, 220, 250]); glow(false); },
       lm_mushroom: (w, h) => { cyl(0, 0, 0, 0.45, 0.3, h * 0.7, [220, 210, 190], 10); glow(true); ball(0, h * 0.75, 0, w * 0.5, [120, 230, 140], 0.45); for (let k = 0; k < 8; k++) ball(Math.cos(k * 0.8) * w * 0.32, h * 0.78 + 0.25, Math.sin(k * 0.8) * w * 0.32, 0.09, [230, 255, 200]); glow(false); for (let k = 0; k < 5; k++) { const a = k * 1.3 + 0.4, d = 1.0 + 0.2 * k % 2; cyl(Math.cos(a) * d, 0, Math.sin(a) * d * 0.7, 0.1, 0.08, 0.6 + 0.2 * (k % 2), [210, 200, 180], 6); glow(true); ball(Math.cos(a) * d, 0.7 + 0.2 * (k % 2), Math.sin(a) * d * 0.7, 0.3, [150, 240, 160], 0.5); glow(false); } },
       lm_lava: (w, h) => { for (let k = 0; k < 12; k++) { const a = k / 12 * Math.PI * 2; ball(Math.cos(a) * w * 0.5, 0.15, Math.sin(a) * w * 0.38, 0.35 + 0.1 * (k % 3), [44, 30, 26], 0.7); } glow(true); cyl(0, 0.05, 0, w * 0.46, w * 0.46, 0.06, [255, 110, 30], 16); for (let k = 0; k < 6; k++) ball(Math.cos(k * 1.1) * w * 0.25, 0.14, Math.sin(k * 1.1) * w * 0.2, 0.12, [255, 220, 90], 0.5); glow(false); },
-      lm_statue: (w, h) => { const ST = [128, 124, 118], SD = [100, 96, 92];
+      lm_statue: (w, h) => { noT3 = true; try { const ST = [128, 124, 118], SD = [100, 96, 92];
         box(0, 0, 0, 2.0, 0.35, 1.7, SD); box(0, 0.35, 0, 1.7, 0.35, 1.45, [112, 108, 102]);   /* 台座 */
         cyl(0, 0.7, 0, 0.62, 0.42, 1.7, ST, 10); cyl(0, 2.4, 0, 0.42, 0.36, 0.35, ST, 10);   /* ローブの体 */
         ball(0, 2.95, 0.02, 0.3, ST, 1.1); cyl(0, 2.7, -0.03, 0.42, 0.12, 0.75, SD, 10, true);   /* 頭とフード */
@@ -13971,7 +13997,7 @@ function fpOpen30(){
         box(0, 0.95, 0.42, 0.12, 1.9, 0.08, [140, 136, 130]); box(0, 2.25, 0.42, 0.55, 0.1, 0.12, [150, 146, 138]); ball(0, 2.45, 0.42, 0.09, [150, 146, 138]);   /* 剣を地につく */
         glow(true); for (const sx of [-1, 1]) ball(sx * 0.11, 2.98, 0.27, 0.05, [255, 190, 90]); glow(false);
         for (let k = 0; k < 6; k++) pebble(Math.cos(k * 1.2) * 1.3, Math.sin(k * 1.2) * 1.1, 0.14 + 0.05 * (k % 2), [90, 86, 82]);
-        for (let k = 0; k < 4; k++) box(Math.cos(k * 1.7) * 0.85, 0.72, Math.sin(k * 1.7) * 0.7, 0.25, 0.04, 0.12, [70, 110, 60], k);   /* 苔 */ },
+        for (let k = 0; k < 4; k++) box(Math.cos(k * 1.7) * 0.85, 0.72, Math.sin(k * 1.7) * 0.7, 0.25, 0.04, 0.12, [70, 110, 60], k);   /* 苔 */ } finally { noT3 = false; } statueT3(); },
       lm_roots: (w, h) => { const RT = [96, 70, 44], RD = [72, 52, 32];
         const root = (x0, z0, a, len, r0, seg) => { let x = x0, y = 0, z = z0, r = r0; for (let k = 0; k < seg; k++) { const nx = x + Math.cos(a) * len * 0.5, ny = y + len * (0.6 + 0.25 * Math.sin(k + a)), nz2 = z + Math.sin(a) * len * 0.5; const L = Math.hypot(nx - x, ny - y, nz2 - z); cyl(x, y, z, r, r * 0.8, L * 0.9, k % 2 ? RT : RD, 7, false); x = nx * 0.6 + x * 0.4; y = ny; z = nz2 * 0.6 + z * 0.4; r *= 0.82; a += 0.6 * Math.sin(k * 1.7); } };
         cyl(0, 0, 0, 0.85, 0.55, h * 0.55, RT, 11); cyl(0, h * 0.55, 0, 0.55, 0.35, h * 0.5, RD, 11);   /* 太い幹 */
@@ -14009,7 +14035,14 @@ function fpOpen30(){
     const mk = T => { if (!T.I.length) return null; const pb = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, pb); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(T.P), gl.STATIC_DRAW);
       const cb = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, cb); gl.bufferData(gl.ARRAY_BUFFER, new Uint8Array(T.C.map(v => Math.max(0, Math.min(255, Math.round(v))))), gl.STATIC_DRAW);
       const ib = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint32Array(T.I), gl.STATIC_DRAW); return { pb, cb, ib, n: T.I.length }; };
-    const a1 = mk(NM), a2 = mk(GL); if (a1) a1.det = 2; if (a2) a2.det = 3; return a1 || a2 ? { a: a1, g: a2 } : null; }
+    /* ゴブリンと同じ描き方の版：面の向きでトゥーン、輪郭線は角をつないだ向きで外へ押し出す */
+    let toon = false; try { if (window.__labProps3 && T3.P.length) { const nv = T3.P.length / 3, O = new Float32Array(nv * 3), map = new Map(), M = (Rm.CM && Rm.CM.M) || [1, 0, 0, 0, 1, 0, 0, 0, 1], CO = (Rm.CM && Rm.CM.O) || [0, 0, 0];
+      for (let k = 0; k < nv; k++) { const key = Math.round(T3.P[k * 3] * 400) + "," + Math.round(T3.P[k * 3 + 1] * 400) + "," + Math.round(T3.P[k * 3 + 2] * 400); let e = map.get(key); if (!e) map.set(key, e = { n: [0, 0, 0], v: [] }); e.v.push(k); for (let q = 0; q < 3; q++) e.n[q] += T3.N[k * 3 + q]; }
+      map.forEach(e => { const l = Math.hypot(...e.n) || 1; e.v.forEach(k => { for (let q = 0; q < 3; q++) O[k * 3 + q] = e.n[q] / l; }); });
+      const pos = new Float32Array(T3.P), col = new Float32Array(nv * 3); for (let k = 0; k < nv; k++) { pos[k * 3 + 1] += Rm.Y; pos[k * 3 + 2] += Rm.Z; const c0 = [T3.C[k * 3] / 255, T3.C[k * 3 + 1] / 255, T3.C[k * 3 + 2] / 255]; for (let q = 0; q < 3; q++) col[k * 3 + q] = Math.max(0, Math.min(1, M[q * 3] * c0[0] + M[q * 3 + 1] * c0[1] + M[q * 3 + 2] * c0[2] + CO[q])); }
+      const idx = new Uint32Array(nv); for (let k = 0; k < nv; k++) idx[k] = k;
+      window.__labProps3.list["pm" + Rm.i] = { pos, nrm: new Float32Array(T3.N), onrm: O, col, idx, ow: 0.018 }; toon = true; } } catch (e) { console.error(e); }
+    const a1 = mk(NM), a2 = mk(GL); if (a1) { a1.det = 2; a1.toon = toon; } if (a2) a2.det = 3; return a1 || a2 ? { a: a1, g: a2 } : null; }
   rooms.forEach(Rm => { Rm.props = propsFor(Rm); });
   const trapSpots = Rm => { if (Rm.classic) return ((typeof trapsOf24 === "function" ? trapsOf24(S.path[Rm.i]) : []) || []).map((tp, k) => ({ k: tp.k, lv: tp.lv || 0, x: 0, z: Rm.Z + 12 - 3 * k, y: Rm.Y })); try { g30sync(S, Rm.i); } catch (e) {} const G = Rm.G30, mid = (G.W - 1) / 2; return (G.t || []).map(t => ({ k: t[2], lv: t[3] || 0, x: (t[0] - mid) * Rm.CS, z: Rm.Z - t[1] * Rm.CS, y: Rm.Y, cell: [t[0], t[1]] })); };
   rooms.forEach(Rm => { Rm.traps = trapSpots(Rm); }); CORR.forEach(C => { C.traps = []; });
@@ -14291,7 +14324,7 @@ function fpOpen30(){
       { const lnA = PM.A("an"); if (B.nb) { gl.enableVertexAttribArray(lnA); gl.bindBuffer(gl.ARRAY_BUFFER, B.nb); gl.vertexAttribPointer(lnA, 3, gl.FLOAT, false, 0, 0); gl.uniform1f(PM.U("UN"), 1); } else { if (lnA >= 0) { gl.disableVertexAttribArray(lnA); gl.vertexAttrib3f(lnA, 0, 1, 0); } gl.uniform1f(PM.U("UN"), 0); }
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, B.ib); gl.drawElements(gl.TRIANGLES, B.n, gl.UNSIGNED_INT, 0); if (B.nb) gl.disableVertexAttribArray(lnA); } };
     const ID = { M: [1, 0, 0, 0, 1, 0, 0, 0, 1], O: [0, 0, 0] };
-    for (let i = Math.max(0, curRoom - 1); i <= Math.min(n - 1, curRoom + 1); i++) { const R = rooms[i]; if (R.mb) { if (R.classic) draw(R.mb, [0, R.Y, R.Z], 0.01, true, R.CM, i); else { draw(R.mb, [0, R.Y, R.Z], 1, false, R.CM); if (R.pm === undefined) R.pm = propMesh(R); if (R.pm) { if (R.pm.a) draw(R.pm.a, [0, R.Y, R.Z], 1, false, R.CM); if (R.pm.g) draw(R.pm.g, [0, R.Y, R.Z], 1, false, R.CM); } } } if (CORR[i] && CORR[i].n) draw(CORR[i], [0, 0, 0], 1, false, R.CM); if (i > 0 && CORR[i - 1] && CORR[i - 1].n) draw(CORR[i - 1], [0, 0, 0], 1, false, rooms[i - 1].CM); }
+    for (let i = Math.max(0, curRoom - 1); i <= Math.min(n - 1, curRoom + 1); i++) { const R = rooms[i]; if (R.mb) { if (R.classic) draw(R.mb, [0, R.Y, R.Z], 0.01, true, R.CM, i); else { draw(R.mb, [0, R.Y, R.Z], 1, false, R.CM); if (R.pm === undefined) R.pm = propMesh(R); if (R.pm) { if (R.pm.a && !(R.pm.a.toon && (window.__R2 || 0) > 0.5)) draw(R.pm.a, [0, R.Y, R.Z], 1, false, R.CM); if (R.pm.g) draw(R.pm.g, [0, R.Y, R.Z], 1, false, R.CM); } } } if (CORR[i] && CORR[i].n) draw(CORR[i], [0, 0, 0], 1, false, R.CM); if (i > 0 && CORR[i - 1] && CORR[i - 1].n) draw(CORR[i - 1], [0, 0, 0], 1, false, rooms[i - 1].CM); }
     gl.disableVertexAttribArray(lc);
     // 魔物と看板
     gl.useProgram(PB.p); gl.uniform1f(PB.U("OL"), 0); gl.uniformMatrix4fv(PB.U("VP"), false, new Float32Array(VP)); const lq = PB.A("aq"); gl.bindBuffer(gl.ARRAY_BUFFER, qb); gl.enableVertexAttribArray(lq); gl.vertexAttribPointer(lq, 2, gl.FLOAT, false, 0, 0);
@@ -16159,13 +16192,13 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[];let seed=1;
   gl.useProgram(PT.p);gl.uniformMatrix4fv(PT.U("VP"),false,new Float32Array(VP));gl.uniform3fv(PT.U("EYE"),EYE);
   try{for(let i=0;i<6;i++){gl.uniform3fv(PT.U("LT["+i+"]"),gl.getUniform(PM.p,PM.U("LT["+i+"]"))||[0,-999,0]);gl.uniform1f(PT.U("LF["+i+"]"),gl.getUniform(PM.p,PM.U("LF["+i+"]"))||0);}gl.uniform3fv(PT.U("LC"),gl.getUniform(PM.p,PM.U("LC"))||[1,0.56,0.24]);}catch(e){}
   gl.disable(gl.BLEND);gl.depthMask(true);gl.enable(gl.DEPTH_TEST);gl.enable(gl.CULL_FACE);
-  for(const k of keys){const M=L[k];let B=PB3[k];if(!B||B.src!==M){B=PB3[k]={src:M,pb:gl.createBuffer(),nb:gl.createBuffer(),cb:gl.createBuffer(),ib:gl.createBuffer(),n:M.idx.length};
+  for(const k of keys){const M=L[k];let B=PB3[k];if(!B||B.src!==M){B=PB3[k]={src:M,pb:gl.createBuffer(),nb:gl.createBuffer(),ob:M.onrm?gl.createBuffer():null,cb:gl.createBuffer(),ib:gl.createBuffer(),n:M.idx.length};if(B.ob){gl.bindBuffer(gl.ARRAY_BUFFER,B.ob);gl.bufferData(gl.ARRAY_BUFFER,M.onrm,gl.STATIC_DRAW);}
     gl.bindBuffer(gl.ARRAY_BUFFER,B.pb);gl.bufferData(gl.ARRAY_BUFFER,M.pos,gl.STATIC_DRAW);gl.bindBuffer(gl.ARRAY_BUFFER,B.nb);gl.bufferData(gl.ARRAY_BUFFER,M.nrm,gl.STATIC_DRAW);gl.bindBuffer(gl.ARRAY_BUFFER,B.cb);gl.bufferData(gl.ARRAY_BUFFER,M.col,gl.STATIC_DRAW);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,B.ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,M.idx,gl.STATIC_DRAW);}
    gl.bindBuffer(gl.ARRAY_BUFFER,B.pb);gl.enableVertexAttribArray(PT.ap);gl.vertexAttribPointer(PT.ap,3,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ARRAY_BUFFER,B.nb);gl.enableVertexAttribArray(PT.an);gl.vertexAttribPointer(PT.an,3,gl.FLOAT,false,0,0);
    gl.bindBuffer(gl.ARRAY_BUFFER,B.cb);gl.enableVertexAttribArray(PT.ac);gl.vertexAttribPointer(PT.ac,3,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,B.ib);
-   gl.cullFace(gl.FRONT);gl.uniform1f(PT.U("OUT"),1);gl.uniform1f(PT.U("OW"),0.024);gl.drawElements(gl.TRIANGLES,B.n,gl.UNSIGNED_INT,0);
-   gl.cullFace(gl.BACK);gl.uniform1f(PT.U("OUT"),0);gl.uniform1f(PT.U("OW"),0);gl.drawElements(gl.TRIANGLES,B.n,gl.UNSIGNED_INT,0);}
+   if(B.ob){gl.bindBuffer(gl.ARRAY_BUFFER,B.ob);gl.vertexAttribPointer(PT.an,3,gl.FLOAT,false,0,0);}gl.cullFace(gl.FRONT);gl.uniform1f(PT.U("OUT"),1);gl.uniform1f(PT.U("OW"),M.ow||0.024);gl.drawElements(gl.TRIANGLES,B.n,gl.UNSIGNED_INT,0);
+   if(B.ob){gl.bindBuffer(gl.ARRAY_BUFFER,B.nb);gl.vertexAttribPointer(PT.an,3,gl.FLOAT,false,0,0);}gl.cullFace(gl.BACK);gl.uniform1f(PT.U("OUT"),0);gl.uniform1f(PT.U("OW"),0);gl.drawElements(gl.TRIANGLES,B.n,gl.UNSIGNED_INT,0);}
   gl.disable(gl.CULL_FACE);[PT.ap,PT.an,PT.ac].forEach(a=>{if(a!==lq)gl.disableVertexAttribArray(a);});
   gl.useProgram(PB.p);gl.bindBuffer(gl.ARRAY_BUFFER,qbuf);gl.enableVertexAttribArray(lq);gl.vertexAttribPointer(lq,2,gl.FLOAT,false,0,0);
   gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);}
