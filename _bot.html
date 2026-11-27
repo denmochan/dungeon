@@ -14868,7 +14868,7 @@ ${p} .modal{padding:6px!important}
 ${p} .mbox{max-width:min(900px,98%)!important;padding:8px 10px!important;gap:6px!important}
 ${p} .mbox h2{font-size:16px!important;margin:0!important;padding-bottom:4px!important}
 ${p} .mbox .hint{font-size:11.5px!important}
-${p} .mbox .shop18{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:6px}
+${p} .mbox .shop18{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:6px}
 ${p} .mbox .shopc18{margin:0!important}
 ${p} .mbox .big29 button,${p} .mbox .pk button{padding:6px 8px!important;min-height:0!important}
 ${p} .mbox .mixrow{padding:4px 6px!important}
@@ -15039,6 +15039,28 @@ diffScreen15 = (prev => function () { const h = prev.apply(this, arguments); try
 .tkl28{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));max-height:calc(100dvh - 130px)!important;align-content:start}
 .tkr28{padding:3px 5px!important;gap:6px!important}.tkr28 button{min-width:0!important;padding:4px 8px!important}
 }`; document.head.appendChild(st); media30(); }
+{ const st = document.createElement("style"); st.textContent = `@media (orientation:landscape) and (max-height:500px){
+.mbox:has(>.bkrow27){flex-direction:row!important;flex-wrap:wrap!important;align-content:flex-start}
+.mbox:has(>.bkrow27)>*{width:100%}.mbox:has(>.bkrow27)>.bkrow27{width:calc(50% - 3px)!important;margin:0!important}
+}`; document.head.appendChild(st); media30(); }
+/* 主に刻む（横持ち）：刻印の円が小さく、名前が読めなかった → 左の列いっぱいに */
+{ const st = document.createElement("style"); st.textContent = `@media (orientation:landscape) and (max-height:500px){.title.altar>.tlord{zoom:.75!important;margin-top:-6px!important}}`; document.head.appendChild(st); media30(); }
+/* 店（横持ち）：大物を呼ぶ と 入れかえ・早見表 を1行に（魔物のカードを上へ） */
+{ const st = document.createElement("style"); st.textContent = `@media (orientation:landscape) and (max-height:500px){
+.mbox:has(>.shop18){flex-direction:row!important;flex-wrap:wrap!important;align-content:flex-start}
+.mbox:has(>.shop18)>*{width:100%}
+.mbox:has(>.shop18)>.big29{width:calc(40% - 3px)!important;margin:0!important}
+.mbox:has(>.shop18)>.pk{width:calc(60% - 3px)!important;margin:0!important}
+.mbox:has(>.shop18)>.big29~.pk,.mbox:has(>.shop18)>.big29+.pk{align-self:stretch}
+}`; document.head.appendChild(st); media30(); }
+/* 店の「くわしく」：まだ図鑑にない子だと「？？？ まだ出会っていない」しか出ず、買う前に中身が分からなかった → 店に並んでいる子は見せる。戻るは店へ */
+let DXFROM30 = null;
+document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="dexsp"]'); if (b) DXFROM30 = b.closest(".shop18,.shopc18,.grid3") ? "shop" : null; }, true);
+{ const _dm = dexModal; dexModal = function () { if (DXFROM30 !== "shop" || !DX || !(S.shop || []).some(o => o.sp === DX)) return _dm.apply(this, arguments);
+  const had = (S.dex || []).includes(DX); if (!had) (S.dex = S.dex || []).push(DX); let h; try { h = _dm.apply(this, arguments); } finally { if (!had) S.dex = S.dex.filter(k => k !== DX); }
+  return h.replace('<button data-a="dex">← 図鑑</button>', '<button data-a="shop">← 店</button>'); }; }
+/* ほか →「部屋を開く」：押しても何も出なかった（部屋の画面を歩く画面の上に重ねていなかった） */
+document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('.dmx30 [data-d="openroom"]'); if (!b) return; setTimeout(() => { try { if (roomSel != null) { page20 = null; modal = null; pan30(true); render(); } const m = document.querySelector(".dmx30"); if (m) m.remove(); } catch (e) {} }, 30); }, true);
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------

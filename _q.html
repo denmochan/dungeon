@@ -15061,6 +15061,8 @@ document.addEventListener("click", ev => { const b = ev.target.closest && ev.tar
   return h.replace('<button data-a="dex">← 図鑑</button>', '<button data-a="shop">← 店</button>'); }; }
 /* ほか →「部屋を開く」：押しても何も出なかった（部屋の画面を歩く画面の上に重ねていなかった） */
 document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('.dmx30 [data-d="openroom"]'); if (!b) return; setTimeout(() => { try { if (roomSel != null) { page20 = null; modal = null; pan30(true); render(); } const m = document.querySelector(".dmx30"); if (m) m.remove(); } catch (e) {} }, 30); }, true);
+/* 図鑑（横持ち）：上の帯を詰めて、魔物を1段多く */
+{ const st = document.createElement("style"); st.textContent = `@media (orientation:landscape) and (max-height:500px){.mbox:has(>.dexg)>.hint{display:none!important}.dexbar19{margin:0 0 4px!important}}`; document.head.appendChild(st); media30(); }
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------
