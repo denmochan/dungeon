@@ -14232,6 +14232,7 @@ function fpOpen30(){
     gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(false); gl.uniform1f(PB.U("AM"), 1); gl.uniform1f(PB.U("FL"), 0); gl.uniform4f(PB.U("UR"), 0, 0, 1, 1); gl.uniform1f(PB.U("LB"), 1);
     gl.activeTexture(gl.TEXTURE0); gl.uniform1f(PB.U("OL"), 0); gl.bindTexture(gl.TEXTURE_2D, texOf(SHADOW)); gl.uniform1i(PB.U("tx"), 0); gl.uniform3f(PB.U("UPV"), 0, 0, 1); gl.uniform3f(PB.U("R"), 1, 0, 0);
     for (let i = Math.max(0, curRoom - 1); i <= Math.min(n - 1, curRoom + 1); i++) { const R = rooms[i]; (R.acts || []).forEach(a => { const ss = Math.max(1, (a.H || 1.6) * 0.42) * (DHOV25[a.sp] ? 0.7 : 1);   /* 飛ぶ子にも床に影（宙に立っているように見えた） */ gl.uniform3f(PB.U("C"), a.x, R.Y + floorY(R, a.x, a.z) + 0.05, R.Z + a.z); gl.uniform4f(PB.U("Q"), -0.9 * ss, -0.5 * ss, 1.8 * ss, 1.0 * ss); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); }); }
+    if (window.__labGob) try { window.__labGob({ gl, PB, texOf, SHADOW, EYE, P, now, R: rooms[0], floorY, gFree, Rr }); } catch (e) { window.__labErr = String(e && e.stack || e); }
     /* 通路の罠：床の絵（毒はゆらゆら光る） */
     for (let i = Math.max(0, curRoom - 1); i <= Math.min(n - 1, curRoom + 1); i++) (rooms[i].traps || []).forEach(tp => { const tx = TRT[tp.k]; if (!tx) return; const d = Math.hypot(tp.x - P.x, tp.z - P.z), sz = tp.k === "pit" ? 3.4 : tp.k === "net" ? 2.6 : 3.0;
       gl.bindTexture(gl.TEXTURE_2D, texOf(tx)); gl.uniform1f(PB.U("LB"), (0.45 + 0.8 * Math.exp(-d / 6)) * (tp.k === "poison" ? 0.85 + 0.25 * Math.sin(now / 300 + tp.z) : 1)); gl.uniform3f(PB.U("C"), tp.x, tp.y + 0.03, tp.z); gl.uniform4f(PB.U("Q"), -sz / 2, -sz / 2, sz, sz); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); });
@@ -15946,5 +15947,34 @@ overlay25 = (prev => function (now) { prev.apply(this, arguments);
 <button data-r="1" style="height:30px;border-radius:8px;border:1px solid #ffcf8f;background:#b06a2c;color:#fff;font:700 12px system-ui;padding:0 8px">新</button>
 <button data-r="2" style="height:30px;border-radius:8px;border:1px solid #8a6440;background:#2a1b10;color:#f6ead6;font:700 12px system-ui;padding:0 8px">新・ドット寄り</button></div>
 <script>document.querySelectorAll("#lab27 [data-r]").forEach(b=>b.onclick=e=>{e.stopPropagation();window.__R2=+b.dataset.r;document.querySelectorAll("#lab27 [data-r]").forEach(x=>{const on=x===b;x.style.background=on?"#b06a2c":"#2a1b10";x.style.borderColor=on?"#ffcf8f":"#8a6440";x.style.color=on?"#fff":"#f6ead6";});});</script>
+<script>
+/* 試し場：案1のゴブリン（8方向・歩き）を今のダンジョンで歩かせる */
+(()=>{const im=new Image();im.src="lab/gob1.png";const S=192,FOOT=174/192,SZ=3.56;
+ let g=null,seed=7;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};
+ window.__labGob=o=>{const {gl,PB,texOf,SHADOW,EYE,P,R,floorY,gFree,Rr}=o;if(!im.complete||!im.naturalWidth||!R||!R.G)return;
+  const t=(window.__labT!=null?window.__labT:o.now)/1000,G=R.G,free=(x,z)=>gFree(G,x,z-R.Z,0.45,1.7);
+  if(!g){let x=P.x,z=P.z-3;for(let k=0;k<200&&!free(x,z);k++){x=P.x+(rnd()-0.5)*6;z=P.z-1-rnd()*6;}g={x,z,tx:x,tz:z,yaw:Math.PI,wait:0,lt:t};}
+  const dt=Math.min(0.1,Math.max(0,t-g.lt));g.lt=t;
+  let moving=false;
+  if(g.wait>0)g.wait-=dt;else{const dx=g.tx-g.x,dz=g.tz-g.z,d=Math.hypot(dx,dz);
+   if(d<0.15){g.wait=0.8+rnd()*1.2;for(let k=0;k<60;k++){const a=rnd()*6.283,r=2.5+rnd()*4,x=g.x+Math.sin(a)*r,z=g.z+Math.cos(a)*r;let ok=true;for(let q=1;q<=8;q++){if(!free(g.x+(x-g.x)*q/8,g.z+(z-g.z)*q/8)){ok=false;break;}}if(ok){g.tx=x;g.tz=z;break;}}}
+   else{const st=Math.min(d,1.25*dt),nx=g.x+dx/d*st,nz=g.z+dz/d*st;if(free(nx,nz)){g.x=nx;g.z=nz;moving=true;const ty=Math.atan2(dx,dz);let dd=ty-g.yaw;dd=Math.atan2(Math.sin(dd),Math.cos(dd));g.yaw+=dd*Math.min(1,dt*8);}else{g.tx=g.x;g.tz=g.z;}}}
+  const gy=R.Y+floorY(R,g.x,g.z-R.Z);
+  /* 撮影用：ゴブリンのまわりをゆっくり回るカメラ */
+  if(window.__labCam){if(g.ph==null)g.ph=Math.atan2(P.x-g.x,P.z-g.z);g.ph+=dt*0.3;let rad=3.6,cx,cz;for(;rad>1.6;rad-=0.2){cx=g.x+Math.sin(g.ph)*rad;cz=g.z+Math.cos(g.ph)*rad;if(gFree(G,cx,cz-R.Z,0.35,1.6))break;}if(rad<=1.6){g.ph+=dt*1.2;}else{g.cx=g.cx==null?cx:g.cx+(cx-g.cx)*Math.min(1,dt*3);g.cz=g.cz==null?cz:g.cz+(cz-g.cz)*Math.min(1,dt*3);}P.x=g.cx??cx;P.z=g.cz??cz;P.yaw=Math.atan2(g.x-P.x,-(g.z-P.z));P.pit=-0.3;}
+  /* 影 */
+  gl.uniform1f(PB.U("AM"),1);gl.uniform1f(PB.U("FL"),0);gl.uniform4f(PB.U("UR"),0,0,1,1);gl.uniform1f(PB.U("LB"),1);gl.bindTexture(gl.TEXTURE_2D,texOf(SHADOW));
+  gl.uniform3f(PB.U("UPV"),0,0,1);gl.uniform3f(PB.U("R"),1,0,0);gl.uniform3f(PB.U("C"),g.x,gy+0.05,g.z);gl.uniform4f(PB.U("Q"),-0.75,-0.42,1.5,0.84);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+  /* 本体：主から見た向きで8方向の絵を選ぶ */
+  const A=Math.atan2(EYE[0]-g.x,EYE[2]-g.z)-g.yaw,k=((Math.round(A/(Math.PI/4))%8)+8)%8;
+  const col=moving?4+Math.floor(t*7.5)%6:Math.floor(t*2.5)%4;
+  gl.disable(gl.BLEND);gl.depthMask(true);gl.uniform1f(PB.U("AM"),0);
+  gl.bindTexture(gl.TEXTURE_2D,texOf(im));gl.uniform4f(PB.U("UR"),col/10,k/8,1/10,1/8);
+  const d=Math.hypot(g.x-EYE[0],g.z-EYE[2]);gl.uniform1f(PB.U("LB"),Math.min(1.15,0.5+0.8*Math.exp(-d/6)));
+  gl.uniform3fv(PB.U("R"),Rr);gl.uniform3f(PB.U("UPV"),0,1,0);gl.uniform3f(PB.U("C"),g.x,gy,g.z);gl.uniform4f(PB.U("Q"),-SZ/2,-SZ*(1-FOOT),SZ,SZ);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+  /* 元に戻す（このあと床の絵を描くため） */
+  gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);gl.uniform1f(PB.U("AM"),1);gl.uniform3f(PB.U("UPV"),0,0,1);gl.uniform3f(PB.U("R"),1,0,0);
+  window.__labG=g;};})();
+</script>
 </body>
 </html>
