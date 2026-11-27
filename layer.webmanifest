@@ -1,0 +1,1 @@
+{"name": "ダンジョンマスター（仮）層", "short_name": "ダンジョン層", "start_url": "./layer/", "scope": "./", "display": "standalone", "orientation": "landscape", "background_color": "#120c0a", "theme_color": "#120c0a", "icons": [{"src": "icon.png", "sizes": "512x512", "type": "image/png"}]}

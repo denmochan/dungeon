@@ -14628,6 +14628,8 @@ window.__place30 = function (F, i, R) {
   F.P.auto = null; if (F.go) F.go(i); F.P.x = 0; F.P.z = R.classic ? R.Z + (R.ZS || 0) - 1 : R.Z - L30.CS * 0.6; F.P.y = R.Y; F.P.yaw = 0; if (!R.classic) { try { const G = g30(S, i), mid = (G.W - 1) >> 1, pth = bfs30(G, [mid, 0], [mid, G.H - 1]); let bs = null; if (pth) for (let si = 0; si < Math.min(3, pth.length - 1); si++) { const s0 = pth[si]; let far = null, len = 0; for (let k = si + 1; k < Math.min(pth.length, si + 9); k++) { const q = pth[k]; let ok = true; for (let t = 0.1; t < 1; t += 0.1) { const xx = Math.round(s0[0] + (q[0] - s0[0]) * t), yy = Math.round(s0[1] + (q[1] - s0[1]) * t); if (!g30at(G, xx, yy)) { ok = false; break; } } if (ok) { far = q; len = Math.hypot(q[0] - s0[0], q[1] - s0[1]); } else break; } if (far && (!bs || len > bs.len)) bs = { s0, far, len }; }
             if (bs) { F.P.x = (bs.s0[0] - mid) * L30.CS; F.P.z = R.Z - bs.s0[1] * L30.CS; const tx = (bs.far[0] - mid) * L30.CS, tz = R.Z - bs.far[1] * L30.CS; F.P.yaw = Math.atan2(tx - F.P.x, -(tz - F.P.z)); } } catch (e) {} }      
 };
+/* 感度の窓：ほかの所を押したら閉じる（他のメニューと重なって残らない） */
+document.addEventListener("pointerdown", ev => { const pn = document.querySelector("#fp26 .sens30"); if (!pn) return; const t = ev.target; if (t.closest && (t.closest(".sens30") || t.closest('[data-f="sens"]') || t.closest('[data-d="fpsens30"]'))) return; pn.remove(); }, true);
 
 // ================= night30：夜、勇者は層の中の道を1マスずつ進む =================
 // 計算の中身（戦い・罠の強さ）は今までのものを使う。そのうえで：
@@ -14816,8 +14818,8 @@ media30(); addEventListener("load", media30); setTimeout(media30, 1500);
 #fp26 .f26where{pointer-events:auto;background:rgba(14,10,8,.7);border:1px solid #6a5444;border-radius:10px;padding:5px 10px;width:auto!important;display:inline-flex;gap:6px;align-items:baseline}
 #fp26 .f26hint{top:auto!important;bottom:calc(150px + env(safe-area-inset-bottom));left:max(14px,env(safe-area-inset-left))!important;background:rgba(14,10,8,.6);padding:4px 8px;border-radius:8px;font-size:12px;transition:opacity .6s}
 #fp26.seen30 .f26hint{opacity:0;pointer-events:none}
-#fp26 .f26map{top:max(8px,env(safe-area-inset-top))!important;right:max(8px,env(safe-area-inset-right))!important;width:112px!important;height:82px!important;border-radius:10px;cursor:pointer;transition:width .2s,height .2s}
-#fp26.mapbig30 .f26map{width:250px!important;height:183px!important;z-index:40}
+#fp26 .f26map{top:max(8px,env(safe-area-inset-top))!important;right:max(8px,env(safe-area-inset-right))!important;width:112px!important;height:82px!important;border-radius:10px;cursor:pointer;transition:width .2s,height .2s;z-index:31;position:absolute;pointer-events:auto!important}
+#fp26.mapbig30 .f26map{width:250px!important;height:183px!important;z-index:40;right:max(118px,calc(env(safe-area-inset-right) + 110px))!important;top:44px!important;box-shadow:0 6px 20px #000a}
 #fp26 .dm30{top:auto;bottom:max(8px,env(safe-area-inset-bottom))!important;right:max(8px,env(safe-area-inset-right))!important;max-width:none!important;display:grid!important;grid-template-columns:repeat(2,48px);grid-auto-rows:46px;gap:4px;padding:5px!important;background:rgba(14,10,8,.55)!important;border-radius:14px}
 #fp26 .dm30 button{min-width:0!important;width:48px;height:46px;padding:2px 0!important;font-size:19px!important;justify-content:center}
 #fp26 .dm30 button small{font-size:10px!important}
@@ -14938,6 +14940,7 @@ ${p} .top{min-height:0!important}`;
 .card>div:has(>.tok27)>*{flex:0 0 100%}.card>div:has(>.tok27)>.tok27{flex:1 1 calc(50% - 4px)!important;margin:0!important}
 .card .tok27 button{padding:5px 6px!important;min-height:0!important;font-size:12.5px!important}
 .card .tok27 .hint,.card .tok27+.hint{display:none}
+.rs-grid{grid-template-columns:repeat(6,1fr)!important;gap:4px!important}.rs-grid>div{padding:4px!important}
 .main-area>.sheet20{position:fixed!important;left:104px;right:max(8px,env(safe-area-inset-right));bottom:0;z-index:60;max-height:62vh!important;margin:0!important}
 .inv25svg{width:min(56vw,560px)!important}
 .inv25sheet{top:46px!important;width:min(400px,40vw)!important;z-index:3}
@@ -14955,6 +14958,8 @@ setInterval(() => { try { if (!window.__dig30) return; if (Date.now() - window._
 /* 難易度の画面：横持ちだと「▶ ではじめる」が画面の外で、スクロールもできず次の周回を始められなかった */
 { const st = document.createElement("style"); st.textContent = `.title.diff{overflow-y:auto!important;align-content:start}.title.diff>[data-a="diffgo"]{position:sticky;bottom:6px;z-index:5;box-shadow:0 -6px 16px #000c}
 @media (orientation:landscape) and (max-height:500px){.title.diff .demb{height:40px!important;font-size:30px!important;margin:0!important}.title.diff .demb *{max-height:40px}}`; document.head.appendChild(st); media30(); }
+/* ミッション達成の帯は、店で呼んだ魔物の演出（buy23）と重ならないよう、閉じてから出す */
+{ const _bn = banner19; banner19 = function (t, cls, ms) { if (cls === "mis" && document.querySelector(".buy23")) { const a = arguments, t0 = Date.now(); const w = () => { if (document.querySelector(".buy23") && Date.now() - t0 < 6000) return setTimeout(w, 200); _bn.apply(this, a); }; return setTimeout(w, 200); } return _bn.apply(this, arguments); }; }
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------

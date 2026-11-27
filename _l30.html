@@ -14960,6 +14960,16 @@ setInterval(() => { try { if (!window.__dig30) return; if (Date.now() - window._
 @media (orientation:landscape) and (max-height:500px){.title.diff .demb{height:40px!important;font-size:30px!important;margin:0!important}.title.diff .demb *{max-height:40px}}`; document.head.appendChild(st); media30(); }
 /* ミッション達成の帯は、店で呼んだ魔物の演出（buy23）と重ならないよう、閉じてから出す */
 { const _bn = banner19; banner19 = function (t, cls, ms) { if (cls === "mis" && document.querySelector(".buy23")) { const a = arguments, t0 = Date.now(); const w = () => { if (document.querySelector(".buy23") && Date.now() - t0 < 6000) return setTimeout(w, 200); _bn.apply(this, a); }; return setTimeout(w, 200); } return _bn.apply(this, arguments); }; }
+/* 案内（キキ）の吹き出しと光る枠：縦持ちで画面を回しているときは、回した中の座標に直す（枠と吹き出しが画面の外に出ていた） */
+{ const _tf = tutFrame; tutFrame = function () { _tf.apply(this, arguments); try {
+  if (!document.documentElement.classList.contains("land30") || !tutEl || tutEl.style.display === "none") return; const st = TUT[S.tut]; if (!st) return;
+  const els = (!st.when || st.when()) ? tutEls(st) : [], VH = innerWidth, h = tutEl.querySelector(".tuth"), b = tutEl.querySelector(".tutb");
+  if (els.length) { const R = els.map(e => { const r = e.getBoundingClientRect(); return { left: r.top, right: r.bottom, top: innerWidth - r.right, bottom: innerWidth - r.left }; });
+    const l = Math.min(...R.map(r => r.left)) - 5, t = Math.min(...R.map(r => r.top)) - 5, rr = Math.max(...R.map(r => r.right)) + 5, bb = Math.max(...R.map(r => r.bottom)) + 5;
+    Object.assign(h.style, { left: l + "px", top: t + "px", width: (rr - l) + "px", height: (bb - t) + "px", display: "" });
+    if ((t + bb) / 2 < VH / 2) b.style.top = Math.min(VH - b.offsetHeight - 10, bb + 10) + "px"; else b.style.top = Math.max(10, t - b.offsetHeight - 10) + "px"; b.style.bottom = "";
+  } else if (!st.quiet) b.style.top = (VH / 2 - b.offsetHeight / 2) + "px";
+} catch (e) {} }; }
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------
