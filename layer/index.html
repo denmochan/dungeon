@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層90／No.350（11/25 00:49）";
+const VER20 = "層91／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -14973,7 +14973,16 @@ document.addEventListener("click", ev => { const b = ev.target.closest && ev.tar
 /* 縦持ち（画面を回している時）：vw・vhが回す前の縦長の幅・高さのままなので、たて横を入れかえる（朝の収穫が細い1列になり、文字が縦に並んでいた） */
 { const st = document.createElement("style"); st.textContent = `html.land30 .inv25svg{width:min(56vh,560px)!important}html.land30 .inv25sheet{width:min(400px,40vh)!important}html.land30 .inv25map::after{width:40vh}
 html.land30 .dg30g{width:min(92vh,62vw,420px)}html.land30 .main-area>.sheet20{max-height:62vw!important}html.land30 .tkl28{max-height:calc(100vw - 130px)!important}
-.stage .dw28>.dr28.big{grid-column:1/-1}`; document.head.appendChild(st); }
+.stage .dw28>.dr28.ev{grid-column:1/-1}`; document.head.appendChild(st); }
+/* 夜の結果（横持ち）：見出しの◆とMVPが大きく、下の「書を読ませる」が「つづける」の下に隠れていた → 見出しを1段に詰める */
+{ const st = document.createElement("style"); st.textContent = `@media (orientation:landscape) and (max-height:500px){
+.stage:has(>.raidban)>.raidban{display:flex!important;flex-wrap:wrap;align-items:center;justify-content:center;column-gap:12px;row-gap:0;max-width:calc(100% - 140px)!important}
+.stage:has(>.raidban)>.raidban .rb-h{font-size:20px!important}.stage:has(>.raidban)>.raidban .rstars19{margin:0!important;gap:6px}.stage:has(>.raidban)>.raidban .rstars19 span{font-size:22px!important}
+.stage:has(>.raidban)>.raidban .rsl19,.stage:has(>.raidban)>.raidban .rb-t{flex-basis:100%;text-align:center}
+.stage:has(>.raidban)>.mvp{padding:2px 12px!important;flex-direction:row!important;gap:8px!important}.stage:has(>.raidban)>.mvp .mvp-t{font-size:13px!important;letter-spacing:.15em}
+.stage:has(>.raidban)>.mvp img,.stage:has(>.raidban)>.mvp .sp{width:40px!important;height:40px!important}
+}
+html.land30 .raidban{max-width:calc(100vh - 24px)!important}`; document.head.appendChild(st); media30(); }
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------
