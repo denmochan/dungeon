@@ -18,6 +18,8 @@ B.append(seg(6,7,0.12));B.append(np.minimum(seg(7,8,0.11),np.linalg.norm(P-J[8],
 B.append(seg(9,10,0.15));B.append(seg(10,11,0.11));B.append(seg(11,15,0.1))                      # 7,8,9 左脚
 B.append(seg(12,13,0.15));B.append(seg(13,14,0.11));B.append(seg(14,16,0.1))                     # 10,11,12 右脚
 D=np.stack(B,1)
+low=(P[:,1]<J[0][1]+0.08)&((d['mat']==3) if 'mat' in d.files else False)
+D[np.ix_(low,[3,4,5,6])]=9.0   # 腰より下（すそ・腰布）は腕について行かない（僧侶のローブがはなれて見えた）
 if SP=='slime' or ('kit' in d.files and str(d['kit'])=='slime'): D=np.zeros_like(D)+9; D[:,0]=0
 D[M==3,0]-=0.12            # 腰布は胴について行く
 D[:,2]+=0.03               # 首は弱め

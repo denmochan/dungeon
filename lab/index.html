@@ -16235,6 +16235,15 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
  const MS={};
  const baseSp=sp=>String(sp||"").replace(/\d+$/,"");
  const SHAPE30={gargoyle:"imp",jackal:"kobold"},GHOST30=/^(ghostslime|ghost|wraitheye|sporewraith)$/;const rigOf=sp=>SHAPE30[sp]||sp;   /* 形を別の種族から借りた子は、動きもその種族のリグで */   /* 勇者の色ちがい（warrior2 など）は同じ形 */
+ /* 顔の絵をなめらかに：32マスのドット絵を8倍にのばして、ふちを整える（四角いドットが3Dの中で浮いていた） */
+ /* 顔の絵をなめらかに：ドット絵の色ごとに形をなめらかにのばして、いちばん強い色をとる（四角いドットが3Dの中で浮いていた。色はぼかさず、ふちだけ丸く） */
+ function faceAtlasSmooth(gl){const K=8,W=256*K,H=32*K,out=new ImageData(W,H),up=(m)=>{const a=document.createElement("canvas");a.width=32;a.height=32;const g0=a.getContext("2d"),im=g0.createImageData(32,32);for(let q=0;q<1024;q++){im.data[q*4]=im.data[q*4+1]=im.data[q*4+2]=255;im.data[q*4+3]=m[q];}g0.putImageData(im,0,0);
+   const b=document.createElement("canvas");b.width=32*K;b.height=32*K;const g=b.getContext("2d");g.imageSmoothingEnabled=true;g.imageSmoothingQuality="high";g.filter="blur("+(K*0.35)+"px)";g.drawImage(a,0,0,32*K,32*K);return g.getImageData(0,0,32*K,32*K).data;};
+  ["goblin","slime","bat","ghost","imp","myconid","orc","human"].forEach((sp,fi)=>{const F=FACE24[sp],cols={};F.rows.forEach((r,y)=>[...r].forEach((ch,k)=>{if(!F.pal[ch])return;(cols[ch]=cols[ch]||new Uint8Array(1024))[y*32+k]=255;}));
+   const all=new Uint8Array(1024);Object.values(cols).forEach(m=>m.forEach((v,q)=>{if(v)all[q]=255;}));const A=up(all),U=Object.keys(cols).map(ch=>[F.pal[ch],up(cols[ch])]);
+   for(let y=0;y<32*K;y++)for(let x=0;x<32*K;x++){const q=(y*32*K+x)*4;let best=-1,bc=null;for(const[c,m]of U){if(m[q+3]>best){best=m[q+3];bc=c;}}const o=(y*W+fi*32*K+x)*4,a=A[q+3]/255,t=Math.max(0,Math.min(1,(a-0.4)/0.2));
+    if(bc){out.data[o]=bc[0];out.data[o+1]=bc[1];out.data[o+2]=bc[2];}out.data[o+3]=t*t*(3-2*t)*255;}});
+  const t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,out);gl.generateMipmap&&0;[gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER].forEach(k=>gl.texParameteri(gl.TEXTURE_2D,k,gl.LINEAR));[gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T].forEach(k=>gl.texParameteri(gl.TEXTURE_2D,k,gl.CLAMP_TO_EDGE));return t;}
  const lidMark=(sp,M)=>{try{if(kitOf24(rigOf(sp))!=="mimic")return;const a=0.15,ca=Math.cos(a),sa=Math.sin(a),L=new Uint8Array(M.NV);   /* 箱のふたの頂点（ゲームの形と同じ、うしろのちょうつがい y0.48・z-0.36、角度0.15） */
    for(let i=0;i<M.NV;i++){const y=M.P0[i*3+1]-0.48,z=M.P0[i*3+2]+0.36,ly=ca*y-sa*z,lz=sa*y+ca*z;L[i]=ly>-0.04&&lz>-0.06&&M.P0[i*3+1]>0.4?1:0;}M.LID=L;}catch(e){}};
  const faceUV=(sp,M)=>{try{const kit=kitOf24(rigOf(sp)),fi=FACEIDX24[kit];if(fi==null||fi<0)return;const R=rigSp24(rigOf(sp),"idle",0),A=R.HR,J2=R.J[2];if(!J2||J2[1]<-5)return;   /* 頭の空間で、顔の絵のどこに当たるか（ゲームの charCol と同じ式） */
@@ -16290,7 +16299,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
   gl.bindBuffer(gl.ARRAY_BUFFER,g.cb);gl.enableVertexAttribArray(MP.ac);gl.vertexAttribPointer(MP.ac,3,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,g.ib);
   gl.disable(gl.BLEND);gl.depthMask(true);gl.enable(gl.DEPTH_TEST);gl.enable(gl.CULL_FACE);
   if(MP.af>=0){if(M.F&&window.__labFaceTex!==false&&!/[?&]noface/.test(location.search)){if(!g.fb){g.fb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,g.fb);gl.bufferData(gl.ARRAY_BUFFER,M.F,gl.STATIC_DRAW);}gl.bindBuffer(gl.ARRAY_BUFFER,g.fb);gl.enableVertexAttribArray(MP.af);gl.vertexAttribPointer(MP.af,3,gl.FLOAT,false,0,0);
-    if(!gl.__facet3){gl.__facet3=faceAtlas24(gl);gl.bindTexture(gl.TEXTURE_2D,gl.__facet3);[gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER].forEach(k=>gl.texParameteri(gl.TEXTURE_2D,k,gl.LINEAR));}
+    if(!gl.__facet3){gl.__facet3=faceAtlasSmooth(gl);}
     gl.activeTexture(gl.TEXTURE3);gl.bindTexture(gl.TEXTURE_2D,gl.__facet3);gl.uniform1i(MP.U("FT"),3);gl.uniform1f(MP.U("FI"),M.FI);gl.activeTexture(gl.TEXTURE0);}
    else{gl.disableVertexAttribArray(MP.af);gl.vertexAttrib3f(MP.af,0,0,0);gl.uniform1f(MP.U("FI"),-1);}}
   if(!o.alpha){gl.cullFace(gl.FRONT);gl.uniform1f(MP.U("OUT"),1);gl.uniform1f(MP.U("OW"),0.018*Math.sqrt(S0));gl.drawElements(gl.TRIANGLES,M.NT*3,gl.UNSIGNED_SHORT,0);}   /* すける子は輪郭の殻を描かない（中から黒く見える） */

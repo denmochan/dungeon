@@ -6,7 +6,7 @@ function setRig(p,pack,rig,L){gl.useProgram(p);const U=n=>gl.getUniformLocation(
  gl.uniform3fv(U('J'),new Float32Array(rig.J.flat()));gl.uniformMatrix3fv(U('HR'),false,new Float32Array(rig.HR));gl.uniformMatrix3fv(U('TR'),false,new Float32Array(rig.TR));gl.uniform1f(U('tool'),rig.tool||0);
  gl.uniform4fv(U('deb'),new Float32Array(24));gl.uniform3fv(U('SKIN'),new Float32Array(L.col[0]));gl.uniform3fv(U('CLOTH'),new Float32Array(L.col[1]));gl.uniform1fv(U('FI'),new Float32Array([pack.faceIdx]));
  gl.uniform1fv(U('EV'),new Float32Array([0]));gl.uniform1fv(U('SCL'),new Float32Array([1]));gl.uniform4fv(U('VAR'),new Float32Array(L.vr[0]));gl.uniform3fv(U('ACC'),new Float32Array(L.vr[1]));
- gl.uniform1f(U('hasFace'),2);gl.uniform1f(U('tm'),0);gl.uniform1f(U('CS'),1);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,faceTex);gl.uniform1i(U('face'),0);}
+ gl.uniform1f(U('hasFace'),pack.noFace?0:2);gl.uniform1f(U('tm'),0);gl.uniform1f(U('CS'),1);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,faceTex);gl.uniform1i(U('face'),0);}
 async function init(sh,pack){const c=document.getElementById('c');gl=c.getContext('webgl',{preserveDrawingBuffer:true,antialias:false});
  if(!gl.getExtension('OES_texture_float'))throw new Error('no float tex');
  PS=mkP(sh.vs,sh.samp);PC=mkP(sh.vs,sh.colr);

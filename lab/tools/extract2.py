@@ -30,6 +30,7 @@ with sync_playwright() as p:
     i=fs.index('void main(){')
     sh={'vs':sh0['vs'],'samp':fs[:i]+SAMP_MAIN,'colr':fs[:i]+COLR_MAIN}
     pack={'face':pk0['face'],'faceIdx':info['FI']}
+    if os.environ.get('NOFACE'): pack['noFace']=1   # 顔は形に焼かず、絵で貼る
     rig={'J':info['J'],'HR':info['HR'],'TR':info['TR']};L={'col':info['col'],'vr':info['vr']}
     import os
     if os.environ.get('VARZ'): L['vr'][0][2]=float(os.environ['VARZ'])   # 武器を描かない版など（悪魔の系統：VAR.z 2＝なし）
