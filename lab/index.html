@@ -13896,8 +13896,8 @@ function fpOpen30(){
 
   /* ===== 広間の飾りを、板の絵ではなく立体で作る（洞窟と同じ作り方：頂点の色に光をつけておく） ===== */
   function propMesh(Rm){ let P = [], C = [], I = []; const pr = Rm.props || {}; if (Rm.classic) return null; const GL = { P: [], C: [], I: [] }, NM = { P, C, I }; const glow = on => { const t = on ? GL : NM; P = t.P; C = t.C; I = t.I; };
-    let rx = 0, rz = 0, ry = 0, rc = 1, rs = 0, rk = 1, ctr = null, noT3 = false; const T3 = { P: [], N: [], C: [] };   /* T3：ゴブリンと同じ描き方（トゥーン＋輪郭線）用に、焼いた陰なしの色と面の向きも取っておく */   /* 置く位置・向き */
-    const tf = (x, y, z) => { const c = Math.cos(ry), sn = Math.sin(ry); x *= rk; y *= rk; z *= rk; return [rx + x * c - z * sn, y, rz + x * sn + z * c]; };
+    let rx = 0, rz = 0, ry = 0, rc = 1, rs = 0, rk = 1, ctr = null, noT3 = false, SUB = null; const T3 = { P: [], N: [], C: [] };   /* T3：ゴブリンと同じ描き方（トゥーン＋輪郭線）用に、焼いた陰なしの色と面の向きも取っておく */   /* 置く位置・向き */
+    const tf = (x, y, z) => { if (SUB) { const X = SUB.x + x * SUB.c - z * SUB.s, Z = SUB.z + x * SUB.s + z * SUB.c; x = X; y = SUB.y + y; z = Z; } const c = Math.cos(ry), sn = Math.sin(ry); x *= rk; y *= rk; z *= rk; return [rx + x * c - z * sn, y, rz + x * sn + z * c]; };
     const shade = (col, nY, nX) => col.map(v => Math.min(255, v * (0.62 + 0.38 * Math.max(0, nY) + 0.12 * nX + 0.08 * (nz(rx, ry, rz, rs++ % 9) )))) ;
     const tri = (a, b, c2, col) => { const u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], v = [c2[0] - a[0], c2[1] - a[1], c2[2] - a[2]], n = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]], L = Math.hypot(...n) || 1, cc = shade(col, n[1] / L, n[0] / L);
       const b0 = P.length / 3; [a, b, c2].forEach(p => { P.push(p[0], p[1], p[2]); C.push(cc[0], cc[1], cc[2]); }); I.push(b0, b0 + 1, b0 + 2);
@@ -13935,7 +13935,7 @@ function fpOpen30(){
     const pebble = (x, z, r, col) => { ctr = tf(x, -r * 0.3, z); const seg = 5, B = Array.from({ length: seg }, (_, k) => { const an = k / seg * Math.PI * 2; return tf(x + Math.cos(an) * r * (0.7 + 0.5 * Math.abs(nz(x, k, z, 2))), 0.01, z + Math.sin(an) * r); }), T = tf(x, r * 0.6, z); for (let k = 0; k < seg; k++) tri(B[k], B[(k + 1) % seg], T, col); };
 
     /* なめらかな形（ゴブリンと同じ描き方の版だけに入る）：回転体・楕円体・管 */
-    const rotN = n => { const c = Math.cos(ry), sn = Math.sin(ry); return [n[0] * c - n[2] * sn, n[1], n[0] * sn + n[2] * c]; };
+    const rotN = n => { if (SUB) n = [n[0] * SUB.c - n[2] * SUB.s, n[1], n[0] * SUB.s + n[2] * SUB.c]; const c = Math.cos(ry), sn = Math.sin(ry); return [n[0] * c - n[2] * sn, n[1], n[0] * sn + n[2] * c]; };
     const sv = (p, n, col) => { T3.P.push(p[0], p[1], p[2]); const l = Math.hypot(...n) || 1; T3.N.push(n[0] / l, n[1] / l, n[2] / l); T3.C.push(col[0], col[1], col[2]); };
     const grid = (pts, nrm, cols, rows, segs) => { for (let i = 0; i < rows; i++) for (let j = 0; j < segs; j++) { const a = i * (segs + 1) + j, b = a + 1, c = a + segs + 1, d = c + 1; [[a, c, b], [b, c, d]].forEach(t => t.forEach(k => sv(pts[k], nrm[k], cols[k]))); } };
     const lathe = (x, y, z, prof, col, segs = 18, wob = 0) => { const pts = [], nrm = [], cols = []; prof.forEach(([r, yy], i) => { const pr = prof[Math.max(0, i - 1)], nx2 = prof[Math.min(prof.length - 1, i + 1)], dr = nx2[0] - pr[0], dy = nx2[1] - pr[1];
@@ -13948,6 +13948,30 @@ function fpOpen30(){
         pts.push(tf(b[0] + dir[0] * r, b[1] + dir[1] * r, b[2] + dir[2] * r)); nrm.push(rotN([dir[0] - u[0] * sl, dir[1] - u[1] * sl, dir[2] - u[2] * sl])); cols.push(col); } grid(pts, nrm, cols, 1, segs); ellT(p0[0], p0[1], p0[2], r0, r0, r0, col, 5, 10); ellT(p1[0], p1[1], p1[2], r1, r1, r1, col, 5, 10); };
     /* 石像（ゴブリンと同じ丸い形で作り直し）：苔むした台座、フードのローブ、地についた剣 */
     const rubbleT3 = (w, h, k) => { const RC = [[92, 84, 76], [78, 72, 66], [104, 94, 82]]; const n2 = 3 + (k % 3); for (let j = 0; j < n2; j++) { const an = j * 2.3 + k, d = j ? 0.25 + 0.15 * (j % 2) : 0, rr = (j ? 0.22 : 0.38) * (0.8 + 0.4 * Math.abs(nz(k, j, 1, 2))); ellT(Math.cos(an) * d, rr * 0.55, Math.sin(an) * d, rr * 1.15, rr * 0.8, rr, RC[(j + k) % 3], 6, 10); } };   /* がれき：角ばった既製品の代わりに丸い石の山 */
+
+    /* 角を丸めた箱（超楕円体）。樽・宝箱・木箱・トロッコを、ゴブリンと同じ丸い形で作り直す */
+    const spw = (v, e) => Math.sign(v) * Math.pow(Math.abs(v), e);
+    const rbox = (x, y, z, a, b, c, col, e = 0.3, la = 10, lo = 20) => { const pts = [], nrm = [], cols = []; for (let i = 0; i <= la; i++) for (let j = 0; j <= lo; j++) { const v = -Math.PI / 2 + i / la * Math.PI, u = -Math.PI + j / lo * Math.PI * 2, cv = Math.cos(v), sv2 = Math.sin(v), cu = Math.cos(u), su = Math.sin(u);
+        pts.push(tf(x + a * spw(cv, e) * spw(cu, e), y + b * spw(sv2, e), z + c * spw(cv, e) * spw(su, e))); nrm.push(rotN([spw(cv, 2 - e) * spw(cu, 2 - e) / a, spw(sv2, 2 - e) / b, spw(cv, 2 - e) * spw(su, 2 - e) / c])); cols.push(col); } grid(pts, nrm, cols, la, lo); };
+    const WD = [126, 86, 50], WD2 = [100, 68, 40], IR = [78, 78, 86], GD = [214, 168, 70];
+    const barrelT = (x, z, r, h, col = WD) => { const ys = [0, 0.03, 0.1, 0.1, 0.17, 0.17, 0.5, 0.83, 0.83, 0.9, 0.9, 0.97, 1, 1], prof = [], cs = []; ys.forEach((t, i) => { const band = (i >= 3 && i <= 4) || (i >= 8 && i <= 9); prof.push([r * (0.84 + 0.16 * Math.sin(Math.PI * t)) + (band ? 0.018 : 0) - (i === 13 ? r * 0.12 : 0), h * t]); cs.push(band ? IR : (i >= 12 ? WD2 : col)); }); prof.push([0, h * 0.99]); cs.push(WD2); lathe(x, 0, z, prof, cs, 16); };
+    const crateT = (x, y, z, w, h, d) => { rbox(x, y + h / 2, z, w / 2, h / 2, d / 2, WD, 0.22); for (const yy of [0.08, 0.92]) rbox(x, y + h * yy, z, w / 2 + 0.015, h * 0.06, d / 2 + 0.015, WD2, 0.3, 6, 16); for (const sx of [-1, 1]) rbox(x + sx * w * 0.44, y + h / 2, z, w * 0.06 + 0.012, h / 2 + 0.01, d / 2 + 0.015, WD2, 0.3, 6, 16); };
+    const chestT = (w, h, d) => { rbox(0, h * 0.3, 0, w / 2, h * 0.3, d / 2, WD, 0.25); rbox(0, h * 0.66, 0, w / 2 + 0.02, h * 0.2, d / 2 + 0.02, WD2, 0.55); for (const sx of [-0.3, 0.3]) rbox(sx * w, h * 0.45, 0, 0.04, h * 0.46, d / 2 + 0.035, IR, 0.35, 8, 14); rbox(0, h * 0.52, d / 2 + 0.03, 0.08, 0.1, 0.035, GD, 0.35, 6, 12); ellT(0, h * 0.5, d / 2 + 0.06, 0.03, 0.03, 0.02, [60, 40, 20], 4, 8); };
+    const KT3 = {
+      barrel_large: sc => barrelT(0, 0, 0.9 * sc, 2 * sc),
+      barrel_small_stack: sc => { barrelT(-0.45 * sc, 0, 0.45 * sc, 1.0 * sc); barrelT(0.47 * sc, 0.05 * sc, 0.45 * sc, 0.95 * sc); barrelT(0, -0.02 * sc, 0.42 * sc, 0.8 * sc, WD2); },
+      keg_decorated: sc => { barrelT(0, 0, 0.95 * sc, 1.9 * sc); },
+      crates_stacked: sc => { crateT(0, 0, 0, 2 * sc * 0.95, 1.05 * sc, 2.1 * sc * 0.95); crateT(0.1 * sc, 1.05 * sc, -0.05 * sc, 1.3 * sc, 1.0 * sc, 1.3 * sc); },
+      box_small_decorated: sc => crateT(0.13 * sc, 0, 0.11 * sc, 1.45 * sc, 1.45 * sc, 1.45 * sc),
+      box_stacked: sc => { crateT(-0.8 * sc, 0, 0, 1.7 * sc, 1.7 * sc, 1.7 * sc); crateT(0.9 * sc, 0, 0.1 * sc, 1.6 * sc, 1.6 * sc, 1.6 * sc); crateT(0, 1.7 * sc, 0, 1.6 * sc, 1.55 * sc, 1.6 * sc); },
+      trunk_large_A: sc => chestT(1.5 * sc, 1.0 * sc, 1.3 * sc),
+      chest: sc => chestT(1.7 * sc, 1.3 * sc, 1.4 * sc),
+    };
+    /* トロッコ：丸い箱・円盤の車輪・丸い鉱石・線路 */
+    const cartT = w => { rbox(0, 0.62, 0, w / 2, 0.28, w * 0.28, WD, 0.25); rbox(0, 0.93, 0, w / 2 + 0.03, 0.06, w * 0.28 + 0.03, WD2, 0.35, 6, 18); for (const sx of [-0.33, 0.33]) rbox(sx * w, 0.62, 0, 0.035, 0.3, w * 0.28 + 0.02, IR, 0.35, 6, 12);
+      for (const sx of [-1, 1]) for (const sz of [-1, 1]) { ellT(sx * w * 0.32, 0.28, sz * w * 0.3, 0.27, 0.27, 0.07, [52, 50, 54], 6, 14); ellT(sx * w * 0.32, 0.28, sz * w * 0.3 + sz * 0.06, 0.08, 0.08, 0.04, IR, 4, 8); }
+      for (let k = 0; k < 7; k++) ellT((k % 4 - 1.5) * w * 0.2, 0.98 + 0.06 * (k % 2), (k > 3 ? 0.1 : -0.1) * w, 0.17, 0.14, 0.15, k % 3 ? [104, 112, 130] : [140, 150, 172], 5, 9);
+      for (const sz of [-1, 1]) rbox(0, 0.04, sz * w * 0.27, w * 1.1, 0.035, 0.035, [112, 104, 98], 0.35, 4, 10); for (let k = -2; k <= 2; k++) rbox(k * w * 0.48, 0.02, 0, 0.09, 0.03, w * 0.38, WD2, 0.35, 4, 10); };
     const statueT3 = () => { const ST = [112, 106, 100], SD = [88, 83, 80], SL = [130, 126, 120], MS = [66, 86, 52];
       lathe(0, 0, 0, [[1.15, -0.05], [1.18, 0.12], [1.1, 0.3], [0.98, 0.36], [0.95, 0.4], [0.93, 0.62], [0.82, 0.7], [0.7, 0.72], [0, 0.73]], SD, 10, 0.05);   /* 台座：角を丸めた二段 */
       lathe(0, 0.7, 0, [[0.6, 0.0], [0.66, 0.12], [0.64, 0.4], [0.56, 0.95], [0.48, 1.45], [0.42, 1.72], [0.36, 1.82], [0.0, 1.86]], ST, 20, 0.04);   /* ローブ：すそが広がる */
@@ -13960,7 +13984,7 @@ function fpOpen30(){
       for (let k = 0; k < 9; k++) { const an = k * 0.7 + 0.2, r = 1.35 + 0.2 * (k % 3), rr = 0.14 + 0.06 * (k % 3); ellT(Math.cos(an) * r, rr * 0.5, Math.sin(an) * r * 0.9, rr * 1.2, rr * 0.75, rr, k % 3 ? [96, 90, 84] : [80, 76, 72], 5, 9); } };   /* 足もとの石 */
     /* 既製の小物（KayKit・CC0）を置く。面ごとに光をつけておく */
     const KKC = window.__kkc30 || (window.__kkc30 = {}); const kkGet = nm => { if (KKC[nm]) return KKC[nm]; const d = typeof KK30 !== "undefined" && KK30[nm]; if (!d) return null; const b64 = s2 => Uint8Array.from(atob(s2), ch => ch.charCodeAt(0)); const pb2 = b64(d.p), cb2 = b64(d.c), ib2 = b64(d.i); return KKC[nm] = { p: new Int16Array(pb2.buffer), c: cb2, i: new Uint16Array(ib2.buffer), b: d.b }; };
-    const mdl = (nm, sc, x = 0, y = 0, z = 0, a2 = 0, gl2) => { const m = kkGet(nm); if (!m) return false; ctr = null; const c = Math.cos(a2), sn = Math.sin(a2), V = k => { const px = m.p[k * 3] / 1000 * sc, py = m.p[k * 3 + 1] / 1000 * sc, pz = m.p[k * 3 + 2] / 1000 * sc; return tf(x + px * c - pz * sn, y + py, z + px * sn + pz * c); };
+    const mdl = (nm, sc, x = 0, y = 0, z = 0, a2 = 0, gl2) => { const m = kkGet(nm); if (!m) return false; ctr = null; const kt = !gl2 && !noT3 && KT3[nm]; if (kt) { noT3 = true; try { mdl(nm, sc, x, y, z, a2, gl2); } finally { noT3 = false; } SUB = { x, y, z, c: Math.cos(a2), s: Math.sin(a2) }; try { kt(sc); } finally { SUB = null; } return true; } const c = Math.cos(a2), sn = Math.sin(a2), V = k => { const px = m.p[k * 3] / 1000 * sc, py = m.p[k * 3 + 1] / 1000 * sc, pz = m.p[k * 3 + 2] / 1000 * sc; return tf(x + px * c - pz * sn, y + py, z + px * sn + pz * c); };
       if (gl2) glow(true); for (let t = 0; t + 2 < m.i.length; t += 3) { const a = m.i[t], b = m.i[t + 1], d = m.i[t + 2], col = [0, 1, 2].map(q => (m.c[a * 3 + q] + m.c[b * 3 + q] + m.c[d * 3 + q]) / 3 * 0.86); tri(V(a), V(b), V(d), col); } if (gl2) glow(false); return true; };
     const KS = 0.62;   /* KayKitの大きさ → この洞窟の大きさ */
     const MK3 = {
@@ -14005,7 +14029,7 @@ function fpOpen30(){
         for (let k = 0; k < 5; k++) { const a = k * 1.25 + 0.3; cyl(Math.cos(a) * 0.4, h * 0.75, Math.sin(a) * 0.3, 0.16, 0.06, 1.2, RT, 6); }
         glow(true); for (let k = 0; k < 9; k++) ball(Math.cos(k * 1.4) * (0.6 + 0.1 * (k % 3)), h * (0.2 + 0.09 * k), Math.sin(k * 1.4) * 0.5, 0.07, [255, 230, 140]); glow(false); },
       crystal: (w, h) => { glow(true); MK.crystal(w, h); glow(false); for (let k = 0; k < 7; k++) pebble(Math.cos(k * 1.7) * w * 0.6, Math.sin(k * 1.7) * w * 0.5, 0.08 + 0.04 * (k % 3), [70, 64, 60]); },
-      cart: (w, h) => { MK.cart(w, h); for (const sz of [-1, 1]) box(0, 0.02, sz * w * 0.27, w * 2.2, 0.06, 0.07, [110, 100, 92]); for (let k = -2; k <= 2; k++) box(k * w * 0.48, 0, 0, 0.18, 0.05, w * 0.75, DW); for (let k = 0; k < 5; k++) ball(-w * 0.75 + (k % 3) * 0.2, 0.1, 0.4 + (k > 2 ? 0.2 : 0), 0.14, [100 + k * 10, 110, 130]); },
+      cart: (w, h) => { noT3 = true; try { MK.cart(w, h); for (const sz of [-1, 1]) box(0, 0.02, sz * w * 0.27, w * 2.2, 0.06, 0.07, [110, 100, 92]); for (let k = -2; k <= 2; k++) box(k * w * 0.48, 0, 0, 0.18, 0.05, w * 0.75, DW); for (let k = 0; k < 5; k++) ball(-w * 0.75 + (k % 3) * 0.2, 0.1, 0.4 + (k > 2 ? 0.2 : 0), 0.14, [100 + k * 10, 110, 130]); } finally { noT3 = false; } cartT(w); },
       pick: (w, h) => { MK.pick(w, h); ball(0.35, 0.12, 0.2, 0.2, [96, 90, 86], 0.6); },
       dummy: (w, h) => { MK.dummy(w, h); for (let k = 0; k < 10; k++) { const an = k / 10 * Math.PI * 2; box(Math.cos(an) * w * 0.24, h * 0.33, Math.sin(an) * w * 0.24, 0.03, 0.18, 0.03, [220, 190, 110], an); } for (const r of [0.3, 0.2, 0.1]) cyl(0, h * 0.5, w * 0.22 + (0.3 - r) * 0.05, r * w * 0.6, r * w * 0.6, 0.02, r === 0.2 ? [235, 225, 200] : [180, 50, 40], 12, true, 0); cyl(0, 0, 0, w * 0.9, w * 0.9, 0.02, [150, 128, 92], 14, true); },
       rack: (w, h) => { MK.rack(w, h); for (let k = 0; k < 2; k++) { box(-w * 0.6 - k * 0.3, 0, 0.3, 0.5, 0.12, 0.5, [90, 80, 70], 0.3 * k); } box(w * 0.7, 0, 0.2, 0.12, h * 0.6, 0.6, IRON, 0.2); ball(w * 0.7, h * 0.62, 0.2, 0.32, IRON, 0.35); },
@@ -16152,7 +16176,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[];let seed=1;
  let R0=null;
  function draw3d(o,g,gy,t,moving){const {gl,PB,PM,EYE,VP}=o;
   if(!GL3)GL3=prog3(gl);const Q=GL3;if(!R0)R0=rigSp24("goblin","idle",0);
-  const R=moving?rigSp24("goblin","walk",(t*1.0)%0.8):rigSp24("goblin","idle",t*0.6);const T=bones(R,R0);
+  const R=moving?rigSp24("goblin","walk",((g.wd||0)/1.3)%0.8):rigSp24("goblin","idle",t*0.6);const T=bones(R,R0);
   const cy=Math.cos(g.yaw),sy=Math.sin(g.yaw),S=1.0,P0=G3.P0,N0=G3.N0,B=G3.B,W=G3.W,pos=Q.pos,nor=Q.nor;
   const place=(x,y,z,i)=>{pos[i]=g.x+(x*cy+z*sy)*S;pos[i+1]=gy+y*S;pos[i+2]=g.z+(-x*sy+z*cy)*S;};
   for(let i=0,NV=G3.NV;i<NV;i++){const px=P0[i*3],py=P0[i*3+1],pz=P0[i*3+2],nx=N0[i*3],ny=N0[i*3+1],nz=N0[i*3+2],w0=W[i]/255;let X=0,Y=0,Z=0,NX=0,NY=0,NZ=0;
@@ -16212,11 +16236,13 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[];let seed=1;
    let cur=cell(g.x,g.z);const raw=[];for(const p2 of T){const b=cell(p2[0],R.Z+p2[1]);bfs(cur,b).forEach(c=>{const i=c%NX;raw.push([X0+i*S,Z0+(c-i)/NX*S]);});cur=b;}
    const los=(a,b)=>{const n=Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1])/0.2);for(let k=1;k<n;k++){if(!free(a[0]+(b[0]-a[0])*k/n,a[1]+(b[1]-a[1])*k/n))return false;}return true;};
    const sm=[];let k=0;while(k<raw.length){let m=Math.min(raw.length-1,k+12);while(m>k+1&&!los(raw[k],raw[m]))m--;sm.push(raw[m]);k=m===k?k+1:m;}g.path=sm;g.pi=0;}
-  if(g.path&&g.pi<g.path.length){const p2=g.path[g.pi];if(Math.hypot(p2[0]-g.x,p2[1]-g.z)<0.35)g.pi++;g.tx=p2[0];g.tz=p2[1];g.wait=0;}
+  if(g.path&&g.pi<g.path.length){const p2=g.path[g.pi];if(Math.hypot(p2[0]-g.x,p2[1]-g.z)<0.5)g.pi++;g.tx=p2[0];g.tz=p2[1];g.wait=0;}
   let moving=false;
   if(g.wait>0)g.wait-=dt;else{const dx=g.tx-g.x,dz=g.tz-g.z,d=Math.hypot(dx,dz);
    if(d<0.15){g.wait=0.8+rnd()*1.2;for(let k=0;k<60;k++){const a=rnd()*6.283,r=2.5+rnd()*4,x=g.x+Math.sin(a)*r,z=g.z+Math.cos(a)*r;let ok=true;for(let q=1;q<=8;q++){if(!free(g.x+(x-g.x)*q/8,g.z+(z-g.z)*q/8)){ok=false;break;}}if(ok){g.tx=x;g.tz=z;break;}}}
-   else{const st=Math.min(d,(window.__labSpd||1.25)*dt),nx=g.x+dx/d*st,nz=g.z+dz/d*st;if(g.path&&g.pi<g.path.length||free(nx,nz)){g.x=nx;g.z=nz;moving=true;const ty=Math.atan2(dx,dz);let dd=ty-g.yaw;dd=Math.atan2(Math.sin(dd),Math.cos(dd));g.yaw+=dd*Math.min(1,dt*8);}else{g.tx=g.x;g.tz=g.z;}}}
+   else{const ty=Math.atan2(dx,dz);let dd=ty-g.yaw;dd=Math.atan2(Math.sin(dd),Math.cos(dd));g.yaw+=Math.sign(dd)*Math.min(Math.abs(dd),3.2*dt);   /* 体の向きを先に変えて、向いている方へ進む（横すべりしない） */
+   const cf=Math.max(0,Math.cos(dd)),sp=(window.__labSpd||1.25)*cf*cf,st=Math.min(d,sp*dt),nx=g.x+Math.sin(g.yaw)*st,nz=g.z+Math.cos(g.yaw)*st;
+   if(st>1e-4&&(g.path&&g.pi<g.path.length||free(nx,nz))){g.x=nx;g.z=nz;moving=true;g.wd=(g.wd||0)+st;}else if(st>1e-4){g.tx=g.x;g.tz=g.z;}else{moving=Math.abs(dd)>0.05;g.wd=(g.wd||0)+0.35*dt;}}}   /* その場で向きを変えるときも足ぶみ */
   const gy=R.Y+floorY(R,g.x,g.z-R.Z);
   if(window.__labEye)P.eye=window.__labEye;
   if(window.__labChase){const fx=Math.sin(g.yaw),fz=Math.cos(g.yaw);let rad=window.__labRad||3.4,cx=g.x,cz=g.z;for(;rad>1.0;rad-=0.1){const sd=Math.sin(t*0.25)*0.9;cx=g.x-fx*rad+fz*sd;cz=g.z-fz*rad-fx*sd;if(gFree(G,cx,cz-R.Z,0.35,1.6))break;}   /* 撮影用：うしろから追いかけるカメラ */
