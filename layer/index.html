@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層87／No.350（11/25 00:49）";
+const VER20 = "層88／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -14048,6 +14048,9 @@ function fpOpen30(){
     const tr = R.acts.filter(a => /^(slash|lift|spar)$/.test(a.mode)), np = Math.floor((tr.length - (tr.length >= 3 ? 1 : 0)) / 2);
     for (let p = 0; p < np; p++) { const A = tr[p * 2], B = tr[p * 2 + 1], ph = Math.random() * 9; A.mode = B.mode = "duel"; A.pt = B; B.pt = A; A.role = 0; B.role = 1; A.dph = B.dph = ph; A.stay = B.stay = true; } };
   rooms.forEach(mkActs);
+  /* 部屋の画面で住む子を入れかえたら、歩く画面の魔物もすぐ入れかえる（前は開いたときのまま：入口に4体・第1層に誰もいない、になっていた） */
+  { const sig30 = () => { try { return S.mons.map(m => m.id + ":" + m.home + ":" + (m.job19 || "") + ":" + (m.job19h ?? "")).join(","); } catch (e) { return ""; } }; let ms30 = sig30();
+    const iv30 = setInterval(() => { if (!wrap.isConnected) { clearInterval(iv30); return; } if (N) return; const s2 = sig30(); if (s2 === ms30) return; ms30 = s2; try { rooms.forEach(mkActs); } catch (e) {} }, 600); }
   /* 主：いちばん下の層の奥（降り口のマス）に座っている */
   const addLord = () => { const L = typeof lordIdx === "function" ? lordIdx(S) : n - 1, Rm = rooms[L]; if (!Rm || (Rm.acts || []).some(a => a.lord)) return;   /* 主の間にも主を立たせる（いなかった） */ const G = Rm.G30, z = Rm.classic ? -9 : -(G.H - 1) * Rm.CS + 0.6; (Rm.acts = Rm.acts || []).push({ lord: 1, hero: 0, m: { nick: "主", id: -999 }, sp: "lord", evo: 0, x: 0, z, r: 0, hx: 0, hz: z, tx: 0, tz: z, wait: 99, ph: 0, walking: false, dist: 0, mode: "idle", y: 0, stay: true, fixd: 1 }); };
   addLord();
@@ -14161,6 +14164,7 @@ function fpOpen30(){
       const hitM = (x, z) => { const R = rooms[curRoom]; if (P.auto) return false; return (R.acts || []).some(a => !a.hide && !a.hero && Math.hypot(R.Z + a.z - z, a.x - x) < Math.max(0.8, (a.H || 0) * 0.25) && Math.hypot(R.Z + a.z - z, a.x - x) < Math.hypot(R.Z + a.z - P.z, a.x - P.x)); };   /* 魔物に重ならない */
       if (!where(P.x, P.z)) { for (let r = 0.25; r < 6; r += 0.25) { let f = 0; for (let k = 0; k < 16; k++) { const an = k / 16 * 6.2832; if (where(P.x + Math.cos(an) * r, P.z + Math.sin(an) * r)) { P.x += Math.cos(an) * r; P.z += Math.sin(an) * r; f = 1; break; } } if (f) break; } }   /* 岩の中に立っていたら外へ出す */
       let ok = false; for (const an of [0, 0.5, -0.5, 1.0, -1.0]) { const c = Math.cos(an), sn = Math.sin(an), ex = dx * c - dz * sn, ez = dx * sn + dz * c; if (where(P.x + ex, P.z + ez) && !hitM(P.x + ex, P.z + ez)) { P.x += ex; P.z += ez; ok = true; break; } }   /* ぶつかったら少し向きを変えて回りこむ */
+      if (!ok) { for (const an of [0, 0.5, -0.5]) { const c = Math.cos(an), sn = Math.sin(an), ex = dx * c - dz * sn, ez = dx * sn + dz * c; if (where(P.x + ex, P.z + ez)) { P.x += ex; P.z += ez; ok = true; break; } } }   /* 魔物でふさがっていたら、すりぬけて進む（狭い所で魔物が固まると先へ行けなかった） */
       if (!ok) { if (where(P.x + dx, P.z)) P.x += dx; else if (where(P.x, P.z + dz)) P.z += dz; } } }
     if (mv.x || mv.y) { const W1 = where(P.x, P.z); if (W1 && W1.tight) { const cx = W1.cx || 0; P.x = cx + (P.x - cx) * Math.max(0, 1 - dt * 2.5); } }   /* 坑道・通路では真ん中へ寄せる（ふちで引っかかって進めなかった） */
     if (window.__ovh30 && window.__ovh30.free && window.__ovh30.t) { const O = window.__ovh30, li = O.li ?? curRoom, R = rooms[li]; if (R) O.t[1] += (R.Y - O.t[1]) * Math.min(1, dt * 6); P.x = O.t[0]; P.z = O.t[2]; if (!where(P.x, P.z) && R) curRoom = li; }   /* 夜：見ている所に合わせて、その層を読みこむ */
