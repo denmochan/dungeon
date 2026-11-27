@@ -36,7 +36,7 @@ with sync_playwright() as p:
     rig['tool']=0
     print('sampled',round(time.time()-t,1),'inside',(D<0).sum(),'tool',TOOL,'wpn',None if DW is None else int((DW<0).sum()))
     verts,faces,norms,_=measure.marching_cubes(D,0.0,spacing=(GS,GS,GS))
-    if len(verts)>60000: print('TOO_MANY',len(verts));b.close();sys.exit(3)
+    if len(verts)>int(__import__("os").environ.get("VMAX","60000")): print('TOO_MANY',len(verts));b.close();sys.exit(3)
     verts=verts[:,::-1]+lo;faces=faces[:,::-1]
     print('mesh',len(verts),len(faces))
     wpn=np.zeros(len(verts),np.uint8)
@@ -44,7 +44,7 @@ with sync_playwright() as p:
         vw,fw,_,_=measure.marching_cubes(DW,0.0,spacing=(GS,GS,GS));vw=vw[:,::-1]+lo;fw=fw[:,::-1]
         faces=np.concatenate([faces,fw+len(verts)]);verts=np.concatenate([verts,vw]);wpn=np.concatenate([wpn,np.ones(len(vw),np.uint8)])
         print('weapon verts',len(vw))
-        if len(verts)>60000: print('TOO_MANY',len(verts));b.close();sys.exit(3)
+        if len(verts)>int(__import__("os").environ.get("VMAX","60000")): print('TOO_MANY',len(verts));b.close();sys.exit(3)
     pos=verts.astype(np.float32)
     def cols(tool):
         rig['tool']=tool

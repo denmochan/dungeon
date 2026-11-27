@@ -16156,10 +16156,10 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
   ball([-0.29,0,0],0.052,(i,j)=>i<3?goldL:(i>5?goldD:gold),1.1);
   return{V,N,C,O,n:V.length};})();
  let GL3=null;
- const VS3=`attribute vec3 ap;attribute vec3 an;attribute vec3 ac;uniform mat4 VP;uniform float OW;varying vec3 vc;varying vec3 vn;varying vec3 vw;
-   void main(){vec3 w=ap+an*OW;gl_Position=VP*vec4(w,1.0);if(OW>0.0)gl_Position.z+=0.0015*gl_Position.w;vc=ac;vn=an;vw=ap;}`,FS3=`precision mediump float;varying vec3 vc;varying vec3 vn;varying vec3 vw;uniform highp vec3 EYE;uniform vec3 LT[6];uniform float LF[6];uniform vec3 LC;uniform float OUT;
+ const VS3=`attribute vec3 ap;attribute vec3 an;attribute vec3 ac;attribute vec3 af;varying vec3 vf;uniform mat4 VP;uniform float OW;varying vec3 vc;varying vec3 vn;varying vec3 vw;
+   void main(){vec3 w=ap+an*OW;gl_Position=VP*vec4(w,1.0);if(OW>0.0)gl_Position.z+=0.0015*gl_Position.w;vc=ac;vn=an;vw=ap;vf=af;}`,FS3=`precision mediump float;varying vec3 vc;varying vec3 vn;varying vec3 vw;varying vec3 vf;uniform sampler2D FT;uniform float FI;uniform highp vec3 EYE;uniform vec3 LT[6];uniform float LF[6];uniform vec3 LC;uniform float OUT;
    void main(){float vd=distance(vw,EYE);if(OUT>0.5){gl_FragColor=vec4(mix(vec3(0.09,0.06,0.04),vec3(0.03,0.04,0.07),smoothstep(18.0,52.0,vd)),1.0);return;}
-    vec3 n=normalize(vn);vec3 base=vc;if(base.g>base.r*0.9&&base.b<base.g*0.6)base*=vec3(0.86,1.0,0.82);   /* 肌は少し緑に寄せる（黄色く見えた） */
+    vec3 n=normalize(vn);vec3 base=vc;if(vf.z>0.01&&FI>-0.5&&vf.x>0.0&&vf.x<1.0&&vf.y>0.0&&vf.y<1.0){vec4 tx=texture2D(FT,vec2((vf.x+FI)/8.0,vf.y));base=mix(base,tx.rgb,tx.a*vf.z);}   /* 顔：2Dの顔の絵をそのまま貼る（形の色だけだとぼやけた） */if(base.g>base.r*0.9&&base.b<base.g*0.6)base*=vec3(0.86,1.0,0.82);   /* 肌は少し緑に寄せる（黄色く見えた） */
     float kd=dot(n,normalize(vec3(0.3,0.9,0.35)));float tb=kd>0.42?1.0:(kd>-0.05?0.74:0.52);
     vec3 hemi=mix(vec3(0.34,0.35,0.47),vec3(0.8,0.8,0.86),n.y*0.5+0.5);
     vec3 c=base*tb*hemi*(0.5+0.3*exp(-vd/11.0));
@@ -16234,6 +16234,10 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
  /* ===== ほかの魔物も同じ作り方の3Dで描く（ガイコツ・スライム…）。ファイルがある種族だけ。ない種族は今までの絵 ===== */
  const MS={};
  const baseSp=sp=>String(sp||"").replace(/\d+$/,"");   /* 勇者の色ちがい（warrior2 など）は同じ形 */
+ const faceUV=(sp,M)=>{try{const kit=kitOf24(sp),fi=FACEIDX24[kit];if(fi==null||fi<0)return;const R=rigSp24(sp,"idle",0),A=R.HR,J2=R.J[2];if(!J2||J2[1]<-5)return;   /* 頭の空間で、顔の絵のどこに当たるか（ゲームの charCol と同じ式） */
+   const F=new Float32Array(M.NV*3),hm=(v)=>[A[0]*v[0]+A[3]*v[1]+A[6]*v[2],A[1]*v[0]+A[4]*v[1]+A[7]*v[2],A[2]*v[0]+A[5]*v[1]+A[8]*v[2]];
+   for(let i=0;i<M.NV;i++){if(M.WP&&M.WP[i])continue;const hp=hm([M.P0[i*3]-J2[0],M.P0[i*3+1]-J2[1],M.P0[i*3+2]-J2[2]]);if(Math.hypot(hp[0],hp[1],hp[2])>=0.52)continue;const hn=hm([M.N0[i*3],M.N0[i*3+1],M.N0[i*3+2]]),t=Math.max(0,Math.min(1,(hn[2]-0.05)/0.25)),fz=t*t*(3-2*t);
+    F[i*3]=hp[0]/0.84+0.5;F[i*3+1]=0.5-hp[1]/0.86;F[i*3+2]=fz;}M.F=F;M.FI=fi;}catch(e){}};
  const loadMon=sp=>{if(MS[sp])return MS[sp];const M=MS[sp]={ok:false};(async()=>{try{const LT=window.__labLite!==false&&!/[?&]full/.test(location.search),r=await fetch((LT?"lab/lite/":"lab/")+(sp==="goblin"?"gob3d.bin.gz":"mon_"+sp+".bin.gz"));if(!r.ok)throw new Error(r.status);const buf=await new Response(r.body.pipeThrough(new DecompressionStream("gzip"))).arrayBuffer();
    const mg=String.fromCharCode(...new Uint8Array(buf.slice(0,4)));
    if(mg==="GB03"){const dv=new DataView(buf),NV=dv.getUint32(4,true),NT=dv.getUint32(8,true),fl=dv.getUint8(12);let o=13;M.pt=fl===1;M.hasW=fl===2;   /* 軽い版 */
@@ -16243,16 +16247,16 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
     const b0=new Uint8Array(buf.slice(o,o+NV));o+=NV;const b1=new Uint8Array(buf.slice(o,o+NV));o+=NV;M.B=new Uint8Array(NV*2);for(let i=0;i<NV;i++){M.B[i*2]=b0[i];M.B[i*2+1]=b1[i];}
     M.W=new Uint8Array(buf.slice(o,o+NV));o+=NV;if(M.hasW){M.WP=new Uint8Array(buf.slice(o,o+NV));o+=NV;}
     const u8=new Uint8Array(buf,o),I=M.I=new Uint16Array(NT*3);let pos=0,prev=0;for(let i=0;i<NT*3;i++){let v=0,sh=0,b;do{b=u8[pos++];v+=(b&127)*Math.pow(2,sh);sh+=7;}while(b&128);const d=(v%2)?-(v+1)/2:v/2;prev+=d;I[i]=prev;}
-    M.NV=NV;M.NT=NT;M.ok=true;return;}
+    M.NV=NV;M.NT=NT;faceUV(sp,M);M.ok=true;return;}
    M.pt=mg==="GB02";M.hasW=mg==="GB1W";
    const dv=new DataView(buf),NV=dv.getUint32(4,true),NT=dv.getUint32(8,true);let o=12;M.P0=new Float32Array(buf.slice(o,o+NV*12));o+=NV*12;const n8=new Int8Array(buf.slice(o,o+NV*3));o+=NV*3;M.N0=Float32Array.from(n8,v=>v/127);
    M.C=new Uint8Array(buf.slice(o,o+NV*3));o+=NV*3;M.B=new Uint8Array(buf.slice(o,o+NV*2));o+=NV*2;M.W=new Uint8Array(buf.slice(o,o+NV));o+=NV;M.I=new Uint16Array(buf.slice(o,o+NT*6));o+=NT*6;
-   if(M.hasW)M.WP=new Uint8Array(buf.slice(o,o+NV));M.NV=NV;M.NT=NT;M.ok=true;}catch(e){M.bad=1;}})();return M;};
+   if(M.hasW)M.WP=new Uint8Array(buf.slice(o,o+NV));M.NV=NV;M.NT=NT;faceUV(sp,M);M.ok=true;}catch(e){M.bad=1;}})();return M;};
  loadMon("goblin");
  let MP=null;
  function drawSkin(o,M,X,Y,Z,yaw,S,R,R0,slime,hideW,RT){const {gl,PB,PM,EYE,VP}=o;const X0=X,Y0=Y,Z0=Z,yaw0=yaw,S0=S;X=0;Y=0;Z=0;yaw=0;S=1;   /* まず体の空間で作り、最後に root・向き・大きさ・位置をまとめてかける */
   if(!MP){const mk=(t,src)=>{const x=gl.createShader(t);gl.shaderSource(x,src);gl.compileShader(x);if(!gl.getShaderParameter(x,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(x));return x;};
-   const p=gl.createProgram();gl.attachShader(p,mk(gl.VERTEX_SHADER,VS3));gl.attachShader(p,mk(gl.FRAGMENT_SHADER,FS3));gl.linkProgram(p);const U={};MP={p,U:k=>k in U?U[k]:(U[k]=gl.getUniformLocation(p,k)),ap:gl.getAttribLocation(p,"ap"),an:gl.getAttribLocation(p,"an"),ac:gl.getAttribLocation(p,"ac")};}
+   const p=gl.createProgram();gl.attachShader(p,mk(gl.VERTEX_SHADER,VS3));gl.attachShader(p,mk(gl.FRAGMENT_SHADER,FS3));gl.linkProgram(p);const U={};MP={p,U:k=>k in U?U[k]:(U[k]=gl.getUniformLocation(p,k)),ap:gl.getAttribLocation(p,"ap"),an:gl.getAttribLocation(p,"an"),ac:gl.getAttribLocation(p,"ac"),af:gl.getAttribLocation(p,"af")};}
   if(!M.g){const NV=M.NV,g={pb:gl.createBuffer(),nb:gl.createBuffer(),cb:gl.createBuffer(),ib:gl.createBuffer(),pos:new Float32Array(NV*3),nor:new Float32Array(NV*3)};const col=new Float32Array(NV*3);for(let i=0;i<NV*3;i++)col[i]=M.C[i]/255;
    gl.bindBuffer(gl.ARRAY_BUFFER,g.cb);gl.bufferData(gl.ARRAY_BUFFER,col,gl.STATIC_DRAW);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,g.ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,M.I,gl.STATIC_DRAW);M.g=g;}
   const g=M.g,pos=g.pos,nor=g.nor,cy=Math.cos(yaw),sy=Math.sin(yaw),P0=M.P0,N0=M.N0;
@@ -16281,8 +16285,13 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
   gl.bindBuffer(gl.ARRAY_BUFFER,g.nb);gl.bufferData(gl.ARRAY_BUFFER,nor,gl.DYNAMIC_DRAW);gl.enableVertexAttribArray(MP.an);gl.vertexAttribPointer(MP.an,3,gl.FLOAT,false,0,0);
   gl.bindBuffer(gl.ARRAY_BUFFER,g.cb);gl.enableVertexAttribArray(MP.ac);gl.vertexAttribPointer(MP.ac,3,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,g.ib);
   gl.disable(gl.BLEND);gl.depthMask(true);gl.enable(gl.DEPTH_TEST);gl.enable(gl.CULL_FACE);
+  if(MP.af>=0){if(M.F&&window.__labFaceTex!==false&&!/[?&]noface/.test(location.search)){if(!g.fb){g.fb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,g.fb);gl.bufferData(gl.ARRAY_BUFFER,M.F,gl.STATIC_DRAW);}gl.bindBuffer(gl.ARRAY_BUFFER,g.fb);gl.enableVertexAttribArray(MP.af);gl.vertexAttribPointer(MP.af,3,gl.FLOAT,false,0,0);
+    if(!gl.__facet3){gl.__facet3=faceAtlas24(gl);gl.bindTexture(gl.TEXTURE_2D,gl.__facet3);[gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER].forEach(k=>gl.texParameteri(gl.TEXTURE_2D,k,gl.LINEAR));}
+    gl.activeTexture(gl.TEXTURE3);gl.bindTexture(gl.TEXTURE_2D,gl.__facet3);gl.uniform1i(MP.U("FT"),3);gl.uniform1f(MP.U("FI"),M.FI);gl.activeTexture(gl.TEXTURE0);}
+   else{gl.disableVertexAttribArray(MP.af);gl.vertexAttrib3f(MP.af,0,0,0);gl.uniform1f(MP.U("FI"),-1);}}
   gl.cullFace(gl.FRONT);gl.uniform1f(MP.U("OUT"),1);gl.uniform1f(MP.U("OW"),0.018*Math.sqrt(S0));gl.drawElements(gl.TRIANGLES,M.NT*3,gl.UNSIGNED_SHORT,0);
   gl.cullFace(gl.BACK);gl.uniform1f(MP.U("OUT"),0);gl.uniform1f(MP.U("OW"),0);gl.drawElements(gl.TRIANGLES,M.NT*3,gl.UNSIGNED_SHORT,0);gl.disable(gl.CULL_FACE);
+  if(MP.af>=0&&MP.af!==lq){gl.disableVertexAttribArray(MP.af);gl.vertexAttrib3f(MP.af,0,0,0);}
   [MP.ap,MP.an,MP.ac].forEach(a=>{if(a!==lq)gl.disableVertexAttribArray(a);});if(PB){gl.useProgram(PB.p);gl.bindBuffer(gl.ARRAY_BUFFER,qbuf);gl.enableVertexAttribArray(lq);gl.vertexAttribPointer(lq,2,gl.FLOAT,false,0,0);}}
  /* 魔物の道具：剣（ゴブリンと同じ作り込みの剣）と、つるはし。リグの道具の関節に合わせる */
  const TB={};function toolDraw(q,V,N,O,C,n){const {gl,PB}=q;if(!n)return;if(!TB.pb){TB.pb=gl.createBuffer();TB.nb=gl.createBuffer();TB.ob=gl.createBuffer();TB.cb=gl.createBuffer();}
@@ -16393,7 +16402,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
    const sp=LIST[cur],M=MS[sp];const T=(now-t0)/1000;turn+=dt*0.35;
    if(M&&M.bad){title.textContent+="（まだない）";go(1);requestAnimationFrame(frame);return;}
    if(M&&M.ok){if(M.c==null){let h=0,x0=9,x1=-9,z0=9,z1=-9;for(let i=0;i<M.NV;i++){if(M.WP&&M.WP[i])continue;const x=M.P0[i*3],y=M.P0[i*3+1],z=M.P0[i*3+2];if(y>h)h=y;if(x<x0)x0=x;if(x>x1)x1=x;if(z<z0)z0=z;if(z>z1)z1=z;}M.c=Math.max(h,0.55*Math.max(x1-x0,z1-z0));M.h=h;M.L=Math.max(x1-x0,z1-z0);}
-    const S=1.6/M.c,ht=M.h*S,dist=Math.max(ht,M.L*S*0.8)*2.5,EYE=[Math.sin(turn)*dist,ht*0.75,Math.cos(turn)*dist],tg=[0,ht*0.42,0],VP=mul(persp(0.62,W/H,0.1,60),look(EYE,tg,[0,1,0]));
+    if(window.__galTurn!=null)turn=window.__galTurn;const Z=window.__galZoom||0,S=1.6/M.c,ht=M.h*S,dist=Math.max(ht,M.L*S*0.8)*2.5*(Z?0.55:1),EYE=[Math.sin(turn)*dist,ht*(Z?0.72:0.75),Math.cos(turn)*dist],tg=[0,ht*(Z?0.66:0.42),0],VP=mul(persp(0.62,W/H,0.1,60),look(EYE,tg,[0,1,0]));
     const L=[[EYE[0]*0.6+1.2,2.6,EYE[2]*0.6+0.8],[-2,1.5,-2],[0,-99,0],[0,-99,0],[0,-99,0],[0,-99,0]],q={gl,PB:null,PM:null,EYE,VP,LT:L,LF:[1.3,0.5,0,0,0,0],LC:[1,0.62,0.32]};
     let st=null,k=0,side=1,dz=0;if(pose==="walk"){st="walk";k=(T*1.25/1.3/0.8)%1;}else if(pose==="run"){st="run";k=(T*2.6/1.3/0.8)%1;}else if(pose==="atk"){const c=T%1.4;if(c<0.45){st="windup";k=c/0.45;}else if(c<0.57){st="strike";k=(c-0.45)/0.12;}else if(c<1.0){st="recover";k=(c-0.57)/0.43;}else st="idle";}
     else if(pose==="bow"){const c=T%1.8;if(c<0.9){st="bowdraw";k=c/0.9;}else if(c<1.1){st="bowshoot";k=(c-0.9)/0.2;}else st="idle";}else if(pose==="dodge"){const c=T%1.6;st=c<0.5?"dodge":"idle";k=c/0.5;side=Math.floor(T/1.6)%2?1:-1;}
