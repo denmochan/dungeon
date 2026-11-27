@@ -13518,6 +13518,94 @@ document.addEventListener("click", ev => { const b = ev.target.closest && ev.tar
 /* 仕事の絵：13方向（行0手前〜12奥）×19コマ（待機4・攻撃4・掘る4・寝る1・歩く6。目の高さに近い角度。足のない子は待機4・攻撃4だけ）。[1コマの幅,高さ,左上x,y,焼いたマスS,コマ数,足もと,二本足,版] */
 const JOB29 = {"bat_0":[83,62,23,48,128,8,100,0,"de702b"],"bat_1":[87,65,21,44,128,8,99,0,"344cd9"],"bat_2":[91,69,19,40,128,8,97,0,"25c0ec"],"berserker_0":[91,106,26,21,128,19,122,1,"806faf"],"berserker_1":[98,113,23,15,128,19,122,1,"d51bc4"],"berserker_2":[104,119,21,9,128,19,122,1,"056004"],"bogtroll_0":[93,107,27,21,128,19,122,1,"cd2f35"],"bogtroll_1":[100,114,24,14,128,19,122,1,"93fbb5"],"bogtroll_2":[106,120,22,8,128,19,123,1,"91c8ea"],"bonedragon_0":[234,150,0,90,240,8,231,0,"f720e9"],"bonedragon_1":[224,150,0,90,240,8,230,0,"148c03"],"bonedragon_2":[232,150,0,90,240,8,231,0,"7b4bb6"],"bonewarden_0":[83,89,32,39,128,19,126,1,"2ea53b"],"bonewarden_1":[88,94,30,34,128,19,126,1,"296266"],"bonewarden_2":[93,99,28,29,128,19,127,1,"85b09f"],"chimera_0":[120,76,7,52,128,8,125,0,"6cc578"],"chimera_1":[125,81,3,47,128,8,126,0,"5ddafa"],"chimera_2":[128,85,0,43,128,8,126,0,"213d11"],"count_0":[92,108,22,18,128,19,121,1,"1b433a"],"count_1":[98,115,19,12,128,19,122,1,"e711f1"],"count_2":[107,122,13,6,128,19,123,1,"683324"],"dragon_0":[235,150,0,90,240,8,231,0,"4d0875"],"dragon_1":[225,150,0,90,240,8,230,0,"d1f31f"],"dragon_2":[233,150,0,90,240,8,231,0,"d4a8b9"],"elderdragon_0":[150,142,46,90,240,8,227,0,"db7145"],"elderdragon_1":[182,144,16,90,240,8,230,0,"9233aa"],"elderdragon_2":[186,146,17,90,240,8,232,0,"3a7fb0"],"emberskel_0":[74,80,35,48,128,19,126,1,"221cf8"],"emberskel_1":[79,85,33,43,128,19,126,1,"81b21e"],"emberskel_2":[83,89,32,39,128,19,126,1,"82ece0"],"eye_0":[51,58,44,67,128,8,120,0,"3f81b0"],"eye_1":[53,79,42,46,128,8,120,0,"0afd67"],"eye_2":[54,81,41,44,128,8,120,0,"7ca399"],"eyebat_0":[78,49,26,57,128,8,101,0,"95cf8e"],"eyebat_1":[81,59,24,46,128,8,99,0,"aad45a"],"eyebat_2":[85,60,22,44,128,8,98,0,"507fec"],"eyespider_0":[83,49,28,79,128,8,128,0,"48bb54"],"eyespider_1":[87,82,26,46,128,8,128,0,"21b770"],"eyespider_2":[90,84,24,44,128,8,128,0,"9d32aa"],"firebat_0":[83,62,23,48,128,8,100,0,"e71087"],"firebat_1":[87,65,21,44,128,8,99,0,"9b405b"],"firebat_2":[91,69,19,40,128,8,97,0,"78abfe"],"flamechimera_0":[146,100,49,137,240,8,232,0,"8c4f15"],"flamechimera_1":[156,107,43,131,240,8,233,0,"cf9228"],"flamechimera_2":[166,113,38,125,240,8,234,0,"9582ca"],"fortgolem_0":[97,105,17,23,128,19,123,1,"dda288"],"fortgolem_1":[101,128,15,0,128,19,124,1,"dad99f"],"fortgolem_2":[91,116,20,6,128,19,117,1,"08296d"],"fungus_0":[58,53,41,75,128,8,125,0,"f3951b"],"fungus_1":[61,72,39,56,128,8,125,0,"a02fb0"],"fungus_2":[62,75,38,53,128,8,125,0,"8717dc"],"gargoyle_0":[109,95,9,33,128,8,124,0,"ebe964"],"gargoyle_1":[115,90,6,36,128,8,123,0,"b52aa7"],"gargoyle_2":[119,91,4,35,128,8,123,0,"3ff623"],"gemeater_0":[68,47,35,81,128,8,128,0,"171832"],"gemeater_1":[72,71,33,55,128,8,123,0,"b72341"],"gemeater_2":[75,74,31,53,128,8,123,0,"161c3f"],"ghost_0":[53,46,41,69,128,8,111,0,"fd69d9"],"ghost_1":[72,53,30,62,128,8,110,0,"1de6c4"],"ghost_2":[72,57,31,58,128,8,110,0,"1058ba"],"ghostslime_0":[60,41,40,87,128,8,127,0,"521d8d"],"ghostslime_1":[62,57,39,71,128,8,127,0,"1da695"],"ghostslime_2":[64,58,38,70,128,8,128,0,"225f1e"],"ghoul_0":[82,85,28,43,128,19,127,1,"ac1528"],"ghoul_1":[86,89,26,39,128,19,127,1,"92d62a"],"ghoul_2":[92,99,23,28,128,19,121,1,"3254b7"],"goblin_0":[77,80,30,48,128,19,126,1,"9fb964"],"goblin_1":[82,85,28,43,128,19,127,1,"5c4953"],"goblin_2":[86,89,26,39,128,19,127,1,"a3e105"],"goldkobold_0":[77,81,30,47,128,19,126,1,"490c0a"],"goldkobold_1":[82,85,28,43,128,19,127,1,"08ceee"],"goldkobold_2":[86,89,26,39,128,19,127,1,"27ec40"],"golem_0":[75,83,28,42,128,19,121,1,"1ea1d1"],"golem_1":[81,104,25,22,128,19,122,1,"07b12b"],"golem_2":[85,109,23,18,128,19,122,1,"e07e93"],"hauntchest_0":[59,53,38,75,128,8,128,0,"f58007"],"hauntchest_1":[61,56,37,72,128,8,128,0,"e0bb3c"],"hauntchest_2":[64,61,35,64,128,8,123,0,"79ef46"],"hunter_0":[71,80,36,48,128,19,126,1,"39fe24"],"hunter_1":[75,85,35,43,128,19,127,1,"e3a310"],"hunter_2":[79,89,33,39,128,19,127,1,"aa5eef"],"ifrit_0":[75,81,32,47,128,19,126,1,"a42460"],"ifrit_1":[80,85,30,43,128,19,127,1,"e017e9"],"ifrit_2":[84,89,28,39,128,19,127,1,"58a810"],"imp_0":[75,81,32,47,128,19,126,1,"54b10b"],"imp_1":[80,85,30,43,128,19,127,1,"3a1593"],"imp_2":[84,89,28,39,128,19,127,1,"19995e"],"jackal_0":[102,61,18,67,128,8,125,0,"bdd879"],"jackal_1":[106,64,16,64,128,8,125,0,"e31c92"],"jackal_2":[111,66,13,62,128,8,125,0,"5d7bdd"],"knight_0":[77,80,34,48,128,19,126,1,"d26b1a"],"knight_1":[80,85,33,43,128,19,127,1,"61a977"],"knight_2":[85,89,31,39,128,19,127,1,"549d26"],"kobold_0":[77,81,30,47,128,19,126,1,"1eb32e"],"kobold_1":[82,85,28,43,128,19,127,1,"e152fe"],"kobold_2":[86,89,26,39,128,19,127,1,"f970c8"],"lavaslime_0":[70,49,34,79,128,8,128,0,"63f2ff"],"lavaslime_1":[75,75,31,52,128,8,123,0,"a7bf22"],"lavaslime_2":[79,77,29,50,128,8,124,0,"e601e8"],"lich_0":[72,101,35,26,128,19,123,1,"baf306"],"lich_1":[77,107,33,21,128,19,124,1,"e17f1d"],"lich_2":[81,112,31,16,128,19,124,1,"ea1498"],"mage_0":[71,92,36,36,128,19,126,1,"40393c"],"mage_1":[75,97,35,31,128,19,127,1,"367f17"],"mage_2":[79,102,33,26,128,19,127,1,"346332"],"maou_0":[166,150,48,90,240,19,229,1,"368c8a"],"maou_1":[158,148,58,90,240,19,220,1,"4e65ae"],"maou_2":[158,149,59,90,240,19,220,1,"a70ec8"],"mimic_0":[59,53,38,75,128,8,128,0,"777f45"],"mimic_1":[61,56,37,72,128,8,128,0,"67c9dc"],"mimic_2":[64,61,35,64,128,8,123,0,"49a407"],"mindlord_0":[72,95,34,33,128,8,122,0,"a7a444"],"mindlord_1":[76,122,32,6,128,8,123,0,"e7999f"],"mindlord_2":[77,125,31,3,128,8,123,0,"3744a5"],"minerorc_0":[88,102,29,25,128,19,122,1,"8a4483"],"minerorc_1":[94,109,27,19,128,19,122,1,"013bb6"],"minerorc_2":[100,115,25,13,128,19,122,1,"824dc6"],"myconid_0":[58,53,41,75,128,8,125,0,"335f38"],"myconid_1":[61,72,39,56,128,8,125,0,"9820dd"],"myconid_2":[62,75,38,53,128,8,125,0,"027b70"],"nightspider_0":[80,43,27,85,128,8,128,0,"9b4c48"],"nightspider_1":[84,49,25,79,128,8,128,0,"b86de2"],"nightspider_2":[87,52,23,76,128,8,128,0,"b3a948"],"nightwolf_0":[102,61,18,67,128,8,125,0,"aac22d"],"nightwolf_1":[106,64,16,64,128,8,125,0,"f96239"],"nightwolf_2":[111,66,13,62,128,8,125,0,"d4dcc4"],"ogremage_0":[89,120,27,7,128,19,121,1,"65ef80"],"ogremage_1":[96,128,24,0,128,19,122,1,"a326a8"],"ogremage_2":[101,128,22,0,128,19,123,1,"249d2d"],"orc_0":[84,98,31,29,128,19,121,1,"191b5e"],"orc_1":[89,105,29,23,128,19,122,1,"060c01"],"orc_2":[95,110,27,18,128,19,122,1,"0ebf0c"],"priest_0":[71,87,36,41,128,19,126,1,"a3e3ab"],"priest_1":[75,92,35,36,128,19,127,1,"4614d3"],"priest_2":[79,97,33,31,128,19,127,1,"23993e"],"rat_0":[100,38,12,90,128,8,125,0,"b85fb2"],"rat_1":[104,43,9,85,128,8,125,0,"b22f79"],"rat_2":[109,44,6,84,128,8,125,0,"ea07c4"],"ratking_0":[95,65,13,63,128,8,128,0,"150286"],"ratking_1":[100,69,10,59,128,8,128,0,"cd6de0"],"ratking_2":[105,78,7,50,128,8,126,0,"129c24"],"rotlord_0":[81,81,28,47,128,8,124,0,"fc5292"],"rotlord_1":[86,88,25,40,128,8,125,0,"049436"],"rotlord_2":[90,90,23,38,128,8,126,0,"782d74"],"rotslime_0":[60,41,40,87,128,8,127,0,"9be264"],"rotslime_1":[62,57,39,71,128,8,127,0,"f26f31"],"rotslime_2":[64,58,38,70,128,8,128,0,"e1b682"],"salamander_0":[108,38,9,90,128,8,127,0,"9f72bc"],"salamander_1":[112,43,6,85,128,8,127,0,"42d676"],"salamander_2":[117,44,3,84,128,8,128,0,"46e16c"],"sapper_0":[77,92,30,36,128,19,126,1,"89d8d5"],"sapper_1":[82,97,28,31,128,19,127,1,"1d89dc"],"sapper_2":[86,102,26,26,128,19,127,1,"27e99c"],"shaman_0":[77,83,30,45,128,19,126,1,"538206"],"shaman_1":[82,87,28,41,128,19,127,1,"3dc799"],"shaman_2":[86,92,26,36,128,19,127,1,"8b58b1"],"skeleton_0":[74,80,35,48,128,19,126,1,"d5a4ef"],"skeleton_1":[84,85,28,43,128,19,126,1,"f76f2d"],"skeleton_2":[87,89,28,39,128,19,126,1,"69f7e8"],"slime_0":[60,41,40,87,128,8,127,0,"2e31a9"],"slime_1":[62,57,39,71,128,8,127,0,"b2a3df"],"slime_2":[64,58,38,70,128,8,128,0,"6ea5c5"],"slimeknight_0":[80,85,33,43,128,19,127,1,"ea72c8"],"slimeknight_1":[85,89,31,39,128,19,127,1,"081d04"],"slimeknight_2":[91,99,29,28,128,19,121,1,"133cf4"],"spider_0":[80,43,27,85,128,8,128,0,"ca1466"],"spider_1":[84,49,25,79,128,8,128,0,"7c5e00"],"spider_2":[87,52,23,76,128,8,128,0,"9c723b"],"sporerat_0":[100,43,12,85,128,8,125,0,"148363"],"sporerat_1":[104,44,9,84,128,8,125,0,"2ae395"],"sporerat_2":[109,46,6,82,128,8,125,0,"17e421"],"sporewraith_0":[62,52,39,63,128,8,111,0,"2040f2"],"sporewraith_1":[72,55,30,60,128,8,110,0,"3b2e96"],"sporewraith_2":[72,59,31,56,128,8,110,0,"22f518"],"stoneeye_0":[67,62,36,64,128,8,123,0,"b4dbae"],"stoneeye_1":[69,86,35,40,128,8,123,0,"7bfb09"],"stoneeye_2":[72,89,33,38,128,8,124,0,"6e77b2"],"stonespider_0":[91,49,21,79,128,8,128,0,"7ce21f"],"stonespider_1":[96,61,18,67,128,8,128,0,"edcaf8"],"stonespider_2":[101,64,15,64,128,8,128,0,"5f9f19"],"thief_0":[71,80,36,48,128,19,126,1,"6c723b"],"thief_1":[75,85,35,43,128,19,127,1,"7bfd58"],"thief_2":[79,89,33,39,128,19,127,1,"cd18c1"],"underlord_0":[91,119,29,4,128,19,114,1,"dd4b4b"],"underlord_1":[124,121,0,7,128,19,120,1,"11676d"],"underlord_2":[115,124,4,4,128,19,119,1,"351175"],"vampire_0":[73,88,34,36,128,19,120,1,"d7c094"],"vampire_1":[77,98,33,27,128,19,120,1,"dfd367"],"vampire_2":[92,103,20,23,128,19,121,1,"36450c"],"vaultkeeper_0":[73,71,30,55,128,8,124,0,"2263f1"],"vaultkeeper_1":[76,76,28,51,128,8,125,0,"23fad1"],"vaultkeeper_2":[80,80,26,47,128,8,125,0,"d1d7fe"],"warrior_0":[77,80,34,48,128,19,126,1,"51e7a1"],"warrior_1":[80,85,33,43,128,19,127,1,"39bee3"],"warrior_2":[85,92,31,36,128,19,127,1,"e0a355"],"webgoblin_0":[83,110,18,18,128,19,128,1,"2a252d"],"webgoblin_1":[88,116,15,12,128,19,128,1,"6b546f"],"webgoblin_2":[93,121,13,7,128,19,128,1,"e3d4c8"],"wolf_0":[102,61,18,67,128,8,125,0,"78d3a5"],"wolf_1":[106,64,16,64,128,8,125,0,"e53800"],"wolf_2":[111,66,13,62,128,8,125,0,"26427f"],"wolfrider_0":[102,68,18,60,128,8,125,0,"20848d"],"wolfrider_1":[106,71,16,57,128,8,125,0,"ac9c54"],"wolfrider_2":[111,74,13,54,128,8,125,0,"4ae310"],"wraitheye_0":[63,56,36,67,128,8,117,0,"9158b9"],"wraitheye_1":[65,77,35,46,128,8,117,0,"903501"],"wraitheye_2":[68,79,33,44,128,8,117,0,"58196f"]};
 
+/* 体の能力（普通の人間＝1）。本人「客観的・基本的な価値観での計算」。全員を人間ばなれさせるのではない
+   走：走る速さ／身：身のこなし（振りの速さ・向き直り・かわす）／力：当たりの重さ・吹き飛ばし／硬：硬さ（受けるダメージが減る）
+   大：大きさ（届く長さ・囲まれにくい・吹き飛ばない・体力）／持：持久力（長く戦っても鈍らない・体力）／勇：勇気（押されても逃げない）／魔：魔力（魔法の強さ・魔法への強さ） */
+const BODY30V2 = {
+  //            走    身    力    硬    大    持    勇    魔
+  slime:       [0.4, 0.4, 0.5, 0.6, 0.7, 1.5, 0.8, 0.3],
+  rotslime:    [0.35,0.35,0.6, 0.7, 0.8, 1.6, 0.9, 0.5],
+  lavaslime:   [0.4, 0.4, 1.0, 1.2, 0.9, 1.4, 1.0, 1.2],
+  ghostslime:  [0.7, 0.7, 0.5, 0.5, 0.7, 1.2, 0.8, 1.4],
+  gemeater:    [0.45,0.45,0.9, 1.8, 0.9, 1.4, 0.9, 0.6],
+  slimeknight: [0.7, 0.8, 1.3, 1.6, 1.1, 1.4, 1.4, 0.4],
+  goblin:      [0.95,1.05,0.8, 0.8, 0.7, 0.9, 0.7, 0.3],
+  webgoblin:   [1.0, 1.1, 0.8, 0.8, 0.7, 0.9, 0.8, 0.5],
+  sapper:      [1.0, 1.0, 0.9, 0.9, 0.75,1.0, 1.0, 0.4],
+  kobold:      [1.15,1.1, 0.85,0.85,0.75,1.0, 0.8, 0.3],
+  goldkobold:  [1.2, 1.2, 0.9, 0.9, 0.75,1.0, 0.7, 0.5],
+  imp:         [1.5, 1.6, 0.6, 0.6, 0.5, 0.9, 0.8, 1.3],
+  orc:         [1.0, 0.9, 1.6, 1.3, 1.25,1.3, 1.2, 0.3],
+  minerorc:    [0.95,0.9, 1.6, 1.4, 1.25,1.4, 1.1, 0.3],
+  berserker:   [1.3, 1.2, 2.0, 1.3, 1.3, 1.2, 2.0, 0.3],
+  bogtroll:    [1.0, 0.8, 2.2, 1.6, 1.7, 1.5, 1.3, 0.4],
+  ogremage:    [0.9, 0.8, 2.0, 1.4, 1.7, 1.3, 1.2, 1.6],
+  shaman:      [0.9, 0.9, 0.8, 0.8, 0.75,0.9, 1.0, 1.6],
+  bat:         [2.5, 1.9, 0.3, 0.4, 0.35,0.8, 0.6, 0.3],
+  firebat:     [2.5, 1.9, 0.4, 0.5, 0.35,0.8, 0.7, 1.0],
+  eyebat:      [2.3, 1.8, 0.4, 0.5, 0.4, 0.8, 0.7, 1.1],
+  rat:         [2.0, 1.6, 0.3, 0.4, 0.3, 0.9, 0.5, 0.2],
+  sporerat:    [1.8, 1.5, 0.4, 0.5, 0.35,1.0, 0.6, 0.6],
+  ratking:     [1.5, 1.2, 0.9, 0.9, 0.9, 1.2, 1.1, 0.6],
+  wolf:        [3.5, 1.8, 1.1, 0.9, 0.9, 1.6, 1.1, 0.3],
+  nightwolf:   [4.0, 2.0, 1.3, 1.0, 1.0, 1.7, 1.2, 0.6],
+  jackal:      [3.2, 1.9, 0.8, 0.8, 0.8, 1.6, 0.8, 0.3],
+  wolfrider:   [3.3, 1.5, 1.3, 1.1, 1.4, 1.5, 1.2, 0.3],
+  chimera:     [3.0, 1.6, 2.4, 1.6, 2.2, 1.6, 1.6, 1.2],
+  flamechimera:[3.2, 1.7, 2.6, 1.7, 2.2, 1.6, 1.7, 1.8],
+  spider:      [2.0, 1.5, 0.9, 1.0, 0.8, 1.2, 1.0, 0.4],
+  nightspider: [2.3, 1.7, 1.1, 1.1, 0.9, 1.3, 1.1, 0.8],
+  eyespider:   [2.1, 1.6, 1.0, 1.1, 0.85,1.2, 1.0, 1.0],
+  stonespider: [1.4, 1.1, 1.4, 2.0, 1.0, 1.4, 1.2, 0.4],
+  skeleton:    [0.9, 0.85,0.9, 0.8, 1.0, 2.0, 1.5, 0.5],
+  emberskel:   [0.95,0.9, 1.0, 0.9, 1.0, 2.0, 1.5, 1.1],
+  bonewarden:  [0.9, 0.9, 1.5, 1.5, 1.3, 2.0, 1.8, 0.6],
+  ghoul:       [1.4, 1.3, 1.3, 1.0, 1.0, 1.8, 1.4, 0.6],
+  ghost:       [1.3, 1.3, 0.4, 0.3, 0.9, 2.0, 1.2, 1.6],
+  wraitheye:   [1.1, 1.0, 0.4, 0.4, 0.8, 2.0, 1.2, 1.8],
+  sporewraith: [1.1, 1.1, 0.6, 0.5, 0.9, 2.0, 1.2, 1.4],
+  vampire:     [3.0, 2.4, 2.0, 1.3, 1.0, 1.8, 1.6, 1.8],
+  count:       [3.5, 2.6, 2.3, 1.4, 1.0, 1.9, 1.8, 2.2],
+  lich:        [0.9, 1.0, 0.7, 0.9, 1.0, 2.0, 1.6, 3.0],
+  underlord:   [2.0, 1.5, 2.6, 1.8, 1.8, 2.0, 2.0, 2.0],
+  bonedragon:  [4.0, 1.2, 3.5, 2.2, 4.0, 2.0, 2.0, 1.6],
+  hauntchest:  [0.8, 0.9, 1.2, 1.6, 1.0, 2.0, 1.2, 1.0],
+  myconid:     [0.45,0.5, 0.8, 0.9, 0.9, 1.2, 1.0, 0.8],
+  fungus:      [0.2, 0.3, 0.5, 0.8, 0.8, 1.5, 1.5, 0.6],
+  rotlord:     [0.7, 0.7, 2.0, 1.6, 2.0, 1.6, 1.5, 1.4],
+  mimic:       [0.9, 1.4, 1.6, 1.8, 1.0, 1.4, 1.2, 0.6],
+  golem:       [1.0, 0.65,3.0, 3.0, 2.2, 3.0, 2.0, 0.5],
+  fortgolem:   [0.8, 0.6, 3.5, 4.0, 2.8, 3.0, 2.0, 0.5],
+  gargoyle:    [2.5, 1.0, 1.8, 2.5, 1.3, 2.0, 1.5, 0.6],
+  vaultkeeper: [0.8, 0.7, 2.6, 3.0, 2.0, 2.5, 2.0, 0.8],
+  stoneeye:    [0.5, 0.6, 0.5, 2.5, 1.0, 2.0, 1.5, 1.8],
+  eye:         [1.0, 0.8, 0.3, 0.6, 0.9, 1.2, 1.0, 2.0],
+  mindlord:    [1.5, 1.3, 1.2, 1.2, 1.2, 1.5, 1.6, 3.0],
+  ifrit:       [3.0, 1.6, 2.0, 1.4, 1.6, 1.6, 1.6, 2.6],
+  salamander:  [2.0, 1.3, 1.3, 1.4, 1.1, 1.3, 1.1, 1.4],
+  dragon:      [6.0, 1.3, 5.0, 3.0, 5.0, 2.5, 2.2, 2.5],
+  elderdragon: [7.0, 1.6, 6.0, 3.5, 6.0, 3.0, 2.6, 3.5],
+  maou:        [4.0, 2.2, 4.0, 2.5, 2.4, 3.0, 3.0, 4.0] };
+/* 勇者は鍛えた人間（Lv1）。レベルで少しずつ上がる（1Lvで約3%）。ボスはさらに上 */
+const HEROBODY30 = {
+  warrior: [1.2, 1.25, 1.4, 1.3, 1.0, 1.3, 1.3, 0.4],
+  knight:  [1.0, 1.1,  1.4, 1.8, 1.05,1.3, 1.6, 0.5],
+  thief:   [1.4, 1.6,  0.9, 0.9, 0.9, 1.1, 0.9, 0.5],
+  hunter:  [1.3, 1.4,  1.0, 1.0, 1.0, 1.2, 1.0, 0.5],
+  mage:    [1.0, 1.0,  0.7, 0.8, 0.95,0.9, 1.0, 2.2],
+  priest:  [1.0, 1.0,  0.8, 1.0, 0.95,1.0, 1.4, 1.8] };
+const MAGIC_SP30 = /lich|eye|shaman|ogremage|wraitheye|mindlord|ifrit|maou|imp|ghost/;
+/* 体から体力・攻撃力を出す（人間＝体力50・攻撃9） */
+function bodyStats30(b, magic) { const [run, agi, str, tough, size, stam, brave, mag] = b;
+  const hp = 50 * Math.pow(size, 1.3) * Math.pow(tough, 0.4) * Math.pow(stam, 0.4), atk = 9 * Math.pow(magic ? Math.max(str, mag) : str, 0.9);
+  return { hp: Math.round(hp), atk: Math.round(atk * 10) / 10 }; }
+/* 表をゲームの数値にする：体力は×1.6（人間＝80）。勇者の職も同じ表から（魔法使い・僧侶の攻撃は魔力の6割＝炎・回復は別にある） */
+const BODYHP30 = 1.6;
+(function applyBody30() { try {
+  Object.keys(BODY30V2).forEach(k => { if (!MON[k]) return; const b = BODY30V2[k], s = bodyStats30([b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7] * 0.8], MAGIC_SP30.test(k)); MON[k].hp0 = MON[k].hp0 || MON[k].hp; MON[k].atk0 = MON[k].atk0 || MON[k].atk; MON[k].hp = Math.max(5, Math.round(s.hp * BODYHP30)); MON[k].atk = Math.max(2, Math.round(s.atk)); });
+  Object.keys(HEROBODY30).forEach(j => { if (!JOB5[j]) return; const b = HEROBODY30[j], magic = j === "mage" || j === "priest", s = bodyStats30([b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7] * 0.6], magic); JOB5[j].hp = Math.round(s.hp * BODYHP30); JOB5[j].atk = Math.round(s.atk); });
+} catch (e) { console.warn("body30", e); } })();
+
 // ================= layer30：部屋を「層」に。層の中の形をマスで持つ =================
 // S.path[i].g30 = { W, H, c: "0/1/2…" の文字列（0=岩 1=道 2=広間）, t: [[x, y, 罠の種類, 段]] }
 // 入口は (中央, 0)、降り口は (中央, H-1)。どちらも掘れたまま変えられない
@@ -14559,19 +14647,19 @@ function fpOpen30(){
   function rtUnit(a, Rm) { const u = a.rt || (a.rt = {}); if (a.hero) { const h = a.h; if (!h || !(h.st === "in" || h.st === "hold30") || h.walk != null || h.hp <= 0) return null; if (!u.b || u.lv !== h.lv) { u.b = body30(h, true); u.lv = h.lv; } u.o = h; u.side = 0; }
     else { const M = a.M30 || (a.M30 = N.mons.find(q => q.ref && a.m && q.ref.id === a.m.id)); if (!M || M.down || M.hp <= 0 || M.pos !== Rm.i || M.mto != null || M.guard30 || a.hide) return null; if (!u.b) u.b = body30(M, false); u.o = M; u.side = 1; }
     if (u.cd == null) { u.cd = Math.random() * 0.8; u.ph = "idle"; u.fa = a.r || 0; } return u; }
-  const rtInt = b => 1.05 / Math.sqrt(b.agi), rtWind = b => 0.3 / Math.sqrt(b.agi), rtSpd = b => 3.0 * Math.pow(b.agi, 0.65);
+  const rtInt = b => 1.05 / Math.sqrt(b.agi) * Math.pow(b.size, 0.15), rtWind = b => 0.3 / Math.sqrt(b.agi) * Math.pow(b.size, 0.25), rtSpd = b => 3.0 * Math.pow(b.run, 0.8);   /* 走る速さは「走」、振りは「身」。大きい子は振りかぶりが長い */
   function rtHit(Rm, A, T, now) { const ua = A.rt, ut = T.rt, oa = ua.o, ot = ut.o;
     const ang = Math.atan2(A.x - T.x, A.z - T.z), rel = Math.abs(Math.atan2(Math.sin(ang - ut.fa), Math.cos(ang - ut.fa))); let mul = 1, tag = "";
     if (rel > 2.35) { mul = 1.6; tag = "背後！"; } else if (rel > 1.3) { mul = 1.3; tag = "横から！"; }
-    if (!tag && !ut.b.ranged && ut.ph !== "wind") { const dg = Math.max(0, Math.min(0.35, 0.05 + 0.14 * (ut.b.agi / ua.b.agi - 1))); if (Math.random() < dg) { POPS30.push({ x: T.x, y: Rm.Y + 2.2, z: Rm.Z + T.z, txt: "かわした", col: "#d8e8ff", big: 0, t: now }); const sx = T.x - A.x, sz = T.z - A.z, L = Math.hypot(sx, sz) || 1; step30(Rm, T, -sz / L * 0.6, sx / L * 0.6); return; } }
-    const I = rtInt(ua.b), pace = I * Math.pow(ua.b.agi, 0.3), r = 0.8 + Math.random() * 0.4; N._rt30 = 1;
+    if (!tag && !ut.b.ranged && ut.ph !== "wind" && ut.b.size < 2.2) { const dg = Math.max(0, Math.min(0.35, 0.05 + 0.14 * (ut.b.agi / ua.b.agi - 1)) - (ut.fat || 0) * 0.1); if (Math.random() < dg) { POPS30.push({ x: T.x, y: Rm.Y + 2.2, z: Rm.Z + T.z, txt: "かわした", col: "#d8e8ff", big: 0, t: now }); const sx = T.x - A.x, sz = T.z - A.z, L = Math.hypot(sx, sz) || 1; step30(Rm, T, -sz / L * 0.6, sx / L * 0.6); return; } }
+    const I = rtInt(ua.b), pace = I * Math.pow(ua.b.agi, 0.3), r = (0.8 + Math.random() * 0.4) * (ua.b.magic ? Math.pow(Math.max(0.3, ua.b.mag) / Math.max(0.3, ut.b.mag), 0.25) : 1); N._rt30 = 1;   /* 魔法は、受ける側の魔力が高いほど効きにくい */
     try { if (A.hero) { const h = oa, sk = h.sk || {}; let d = h.atk * r * pace * (1 + 0.15 * (sk.sword || 0)) * mul; const fam = (MON[ot.sp] || {}).fam; if (sk.holy && fam === "undead") d *= 1.3 + 0.3 * sk.holy;
         if (sk.fire) { (Rm.acts || []).forEach(o => { if (o !== T && o.rt && o.rt.side === 1 && o.rt.o && Math.hypot(o.x - T.x, o.z - T.z) < 2.3) hitMon5(S, N, o.rt.o, d * 0.7, h); }); } hitMon5(S, N, ot, d, h); }
       else { const m = oa; let d = m.atk * r * pace * mul; if (m.first) { m.first = false; d *= (m.fx.first || 1) * (m.quick || 1); } const tgts = m.aoe ? (Rm.acts || []).filter(o => o.rt && o.rt.side === 0 && o.rt.o && Math.hypot(o.x - T.x, o.z - T.z) < 2.3).map(o => o.rt.o) : [ot];
         tgts.forEach(h => { monHit11(S, N, m, h, d * (m.aoe || 1)); if (m.fx.steal) m.hp = Math.min(m.max, m.hp + Math.round(d * m.fx.steal)); if (h.st === "in" && m.fx.net && Math.random() < m.fx.net) h.stuck = Math.max(h.stuck, 1); if (h.st === "in" && m.fx.scare && !h.boss && !h.flee && Math.random() < m.fx.scare) h.flee = true; }); } } catch (e) {}
     N._rt30 = 0; const H = N.hit25 || []; for (let k = H.length - 1; k >= 0 && k >= H.length - 6; k--) if (H[k].rtq == null) H[k].rtq = 1;
     if (tag) POPS30.push({ x: T.x, y: Rm.Y + 2.9, z: Rm.Z + T.z, txt: tag, col: "#ffcf70", big: 0, t: now });
-    const kx = T.x - A.x, kz = T.z - A.z, KL = Math.hypot(kx, kz) || 1; step30(Rm, T, kx / KL * 0.25 * mul, kz / KL * 0.25 * mul); }
+    const kx = T.x - A.x, kz = T.z - A.z, KL = Math.hypot(kx, kz) || 1, kb = Math.min(2.2, 0.28 * mul * ua.b.str / Math.max(0.3, ut.b.size)); step30(Rm, T, kx / KL * kb, kz / KL * kb); if (kb > 1.1) { T.stag30 = now + 350; POPS30.push({ x: T.x, y: Rm.Y + 2.6, z: Rm.Z + T.z, txt: "吹っ飛んだ！", col: "#ffd27a", big: 0, t: now }); } }   /* 力の強い子が小さい子を叩くと吹き飛ぶ */
   const RTON30 = (() => { try { return /\/rt\//.test(location.pathname) || /[?&]rt\b/.test(location.search) || localStorage.getItem("rt30") === "1"; } catch (e) { return false; } })();   /* 作り直し版（/rt/）だけで動かす。いつもの版は今までの戦い */
   function rt30Step(dt, now) { if (!RTON30 || typeof N === "undefined" || !N || N.scout || N.done) return; N.rtRooms30 = {}; let any = false;
     rooms.forEach(Rm => { Rm.rtOn30 = false; if (Rm.classic) return; const acts = Rm.acts || []; const U = acts.filter(a => (a.al30 ?? 1) > 0 && (a.hero || a.m) && rtUnit(a, Rm)); const Hs = U.filter(a => a.rt.side === 0), Ms = U.filter(a => a.rt.side === 1); if (!Hs.length || !Ms.length) return;
@@ -14591,16 +14679,21 @@ function fpOpen30(){
         if (!u.b.ranged && eng.length && !u.icp) { const f0 = eng[0], fx = f0.x - T.x, fz = f0.z - T.z, FL = Math.hypot(fx, fz) || 1, ox = fx / FL, oz = fz / FL; const sides = eng.length >= 2 ? [[-ox, -oz]] : [[-oz, ox], [oz, -ox], [-ox, -oz]]; const R0 = u.b.reach * 0.85;
           const pick = sides.map(([sx, sz]) => [T.x + sx * R0, T.z + sz * R0]).filter(p => okAt(Rm, p[0], p[1])).sort((p, q) => Math.hypot(p[0] - a.x, p[1] - a.z) - Math.hypot(q[0] - a.x, q[1] - a.z))[0]; if (pick) { const was = u.flk; u.mv = pick; u.flk = 1; if (!was) POPS30.push({ x: a.x, y: Rm.Y + 3.6, z: Rm.Z + a.z, txt: u.side ? "⚡ 横から！" : "⚡ 回りこめ！", col: u.side ? "#ffb070" : "#a9ccff", big: 0, t: now, cue: 1, life: 1500 }); } else u.flk = 0; } else u.flk = 0; });
       // 動く・振る
-      U.forEach(a => { const u = a.rt, b = u.b, T = u.tg; a.rt30 = now; a.btT30 = performance.now(); a.bt = null; let tx = a.x, tz = a.z;
+      U.forEach(a => { const u = a.rt, b = u.b; a.rt30 = now; a.btT30 = performance.now(); a.bt = null; let tx = a.x, tz = a.z;
+        /* 持久力：長く戦うと身のこなしが落ちる（持が低いほど早い）。勇気：体力が減ると、勇気が低い子は下がる */
+        u.ft = (u.ft || 0) + (u.tg ? dt : -dt * 0.5); u.ft = Math.max(0, u.ft); u.fat = Math.max(0, Math.min(0.4, (u.ft - 12 * b.stam) / (30 * b.stam))); if (u.fat > 0.15 && !u.fatS) { u.fatS = 1; POPS30.push({ x: a.x, y: Rm.Y + 2.8, z: Rm.Z + a.z, txt: "💦 息が上がる", col: "#cfe3ff", big: 0, t: now }); }
+        const hpR = u.o.hp / (u.o.max || 1); if (!u.scare && hpR < 0.3 && b.brave < 1.1 && Math.random() < dt * (1.2 - b.brave)) { u.scare = now + 3500; POPS30.push({ x: a.x, y: Rm.Y + 3.4, z: Rm.Z + a.z, txt: u.side ? "ひっ…！" : "む、無理だ…！", col: "#e8e0ff", big: 0, t: now, cue: 1, life: 1400 }); if (u.side === 0 && !u.o.boss) u.o.flee = true; }
+        if (u.scare && now > u.scare) u.scare = 0; const T = u.scare ? null : u.tg; if (u.scare && u.tg) { const dx0 = a.x - u.tg.x, dz0 = a.z - u.tg.z, L0 = Math.hypot(dx0, dz0) || 1; tx = a.x + dx0 / L0 * 3; tz = a.z + dz0 / L0 * 3; }
+        if (a.stag30 && now < a.stag30) { a.walking = false; return; }
         if (u.side === 0 && b.heal) { const low = Hs.filter(o => o.rt.o.hp / o.rt.o.max < 0.6).sort((p, q) => p.rt.o.hp / p.rt.o.max - q.rt.o.hp / q.rt.o.max)[0]; if (low && low !== a && Math.hypot(low.x - a.x, low.z - a.z) > 3) { tx = low.x; tz = low.z; } }
         if (T) { const dx = T.x - a.x, dz = T.z - a.z, L = Math.hypot(dx, dz) || 1, want = b.ranged ? Math.min(b.reach - 1, 5) : b.reach * 0.85; if (u.mv) { tx = u.mv[0]; tz = u.mv[1]; } else if (b.ranged && L < 3) { tx = a.x - dx / L * 2; tz = a.z - dz / L * 2; } else if (L > want) { tx = T.x - dx / L * want; tz = T.z - dz / L * want; } }
-        { /* 岩のむこうの相手へは、マスの道をたどって回りこむ */ if (Math.hypot(tx - a.x, tz - a.z) > 1 && !losL(Rm, a.x, a.z, tx, tz)) { const G = Rm.G30, mid = (G.W - 1) / 2, cOf = (x, z) => [Math.max(0, Math.min(G.W - 1, Math.round(x / Rm.CS + mid))), Math.max(0, Math.min(G.H - 1, Math.round(-z / Rm.CS)))]; if (!u.path || now > u.pathT) { const c0 = cOf(a.x, a.z), c1 = cOf(tx, tz); u.path = g30at(G, c0[0], c0[1]) && g30at(G, c1[0], c1[1]) ? bfs30(G, c0, c1) : null; u.pathT = now + 500; u.pk = 1; }
+        { /* 岩のむこうの相手へは、マスの道をたどって回りこむ */ if (Math.hypot(tx - a.x, tz - a.z) > 1 && !losL(Rm, a.x, a.z, tx, tz)) { const G = Rm.G30, mid = (G.W - 1) / 2, cOf = (x, z) => [Math.max(0, Math.min(G.W - 1, Math.round(x / Rm.CS + mid))), Math.max(0, Math.min(G.H - 1, Math.round(-z / Rm.CS)))]; if (!u.path || now > u.pathT) { const nearW = c => { if (g30at(G, c[0], c[1])) return c; for (let r = 1; r <= 3; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { const q = [c[0] + dx, c[1] + dy]; if (q[0] >= 0 && q[1] >= 0 && q[0] < G.W && q[1] < G.H && g30at(G, q[0], q[1])) return q; } return null; }; const c0 = nearW(cOf(a.x, a.z)), c1 = nearW(cOf(tx, tz)); u.path = c0 && c1 ? bfs30(G, c0, c1) : null; u.pathT = now + 500; u.pk = u.path && u.path.length > 1 ? 1 : 0; if (!u.path && u.tg) { u.noPath = (u.noPath || 0) + 1; if (u.noPath > 2) { u.tg = null; u.th = 0; u.noPath = 0; } } else u.noPath = 0; }   /* 壁ぎわ（鉱脈の前など）にいる子もいちばん近い道のマスから。道がない相手はあきらめて別の相手へ */
           if (u.path && u.path.length > 1) { while (u.pk < u.path.length - 1) { const w = cellW(Rm, u.path[u.pk]); if (Math.hypot(w[0] - a.x, w[1] - a.z) < 0.6) u.pk++; else break; } const w = cellW(Rm, u.path[Math.min(u.pk, u.path.length - 1)]); tx = w[0]; tz = w[1]; } } else u.path = null; }
-        const mx = tx - a.x, mz = tz - a.z, ML = Math.hypot(mx, mz); if (ML > 0.08 && u.ph !== "wind") { const sp = rtSpd(b) * (ML > 2.5 ? 1.35 : 1) * (u.o.stuck > 0 ? 0.3 : 1), st = Math.min(ML, sp * dt); step30(Rm, a, mx / ML * st, mz / ML * st); a.dist = (a.dist || 0) + st; a.walking = true; a.y = ML > 2.5 && b.agi >= 1.3 ? 0.4 * Math.abs(Math.sin(a.dist * 1.7)) : 0; } else { a.walking = false; a.y = (a.y || 0) * 0.8; }
+        const mx = tx - a.x, mz = tz - a.z, ML = Math.hypot(mx, mz); if (ML > 0.08 && u.ph !== "wind") { const sp = rtSpd(b) * (ML > 2.5 ? 1.2 : 1) * (u.o.stuck > 0 ? 0.3 : 1) * (1 - (u.fat || 0) * 0.5), st = Math.min(ML, sp * dt); step30(Rm, a, mx / ML * st, mz / ML * st); a.dist = (a.dist || 0) + st; a.walking = true; a.y = ML > 2.5 && b.run >= 1.8 && b.size < 2 ? 0.4 * Math.abs(Math.sin(a.dist * 1.7)) : 0; } else { a.walking = false; a.y = (a.y || 0) * 0.8; }
         // 向き：相手へ（すばやい子ほど早く向き直る）
         const want = T ? Math.atan2(T.x - a.x, T.z - a.z) : (a.walking ? Math.atan2(mx, mz) : u.fa), dd = Math.atan2(Math.sin(want - u.fa), Math.cos(want - u.fa)); u.fa += Math.sign(dd) * Math.min(Math.abs(dd), dt * 7 * b.agi); a.r = u.fa;
         // 振る
-        u.cd -= dt; if (u.ph === "wind") { u.tw -= dt; if (u.tw <= 0) { u.ph = "rec"; u.cd = rtInt(b) - rtWind(b); const Tn = u.tg; if (u.side === 0 && b.heal && u.healT) { const o = u.healT; const amt = Math.round(u.o.atk * 1.1 * Math.pow(0.85, (u.o.hc23 = (u.o.hc23 || 0) + 1))); o.rt.o.hp = Math.min(o.rt.o.max, o.rt.o.hp + amt); FX30.push({ k: "proj", a: [a.x, Rm.Y + 1.6, Rm.Z + a.z], b: [o.x, Rm.Y + 1.2, Rm.Z + o.z], t0: now, dur: 260, kind: "heal" }); POPS30.push({ x: o.x, y: Rm.Y + 2.4, z: Rm.Z + o.z, txt: "+" + amt, col: "#7dff9a", big: 0, t: now }); u.healT = null; }
+        u.cd -= dt * (1 - (u.fat || 0)); if (u.ph === "wind") { u.tw -= dt; if (u.tw <= 0) { u.ph = "rec"; u.cd = rtInt(b) - rtWind(b); const Tn = u.tg; if (u.side === 0 && b.heal && u.healT) { const o = u.healT; const amt = Math.round(u.o.atk * 1.1 * Math.pow(0.85, (u.o.hc23 = (u.o.hc23 || 0) + 1))); o.rt.o.hp = Math.min(o.rt.o.max, o.rt.o.hp + amt); FX30.push({ k: "proj", a: [a.x, Rm.Y + 1.6, Rm.Z + a.z], b: [o.x, Rm.Y + 1.2, Rm.Z + o.z], t0: now, dur: 260, kind: "heal" }); POPS30.push({ x: o.x, y: Rm.Y + 2.4, z: Rm.Z + o.z, txt: "+" + amt, col: "#7dff9a", big: 0, t: now }); u.healT = null; }
               else if (Tn && Tn.rt && (Tn.al30 ?? 1) > 0 && Math.hypot(Tn.x - a.x, Tn.z - a.z) <= b.reach + 0.45 && (!b.ranged || losL(Rm, a.x, a.z, Tn.x, Tn.z))) { if (b.ranged) FX30.push({ k: "proj", a: [a.x, Rm.Y + 1.4, Rm.Z + a.z], b: [Tn.x, Rm.Y + 1.2, Rm.Z + Tn.z], t0: now, dur: 120 + Math.hypot(Tn.x - a.x, Tn.z - a.z) * 25, kind: a.hero ? (u.o.job === "hunter" ? "bow" : "magic") : (MAGIC30.test(a.sp || "") ? "magic" : "bow") }); rtHit(Rm, a, Tn, now); }
               else if (Tn) POPS30.push({ x: a.x, y: Rm.Y + 2.4, z: Rm.Z + a.z, txt: "空振り", col: "#bba", big: 0, t: now }); setTimeout(() => { if (a.mode === "slash") a.mode = "idle"; }, 200); } }
         else if (u.cd <= 0 && !(u.o.sleep > 0) && !(u.o.stuck > 0)) { if (u.side === 0 && b.heal) { const low = Hs.filter(o => o.rt.o.hp / o.rt.o.max < 0.6 && Math.hypot(o.x - a.x, o.z - a.z) < 7).sort((p, q) => p.rt.o.hp / p.rt.o.max - q.rt.o.hp / q.rt.o.max)[0]; if (low) { u.healT = low; u.ph = "wind"; u.tw = rtWind(b); a.mode = "slash"; return; } }
@@ -14812,7 +14905,7 @@ stepNight5 = (prev => function (S0, N0) {
     m.d30 = best ? bd : 99; const blind = ranged && best && bd > 1 && !los30(G, m.c30, best.c30); m.blind30 = !!blind; const hallJoin = inHall && best && bd <= reach + 3;   /* 同じ広間で仲間が戦っているのに棒立ちしない：広間の子は全員でかかる（本人：味方が戦ってるのに棒立ち） */ if (hallJoin && bd > reach) m.d30 = reach; if (hs && (!(best && (bd <= reach || hallJoin)) || blind)) { m.down = true; m._h30 = 1; hid.push(m); } });   /* 勇者のいない層の魔物は隠さない（入ってきた瞬間の待ち伏せ・盗みの判定が効くように） */
   // 勇者：戦う相手がそばにいなければ、1マス進む（道の終わりまで来たら、いつもどおり次の層へ）
   heroes.forEach(h => { if (!h.flee) return; const F = h.p30f; if (F.k < F.path.length - 1) { if (h.stuck > 0) h.stuck--; else F.k++; h.c30 = F.path[F.k]; if (F.k < F.path.length - 1) { h.st = "hold30"; held.push(h); } } });
-  heroes.forEach(h => { if (h.flee) return; if (h.rtBusy30 && typeof performance !== "undefined" && performance.now() - h.rtBusy30 < 400) return;   /* リアルタイムで戦っている勇者は先へ進まない */ const P = h.p30, last = P.path.length - 1, near = N0.mons.some(m => !m.down && m.pos === h.pos && m.d30 != null && m.d30 <= T30.range && g30dist(g30(S0, h.pos), h.c30[0], h.c30[1])[m.c30[1] * g30(S0, h.pos).W + m.c30[0]] <= T30.range);
+  heroes.forEach(h => { if (h.flee) return; if (h.rtBusy30 && typeof performance !== "undefined" && performance.now() - h.rtBusy30 < 400) { if (h.st === "in") { h.st = "hold30"; held.push(h); } return; }   /* 止めておく（そのまま次の層へ素通りしていた） */   /* リアルタイムで戦っている勇者は先へ進まない */ const P = h.p30, last = P.path.length - 1, near = N0.mons.some(m => !m.down && m.pos === h.pos && m.d30 != null && m.d30 <= T30.range && g30dist(g30(S0, h.pos), h.c30[0], h.c30[1])[m.c30[1] * g30(S0, h.pos).W + m.c30[0]] <= T30.range);
     if (h.flee || near || P.k >= last) return;
     if (h.stuck > 0) { h.stuck--; h.st = "hold30"; held.push(h); return; }
     P.k++; const c = P.path[P.k], G = g30(S0, h.pos), t = (G.t || []).find(q => q[0] === c[0] && q[1] === c[1]); if (t && !(h.t30 = h.t30 || {})[h.pos + ":" + c[0] + "," + c[1]]) { h.t30[h.pos + ":" + c[0] + "," + c[1]] = 1; trapHit30(S0, N0, h, S0.path[h.pos], t); }
@@ -14916,10 +15009,11 @@ const BODY30 = {
   eye: [0.8, 1.0], mindlord: [1.3, 1.4], ifrit: [1.5, 1.6], salamander: [1.2, 1.3],
   dragon: [1.3, 3.0], elderdragon: [1.6, 3.2], maou: [2.0, 2.2] };
 const BODYFAM30 = { slime: 0.5, demon: 1.0, beast: 1.6, undead: 0.9, nature: 0.8, matter: 0.6, dragon: 1.3 };
-function body30(o, isHero) { if (isHero) { const j = o.job, base = j === "thief" ? 1.6 : j === "hunter" ? 1.45 : j === "knight" ? 1.15 : j === "warrior" ? 1.3 : j === "mage" ? 1.1 : j === "priest" ? 1.1 : 1.25; const agi = base * (1 + 0.025 * Math.max(0, (o.lv || 1) - 1)) * (o.boss ? 1.15 : 1);
-    const reach = j === "knight" ? 1.5 : j === "warrior" ? 1.4 : j === "thief" ? 1.0 : 1.2, ranged = j === "hunter" || j === "mage"; return { agi, reach: ranged ? 6.5 : reach, ranged, heal: !!(o.sk && o.sk.heal), melee: reach }; }
-  const sp = o.sp, B = BODY30[sp], fam = (MON[sp] || {}).fam; let agi = B ? B[0] : (BODYFAM30[fam] || 1), reach = B ? B[1] : 1.2; agi *= 1 + 0.02 * Math.max(0, ((o.ref && o.ref.lv) || 1) - 1);
-  const ranged = o.role === "bow" || (o.s11 && o.s11.shot > 0) || o.job === "snipe" || /lich|eye|shaman|ogremage|wraitheye|mindlord/.test(sp); return { agi, reach: ranged ? 6 : reach, ranged, heal: !!(o.fx && o.fx.heal), melee: reach }; }
+function body30(o, isHero) { let B, ranged, heal;
+  if (isHero) { const j = o.job; B = (HEROBODY30[j] || [1.2, 1.2, 1.1, 1.1, 1, 1.1, 1.1, 0.6]).slice(); const g = (1 + 0.03 * Math.max(0, (o.lv || 1) - 1)) * (o.boss ? 1.25 : 1); for (let k = 0; k < 8; k++) if (k !== 4) B[k] *= g; ranged = j === "hunter" || j === "mage"; heal = !!(o.sk && o.sk.heal); }
+  else { const sp = o.sp; B = (BODY30V2[sp] || [1, 1, 1, 1, 1, 1, 1, 1]).slice(); const g = 1 + 0.02 * Math.max(0, ((o.ref && o.ref.lv) || 1) - 1); for (let k = 0; k < 8; k++) if (k !== 4) B[k] *= g; ranged = o.role === "bow" || (o.s11 && o.s11.shot > 0) || o.job === "snipe" || /lich|eye|shaman|ogremage|wraitheye|mindlord/.test(sp); heal = !!(o.fx && o.fx.heal); }
+  const [run, agi, str, tough, size, stam, brave, mag] = B, melee = 1.05 * Math.pow(size, 0.55) + (isHero && (o.job === "knight" || o.job === "warrior") ? 0.35 : 0);
+  return { run, agi, str, tough, size, stam, brave, mag, reach: ranged ? 6.5 : melee, melee, ranged, heal, magic: isHero ? (o.job === "mage" || o.job === "priest") : MAGIC_SP30.test(o.sp || "") }; }
 /* リアルタイムで戦っている層では、1手ごとの殴り合いは止める（リアルタイム側が殴る）。「最後まで」で飛ばすときは今までどおり */
 const rtOn30 = (N0, i) => N0 && N0.rtRooms30 && N0.rtRooms30[i] && typeof performance !== "undefined" && performance.now() - (N0.rt30t || 0) < 400;
 monHit11 = (prev => function (S, N, m, h, d) { if (!N._rt30 && m && rtOn30(N, m.pos)) return; return prev.apply(this, arguments); })(monHit11);
