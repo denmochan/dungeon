@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層72／No.350（11/25 00:49）";
+const VER20 = "層73／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -14872,6 +14872,9 @@ setInterval(() => { try { if (!window.__dig30) return; if (Date.now() - window._
     if ((t + bb) / 2 < VH / 2) b.style.top = Math.min(VH - b.offsetHeight - 10, bb + 10) + "px"; else b.style.top = Math.max(10, t - b.offsetHeight - 10) + "px"; b.style.bottom = "";
   } else if (!st.quiet) b.style.top = (VH / 2 - b.offsetHeight / 2) + "px";
 } catch (e) {} }; }
+/* 部屋・育成などの左の列：「◀ 歩く画面へ」は左下（戻るはいつもの場所）。「次の日へ」は歩く画面だけに置く（大事な操作なので、ついでに押せる所に置かない） */
+{ const st = document.createElement("style"); st.textContent = `body.pan30 .bar20 [data-a="nextday"]{display:none!important}
+body.pan30 .bar20 [data-a="pgback"]{order:99;margin-top:auto!important}`; document.head.appendChild(st); }
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------
