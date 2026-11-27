@@ -15053,6 +15053,12 @@ diffScreen15 = (prev => function () { const h = prev.apply(this, arguments); try
 .mbox:has(>.shop18)>.pk{width:calc(60% - 3px)!important;margin:0!important}
 .mbox:has(>.shop18)>.big29~.pk,.mbox:has(>.shop18)>.big29+.pk{align-self:stretch}
 }`; document.head.appendChild(st); media30(); }
+/* 店の「くわしく」：まだ図鑑にない子だと「？？？ まだ出会っていない」しか出ず、買う前に中身が分からなかった → 店に並んでいる子は見せる。戻るは店へ */
+let DXFROM30 = null;
+document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="dexsp"]'); if (b) DXFROM30 = b.closest(".shop18,.shopc18,.grid3") ? "shop" : null; }, true);
+{ const _dm = dexModal; dexModal = function () { if (DXFROM30 !== "shop" || !DX || !(S.shop || []).some(o => o.sp === DX)) return _dm.apply(this, arguments);
+  const had = (S.dex || []).includes(DX); if (!had) (S.dex = S.dex || []).push(DX); let h; try { h = _dm.apply(this, arguments); } finally { if (!had) S.dex = S.dex.filter(k => k !== DX); }
+  return h.replace('<button data-a="dex">← 図鑑</button>', '<button data-a="shop">← 店</button>'); }; }
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------

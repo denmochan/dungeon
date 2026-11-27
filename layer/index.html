@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層84／No.350（11/25 00:49）";
+const VER20 = "層85／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -14955,6 +14955,12 @@ diffScreen15 = (prev => function () { const h = prev.apply(this, arguments); try
 .mbox:has(>.shop18)>.pk{width:calc(60% - 3px)!important;margin:0!important}
 .mbox:has(>.shop18)>.big29~.pk,.mbox:has(>.shop18)>.big29+.pk{align-self:stretch}
 }`; document.head.appendChild(st); media30(); }
+/* 店の「くわしく」：まだ図鑑にない子だと「？？？ まだ出会っていない」しか出ず、買う前に中身が分からなかった → 店に並んでいる子は見せる。戻るは店へ */
+let DXFROM30 = null;
+document.addEventListener("click", ev => { const b = ev.target.closest && ev.target.closest('[data-a="dexsp"]'); if (b) DXFROM30 = b.closest(".shop18,.shopc18,.grid3") ? "shop" : null; }, true);
+{ const _dm = dexModal; dexModal = function () { if (DXFROM30 !== "shop" || !DX || !(S.shop || []).some(o => o.sp === DX)) return _dm.apply(this, arguments);
+  const had = (S.dex || []).includes(DX); if (!had) (S.dex = S.dex || []).push(DX); let h; try { h = _dm.apply(this, arguments); } finally { if (!had) S.dex = S.dex.filter(k => k !== DX); }
+  return h.replace('<button data-a="dex">← 図鑑</button>', '<button data-a="shop">← 店</button>'); }; }
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------
