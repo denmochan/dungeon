@@ -16345,13 +16345,22 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
  window.__labSize=SIZE30;
  const rigLerp=(A,B,k)=>{const l=(a,b)=>a+(b-a)*k;return{J:A.J.map((a,i)=>{const b=B.J[i];if(!a||!b)return a||b;if(a[1]<-5||b[1]<-5)return k<0.5?a:b;return[l(a[0],b[0]),l(a[1],b[1]),l(a[2],b[2])];}),HR:A.HR.map((v,i)=>l(v,B.HR[i])),TR:A.TR.map((v,i)=>l(v,B.TR[i])),tool:k<0.5?A.tool:B.tool,deb:A.deb||[]};};
  const ease=k=>k*k*(3-2*k),sn1=k=>Math.sin(Math.PI*Math.max(0,Math.min(1,k)));
+ /* 素手の腕：肩から手までの長さはそのままに、手と肘の位置を決めなおす（up＝ふり上げの強さ、fw＝前へつかみかかる強さ） */
+ const clawArms=(R,up,fw)=>{const J=R.J.map(v=>v&&v.slice());const fwd=[0,0,1];
+  for(const [s,e,h,sx] of [[3,4,5,-1],[6,7,8,1]]){const S=J[s],E=J[e],H=J[h];if(!S||!E||!H||S[1]<-5||H[1]<-5)continue;const L1=Math.hypot(E[0]-S[0],E[1]-S[1],E[2]-S[2]),L2=Math.hypot(H[0]-E[0],H[1]-E[1],H[2]-E[2]),Lt=L1+L2,side=Math.sign(S[0]-(J[0]?J[0][0]:0))||sx;
+   const raised=[S[0]+side*0.35*Lt,S[1]+0.8*Lt,S[2]+0.1*Lt],reach=[S[0]-side*0.18*Lt,S[1]+0.02*Lt,S[2]+0.92*Lt],rest=H.slice();
+   const tg=[0,1,2].map(q=>{const a=rest[q]+(raised[q]-rest[q])*up;return a+(reach[q]-a)*fw;});
+   const dx=tg[0]-S[0],dy=tg[1]-S[1],dz=tg[2]-S[2],dl=Math.hypot(dx,dy,dz)||1e-6,d=Math.min(dl,Lt*0.98);const u=[dx/dl,dy/dl,dz/dl];const hp=[S[0]+u[0]*d,S[1]+u[1]*d,S[2]+u[2]*d];
+   const a=(L1*L1-L2*L2+d*d)/(2*d),hh=Math.sqrt(Math.max(0,L1*L1-a*a)),pole=nrm(sub([side*0.6,-1,-0.3],u.map(v=>v*dot(u,[side*0.6,-1,-0.3])))),el=[S[0]+u[0]*a+pole[0]*hh,S[1]+u[1]*a+pole[1]*hh,S[2]+u[2]*a+pole[2]*hh];
+   J[e]=el;J[h]=hp;}   /* 肘は外・下へ曲げる */
+  return Object.assign({},R,{J});};
  window.__labPose=(sp,st,k,o={})=>{k=Math.max(0,Math.min(1,k||0));const kit=typeof kitOf24==="function"?kitOf24(sp):sp,bip=/^(goblin|skeleton|imp|kobold|orc|golem|human|demon|gobx|lich|noble|lordk)$/.test(kit),rg=(m,t)=>rigSp24(sp,m,t);
   const root={dx:0,dy:0,dz:0,pitch:0,roll:0};let R;const T=o.t||0,side=o.side||1;
   if(st==="walk"){R=rg("walk",bip?(k*0.8):k);}
   else if(st==="run"){R=rg("walk",bip?(k*0.8):k);root.pitch=0.16;root.dy=0.05*Math.abs(Math.sin(k*Math.PI*2));}   /* 歩きを前のめりに・はずむ（速さは呼ぶ側で k を速く進める） */
-  else if(bip&&o.unarmed&&st==="windup"){R=rigLerp(rg("idle",T),rg("cast",0.25),ease(k));root.pitch=-0.16*ease(k);root.dz=-0.15*ease(k);root.dy=-0.05*ease(k);}   /* 素手：身をかがめて両手を前にかまえる */
-  else if(bip&&o.unarmed&&st==="strike"){R=rigLerp(rg("cast",0.25),rg("cast",0.55),ease(k));root.dz=0.5*sn1(k*0.85);root.pitch=0.3*sn1(k);root.dy=0.06*sn1(k);}   /* とびかかって、つかむ・ひっかく・かみつく */
-  else if(bip&&o.unarmed&&st==="recover"){R=rigLerp(rg("cast",0.55),rg("idle",T),ease(k));root.dz=0.5*(1-ease(k))*0.5;root.pitch=0.3*(1-ease(k))*0.4;}
+  else if(bip&&o.unarmed&&st==="windup"){R=clawArms(rg("idle",T),ease(k),0);root.pitch=-0.16*ease(k);root.dz=-0.15*ease(k);root.dy=-0.05*ease(k);}   /* 素手：身をかがめて、両手の爪を頭の横にふり上げる */
+  else if(bip&&o.unarmed&&st==="strike"){R=clawArms(rg("idle",T),1,ease(k));root.dz=0.55*sn1(k*0.85);root.pitch=0.32*sn1(k);root.dy=0.06*sn1(k);}   /* とびかかって、両手で前へつかみかかる（ひっかく・かみつく） */
+  else if(bip&&o.unarmed&&st==="recover"){R=clawArms(rg("idle",T),1-ease(k),1-ease(k));root.dz=0.55*(1-ease(k))*0.5;root.pitch=0.32*(1-ease(k))*0.4;}
   else if(st==="windup"){R=bip?rigLerp(rg("idle",T),rg("slash",0),ease(k)):rg("idle",T);root.pitch=-0.12*ease(k);root.dz=-0.1*ease(k);root.dy=bip?0:-0.06*ease(k);}   /* 足のない子は身をかがめて後ろへ */
   else if(st==="strike"){R=bip?rg("slash",0.6*ease(k)):rg("idle",T);root.dz=0.3*sn1(k*0.9);root.pitch=bip?0.12*sn1(k):0.3*sn1(k);root.dy=bip?0:0.12*sn1(k);}   /* 踏みこんで振り下ろす／体当たり */
   else if(st==="recover"){R=bip?rigLerp(rg("slash",0.6),rg("idle",T),ease(k)):rg("idle",T);root.dz=0.3*(1-ease(k))*0.6;}
