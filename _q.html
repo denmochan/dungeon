@@ -14949,6 +14949,9 @@ ${p} .top{min-height:0!important}`;
 setInterval(() => { try { if (!window.__dig30) return; if (Date.now() - window.__dig30 > 8000) { window.__dig30 = 0; return; } const F = window.__fp26; if (!F || !F.rooms || !F.P || !document.getElementById("fp26") || F.rooms.length !== S.path.length) return;
   let bi = 0, bd = 1e9; F.rooms.forEach((R, i) => { const d = Math.abs(R.Z - F.P.z) + Math.abs((R.Y || 0) - (F.P.y || 0)) * 2; if (d < bd) { bd = d; bi = i; } }); window.__dig30 = 0; window.__place30(F, bi, F.rooms[bi]); } catch (e) { window.__dig30 = 0; } }, 300);
 
+/* 左下の「層の試作版」と「オフライン用に保存中」が、ボタンや数字にかぶっていた → 試作版の札は消し、保存中は左上の小さな札にする */
+{ const st = document.createElement("style"); st.textContent = `.lay30tag{display:none!important}#off26{left:max(6px,env(safe-area-inset-left))!important;top:4px!important;bottom:auto!important;right:auto!important;transform:scale(.85);transform-origin:0 0;opacity:.85}body:has(.modal) #off26,body:has(#fp26) #off26,body:has(.stage) #off26{display:none!important}`; document.head.appendChild(st); }
+
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------
 // 勇者は同じ種（raidSeed23）で来るので、進んでいた手数ぶんを見せずに進めてから再開する

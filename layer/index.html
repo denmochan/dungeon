@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層65／No.350（11/25 00:49）";
+const VER20 = "層66／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -14850,6 +14850,9 @@ ${p} .top{min-height:0!important}`;
 /* 掘ったあと、新しい層で壁を向いて立っていた → 道の続くほうを向かせる */
 setInterval(() => { try { if (!window.__dig30) return; if (Date.now() - window.__dig30 > 8000) { window.__dig30 = 0; return; } const F = window.__fp26; if (!F || !F.rooms || !F.P || !document.getElementById("fp26") || F.rooms.length !== S.path.length) return;
   let bi = 0, bd = 1e9; F.rooms.forEach((R, i) => { const d = Math.abs(R.Z - F.P.z) + Math.abs((R.Y || 0) - (F.P.y || 0)) * 2; if (d < bd) { bd = d; bi = i; } }); window.__dig30 = 0; window.__place30(F, bi, F.rooms[bi]); } catch (e) { window.__dig30 = 0; } }, 300);
+
+/* 左下の「層の試作版」と「オフライン用に保存中」が、ボタンや数字にかぶっていた → 試作版の札は消し、保存中は左上の小さな札にする */
+{ const st = document.createElement("style"); st.textContent = `.lay30tag{display:none!important}#off26{left:max(6px,env(safe-area-inset-left))!important;top:4px!important;bottom:auto!important;right:auto!important;transform:scale(.85);transform-origin:0 0;opacity:.85}body:has(.modal) #off26,body:has(#fp26) #off26,body:has(.stage) #off26{display:none!important}`; document.head.appendChild(st); }
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------
