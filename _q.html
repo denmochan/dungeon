@@ -14805,7 +14805,7 @@ function tac30(S0, N0, heroes) { const T = N0.tac30 || (N0.tac30 = { duel: {}, s
     const even = pairs.filter(([x, m, n]) => n >= 2 && Math.abs(x.hp / x.max - m.hp / m.max) < 0.35).sort((p, q) => q[2] - p[2])[0]; if (!even) return;
     const [x, m] = even, D = g30dist(G, x.c30[0], x.c30[1]);
     // 3) 魔物が横腹へ
-    const freeM = Ms.filter(f => !usedM.has(f) && !rangedM(f) && f.job !== "watch" && D[f.c30[1] * G.W + f.c30[0]] >= 0 && D[f.c30[1] * G.W + f.c30[0]] <= T30.aggro).sort((p, q) => D[p.c30[1] * G.W + p.c30[0]] - D[q.c30[1] * G.W + q.c30[0]]);
+    const freeM = Ms.filter(f => !usedM.has(f) && !rangedM(f) && f.job !== "watch" && D[f.c30[1] * G.W + f.c30[0]] >= 0 && D[f.c30[1] * G.W + f.c30[0]] <= 4).sort((p, q) => D[p.c30[1] * G.W + p.c30[0]] - D[q.c30[1] * G.W + q.c30[0]]);
     const f = freeM[0];
     if (f) { f.flk30 = x.id; usedM.add(f);
       if (md(f.c30, x.c30) > 1) { const occ = q => N0.mons.some(o => o !== f && o.hp > 0 && !o.down && o.pos === i && o.c30 && o.c30[0] === q[0] && o.c30[1] === q[1]); const cur = D[f.c30[1] * G.W + f.c30[0]];
@@ -14813,13 +14813,15 @@ function tac30(S0, N0, heroes) { const T = N0.tac30 || (N0.tac30 = { duel: {}, s
       if (f._h30) { f.down = false; f._h30 = 0; } f.d30 = md(f.c30, x.c30);
       say("f" + f.ref.id + ":" + x.id, f.ref.nick, "横ががら空きだ！", i, "bad");
       // 4) 勇者が止めに入る
-      const g = Hs.filter(y => !usedH.has(y) && y !== x).sort((p, q) => (meleeH(q) - meleeH(p)) || md(p.c30, f.c30) - md(q.c30, f.c30))[0];
+      const Df = g30dist(G, f.c30[0], f.c30[1]), dF = y => { const v = Df[y.c30[1] * G.W + y.c30[0]]; return v >= 0 ? v : 99; };
+      const g = md(f.c30, x.c30) <= 3 ? Hs.filter(y => !usedH.has(y) && y !== x && dF(y) <= 3).sort((p, q) => (meleeH(q) - meleeH(p)) || dF(p) - dF(q))[0] : null;   /* 止めに入るのは、回りこむ子が近くまで来ていて、すぐそばにいる勇者だけ（後ろの勇者が遠くの魔物へ走っていた） */
       if (g) { g.icp30 = f.ref.id; f.icp30 = g.id; usedH.add(g); if (g.st === "hold30") g.st = "in"; say("i" + g.id + ":" + f.ref.id, g.name, "させるか！", i); }
       return; }
     // 5) 魔物があいていなければ、勇者が魔物の横腹へ。あいている魔物（弓でも）が止めに入る
-    const g2 = Hs.filter(y => !usedH.has(y) && y !== x).sort((p, q) => (meleeH(q) - meleeH(p)) || md(p.c30, m.c30) - md(q.c30, m.c30))[0];
+    const Dm = g30dist(G, m.c30[0], m.c30[1]), dM = y => { const v = Dm[y.c30[1] * G.W + y.c30[0]]; return v >= 0 ? v : 99; };
+    const g2 = Hs.filter(y => !usedH.has(y) && y !== x && dM(y) <= 3).sort((p, q) => (meleeH(q) - meleeH(p)) || dM(p) - dM(q))[0];
     if (g2) { g2.flkM30 = m.ref.id; usedH.add(g2); if (g2.st === "hold30") g2.st = "in"; say("F" + g2.id + ":" + m.ref.id, g2.name, "回りこめ！", i);
-      const f2 = Ms.filter(o => !usedM.has(o) && o.job !== "watch")[0]; if (f2) { f2.icp30 = g2.id; g2.icpH30 = f2.ref.id; if (f2._h30) { f2.down = false; f2._h30 = 0; } say("I" + f2.ref.id + ":" + g2.id, f2.ref.nick, "通さない！", i, "info"); } } });
+      const Dg = g30dist(G, g2.c30[0], g2.c30[1]), f2 = Ms.filter(o => !usedM.has(o) && o.job !== "watch" && Dg[o.c30[1] * G.W + o.c30[0]] >= 0 && Dg[o.c30[1] * G.W + o.c30[0]] <= 3)[0]; if (f2) { f2.icp30 = g2.id; g2.icpH30 = f2.ref.id; if (f2._h30) { f2.down = false; f2._h30 = 0; } say("I" + f2.ref.id + ":" + g2.id, f2.ref.nick, "通さない！", i, "info"); } } });
   T.duel = nextDuel; }
 /* 叩く相手を、組んだ相手にする（前は部屋の勇者からでたらめに選んでいた） */
 monHit11 = (prev => function (S, N, m, h, d) { try { if (m && !m.aoe && !(m.fx && (m.fx.all || m.fx.two))) { const by = id => N.heroes.find(o => o.id === id && o.st === "in" && o.pos === m.pos && o.walk == null);
