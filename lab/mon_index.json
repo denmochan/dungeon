@@ -116,13 +116,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 1.8,
-  "bytes": 130503,
+  "bytes": 130131,
   "verts": 8000,
-  "tris": 15906,
+  "tris": 15916,
   "full": {
    "file": "mon_demon.bin.gz",
    "fmt": "GB01",
-   "bytes": 656296
+   "bytes": 638900
   }
  },
  "dragon": {
@@ -521,7 +521,7 @@
   "file": "lite/mon_lord.bin.gz",
   "fmt": "GB03",
   "kind": "biped",
-  "scale": 1.0,
+  "scale": 1.5,
   "bytes": 130998,
   "verts": 8000,
   "tris": 15688,
@@ -550,13 +550,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 2.4,
-  "bytes": 128254,
+  "bytes": 127543,
   "verts": 8000,
-  "tris": 15882,
+  "tris": 15892,
   "full": {
    "file": "mon_maou.bin.gz",
    "fmt": "GB01",
-   "bytes": 701628
+   "bytes": 684672
   }
  },
  "mimic": {
@@ -942,13 +942,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 1.8,
-  "bytes": 130502,
+  "bytes": 130131,
   "verts": 8000,
-  "tris": 15906,
+  "tris": 15916,
   "full": {
    "file": "mon_underlord.bin.gz",
    "fmt": "GB01",
-   "bytes": 656300
+   "bytes": 638903
   }
  },
  "vampire": {

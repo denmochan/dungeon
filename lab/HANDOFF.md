@@ -1,5 +1,21 @@
 # 試し場（lab/）→ 本番（layer/）への引き継ぎ
 
+## 2026-11-28 朝（企画チャットより）：武器を持たない種族（FROM_JISSO 06:40 の頼み）
+
+- **素手にした**：vampire・count・noble・demon・gemeater・underlord・rotlord・スライムの系統・elderdragon・serpent・golem・fortgolem・ghoul（ほかに前からの gargoyle・mimic・hauntchest・vaultkeeper）
+  - 一覧は `NOWPN30`
+  - demon・underlord は、形に剣が焼きこまれていた。剣なし（VAR.z＝2）で取り直した
+- **こん棒**：bogtroll・sapper（`CLUB30`、`monTool` の `kind:"club"`）。太くなる木の棒に、鉄のびょうと革の握り
+- **杖**：今のまま。maou は焼きこんだ剣をやめて取り直し、作りこんだ杖を持たせた
+- **主（lord）**：絵に長い杖（やり）があるので、それをそのまま使う。大きさは「大」1.5 にした（`mon_index.json` も 1.5）
+- **素手のポーズ**：`__labPose` の4つめの引数に `{unarmed:true}` を渡すと、windup・strike・recover が次の動きになる
+  - windup：身をかがめて両手を前にかまえる
+  - strike：とびかかって、つかむ・ひっかく・かみつく（前へ 0.5m、前へ倒れる）
+  - recover：戻す
+  - 試し場の魔物と図鑑は、`NOWPN30` の子に自動でこれを使う
+
+---
+
 ## 2026-11-28 未明（企画チャットより）：重さと種族一覧（FROM_JISSO 01:30 の頼み）
 
 ### 頼み1：重さ → 1種族 75〜135KB に（済）

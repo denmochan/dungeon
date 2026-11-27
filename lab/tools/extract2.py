@@ -13,6 +13,8 @@ with sync_playwright() as p:
     sh={'vs':sh0['vs'],'samp':fs[:i]+SAMP_MAIN,'colr':fs[:i]+COLR_MAIN}
     pack={'face':pk0['face'],'faceIdx':info['FI']}
     rig={'J':info['J'],'HR':info['HR'],'TR':info['TR']};L={'col':info['col'],'vr':info['vr']}
+    import os
+    if os.environ.get('VARZ'): L['vr'][0][2]=float(os.environ['VARZ'])   # 武器を描かない版など（悪魔の系統：VAR.z 2＝なし）
     J=np.array([j for j in info['J'] if j[1]>-5]);print(sp,info['kit'],'FI',info['FI'],'scl',info['scl'],'tool',info['tool'],'J',J.min(0),J.max(0))
     lo=np.array([J[:,0].min()-0.8,-0.05,J[:,2].min()-0.7]);hi=np.array([J[:,0].max()+0.8,J[:,1].max()+0.8,J[:,2].max()+0.7])
     N=np.ceil((hi-lo)/GS).astype(int)+1;NX,NY,NZ=map(int,N);print('grid',NX,NY,NZ)

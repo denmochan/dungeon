@@ -16311,6 +16311,9 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
   const ball=(c,r,col,seg=8)=>{for(let i=0;i<seg/2;i++)for(let j=0;j<seg;j++){const P=(a,b)=>{const th=a/(seg/2)*Math.PI,ph=b/seg*6.2832,n=[Math.sin(th)*Math.cos(ph),Math.cos(th),Math.sin(th)*Math.sin(ph)];return[[c[0]+n[0]*r,c[1]+n[1]*r,c[2]+n[2]*r],n];};const a=P(i,j),b=P(i+1,j),c2=P(i,j+1),d=P(i+1,j+1);[[a,b,c2],[c2,b,d]].forEach(T=>T.forEach(([p,n])=>push(p,n,n,col)));}};
   if((kind==="sword"||kind==="dagger")&&R.J[35]&&R.J[35][1]>-5){const ks=kind==="dagger"?0.5:0.85;const h=R.J[34];const u=nrm(sub(R.J[35],R.J[34]));let sd=R.J[36];sd=nrm(sub(sd,[u[0]*dot(sd,u),u[1]*dot(sd,u),u[2]*dot(sd,u)]));const w=crs(u,sd);const L=(a,b,c)=>[h[0]+u[0]*a+sd[0]*b+w[0]*c,h[1]+u[1]*a+sd[1]*b+w[1]*c,h[2]+u[2]*a+sd[2]*b+w[2]*c];
    for(let i=0;i<SW.n;i++){const [a,b,c]=SW.V[i],[na,nb,nc]=SW.N[i],[oa,ob,oc]=SW.O[i];push(L(a*ks,b*ks,c*ks),L(na,nb,nc).map((v,k)=>v-h[k]),L(oa,ob,oc).map((v,k)=>v-h[k]),SW.C[i]);}}
+  else if(kind==="club"&&R.J[35]&&R.J[35][1]>-5){const h=R.J[34],u=nrm(sub(R.J[35],R.J[34])),A=(t)=>[h[0]+u[0]*t,h[1]+u[1]*t,h[2]+u[2]*t],wood=[0.46,0.3,0.17],dk=[0.32,0.2,0.11],iron=[0.5,0.5,0.55];   /* こん棒：太くなる木の棒に鉄のびょう、握りに革 */
+   tube(A(-0.14),A(0.12),0.035,0.04,[0.38,0.2,0.1],8,true);for(let k=0;k<6;k++){const t0=0.12+k*0.11,t1=t0+0.11;tube(A(t0),A(t1),0.04+0.075*k/6,0.04+0.075*(k+1)/6,k%2?dk:wood,10,k===5);}
+   const e1=nrm(crs(u,Math.abs(u[1])<0.9?[0,1,0]:[1,0,0])),e2=crs(u,e1);for(let k=0;k<10;k++){const t=0.5+0.07*(k%4),an=k*2.4,r=0.04+0.075*(t-0.12)/0.66,c=A(t),d=[e1[0]*Math.cos(an)+e2[0]*Math.sin(an),e1[1]*Math.cos(an)+e2[1]*Math.sin(an),e1[2]*Math.cos(an)+e2[2]*Math.sin(an)];ball([c[0]+d[0]*r,c[1]+d[1]*r,c[2]+d[2]*r],0.02,iron,6);}}
   else if(kind==="bow"){   /* 弓：左手で持つ。木の弓に、革の握り・角の弓はず・弦。引くときは右手まで弦をのばし、矢をつがえる */
    const g=R.J[5],U=nrm([-0.12,1,0.05]),F=[0,0,1],Rt=nrm(crs(U,F)),P=(y,z)=>[g[0]+U[0]*y+F[0]*z+Rt[0]*0,g[1]+U[1]*y+F[1]*z,g[2]+U[2]*y+F[2]*z],wood=[0.48,0.3,0.16],dark=[0.3,0.18,0.1],horn=[0.86,0.8,0.66],lea=[0.42,0.22,0.12];
    const lz=y=>-0.34*Math.pow(Math.abs(y)/0.62,1.8)+0.05*Math.sin(Math.abs(y)/0.62*Math.PI)*0.6;   /* 先が手前に反る形 */
@@ -16338,7 +16341,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
  /* ===== 戦闘のポーズ（実装チャットの頼み 11/28）。window.__labPose(種族, 状態, 進み0〜1, {side}) → {R:リグ, root:{dx,dy,dz,pitch,roll}} =====
    状態：idle 待つ / walk 歩く / run 走る / windup 振りかぶる / strike 当てる / recover 戻す / bowdraw 弓を引く / bowshoot 放つ / dodge 横へ跳ぶ / knock 吹っ飛ぶ / stagger よろける / tired 息が上がる / down 倒れる
    root はリグの外側で体ごと動かす量（足もとを中心に、pitch＝前後に倒す・roll＝左右に倒す、dx・dz は体の向きで右・前） */
- const SIZE30={slime:0.7,rotslime:0.8,lavaslime:0.9,ghostslime:0.7,gemeater:0.9,slimeknight:1.1,goblin:0.7,webgoblin:0.7,sapper:0.75,kobold:0.75,goldkobold:0.75,imp:0.5,orc:1.25,minerorc:1.25,berserker:1.3,bogtroll:1.7,ogremage:1.7,shaman:0.75,bat:0.35,firebat:0.35,eyebat:0.4,rat:0.3,sporerat:0.35,ratking:0.9,wolf:0.9,nightwolf:1.0,jackal:0.8,wolfrider:1.4,chimera:2.2,flamechimera:2.2,spider:0.8,nightspider:0.9,eyespider:0.85,stonespider:1.0,skeleton:1.0,emberskel:1.0,bonewarden:1.3,ghoul:1.0,ghost:0.9,wraitheye:0.8,sporewraith:0.9,vampire:1.0,count:1.0,lich:1.0,underlord:1.8,bonedragon:4.0,hauntchest:1.0,myconid:0.9,fungus:0.8,rotlord:2.0,mimic:1.0,golem:2.2,fortgolem:2.8,gargoyle:1.3,vaultkeeper:2.0,stoneeye:1.0,eye:0.9,mindlord:1.2,ifrit:1.6,salamander:1.1,dragon:5.0,elderdragon:6.0,maou:2.4,warrior:1.0,knight:1.05,thief:0.9,hunter:1.0,mage:0.95,priest:0.95,human:1.0,lord:1.0,demon:1.8,gobx:0.7,noble:1.0};   /* 本番 BODY30V2・HEROBODY30 の「大」（人間＝1） */
+ const SIZE30={slime:0.7,rotslime:0.8,lavaslime:0.9,ghostslime:0.7,gemeater:0.9,slimeknight:1.1,goblin:0.7,webgoblin:0.7,sapper:0.75,kobold:0.75,goldkobold:0.75,imp:0.5,orc:1.25,minerorc:1.25,berserker:1.3,bogtroll:1.7,ogremage:1.7,shaman:0.75,bat:0.35,firebat:0.35,eyebat:0.4,rat:0.3,sporerat:0.35,ratking:0.9,wolf:0.9,nightwolf:1.0,jackal:0.8,wolfrider:1.4,chimera:2.2,flamechimera:2.2,spider:0.8,nightspider:0.9,eyespider:0.85,stonespider:1.0,skeleton:1.0,emberskel:1.0,bonewarden:1.3,ghoul:1.0,ghost:0.9,wraitheye:0.8,sporewraith:0.9,vampire:1.0,count:1.0,lich:1.0,underlord:1.8,bonedragon:4.0,hauntchest:1.0,myconid:0.9,fungus:0.8,rotlord:2.0,mimic:1.0,golem:2.2,fortgolem:2.8,gargoyle:1.3,vaultkeeper:2.0,stoneeye:1.0,eye:0.9,mindlord:1.2,ifrit:1.6,salamander:1.1,dragon:5.0,elderdragon:6.0,maou:2.4,warrior:1.0,knight:1.05,thief:0.9,hunter:1.0,mage:0.95,priest:0.95,human:1.0,lord:1.0,demon:1.8,gobx:0.7,noble:1.0};SIZE30.lord=1.5;   /* 主は人間の1.5倍（実装チャット 11/28） */   /* 本番 BODY30V2・HEROBODY30 の「大」（人間＝1） */
  window.__labSize=SIZE30;
  const rigLerp=(A,B,k)=>{const l=(a,b)=>a+(b-a)*k;return{J:A.J.map((a,i)=>{const b=B.J[i];if(!a||!b)return a||b;if(a[1]<-5||b[1]<-5)return k<0.5?a:b;return[l(a[0],b[0]),l(a[1],b[1]),l(a[2],b[2])];}),HR:A.HR.map((v,i)=>l(v,B.HR[i])),TR:A.TR.map((v,i)=>l(v,B.TR[i])),tool:k<0.5?A.tool:B.tool,deb:A.deb||[]};};
  const ease=k=>k*k*(3-2*k),sn1=k=>Math.sin(Math.PI*Math.max(0,Math.min(1,k)));
@@ -16346,6 +16349,9 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
   const root={dx:0,dy:0,dz:0,pitch:0,roll:0};let R;const T=o.t||0,side=o.side||1;
   if(st==="walk"){R=rg("walk",bip?(k*0.8):k);}
   else if(st==="run"){R=rg("walk",bip?(k*0.8):k);root.pitch=0.16;root.dy=0.05*Math.abs(Math.sin(k*Math.PI*2));}   /* 歩きを前のめりに・はずむ（速さは呼ぶ側で k を速く進める） */
+  else if(bip&&o.unarmed&&st==="windup"){R=rigLerp(rg("idle",T),rg("cast",0.25),ease(k));root.pitch=-0.16*ease(k);root.dz=-0.15*ease(k);root.dy=-0.05*ease(k);}   /* 素手：身をかがめて両手を前にかまえる */
+  else if(bip&&o.unarmed&&st==="strike"){R=rigLerp(rg("cast",0.25),rg("cast",0.55),ease(k));root.dz=0.5*sn1(k*0.85);root.pitch=0.3*sn1(k);root.dy=0.06*sn1(k);}   /* とびかかって、つかむ・ひっかく・かみつく */
+  else if(bip&&o.unarmed&&st==="recover"){R=rigLerp(rg("cast",0.55),rg("idle",T),ease(k));root.dz=0.5*(1-ease(k))*0.5;root.pitch=0.3*(1-ease(k))*0.4;}
   else if(st==="windup"){R=bip?rigLerp(rg("idle",T),rg("slash",0),ease(k)):rg("idle",T);root.pitch=-0.12*ease(k);root.dz=-0.1*ease(k);root.dy=bip?0:-0.06*ease(k);}   /* 足のない子は身をかがめて後ろへ */
   else if(st==="strike"){R=bip?rg("slash",0.6*ease(k)):rg("idle",T);root.dz=0.3*sn1(k*0.9);root.pitch=bip?0.12*sn1(k):0.3*sn1(k);root.dy=bip?0:0.12*sn1(k);}   /* 踏みこんで振り下ろす／体当たり */
   else if(st==="recover"){R=bip?rigLerp(rg("slash",0.6),rg("idle",T),ease(k)):rg("idle",T);root.dz=0.3*(1-ease(k))*0.6;}
@@ -16363,13 +16369,13 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
  const R0S={};
  const MAGIC30=/lich|eye|shaman|ogremage|wraitheye|mindlord|ifrit|maou|imp|ghost/;
  /* 何を持たせるか：作りこんだ武器に持ちかえる（焼きこんだ武器はその手の分だけ隠す）。弓役は弓、魔法の子と魔法使い・僧侶は杖、盗賊は短剣、ほかは剣 */
- const NOWPN30=/golem|gargoyle|vaultkeeper|hauntchest|mimic|ghoul/;   /* 素手で戦う子（石の体・爪） */
- const weaponPlan=(sp,M,role,mode,st)=>{if(st==="down")return{kind:null,hide:0};if(mode==="mine")return{kind:"pick",hide:1};if(NOWPN30.test(sp))return{kind:null,hide:0};
+ const NOWPN30=/golem|gargoyle|vaultkeeper|hauntchest|mimic|ghoul|^(vampire|count|noble|demon|gemeater|underlord|rotlord|slime|ghostslime|lavaslime|rotslime|elderdragon|serpent|lord)$/,CLUB30=/^(bogtroll|sapper)$/;   /* 素手で戦う子（爪・牙・こぶし。11/28 本人の指示）／こん棒の子 */   /* 素手で戦う子（石の体・爪） */
+ const weaponPlan=(sp,M,role,mode,st)=>{if(st==="down")return{kind:null,hide:0};if(mode==="mine")return{kind:"pick",hide:1};if(NOWPN30.test(sp))return{kind:null,hide:M.hasW?1:0};if(CLUB30.test(sp))return{kind:"club",hide:M.hasW?6:0};
   if(role==="bow"||role==="snipe"||sp==="hunter")return{kind:"bow",hide:M.hasW?1:0};if(MAGIC30.test(sp)||sp==="mage"||sp==="priest")return{kind:"staff",hide:M.hasW?6:0};
   if(sp==="thief")return{kind:"dagger",hide:M.hasW?6:0};if(/^(warrior|knight|slimeknight)$/.test(sp))return{kind:"sword",hide:1,shield:1};return{kind:"sword",hide:M.hasW?6:0};};
  window.__labMonDraw=q=>{if((window.__R2||0)<0.5||window.__labMonOff)return false;const a=q.a,sp=baseSp(a.sp),M=MS[sp]||loadMon(sp);if(!M||!M.ok||typeof rigSp24!=="function")return false;
   const T=q.now/1000+(a.ph||0),kit=typeof kitOf24==="function"?kitOf24(sp):sp,slime=kit==="slime",bip=!M.pt&&!slime;let mode="idle",t=T*0.6,R,RT=null,st=a.bst||null;
-  if(st&&window.__labPose){const P=window.__labPose(sp,st,a.bk||0,{side:a.bside||1,t:T});R=P.R;RT=P.root;mode=st==="walk"||st==="run"?"walk":"idle";}   /* 戦闘：呼ぶ側が a.bst（状態）と a.bk（0〜1）を入れる */
+  if(st&&window.__labPose){const P=window.__labPose(sp,st,a.bk||0,{side:a.bside||1,t:T,unarmed:NOWPN30.test(sp)});R=P.R;RT=P.root;mode=st==="walk"||st==="run"?"walk":"idle";}   /* 戦闘：呼ぶ側が a.bst（状態）と a.bk（0〜1）を入れる */
   else{if(a.walking){mode="walk";t=bip?((a.dist||0)/1.3)%0.8:((a.dist||0)/1.6)%1;}else if(a.mode==="sleep"){mode="sleep";}else if(bip&&a.mode==="mine"){mode="mine";t=(T/1.1)%1;}else if(bip&&/^(slash|lift|train|duel|spar)$/.test(a.mode)){mode="slash";t=(T/0.55)%1;}R=rigSp24(sp,mode,t);}
   if(!R0S[sp])R0S[sp]=rigSp24(sp,"idle",0);
   if(M.c==null){let h=0,x0=9,x1=-9,z0=9,z1=-9;for(let i=0;i<M.NV;i++){if(M.WP&&M.WP[i])continue;const x=M.P0[i*3],y=M.P0[i*3+1],z=M.P0[i*3+2];if(y>h)h=y;if(x<x0)x0=x;if(x>x1)x1=x;if(z<z0)z0=z;if(z>z1)z1=z;}M.c=Math.max(h,0.55*Math.max(x1-x0,z1-z0));}
@@ -16407,7 +16413,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
     let st=null,k=0,side=1,dz=0;if(pose==="walk"){st="walk";k=(T*1.25/1.3/0.8)%1;}else if(pose==="run"){st="run";k=(T*2.6/1.3/0.8)%1;}else if(pose==="atk"){const c=T%1.4;if(c<0.45){st="windup";k=c/0.45;}else if(c<0.57){st="strike";k=(c-0.45)/0.12;}else if(c<1.0){st="recover";k=(c-0.57)/0.43;}else st="idle";}
     else if(pose==="bow"){const c=T%1.8;if(c<0.9){st="bowdraw";k=c/0.9;}else if(c<1.1){st="bowshoot";k=(c-0.9)/0.2;}else st="idle";}else if(pose==="dodge"){const c=T%1.6;st=c<0.5?"dodge":"idle";k=c/0.5;side=Math.floor(T/1.6)%2?1:-1;}
     else if(pose==="knock"){const c=T%2.2;st=c<0.9?"knock":"idle";k=c/0.9;}else if(pose==="stagger"){const c=T%1.6;st=c<1?"stagger":"idle";k=c;}else if(pose==="tired")st="tired";else if(pose==="down"){st="down";k=Math.min(1,(T%3)/0.8);}else st="idle";
-    const P=window.__labPose(sp,st,k,{side,t:T});if(!R0S[sp])R0S[sp]=rigSp24(sp,"idle",0);const kit=kitOf24(sp),slime=kit==="slime",bip=!M.pt&&!slime;
+    const P=window.__labPose(sp,st,k,{side,t:T,unarmed:NOWPN30.test(sp)});if(!R0S[sp])R0S[sp]=rigSp24(sp,"idle",0);const kit=kitOf24(sp),slime=kit==="slime",bip=!M.pt&&!slime;
     if(st==="knock"||st==="dodge"){} 
     const WPn=weaponPlan(sp,M,pose==="bow"?"bow":"","idle",st),kind=WPn.kind;q.sp=sp;q.shield=WPn.shield;
     drawSkin(q,M,0,0,0,0,S,P.R,R0S[sp],slime,WPn.hide,P.root);if(bip&&kind)monTool(q,P.R,0,0,0,0,S,"idle",kind,P.root,st);toolDraw(q,new Float32Array(floorV),new Float32Array(floorN),new Float32Array(floorN),new Float32Array(floorC),floorV.length/3);}
