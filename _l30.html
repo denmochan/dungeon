@@ -15039,6 +15039,10 @@ diffScreen15 = (prev => function () { const h = prev.apply(this, arguments); try
 .tkl28{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));max-height:calc(100dvh - 130px)!important;align-content:start}
 .tkr28{padding:3px 5px!important;gap:6px!important}.tkr28 button{min-width:0!important;padding:4px 8px!important}
 }`; document.head.appendChild(st); media30(); }
+{ const st = document.createElement("style"); st.textContent = `@media (orientation:landscape) and (max-height:500px){
+.mbox:has(>.bkrow27){flex-direction:row!important;flex-wrap:wrap!important;align-content:flex-start}
+.mbox:has(>.bkrow27)>*{width:100%}.mbox:has(>.bkrow27)>.bkrow27{width:calc(50% - 3px)!important;margin:0!important}
+}`; document.head.appendChild(st); media30(); }
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------

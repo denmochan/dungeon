@@ -15012,6 +15012,33 @@ diffScreen15 = (prev => function () { const h = prev.apply(this, arguments); try
 .stage .dm28h{flex-direction:row!important;flex-wrap:wrap;justify-content:center;align-items:baseline;gap:4px 10px!important;margin-bottom:2px!important}
 .stage .dm28h b{font-size:20px!important}
 }`; document.head.appendChild(st); media30(); }
+/* 夜の結果（横持ち）：1列で縦に長かった（画面3枚半ぶん）→ 2列に流す。見出しとMVPは横並び */
+{ const st = document.createElement("style"); st.textContent = `@media (orientation:landscape) and (max-height:500px){
+.stage:has(>.raidban){flex-direction:row!important;flex-wrap:wrap!important;justify-content:center!important;align-content:flex-start!important;align-items:flex-start!important;gap:6px 8px!important;padding-left:max(10px,env(safe-area-inset-left))!important;padding-right:max(10px,env(safe-area-inset-right))!important}
+.stage:has(>.raidban)>*{margin-top:0!important;margin-bottom:0!important}
+.stage:has(>.raidban)>.raidban,.stage:has(>.raidban)>.mvp{flex:0 0 auto}
+.stage:has(>.raidban)>.dw28,.stage:has(>.raidban)>[data-a="stagenext"]{flex:0 0 100%}
+.stage:has(>.raidban)>[data-a="stagenext"]{flex:0 0 420px!important;max-width:420px!important;margin:0 calc((100% - 420px) / 2)!important}
+.stage:has(>.raidban)>.tip23,.stage:has(>.raidban)>.dmg23,.stage:has(>.raidban)>.rs-grid,.stage:has(>.raidban)>.order,.stage:has(>.raidban)>div:not([class]){flex:0 0 calc(50% - 4px);max-width:calc(50% - 4px)!important;box-sizing:border-box}
+.stage:has(>.raidban)>.hint,.stage:has(>.raidban)>.achpop{flex:0 0 auto}
+.stage:has(>.raidban)::after{flex:0 0 100%!important;height:64px}
+.stage:has(>.raidban) .rs-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+}`; document.head.appendChild(st); media30(); }
+/* 引き継ぎコード（横持ち）：コードの欄が大きく、読みこむボタンが下に隠れていた */
+{ const st = document.createElement("style"); st.textContent = `@media (orientation:landscape) and (max-height:500px){.mbox textarea{height:44px!important;min-height:0!important;font-size:11px!important;line-height:1.25!important}}`; document.head.appendChild(st); media30(); }
+/* 引き継ぎコード（横持ち）：左＝このデータのコード、右＝読みこむ（下のボタンまで1画面に） */
+{ const st = document.createElement("style"); st.textContent = `@media (orientation:landscape) and (max-height:500px){
+.mbox:has([data-a="xcopy20"]){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:10px;row-gap:5px!important;align-content:start}
+.mbox:has([data-a="xcopy20"])>*{margin:0!important;width:auto!important;min-width:0}
+.mbox:has([data-a="xcopy20"])>:nth-child(1),.mbox:has([data-a="xcopy20"])>:nth-child(2),.mbox:has([data-a="xcopy20"])>[data-a="close"]{grid-column:1/-1}
+.mbox:has([data-a="xcopy20"])>:nth-child(3){grid-column:1;grid-row:3}.mbox:has([data-a="xcopy20"])>:nth-child(4){grid-column:1;grid-row:4}.mbox:has([data-a="xcopy20"])>:nth-child(5){grid-column:1;grid-row:5}
+.mbox:has([data-a="xcopy20"])>:nth-child(6){grid-column:2;grid-row:3}.mbox:has([data-a="xcopy20"])>:nth-child(7){grid-column:2;grid-row:4}.mbox:has([data-a="xcopy20"])>[data-a="xpaste20"]{grid-column:2;grid-row:5}.mbox:has([data-a="xcopy20"])>[data-a="xload20"]{grid-column:2;grid-row:6}.mbox:has([data-a="xcopy20"])>.hint.bad{grid-column:1/-1;grid-row:7}
+}`; document.head.appendChild(st); media30(); }
+/* 特訓・スキルの書（横持ち）：1列で横がガラ空き、2つしか見えなかった → 3列／2列 */
+{ const st = document.createElement("style"); st.textContent = `@media (orientation:landscape) and (max-height:500px){
+.tkl28{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));max-height:calc(100dvh - 130px)!important;align-content:start}
+.tkr28{padding:3px 5px!important;gap:6px!important}.tkr28 button{min-width:0!important;padding:4px 8px!important}
+}`; document.head.appendChild(st); media30(); }
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------
