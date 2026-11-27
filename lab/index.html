@@ -16157,7 +16157,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
   return{V,N,C,O,n:V.length};})();
  let GL3=null;
  const VS3=`attribute vec3 ap;attribute vec3 an;attribute vec3 ac;attribute vec3 af;varying vec3 vf;uniform mat4 VP;uniform float OW;varying vec3 vc;varying vec3 vn;varying vec3 vw;
-   void main(){vec3 w=ap+an*OW;gl_Position=VP*vec4(w,1.0);if(OW>0.0)gl_Position.z+=0.0015*gl_Position.w;vc=ac;vn=an;vw=ap;vf=af;}`,FS3=`precision mediump float;varying vec3 vc;varying vec3 vn;varying vec3 vw;varying vec3 vf;uniform sampler2D FT;uniform float FI;uniform highp vec3 EYE;uniform vec3 LT[6];uniform float LF[6];uniform vec3 LC;uniform float OUT;
+   void main(){vec3 w=ap+an*OW;gl_Position=VP*vec4(w,1.0);if(OW>0.0)gl_Position.z+=0.0015*gl_Position.w;vc=ac;vn=an;vw=ap;vf=af;}`,FS3=`precision mediump float;varying vec3 vc;varying vec3 vn;varying vec3 vw;varying vec3 vf;uniform sampler2D FT;uniform float FI;uniform float AL;uniform highp vec3 EYE;uniform vec3 LT[6];uniform float LF[6];uniform vec3 LC;uniform float OUT;
    void main(){float vd=distance(vw,EYE);if(OUT>0.5){gl_FragColor=vec4(mix(vec3(0.09,0.06,0.04),vec3(0.03,0.04,0.07),smoothstep(18.0,52.0,vd)),1.0);return;}
     vec3 n=normalize(vn);vec3 base=vc;if(vf.z>0.01&&FI>-0.5&&vf.x>0.0&&vf.x<1.0&&vf.y>0.0&&vf.y<1.0){vec4 tx=texture2D(FT,vec2((vf.x+FI)/8.0,vf.y));base=mix(base,tx.rgb,tx.a*vf.z);}   /* 顔：2Dの顔の絵をそのまま貼る（形の色だけだとぼやけた） */if(base.g>base.r*0.9&&base.b<base.g*0.6)base*=vec3(0.86,1.0,0.82);   /* 肌は少し緑に寄せる（黄色く見えた） */
     float kd=dot(n,normalize(vec3(0.3,0.9,0.35)));float tb=kd>0.42?1.0:(kd>-0.05?0.74:0.52);
@@ -16166,7 +16166,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
     vec3 L=vec3(0.0);for(int i=0;i<6;i++){vec3 q=LT[i]-vw;float dd=dot(q,q);float ld=dot(n,q*inversesqrt(dd+0.0001));float tl=ld>0.3?1.0:(ld>0.0?0.55:0.15);L+=LC*LF[i]*tl/(1.0+0.16*dd);}
     c+=base*L*0.75;vec3 V=normalize(EYE-vw);float rim=pow(1.0-max(dot(n,V),0.0),3.0);c+=vec3(1.0,0.78,0.55)*rim*0.16;
     float sp=pow(max(dot(n,normalize(V+normalize(vec3(0.3,0.9,0.35)))),0.0),40.0);c+=step(0.5,sp)*0.28*step(0.6,base.b)*step(base.r,base.b);   /* 刃のきらり */
-    c=1.0-exp(-c*1.4);c=mix(c,vec3(0.03,0.04,0.07),smoothstep(18.0,52.0,vd));gl_FragColor=vec4(c,1.0);}`;
+    c=1.0-exp(-c*1.4);c=mix(c,vec3(0.03,0.04,0.07),smoothstep(18.0,52.0,vd));gl_FragColor=vec4(c,AL>0.001?AL:1.0);}`;
  function prog3(gl){const mk=(t,src)=>{const o=gl.createShader(t);gl.shaderSource(o,src);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(o));return o;};
   const p=gl.createProgram();gl.attachShader(p,mk(gl.VERTEX_SHADER,VS3));
   gl.attachShader(p,mk(gl.FRAGMENT_SHADER,FS3));
@@ -16234,7 +16234,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
  /* ===== ほかの魔物も同じ作り方の3Dで描く（ガイコツ・スライム…）。ファイルがある種族だけ。ない種族は今までの絵 ===== */
  const MS={};
  const baseSp=sp=>String(sp||"").replace(/\d+$/,"");
- const SHAPE30={gargoyle:"imp"};const rigOf=sp=>SHAPE30[sp]||sp;   /* 形を別の種族から借りた子は、動きもその種族のリグで */   /* 勇者の色ちがい（warrior2 など）は同じ形 */
+ const SHAPE30={gargoyle:"imp"},GHOST30=/^(ghostslime|ghost|wraitheye|sporewraith)$/;const rigOf=sp=>SHAPE30[sp]||sp;   /* 形を別の種族から借りた子は、動きもその種族のリグで */   /* 勇者の色ちがい（warrior2 など）は同じ形 */
  const faceUV=(sp,M)=>{try{const kit=kitOf24(rigOf(sp)),fi=FACEIDX24[kit];if(fi==null||fi<0)return;const R=rigSp24(rigOf(sp),"idle",0),A=R.HR,J2=R.J[2];if(!J2||J2[1]<-5)return;   /* 頭の空間で、顔の絵のどこに当たるか（ゲームの charCol と同じ式） */
    const F=new Float32Array(M.NV*3),hm=(v)=>[A[0]*v[0]+A[3]*v[1]+A[6]*v[2],A[1]*v[0]+A[4]*v[1]+A[7]*v[2],A[2]*v[0]+A[5]*v[1]+A[8]*v[2]];
    for(let i=0;i<M.NV;i++){if(M.WP&&M.WP[i])continue;const hp=hm([M.P0[i*3]-J2[0],M.P0[i*3+1]-J2[1],M.P0[i*3+2]-J2[2]]);if(Math.hypot(hp[0],hp[1],hp[2])>=0.52)continue;const hn=hm([M.N0[i*3],M.N0[i*3+1],M.N0[i*3+2]]),t=Math.max(0,Math.min(1,(hn[2]-0.05)/0.25)),fz=t*t*(3-2*t);
@@ -16290,8 +16290,9 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
     if(!gl.__facet3){gl.__facet3=faceAtlas24(gl);gl.bindTexture(gl.TEXTURE_2D,gl.__facet3);[gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER].forEach(k=>gl.texParameteri(gl.TEXTURE_2D,k,gl.LINEAR));}
     gl.activeTexture(gl.TEXTURE3);gl.bindTexture(gl.TEXTURE_2D,gl.__facet3);gl.uniform1i(MP.U("FT"),3);gl.uniform1f(MP.U("FI"),M.FI);gl.activeTexture(gl.TEXTURE0);}
    else{gl.disableVertexAttribArray(MP.af);gl.vertexAttrib3f(MP.af,0,0,0);gl.uniform1f(MP.U("FI"),-1);}}
-  gl.cullFace(gl.FRONT);gl.uniform1f(MP.U("OUT"),1);gl.uniform1f(MP.U("OW"),0.018*Math.sqrt(S0));gl.drawElements(gl.TRIANGLES,M.NT*3,gl.UNSIGNED_SHORT,0);
-  gl.cullFace(gl.BACK);gl.uniform1f(MP.U("OUT"),0);gl.uniform1f(MP.U("OW"),0);gl.drawElements(gl.TRIANGLES,M.NT*3,gl.UNSIGNED_SHORT,0);gl.disable(gl.CULL_FACE);
+  if(!o.alpha){gl.cullFace(gl.FRONT);gl.uniform1f(MP.U("OUT"),1);gl.uniform1f(MP.U("OW"),0.018*Math.sqrt(S0));gl.drawElements(gl.TRIANGLES,M.NT*3,gl.UNSIGNED_SHORT,0);}   /* すける子は輪郭の殻を描かない（中から黒く見える） */
+  const al=o.alpha||0;if(al){gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);}gl.uniform1f(MP.U("AL"),al);   /* すけて見える子（霊） */
+  gl.cullFace(gl.BACK);gl.uniform1f(MP.U("OUT"),0);gl.uniform1f(MP.U("OW"),0);gl.drawElements(gl.TRIANGLES,M.NT*3,gl.UNSIGNED_SHORT,0);gl.disable(gl.CULL_FACE);gl.uniform1f(MP.U("AL"),0);if(al)gl.disable(gl.BLEND);
   if(MP.af>=0&&MP.af!==lq){gl.disableVertexAttribArray(MP.af);gl.vertexAttrib3f(MP.af,0,0,0);}
   [MP.ap,MP.an,MP.ac].forEach(a=>{if(a!==lq)gl.disableVertexAttribArray(a);});if(PB){gl.useProgram(PB.p);gl.bindBuffer(gl.ARRAY_BUFFER,qbuf);gl.enableVertexAttribArray(lq);gl.vertexAttribPointer(lq,2,gl.FLOAT,false,0,0);}}
  /* 魔物の道具：剣（ゴブリンと同じ作り込みの剣）と、つるはし。リグの道具の関節に合わせる */
@@ -16393,7 +16394,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
   if(M.c==null){let h=0,x0=9,x1=-9,z0=9,z1=-9;for(let i=0;i<M.NV;i++){if(M.WP&&M.WP[i])continue;const x=M.P0[i*3],y=M.P0[i*3+1],z=M.P0[i*3+2];if(y>h)h=y;if(x<x0)x0=x;if(x>x1)x1=x;if(z<z0)z0=z;if(z>z1)z1=z;}M.c=Math.max(h,0.55*Math.max(x1-x0,z1-z0));}
   const S=window.__labSize&&SIZE30[sp]!=null&&!window.__labOldSize?SIZE30[sp]*1.82/M.c:(typeof spScl24==="function"?spScl24(sp):1)*(a.mult||1);   /* 大きさ：人間＝1 の比率（本番 BODY30V2 の「大」）にそろえる */
   const WPn=weaponPlan(sp,M,a.role||"",mode,st),kind=WPn.kind,hideW=WPn.hide;q.sp=sp;q.shield=WPn.shield;
-  drawSkin(q,M,q.X,q.Y,q.Z,a.r||0,S,R,R0S[sp],slime,hideW,RT);if(bip&&kind)monTool(q,R,q.X,q.Y,q.Z,a.r||0,S,mode,kind,RT,st);return true;};
+  q.alpha=GHOST30.test(sp)?0.62:0;drawSkin(q,M,q.X,q.Y,q.Z,a.r||0,S,R,R0S[sp],slime,hideW,RT);if(bip&&kind)monTool(q,R,q.X,q.Y,q.Z,a.r||0,S,mode,kind,RT,st);return true;};
  /* ===== 図鑑（?gallery）：全部の魔物と勇者の3Dを、ポーズを切りかえて見る。?gallery&auto で自動でめぐる（撮影用） ===== */
  const GNOW=()=>window.__galT!=null?window.__galT:performance.now();
  function startGallery(){if(document.getElementById("gal3d"))return;const auto=/auto/.test(location.search);
@@ -16428,7 +16429,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
     const P=window.__labPose(rigOf(sp),st,k,{side,t:T,unarmed:NOWPN30.test(sp)});if(!R0S[sp])R0S[sp]=rigSp24(rigOf(sp),"idle",0);const kit=kitOf24(rigOf(sp)),slime=kit==="slime",bip=!M.pt&&!slime;
     if(st==="knock"||st==="dodge"){} 
     const WPn=weaponPlan(sp,M,pose==="bow"?"bow":"","idle",st),kind=WPn.kind;q.sp=sp;q.shield=WPn.shield;
-    drawSkin(q,M,0,0,0,0,S,P.R,R0S[sp],slime,WPn.hide,P.root);if(bip&&kind)monTool(q,P.R,0,0,0,0,S,"idle",kind,P.root,st);toolDraw(q,new Float32Array(floorV),new Float32Array(floorN),new Float32Array(floorN),new Float32Array(floorC),floorV.length/3);}
+    q.alpha=GHOST30.test(sp)?0.62:0;drawSkin(q,M,0,0,0,0,S,P.R,R0S[sp],slime,WPn.hide,P.root);if(bip&&kind)monTool(q,P.R,0,0,0,0,S,"idle",kind,P.root,st);toolDraw(q,new Float32Array(floorV),new Float32Array(floorN),new Float32Array(floorN),new Float32Array(floorC),floorV.length/3);}
    else{loadMon(sp);}
    window.__galF=(window.__galF||0)+1;requestAnimationFrame(frame);};requestAnimationFrame(frame);
   addEventListener("keydown",e=>{if(e.key==="ArrowRight")go(1);if(e.key==="ArrowLeft")go(-1);});window.__galGo=go;window.__galPose=p=>{pose=p;t0=GNOW();mark();};}

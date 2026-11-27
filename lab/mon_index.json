@@ -285,13 +285,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 0.9,
-  "bytes": 90385,
+  "bytes": 95638,
   "verts": 7000,
   "tris": 13996,
   "full": {
    "file": "mon_gemeater.bin.gz",
    "fmt": "GB01",
-   "bytes": 299947
+   "bytes": 338202
   }
  },
  "ghost": {
@@ -313,13 +313,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 0.7,
-  "bytes": 91365,
+  "bytes": 89729,
   "verts": 7000,
-  "tris": 13996,
+  "tris": 13956,
   "full": {
    "file": "mon_ghostslime.bin.gz",
    "fmt": "GB01",
-   "bytes": 301624
+   "bytes": 338373
   }
  },
  "ghoul": {
@@ -495,13 +495,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 0.9,
-  "bytes": 88520,
+  "bytes": 96823,
   "verts": 7000,
   "tris": 13996,
   "full": {
    "file": "mon_lavaslime.bin.gz",
    "fmt": "GB01",
-   "bytes": 299624
+   "bytes": 347783
   }
  },
  "lich": {
@@ -733,13 +733,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 2.0,
-  "bytes": 95647,
+  "bytes": 103922,
   "verts": 7000,
-  "tris": 13996,
+  "tris": 13858,
   "full": {
    "file": "mon_rotlord.bin.gz",
    "fmt": "GB01",
-   "bytes": 337493
+   "bytes": 522687
   }
  },
  "rotslime": {
@@ -747,13 +747,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 0.8,
-  "bytes": 90167,
+  "bytes": 98682,
   "verts": 7000,
   "tris": 13996,
   "full": {
    "file": "mon_rotslime.bin.gz",
    "fmt": "GB01",
-   "bytes": 300156
+   "bytes": 430535
   }
  },
  "salamander": {
