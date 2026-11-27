@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層67／No.350（11/25 00:49）";
+const VER20 = "層68／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -14718,8 +14718,8 @@ media30(); addEventListener("load", media30); setTimeout(media30, 1500);
 #fp26 .f26where{pointer-events:auto;background:rgba(14,10,8,.7);border:1px solid #6a5444;border-radius:10px;padding:5px 10px;width:auto!important;display:inline-flex;gap:6px;align-items:baseline}
 #fp26 .f26hint{top:auto!important;bottom:calc(150px + env(safe-area-inset-bottom));left:max(14px,env(safe-area-inset-left))!important;background:rgba(14,10,8,.6);padding:4px 8px;border-radius:8px;font-size:12px;transition:opacity .6s}
 #fp26.seen30 .f26hint{opacity:0;pointer-events:none}
-#fp26 .f26map{top:max(8px,env(safe-area-inset-top))!important;right:max(8px,env(safe-area-inset-right))!important;width:112px!important;height:82px!important;border-radius:10px;cursor:pointer;transition:width .2s,height .2s}
-#fp26.mapbig30 .f26map{width:250px!important;height:183px!important;z-index:40}
+#fp26 .f26map{top:max(8px,env(safe-area-inset-top))!important;right:max(8px,env(safe-area-inset-right))!important;width:112px!important;height:82px!important;border-radius:10px;cursor:pointer;transition:width .2s,height .2s;z-index:31;position:absolute;pointer-events:auto!important}
+#fp26.mapbig30 .f26map{width:250px!important;height:183px!important;z-index:40;right:max(118px,calc(env(safe-area-inset-right) + 110px))!important;top:44px!important;box-shadow:0 6px 20px #000a}
 #fp26 .dm30{top:auto;bottom:max(8px,env(safe-area-inset-bottom))!important;right:max(8px,env(safe-area-inset-right))!important;max-width:none!important;display:grid!important;grid-template-columns:repeat(2,48px);grid-auto-rows:46px;gap:4px;padding:5px!important;background:rgba(14,10,8,.55)!important;border-radius:14px}
 #fp26 .dm30 button{min-width:0!important;width:48px;height:46px;padding:2px 0!important;font-size:19px!important;justify-content:center}
 #fp26 .dm30 button small{font-size:10px!important}
