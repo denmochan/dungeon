@@ -14628,6 +14628,8 @@ window.__place30 = function (F, i, R) {
   F.P.auto = null; if (F.go) F.go(i); F.P.x = 0; F.P.z = R.classic ? R.Z + (R.ZS || 0) - 1 : R.Z - L30.CS * 0.6; F.P.y = R.Y; F.P.yaw = 0; if (!R.classic) { try { const G = g30(S, i), mid = (G.W - 1) >> 1, pth = bfs30(G, [mid, 0], [mid, G.H - 1]); let bs = null; if (pth) for (let si = 0; si < Math.min(3, pth.length - 1); si++) { const s0 = pth[si]; let far = null, len = 0; for (let k = si + 1; k < Math.min(pth.length, si + 9); k++) { const q = pth[k]; let ok = true; for (let t = 0.1; t < 1; t += 0.1) { const xx = Math.round(s0[0] + (q[0] - s0[0]) * t), yy = Math.round(s0[1] + (q[1] - s0[1]) * t); if (!g30at(G, xx, yy)) { ok = false; break; } } if (ok) { far = q; len = Math.hypot(q[0] - s0[0], q[1] - s0[1]); } else break; } if (far && (!bs || len > bs.len)) bs = { s0, far, len }; }
             if (bs) { F.P.x = (bs.s0[0] - mid) * L30.CS; F.P.z = R.Z - bs.s0[1] * L30.CS; const tx = (bs.far[0] - mid) * L30.CS, tz = R.Z - bs.far[1] * L30.CS; F.P.yaw = Math.atan2(tx - F.P.x, -(tz - F.P.z)); } } catch (e) {} }      
 };
+/* 感度の窓：ほかの所を押したら閉じる（他のメニューと重なって残らない） */
+document.addEventListener("pointerdown", ev => { const pn = document.querySelector("#fp26 .sens30"); if (!pn) return; const t = ev.target; if (t.closest && (t.closest(".sens30") || t.closest('[data-f="sens"]') || t.closest('[data-d="fpsens30"]'))) return; pn.remove(); }, true);
 
 // ================= night30：夜、勇者は層の中の道を1マスずつ進む =================
 // 計算の中身（戦い・罠の強さ）は今までのものを使う。そのうえで：
