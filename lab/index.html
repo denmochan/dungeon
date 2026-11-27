@@ -16326,10 +16326,10 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
   else if(st==="bowdraw"){R=bip?rigLerp(rg("idle",T),rg("cast",0.3),ease(k)):rg("idle",T);root.pitch=-0.05*k;}
   else if(st==="bowshoot"){R=bip?rg("cast",0.3+0.5*ease(k)):rg("idle",T);root.dz=-0.08*sn1(k);}
   else if(st==="dodge"){R=bip?rg("walk",0.2):rg("idle",T);root.dx=side*0.95*ease(k);root.dy=0.32*sn1(k);root.roll=-side*0.32*sn1(k);}   /* 横へ跳ぶ */
-  else if(st==="knock"){R=bip?rg("hurt",0.3):rg("idle",T);const f=ease(Math.min(1,k*1.3));root.dz=-1.8*f;root.dy=0.7*sn1(k)*(1-k*0.5);root.pitch=-0.9*sn1(Math.min(1,k*1.2)*0.85);}   /* 後ろへ吹っ飛ぶ */
+  else if(st==="knock"){R=bip?rg("hurt",0.3):rg("idle",T);const f=ease(Math.min(1,k*1.3));root.dz=-1.8*f;root.dy=0.7*sn1(k)*(1-k*0.5);root.pitch=(bip?-0.9:-0.35)*sn1(Math.min(1,k*1.2)*0.85);if(!bip)root.roll=0.5*sn1(k);}   /* 後ろへ吹っ飛ぶ */
   else if(st==="stagger"){R=bip?rg("hurt",0.1+0.2*sn1(k)):rg("idle",T);root.roll=0.18*Math.sin(k*Math.PI*3)*(1-k);root.pitch=-0.12*sn1(k);root.dz=-0.25*ease(k);}
   else if(st==="tired"){R=rg("idle",T*0.5);root.pitch=0.14;root.dy=-0.04+0.025*Math.sin(T*6);}   /* 前かがみで肩で息をする */
-  else if(st==="down"){R=bip?rg("hurt",0.3):rg("idle",0);const f=ease(k);root.pitch=-1.45*f;root.dz=-0.15*f;root.dy=0.06*f;}   /* あおむけに倒れる */
+  else if(st==="down"){R=bip?rg("hurt",0.3):rg("idle",0);const f=ease(k);if(bip){root.pitch=-1.45*f;root.dz=-0.15*f;root.dy=0.06*f;}else{root.roll=1.5*f;root.dy=0.05*f;}}   /* 人の形はあおむけ、四つ足などは横だおし */   /* あおむけに倒れる */
   else R=rg("idle",T);
   return{R,root};};
  const rootM=r=>{if(!r)return null;const cp=Math.cos(r.pitch||0),sp=Math.sin(r.pitch||0),cr=Math.cos(r.roll||0),sr=Math.sin(r.roll||0);   /* 足もと中心：前後（x軸まわり、＋で前へ倒れる）→左右（z軸まわり） */
@@ -16343,7 +16343,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
   if(!R0S[sp])R0S[sp]=rigSp24(sp,"idle",0);
   if(M.c==null){let h=0,x0=9,x1=-9,z0=9,z1=-9;for(let i=0;i<M.NV;i++){if(M.WP&&M.WP[i])continue;const x=M.P0[i*3],y=M.P0[i*3+1],z=M.P0[i*3+2];if(y>h)h=y;if(x<x0)x0=x;if(x>x1)x1=x;if(z<z0)z0=z;if(z>z1)z1=z;}M.c=Math.max(h,0.55*Math.max(x1-x0,z1-z0));}
   const S=window.__labSize&&SIZE30[sp]!=null&&!window.__labOldSize?SIZE30[sp]*1.82/M.c:(typeof spScl24==="function"?spScl24(sp):1)*(a.mult||1);   /* 大きさ：人間＝1 の比率（本番 BODY30V2 の「大」）にそろえる */
-  const role=a.role||"",bowR=role==="bow"||role==="snipe",kind=mode==="mine"?"pick":bowR?"bow":MAGIC30.test(sp)?(M.hasW?null:"staff"):(M.hasW?null:"sword"),hideW=mode==="mine"||(M.hasW&&bowR);
+  const role=a.role||"",bowR=role==="bow"||role==="snipe",kind=st==="down"?null:mode==="mine"?"pick":bowR?"bow":MAGIC30.test(sp)?(M.hasW?null:"staff"):(M.hasW?null:"sword"),hideW=mode==="mine"||(M.hasW&&bowR);
   drawSkin(q,M,q.X,q.Y,q.Z,a.r||0,S,R,R0S[sp],slime,hideW,RT);if(bip&&kind)monTool(q,R,q.X,q.Y,q.Z,a.r||0,S,mode,kind,RT,st);return true;};
  /* ===== 図鑑（?gallery）：全部の魔物と勇者の3Dを、ポーズを切りかえて見る。?gallery&auto で自動でめぐる（撮影用） ===== */
  function startGallery(){if(document.getElementById("gal3d"))return;const auto=/auto/.test(location.search);
@@ -16377,7 +16377,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
     else if(pose==="knock"){const c=T%2.2;st=c<0.9?"knock":"idle";k=c/0.9;}else if(pose==="stagger"){const c=T%1.6;st=c<1?"stagger":"idle";k=c;}else if(pose==="tired")st="tired";else if(pose==="down"){st="down";k=Math.min(1,(T%3)/0.8);}else st="idle";
     const P=window.__labPose(sp,st,k,{side,t:T});if(!R0S[sp])R0S[sp]=rigSp24(sp,"idle",0);const kit=kitOf24(sp),slime=kit==="slime",bip=!M.pt&&!slime;
     if(st==="knock"||st==="dodge"){} 
-    const bowR=pose==="bow",kind=bowR?"bow":MAGIC30.test(sp)?(M.hasW?null:"staff"):(M.hasW?null:"sword");
+    const bowR=pose==="bow",kind=st==="down"?null:bowR?"bow":MAGIC30.test(sp)?(M.hasW?null:"staff"):(M.hasW?null:"sword");
     drawSkin(q,M,0,0,0,0,S,P.R,R0S[sp],slime,M.hasW&&bowR,P.root);if(bip&&kind)monTool(q,P.R,0,0,0,0,S,"idle",kind,P.root,st);toolDraw(q,new Float32Array(floorV),new Float32Array(floorN),new Float32Array(floorN),new Float32Array(floorC),floorV.length/3);}
    else{loadMon(sp);}
    requestAnimationFrame(frame);};requestAnimationFrame(frame);
