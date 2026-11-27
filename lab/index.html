@@ -6,7 +6,7 @@
 (()=>{try{const ls=window.localStorage,P="lab1_",pr=Storage.prototype,g=pr.getItem,st=pr.setItem,rm=pr.removeItem,ky=pr.key;
  if(g.call(ls,P+"__init")!=="1"){const ks=[];for(let i=0;i<ls.length;i++)ks.push(ky.call(ls,i));ks.forEach(k=>{if(k&&!k.startsWith(P))st.call(ls,P+k,g.call(ls,k));});st.call(ls,P+"__init","1");}
  pr.getItem=function(k){return g.call(this,P+k)};pr.setItem=function(k,v){return st.call(this,P+k,v)};pr.removeItem=function(k){return rm.call(this,P+k)};}catch(e){}
- window.__R2=2;})();
+ window.__R2=2;window.__labCove=1;})();
 </script>
 <base href="../">
 <meta charset="utf-8">
@@ -13756,8 +13756,8 @@ function fpOpen30(){
 #endif
         float lw=0.01+0.012*h(vec3(bi,9.9)); float ink=1.0-smoothstep(lw,lw+fw,ed);
         ink*=smoothstep(0.3,0.55,n3(vec3(q*1.8,5.0)));   /* 線はところどころ途切れさせる（全部閉じた線だと石垣・タイルに見える） */
-        ink*=kw>0.5?0.5:(kc>0.5?0.35:0.14);
-        float pw=kw>0.5?0.28:(kc>0.5?0.3:0.12);
+        ink*=kw>0.5?0.5:(kc>0.5?0.35:0.0);
+        float pw=kw>0.5?0.28:(kc>0.5?0.3:0.07);
         cellOn=1.0; cellN=-(T1*bo.x*cs.x+T2*bo.y*cs.y)*pw*smoothstep(0.0,0.35,ed);   /* 塊ごとに丸くふくらんだ陰 */
         inkA=ink; }   /* 壁：地層のような横じま（段々の岩）と、暗いすき間 */
       if(rel<0.12){ float pb=n3(vw*vec3(5.5,1.0,5.5)); if(R2<1.5) bc*=mix(1.0,1.15,smoothstep(0.72,0.8,pb)); float wet=fb(vw*0.5+11.0); bc=mix(bc,bc*vec3(0.78,0.8,0.9),smoothstep(0.55,0.75,wet)*0.6); }
@@ -14091,10 +14091,12 @@ function fpOpen30(){
           else if (v > Lr) { x = T0[0] - n2[0] * 0.06; y = T0[1] + 0.25; z = T0[2] - n2[1] * 0.06; ao = 0.7; }      /* 天井の上へもぐる すそ */
           else { const s2 = v / Lr; x = B0[0] + (T0[0] - B0[0]) * s2; y = B0[1] + (T0[1] - B0[1]) * s2; z = B0[2] + (T0[2] - B0[2]) * s2; const yr = y - B0[1], q = disp(x, y, z, yr, H); d = q.d; band = q.band;
             x += n2[0] * d; z += n2[1] * d;
+            { const Rc = Math.min(0.75, H * 0.24), u = (yr - (H - Rc)) / Rc; if (u > 0) { const ins = Rc * (1 - Math.sqrt(Math.max(0, 1 - Math.min(1, u) ** 2))) * window.__labCove; x += n2[0] * ins; z += n2[1] * ins; } }   /* 壁の上を内側へ丸く曲げて天井へなめらかにつなぐ（天井が「ふた」に見えないように） */
             const hv = s2 < 0.15 ? 0.5 + s2 / 0.15 * 0.35 : s2 > 0.85 ? 0.85 - (s2 - 0.85) / 0.15 * 0.1 : 0.85 + 0.15 * Math.sin((s2 - 0.15) / 0.7 * Math.PI);
             ao = hv; }
           const tint = [1, 1, 1], sh = ao;
-          P.push(x, y - Rm.Y, z - Rm.Z); C.push(...WC.map((c, q) => Math.min(255, c * tint[q] * sh))); row.push(P.length / 3 - 1); WN[P.length / 3 - 1] = n2; }
+          let cvx = 0; if (v >= 0 && v <= Lr) { const Rc = Math.min(0.75, H * 0.24), u = (y - B0[1] - (H - Rc)) / Rc; cvx = Math.max(0, Math.min(1, u)) ** 1.5 * 0.85 * window.__labCove; }   /* 丸めた所は天井の色へなじませる */
+          P.push(x, y - Rm.Y, z - Rm.Z); C.push(...WC.map((c, q) => Math.min(255, (c * sh * (1 - cvx) + CC[q] * 0.75 * cvx) * tint[q]))); row.push(P.length / 3 - 1); WN[P.length / 3 - 1] = n2; }
         ids.push(row); }
       for (let m = 0; m < M; m++) for (let v = 0; v < ids[m].length - 1; v++) { const p0 = ids[m][v], p1 = ids[m + 1][v], q0 = ids[m][v + 1], q1 = ids[m + 1][v + 1]; I.push(p0, q0, p1, p1, q0, q1); } };   /* 洞窟：壁は灰色の岩、床は土の茶色、天井は暗い色 */
     for (let j = 0; j < NZ - 1; j++) for (let i = 0; i < NX - 1; i++) { const X = [x0 + i * r, x0 + (i + 1) * r, x0 + (i + 1) * r, x0 + i * r], Z = [ZS[j], ZS[j], ZS[j + 1], ZS[j + 1]], V = [occ[j * NX + i], occ[j * NX + i + 1], occ[(j + 1) * NX + i + 1], occ[(j + 1) * NX + i]];
