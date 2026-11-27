@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層93／No.350（11/25 00:49）";
+const VER20 = "層94／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -14098,8 +14098,17 @@ function fpOpen30(){
   function layerAtZ30(z) { let best = 0, bd = 1e9; rooms.forEach((R, i) => { const G = g30(S, i), z0 = R.Z, z1 = R.classic ? R.Z + (FPK26.RZ0 || 0) : R.Z - (G.H - 0.5) * L30.CS, d = z > z0 ? z - z0 : z < z1 ? z1 - z : 0; if (d < bd) { bd = d; best = i; } }); return best; }
   function camPan30(dx, dz) { const O = window.__ovh30; if (!O || !O.t) return; O.ut = performance.now(); const zs = rooms.map(R => R.Z), zmax = Math.max(...zs) + 2, zmin = Math.min(...rooms.map((R, i) => R.classic ? R.Z + (FPK26.RZ0 || -20) : R.Z - g30(S, i).H * L30.CS)) - 2, xm = 7.5 * L30.CS; O.t[0] = Math.max(-xm, Math.min(xm, O.t[0] + dx)); O.t[2] = Math.max(zmin, Math.min(zmax, O.t[2] + dz)); O.li = layerAtZ30(O.t[2]); }
   /* 夜のカメラ：さわっていない間は、勇者たちの方へゆっくり寄っていく（遠くで小さく戦っていて見えなかった）。指で動かしたら4秒はそのまま */
-  function autoCam30(dt) { const O = window.__ovh30; if (!O || !O.free || !O.t || !N) return; if (O.ut && performance.now() - O.ut < 4000) return; let sx = 0, sy = 0, sz = 0, c = 0, li = null; rooms.forEach((Rm, i) => (Rm.acts || []).forEach(a => { if (!a.hero || (a.al30 ?? 1) <= 0) return; sx += a.x; sz += Rm.Z + a.z; c++; if (li == null) li = i; })); if (!c) return;
-    const k = Math.min(1, dt * 1.1); O.t[0] += (sx / c - O.t[0]) * k; O.t[2] += (sz / c - O.t[2]) * k; if (li != null) O.li = li; O.z += (1.3 - O.z) * Math.min(1, dt * 0.7); }
+  /* 夜のカメラ：戦っている所へ寄る（本人：戦闘はこだわる）。
+     戦っている勇者と魔物の真ん中に寄り、広がりに合わせて寄り具合を変える。戦いがなければ先頭の勇者を追う。指でさわったら4秒はそのまま */
+  function autoCam30(dt) { const O = window.__ovh30; if (!O || !O.free || !O.t || !N) return; if (O.ut && performance.now() - O.ut < 4000) return;
+    const groups = []; rooms.forEach((Rm, i) => { const acts = Rm.acts || [], fight = acts.filter(a => (a.al30 ?? 1) > 0 && !a.hide && ((a.hero && a.bt && a.face) || (!a.hero && a.tg))); if (fight.length >= 2) groups.push({ i, Rm, a: fight }); });
+    let tx, tz, li, zw;
+    if (groups.length) { const cur = O.li ?? curRoom; groups.sort((p, q) => (p.i === cur ? 0 : 1) - (q.i === cur ? 0 : 1) || q.a.length - p.a.length); const g = groups[0]; let sx = 0, sz = 0; g.a.forEach(a => { sx += a.x; sz += a.z; }); tx = sx / g.a.length; tz = g.Rm.Z + sz / g.a.length; li = g.i;
+      let sp = 0; g.a.forEach(a => { sp = Math.max(sp, Math.hypot(a.x - (tx), g.Rm.Z + a.z - tz)); }); zw = Math.max(0.82, Math.min(1.2, 0.65 + sp / 10)); O.fz30 = performance.now(); }
+    else { let best = null; rooms.forEach((Rm, i) => (Rm.acts || []).forEach(a => { if (!a.hero || (a.al30 ?? 1) <= 0 || a.hide) return; const h = a.h || {}; if (h.walk != null || h.st === "escaped") return;   /* 層のあいだの通路を歩いている子は追わない（通路が真っ暗に映っていた） */ const sc = i * 1000 + ((h.p30 && h.p30.k) || 0); if (!best || sc > best.sc) best = { sc, a, Rm, i }; }));
+      if (best) { tx = best.a.x; tz = best.Rm.Z + best.a.z; li = best.i; } zw = performance.now() - (O.fz30 || 0) < 1500 ? O.z : 0.95; }
+    { const LI3 = rooms.findIndex(R => R.classic), RL = rooms[LI3]; if (RL && N.heroes.some(h => (h.st === "in" || h.st === "hold30") && h.pos === LI3)) { tx = 0; tz = RL.Z + (FPK26.RZ0 || -10) * 0.5; li = LI3; zw = 1; } } if (tx == null) return;   /* 主の間に勇者が来たら、主の間の決まった見え方で（画面が真っ暗になっていた） */
+    const k = Math.min(1, dt * 2.2); O.t[0] += (tx - O.t[0]) * k; O.t[2] += (tz - O.t[2]) * k; O.li = li; O.z += (zw - O.z) * Math.min(1, dt * 1.4); }
   function nightCam30(init) { const O = window.__ovh30 && window.__ovh30.free ? window.__ovh30 : (window.__ovh30 = { free: 1, yaw: Math.PI, up: 6.5, back: 11, cut: 2.4, big: 1.4, z: 1 }); let tg = null; N.heroes.forEach(h => { if (tg || !(h.st === "in" || h.st === "hold30")) return; const a = heroAt(h); if (a) tg = [a.x, rooms[a.i].Y, rooms[a.i].Z + a.z, a.i]; });
     if (init || !tg) { const i = tg ? tg[3] : init ? 0 : Math.min(rooms.length - 1, Math.max(0, curRoom)),   /* 夜の始まりはいつも入口から（本人：毎回入口へ飛ぶのがだるい） */ R = rooms[i], G = g30(S, i); O.t = R.classic ? [0, R.Y, R.Z + (FPK26.RZ0 || -10) * 0.5] : [0, R.Y, R.Z - (G.H - 1) / 2 * L30.CS]; O.li = i; if (init) { O.z = 1.7; O.ut = performance.now() - 2000; } } else { O.t = tg.slice(0, 3); O.li = tg[3]; O.z = Math.min(O.z, 1); } }
   // 画面に映す
@@ -14540,6 +14549,21 @@ window.__place30 = function (F, i, R) {
 };
 /* 感度の窓：ほかの所を押したら閉じる（他のメニューと重なって残らない） */
 document.addEventListener("pointerdown", ev => { const pn = document.querySelector("#fp26 .sens30"); if (!pn) return; const t = ev.target; if (t.closest && (t.closest(".sens30") || t.closest('[data-f="sens"]') || t.closest('[data-d="fpsens30"]'))) return; pn.remove(); }, true);
+/* 夜：勝ち負けのバー（本人：戦闘はこだわる）。左＝勇者の残り体力、右＝魔物と主の残り体力。真ん中から左右にのびる。数字は残りの人数・体数 */
+{ const st = document.createElement("style"); st.textContent = `#fp26 .vs30{position:absolute;left:50%;transform:translateX(-50%);bottom:max(10px,env(safe-area-inset-bottom));width:min(420px,48%);z-index:30;pointer-events:none;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#f3e6cf;text-shadow:0 1px 2px #000}
+#fp26 .vs30 .bar{flex:1;height:12px;display:flex;background:#0009;border:1px solid #6a5444;border-radius:7px;overflow:hidden;box-shadow:0 2px 8px #000a}
+#fp26 .vs30 .h,#fp26 .vs30 .m{flex:1;display:flex}#fp26 .vs30 .h{justify-content:flex-end;border-right:2px solid #f3e6cf}
+#fp26 .vs30 .h i{background:linear-gradient(#7fb8ff,#3c6fc4);transition:width .35s}#fp26 .vs30 .m i{background:linear-gradient(#ff8a6a,#b8341f);transition:width .35s}
+#fp26 .vs30 .h i.hit,#fp26 .vs30 .m i.hit{filter:brightness(1.9)}
+#fp26 .vs30 b{min-width:42px;text-align:center;white-space:nowrap}#fp26 .vs30 b.l{color:#a9ccff}#fp26 .vs30 b.r{color:#ffb39e}
+#fp26:not(.night30) .vs30{display:none}`; document.head.appendChild(st); }
+setInterval(() => { try { const w = document.getElementById("fp26"); if (!w) return; let el = w.querySelector(".vs30"); if (typeof N === "undefined" || !N || N.scout) { if (el) el.remove(); return; }
+  if (!el) { el = document.createElement("div"); el.className = "vs30"; el.innerHTML = `<b class="l"></b><div class="bar"><div class="h"><i></i></div><div class="m"><i></i></div></div><b class="r"></b>`; w.appendChild(el); }
+  const H = N.heroes.filter(h => h.st !== "escaped" && h.st !== "dead"), hp = H.reduce((s, h) => s + Math.max(0, h.hp), 0), hm = N.heroes.reduce((s, h) => s + (h.max || 1), 0), hn = N.heroes.filter(h => h.st !== "escaped" && h.st !== "dead" && h.hp > 0).length;
+  const M = (N.mons || []).filter(m => m.hp > 0), mp = M.reduce((s, m) => s + m.hp, 0) + Math.max(0, (N.lord || {}).hp || 0), mm = (N.mons || []).reduce((s, m) => s + (m.max || 1), 0) + ((N.lord || {}).max || 1);
+  const hr = Math.max(0, Math.min(1, hp / hm)), mr = Math.max(0, Math.min(1, mp / mm)), hi = el.querySelector(".h i"), mi = el.querySelector(".m i");
+  const flash = (e, v) => { const o = +e.dataset.v || 1; if (v < o - 0.004) { e.classList.add("hit"); setTimeout(() => e.classList.remove("hit"), 160); } e.dataset.v = v; e.style.width = (v * 100).toFixed(1) + "%"; };
+  flash(hi, hr); flash(mi, mr); el.querySelector(".l").textContent = `勇者 ${hn}`; el.querySelector(".r").textContent = `${M.length}体 ＋主`; } catch (e) {} }, 200);
 
 // ================= night30：夜、勇者は層の中の道を1マスずつ進む =================
 // 計算の中身（戦い・罠の強さ）は今までのものを使う。そのうえで：
@@ -14994,6 +15018,11 @@ html.land30 .raidban{max-width:calc(100vh - 24px)!important}`; document.head.app
 /* 結果・朝の画面：下に止まる「つづける」の後ろに暗い帯を敷く（下の中身と重なって、ちぎれて見えていた。帯の下は続きがあると分かる） */
 { const st = document.createElement("style"); st.textContent = `.stage.result>button[data-a="stagenext"]{isolation:isolate}
 .stage.result>button[data-a="stagenext"]::before{content:"";position:absolute;left:-60vmax;right:-60vmax;top:-16px;bottom:-12px;background:linear-gradient(#140a0800,#140a08e6 45%,#140a08);z-index:-2;pointer-events:none}.stage.result>button[data-a="stagenext"]{background:none!important}.stage.result>button[data-a="stagenext"]::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(#a8402c,#6e1f15);z-index:-1;pointer-events:none}`; document.head.appendChild(st); }
+/* 夜のボタン（横持ち）：右下に縦長に4つ並んで戦場の右を覆っていた → 右下に横1列で小さく・半透明 */
+{ const st = document.createElement("style"); st.textContent = `@media (orientation:landscape) and (max-height:500px){
+#fp26 .nc30{grid-template-columns:repeat(4,auto)!important;gap:3px!important;padding:3px!important;background:rgba(14,10,8,.55)!important;opacity:.9}
+#fp26 .nc30 button{height:32px!important;min-width:40px!important;padding:0 7px!important;font-size:12px!important;grid-column:auto!important;white-space:nowrap}
+#fp26 .vs30{left:36%!important;width:min(340px,40%)!important}}`; document.head.appendChild(st); media30(); }
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------
