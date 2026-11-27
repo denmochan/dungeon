@@ -15034,6 +15034,11 @@ diffScreen15 = (prev => function () { const h = prev.apply(this, arguments); try
 .mbox:has([data-a="xcopy20"])>:nth-child(3){grid-column:1;grid-row:3}.mbox:has([data-a="xcopy20"])>:nth-child(4){grid-column:1;grid-row:4}.mbox:has([data-a="xcopy20"])>:nth-child(5){grid-column:1;grid-row:5}
 .mbox:has([data-a="xcopy20"])>:nth-child(6){grid-column:2;grid-row:3}.mbox:has([data-a="xcopy20"])>:nth-child(7){grid-column:2;grid-row:4}.mbox:has([data-a="xcopy20"])>[data-a="xpaste20"]{grid-column:2;grid-row:5}.mbox:has([data-a="xcopy20"])>[data-a="xload20"]{grid-column:2;grid-row:6}.mbox:has([data-a="xcopy20"])>.hint.bad{grid-column:1/-1;grid-row:7}
 }`; document.head.appendChild(st); media30(); }
+/* 特訓・スキルの書（横持ち）：1列で横がガラ空き、2つしか見えなかった → 3列／2列 */
+{ const st = document.createElement("style"); st.textContent = `@media (orientation:landscape) and (max-height:500px){
+.tkl28{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));max-height:calc(100dvh - 130px)!important;align-content:start}
+.tkr28{padding:3px 5px!important;gap:6px!important}.tkr28 button{min-width:0!important;padding:4px 8px!important}
+}`; document.head.appendChild(st); media30(); }
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------
