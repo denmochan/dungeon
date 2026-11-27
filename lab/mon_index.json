@@ -268,16 +268,17 @@
  "gargoyle": {
   "file": "lite/mon_gargoyle.bin.gz",
   "fmt": "GB03",
-  "kind": "pointskin",
+  "kind": "biped+weapon",
   "scale": 1.3,
-  "bytes": 90497,
-  "verts": 7000,
-  "tris": 13913,
+  "bytes": 123068,
+  "verts": 8000,
+  "tris": 15981,
   "full": {
    "file": "mon_gargoyle.bin.gz",
-   "fmt": "GB02",
-   "bytes": 366322
-  }
+   "fmt": "GB1W",
+   "bytes": 772333
+  },
+  "shape": "imp"
  },
  "gemeater": {
   "file": "lite/mon_gemeater.bin.gz",
@@ -760,13 +761,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 1.1,
-  "bytes": 94132,
+  "bytes": 103281,
   "verts": 7000,
-  "tris": 13996,
+  "tris": 13992,
   "full": {
    "file": "mon_salamander.bin.gz",
    "fmt": "GB02",
-   "bytes": 255617
+   "bytes": 387522
   }
  },
  "sapper": {

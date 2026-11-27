@@ -24,6 +24,10 @@ D[:,2]+=0.03               # 首は弱め
 o=np.argsort(D,1)[:,:2];d1=np.take_along_axis(D,o,1)
 w=np.exp(-(d1-d1[:,:1])/0.035);w/=w.sum(1,keepdims=True)
 HASW='wpn' in d.files and d['wpn'].sum()>0
+if 'mat' in d.files:   # 足した形（材質15以上：翼・角・尾など）は、頭の近くなら頭、ほかは胴にかたく付ける
+    mx=d['mat']>=15
+    if mx.any():
+        nh=np.linalg.norm(P-J[2],axis=1)<0.5;bx=np.where(nh,1,0);o[mx,0]=bx[mx];o[mx,1]=bx[mx];w[mx,0]=1.0;w[mx,1]=0.0
 if HASW:   # 武器・盾・弓は、近いほうの手の前腕にかたく付ける
     m=d['wpn']>0;hl=np.linalg.norm(P-J[5],axis=1);hr=np.linalg.norm(P-J[8],axis=1);bn=np.where(hl<hr,4,6)
     o[m,0]=bn[m];o[m,1]=bn[m];w[m,0]=1.0;w[m,1]=0.0

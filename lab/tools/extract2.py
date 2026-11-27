@@ -7,9 +7,27 @@ SAMP_MAIN=sh0['samp'][10047:];COLR_MAIN=sh0['colr'][10047:]
 with sync_playwright() as p:
     b=p.chromium.launch(executable_path='/usr/bin/google-chrome',args=['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--ignore-gpu-blocklist','--no-sandbox'])
     pg=b.new_page();pg.goto('http://localhost:8777/lab/');pg.wait_for_timeout(2500)
-    info=pg.evaluate("""sp=>{const fs=makeFS24("train",[{sp}],1),kit=kitOf24(sp);const R=rigSp24(sp,'idle',0);
-      return {fs,kit,FI:(FACEIDX24[kit]??-1),col:spCol24(sp),vr:(typeof varOf24!=='undefined'?varOf24(sp,0):spVar24(sp)),scl:spScl24(sp),J:R.J,HR:R.HR,TR:R.TR,tool:R.tool,deb:R.deb||[]}}""",sp)
-    fs=info['fs'];i=fs.index('void main(){')
+    import os
+    SHAPE=os.environ.get('SHAPE',sp)   # 形は別の種族から借りる（色・服は sp のまま）
+    info=pg.evaluate("""([sp,sh])=>{const fs=makeFS24("train",[{sp:sh}],1),kit=kitOf24(sh);const R=rigSp24(sh,'idle',0);
+      return {fs,kit,FI:(FACEIDX24[kit]??-1),col:spCol24(sp),vr:(typeof varOf24!=='undefined'?varOf24(sp,0):spVar24(sp)),scl:spScl24(sp),J:R.J,HR:R.HR,TR:R.TR,tool:R.tool,deb:R.deb||[]}}""",[sp,SHAPE])
+    fs=info['fs']
+    import os
+    XT=os.environ.get('XTRA')
+    if XT:   # 形を足す・けずる（種族ごとの GLSL：xbody・xmod・xcol・XK）
+        def fend(src,start):
+            k=src.index('{',start);dep=0
+            for q in range(k,len(src)):
+                if src[q]=='{':dep+=1
+                elif src[q]=='}':
+                    dep-=1
+                    if dep==0:return q+1
+        snip=open(XT).read()
+        a0=fs.index('vec2 body(vec3 p){');fs=fs[:a0]+'vec2 body0(vec3 p){'+fs[a0+len('vec2 body(vec3 p){'):];e=fend(fs,a0)
+        fs=fs[:e]+'\n'+snip+'\nvec2 body(vec3 p){vec2 b=xmod(body0(p),p);vec2 x=xbody(p);float d=smin(b.x,x.x,XK);return vec2(d,x.x<b.x?x.y:b.y);}\n'+fs[e:]
+        c0=fs.index('vec4 charCol(vec3 p,vec3 n,float m){');fs=fs[:c0]+'vec4 charCol0(vec3 p,vec3 n,float m){'+fs[c0+len('vec4 charCol(vec3 p,vec3 n,float m){'):];e=fend(fs,c0)
+        fs=fs[:e]+'\nvec4 charCol(vec3 p,vec3 n,float m){if(m>14.5)return xcol(p,n,m);return charCol0(p,n,m);}\n'+fs[e:]
+    i=fs.index('void main(){')
     sh={'vs':sh0['vs'],'samp':fs[:i]+SAMP_MAIN,'colr':fs[:i]+COLR_MAIN}
     pack={'face':pk0['face'],'faceIdx':info['FI']}
     rig={'J':info['J'],'HR':info['HR'],'TR':info['TR']};L={'col':info['col'],'vr':info['vr']}
