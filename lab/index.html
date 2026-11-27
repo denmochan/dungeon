@@ -16234,7 +16234,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
  /* ===== ほかの魔物も同じ作り方の3Dで描く（ガイコツ・スライム…）。ファイルがある種族だけ。ない種族は今までの絵 ===== */
  const MS={};
  const baseSp=sp=>String(sp||"").replace(/\d+$/,"");   /* 勇者の色ちがい（warrior2 など）は同じ形 */
- const loadMon=sp=>{if(MS[sp])return MS[sp];const M=MS[sp]={ok:false};(async()=>{try{const LT=window.__labLite||/[?&]lite/.test(location.search),r=await fetch((LT?"lab/lite/":"lab/")+(sp==="goblin"?"gob3d.bin.gz":"mon_"+sp+".bin.gz"));if(!r.ok)throw new Error(r.status);const buf=await new Response(r.body.pipeThrough(new DecompressionStream("gzip"))).arrayBuffer();
+ const loadMon=sp=>{if(MS[sp])return MS[sp];const M=MS[sp]={ok:false};(async()=>{try{const LT=window.__labLite!==false&&!/[?&]full/.test(location.search),r=await fetch((LT?"lab/lite/":"lab/")+(sp==="goblin"?"gob3d.bin.gz":"mon_"+sp+".bin.gz"));if(!r.ok)throw new Error(r.status);const buf=await new Response(r.body.pipeThrough(new DecompressionStream("gzip"))).arrayBuffer();
    const mg=String.fromCharCode(...new Uint8Array(buf.slice(0,4)));
    if(mg==="GB03"){const dv=new DataView(buf),NV=dv.getUint32(4,true),NT=dv.getUint32(8,true),fl=dv.getUint8(12);let o=13;M.pt=fl===1;M.hasW=fl===2;   /* 軽い版 */
     const q=[0,1,2].map(()=>{const a=new Int16Array(buf.slice(o,o+NV*2));o+=NV*2;return a;}),P0=M.P0=new Float32Array(NV*3);let ax=0,ay=0,az=0;for(let i=0;i<NV;i++){ax+=q[0][i];ay+=q[1][i];az+=q[2][i];P0[i*3]=ax*0.0005;P0[i*3+1]=ay*0.0005;P0[i*3+2]=az*0.0005;}
@@ -16354,7 +16354,8 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
  const R0S={};
  const MAGIC30=/lich|eye|shaman|ogremage|wraitheye|mindlord|ifrit|maou|imp|ghost/;
  /* 何を持たせるか：作りこんだ武器に持ちかえる（焼きこんだ武器はその手の分だけ隠す）。弓役は弓、魔法の子と魔法使い・僧侶は杖、盗賊は短剣、ほかは剣 */
- const weaponPlan=(sp,M,role,mode,st)=>{if(st==="down")return{kind:null,hide:0};if(mode==="mine")return{kind:"pick",hide:1};
+ const NOWPN30=/golem|gargoyle|vaultkeeper|hauntchest|mimic|ghoul/;   /* 素手で戦う子（石の体・爪） */
+ const weaponPlan=(sp,M,role,mode,st)=>{if(st==="down")return{kind:null,hide:0};if(mode==="mine")return{kind:"pick",hide:1};if(NOWPN30.test(sp))return{kind:null,hide:0};
   if(role==="bow"||role==="snipe"||sp==="hunter")return{kind:"bow",hide:M.hasW?1:0};if(MAGIC30.test(sp)||sp==="mage"||sp==="priest")return{kind:"staff",hide:M.hasW?6:0};
   if(sp==="thief")return{kind:"dagger",hide:M.hasW?6:0};if(/^(warrior|knight|slimeknight)$/.test(sp))return{kind:"sword",hide:1,shield:1};return{kind:"sword",hide:M.hasW?6:0};};
  window.__labMonDraw=q=>{if((window.__R2||0)<0.5||window.__labMonOff)return false;const a=q.a,sp=baseSp(a.sp),M=MS[sp]||loadMon(sp);if(!M||!M.ok||typeof rigSp24!=="function")return false;

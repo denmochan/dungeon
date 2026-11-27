@@ -1,0 +1,1052 @@
+{
+ "goblin": {
+  "file": "lite/gob3d.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped",
+  "scale": 0.7,
+  "bytes": 108940,
+  "verts": 7000,
+  "tris": 13992,
+  "full": {
+   "file": "gob3d.bin.gz",
+   "fmt": "GB01",
+   "bytes": 551161
+  }
+ },
+ "bat": {
+  "file": "lite/mon_bat.bin.gz",
+  "fmt": "GB03",
+  "kind": "pointskin",
+  "scale": 0.35,
+  "bytes": 77149,
+  "verts": 7000,
+  "tris": 13891,
+  "full": {
+   "file": "mon_bat.bin.gz",
+   "fmt": "GB02",
+   "bytes": 188035
+  }
+ },
+ "berserker": {
+  "file": "lite/mon_berserker.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped+weapon",
+  "scale": 1.3,
+  "bytes": 112823,
+  "verts": 7000,
+  "tris": 14024,
+  "full": {
+   "file": "mon_berserker.bin.gz",
+   "fmt": "GB1W",
+   "bytes": 992372
+  }
+ },
+ "bogtroll": {
+  "file": "lite/mon_bogtroll.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped",
+  "scale": 1.7,
+  "bytes": 111265,
+  "verts": 7000,
+  "tris": 13996,
+  "full": {
+   "file": "mon_bogtroll.bin.gz",
+   "fmt": "GB01",
+   "bytes": 666564
+  }
+ },
+ "bonedragon": {
+  "file": "lite/mon_bonedragon.bin.gz",
+  "fmt": "GB03",
+  "kind": "pointskin",
+  "scale": 4.0,
+  "bytes": 129629,
+  "verts": 8000,
+  "tris": 15968,
+  "full": {
+   "file": "mon_bonedragon.bin.gz",
+   "fmt": "GB02",
+   "bytes": 972113
+  }
+ },
+ "bonewarden": {
+  "file": "lite/mon_bonewarden.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped+weapon",
+  "scale": 1.3,
+  "bytes": 106046,
+  "verts": 7000,
+  "tris": 14008,
+  "full": {
+   "file": "mon_bonewarden.bin.gz",
+   "fmt": "GB1W",
+   "bytes": 358884
+  }
+ },
+ "chimera": {
+  "file": "lite/mon_chimera.bin.gz",
+  "fmt": "GB03",
+  "kind": "pointskin",
+  "scale": 2.2,
+  "bytes": 105825,
+  "verts": 7000,
+  "tris": 13996,
+  "full": {
+   "file": "mon_chimera.bin.gz",
+   "fmt": "GB02",
+   "bytes": 528701
+  }
+ },
+ "count": {
+  "file": "lite/mon_count.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped",
+  "scale": 1.0,
+  "bytes": 122957,
+  "verts": 8000,
+  "tris": 15858,
+  "full": {
+   "file": "mon_count.bin.gz",
+   "fmt": "GB01",
+   "bytes": 952701
+  }
+ },
+ "demon": {
+  "file": "lite/mon_demon.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped",
+  "scale": 1.8,
+  "bytes": 130503,
+  "verts": 8000,
+  "tris": 15906,
+  "full": {
+   "file": "mon_demon.bin.gz",
+   "fmt": "GB01",
+   "bytes": 656296
+  }
+ },
+ "dragon": {
+  "file": "lite/mon_dragon.bin.gz",
+  "fmt": "GB03",
+  "kind": "pointskin",
+  "scale": 5.0,
+  "bytes": 128111,
+  "verts": 8000,
+  "tris": 15897,
+  "full": {
+   "file": "mon_dragon.bin.gz",
+   "fmt": "GB02",
+   "bytes": 767840
+  }
+ },
+ "elderdragon": {
+  "file": "lite/mon_elderdragon.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped",
+  "scale": 6.0,
+  "bytes": 133842,
+  "verts": 8000,
+  "tris": 15888,
+  "full": {
+   "file": "mon_elderdragon.bin.gz",
+   "fmt": "GB01",
+   "bytes": 1032893
+  }
+ },
+ "emberskel": {
+  "file": "lite/mon_emberskel.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped+weapon",
+  "scale": 1.0,
+  "bytes": 105712,
+  "verts": 7000,
+  "tris": 14008,
+  "full": {
+   "file": "mon_emberskel.bin.gz",
+   "fmt": "GB1W",
+   "bytes": 358844
+  }
+ },
+ "eye": {
+  "file": "lite/mon_eye.bin.gz",
+  "fmt": "GB03",
+  "kind": "pointskin",
+  "scale": 0.9,
+  "bytes": 88011,
+  "verts": 7000,
+  "tris": 13996,
+  "full": {
+   "file": "mon_eye.bin.gz",
+   "fmt": "GB02",
+   "bytes": 260186
+  }
+ },
+ "eyebat": {
+  "file": "lite/mon_eyebat.bin.gz",
+  "fmt": "GB03",
+  "kind": "pointskin",
+  "scale": 0.4,
+  "bytes": 80899,
+  "verts": 7000,
+  "tris": 13920,
+  "full": {
+   "file": "mon_eyebat.bin.gz",
+   "fmt": "GB02",
+   "bytes": 246464
+  }
+ },
+ "eyespider": {
+  "file": "lite/mon_eyespider.bin.gz",
+  "fmt": "GB03",
+  "kind": "pointskin",
+  "scale": 0.85,
+  "bytes": 92825,
+  "verts": 7000,
+  "tris": 13934,
+  "full": {
+   "file": "mon_eyespider.bin.gz",
+   "fmt": "GB02",
+   "bytes": 316840
+  }
+ },
+ "firebat": {
+  "file": "lite/mon_firebat.bin.gz",
+  "fmt": "GB03",
+  "kind": "pointskin",
+  "scale": 0.35,
+  "bytes": 76611,
+  "verts": 7000,
+  "tris": 13896,
+  "full": {
+   "file": "mon_firebat.bin.gz",
+   "fmt": "GB02",
+   "bytes": 187894
+  }
+ },
+ "flamechimera": {
+  "file": "lite/mon_flamechimera.bin.gz",
+  "fmt": "GB03",
+  "kind": "pointskin",
+  "scale": 2.2,
+  "bytes": 104663,
+  "verts": 7000,
+  "tris": 13996,
+  "full": {
+   "file": "mon_flamechimera.bin.gz",
+   "fmt": "GB02",
+   "bytes": 529005
+  }
+ },
+ "fortgolem": {
+  "file": "lite/mon_fortgolem.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped",
+  "scale": 2.8,
+  "bytes": 110121,
+  "verts": 7000,
+  "tris": 13996,
+  "full": {
+   "file": "mon_fortgolem.bin.gz",
+   "fmt": "GB01",
+   "bytes": 441029
+  }
+ },
+ "fungus": {
+  "file": "lite/mon_fungus.bin.gz",
+  "fmt": "GB03",
+  "kind": "pointskin",
+  "scale": 0.8,
+  "bytes": 95627,
+  "verts": 7000,
+  "tris": 13879,
+  "full": {
+   "file": "mon_fungus.bin.gz",
+   "fmt": "GB02",
+   "bytes": 285457
+  }
+ },
+ "gargoyle": {
+  "file": "lite/mon_gargoyle.bin.gz",
+  "fmt": "GB03",
+  "kind": "pointskin",
+  "scale": 1.3,
+  "bytes": 90497,
+  "verts": 7000,
+  "tris": 13913,
+  "full": {
+   "file": "mon_gargoyle.bin.gz",
+   "fmt": "GB02",
+   "bytes": 366322
+  }
+ },
+ "gemeater": {
+  "file": "lite/mon_gemeater.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped",
+  "scale": 0.9,
+  "bytes": 90385,
+  "verts": 7000,
+  "tris": 13996,
+  "full": {
+   "file": "mon_gemeater.bin.gz",
+   "fmt": "GB01",
+   "bytes": 299947
+  }
+ },
+ "ghost": {
+  "file": "lite/mon_ghost.bin.gz",
+  "fmt": "GB03",
+  "kind": "pointskin",
+  "scale": 0.9,
+  "bytes": 87778,
+  "verts": 7000,
+  "tris": 13996,
+  "full": {
+   "file": "mon_ghost.bin.gz",
+   "fmt": "GB02",
+   "bytes": 246805
+  }
+ },
+ "ghostslime": {
+  "file": "lite/mon_ghostslime.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped",
+  "scale": 0.7,
+  "bytes": 91365,
+  "verts": 7000,
+  "tris": 13996,
+  "full": {
+   "file": "mon_ghostslime.bin.gz",
+   "fmt": "GB01",
+   "bytes": 301624
+  }
+ },
+ "ghoul": {
+  "file": "lite/mon_ghoul.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped+weapon",
+  "scale": 1.0,
+  "bytes": 108558,
+  "verts": 7000,
+  "tris": 14000,
+  "full": {
+   "file": "mon_ghoul.bin.gz",
+   "fmt": "GB1W",
+   "bytes": 558576
+  }
+ },
+ "gobx": {
+  "file": "lite/mon_gobx.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped",
+  "scale": 0.7,
+  "bytes": 109418,
+  "verts": 7000,
+  "tris": 14004,
+  "full": {
+   "file": "mon_gobx.bin.gz",
+   "fmt": "GB01",
+   "bytes": 549934
+  }
+ },
+ "goldkobold": {
+  "file": "lite/mon_goldkobold.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped+weapon",
+  "scale": 0.75,
+  "bytes": 109665,
+  "verts": 7000,
+  "tris": 13997,
+  "full": {
+   "file": "mon_goldkobold.bin.gz",
+   "fmt": "GB1W",
+   "bytes": 584048
+  }
+ },
+ "golem": {
+  "file": "lite/mon_golem.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped",
+  "scale": 2.2,
+  "bytes": 110531,
+  "verts": 7000,
+  "tris": 13996,
+  "full": {
+   "file": "mon_golem.bin.gz",
+   "fmt": "GB01",
+   "bytes": 441749
+  }
+ },
+ "hauntchest": {
+  "file": "lite/mon_hauntchest.bin.gz",
+  "fmt": "GB03",
+  "kind": "pointskin",
+  "scale": 1.0,
+  "bytes": 92643,
+  "verts": 7000,
+  "tris": 14004,
+  "full": {
+   "file": "mon_hauntchest.bin.gz",
+   "fmt": "GB02",
+   "bytes": 341070
+  }
+ },
+ "human": {
+  "file": "lite/mon_human.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped+weapon",
+  "scale": 1.0,
+  "bytes": 127078,
+  "verts": 8000,
+  "tris": 15972,
+  "full": {
+   "file": "mon_human.bin.gz",
+   "fmt": "GB1W",
+   "bytes": 872521
+  }
+ },
+ "hunter": {
+  "file": "lite/mon_hunter.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped+weapon",
+  "scale": 1.0,
+  "bytes": 127036,
+  "verts": 8000,
+  "tris": 15976,
+  "full": {
+   "file": "mon_hunter.bin.gz",
+   "fmt": "GB1W",
+   "bytes": 872547
+  }
+ },
+ "ifrit": {
+  "file": "lite/mon_ifrit.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped+weapon",
+  "scale": 1.6,
+  "bytes": 110005,
+  "verts": 7000,
+  "tris": 13987,
+  "full": {
+   "file": "mon_ifrit.bin.gz",
+   "fmt": "GB1W",
+   "bytes": 632783
+  }
+ },
+ "imp": {
+  "file": "lite/mon_imp.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped+weapon",
+  "scale": 0.5,
+  "bytes": 108527,
+  "verts": 7000,
+  "tris": 13986,
+  "full": {
+   "file": "mon_imp.bin.gz",
+   "fmt": "GB1W",
+   "bytes": 629679
+  }
+ },
+ "jackal": {
+  "file": "lite/mon_jackal.bin.gz",
+  "fmt": "GB03",
+  "kind": "pointskin",
+  "scale": 0.8,
+  "bytes": 98296,
+  "verts": 7000,
+  "tris": 13996,
+  "full": {
+   "file": "mon_jackal.bin.gz",
+   "fmt": "GB02",
+   "bytes": 314557
+  }
+ },
+ "knight": {
+  "file": "lite/mon_knight.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped+weapon",
+  "scale": 1.05,
+  "bytes": 127161,
+  "verts": 8000,
+  "tris": 15892,
+  "full": {
+   "file": "mon_knight.bin.gz",
+   "fmt": "GB1W",
+   "bytes": 628442
+  }
+ },
+ "kobold": {
+  "file": "lite/mon_kobold.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped+weapon",
+  "scale": 0.75,
+  "bytes": 109838,
+  "verts": 7000,
+  "tris": 13996,
+  "full": {
+   "file": "mon_kobold.bin.gz",
+   "fmt": "GB1W",
+   "bytes": 584168
+  }
+ },
+ "lavaslime": {
+  "file": "lite/mon_lavaslime.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped",
+  "scale": 0.9,
+  "bytes": 88520,
+  "verts": 7000,
+  "tris": 13996,
+  "full": {
+   "file": "mon_lavaslime.bin.gz",
+   "fmt": "GB01",
+   "bytes": 299624
+  }
+ },
+ "lich": {
+  "file": "lite/mon_lich.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped+weapon",
+  "scale": 1.0,
+  "bytes": 114882,
+  "verts": 7000,
+  "tris": 13919,
+  "full": {
+   "file": "mon_lich.bin.gz",
+   "fmt": "GB1W",
+   "bytes": 1031772
+  }
+ },
+ "lord": {
+  "file": "lite/mon_lord.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped",
+  "scale": 1.0,
+  "bytes": 130998,
+  "verts": 8000,
+  "tris": 15688,
+  "full": {
+   "file": "mon_lord.bin.gz",
+   "fmt": "GB01",
+   "bytes": 828518
+  }
+ },
+ "mage": {
+  "file": "lite/mon_mage.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped+weapon",
+  "scale": 0.95,
+  "bytes": 122019,
+  "verts": 8000,
+  "tris": 15959,
+  "full": {
+   "file": "mon_mage.bin.gz",
+   "fmt": "GB1W",
+   "bytes": 685461
+  }
+ },
+ "maou": {
+  "file": "lite/mon_maou.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped",
+  "scale": 2.4,
+  "bytes": 128254,
+  "verts": 8000,
+  "tris": 15882,
+  "full": {
+   "file": "mon_maou.bin.gz",
+   "fmt": "GB01",
+   "bytes": 701628
+  }
+ },
+ "mimic": {
+  "file": "lite/mon_mimic.bin.gz",
+  "fmt": "GB03",
+  "kind": "pointskin",
+  "scale": 1.0,
+  "bytes": 91903,
+  "verts": 7000,
+  "tris": 14004,
+  "full": {
+   "file": "mon_mimic.bin.gz",
+   "fmt": "GB02",
+   "bytes": 340409
+  }
+ },
+ "mindlord": {
+  "file": "lite/mon_mindlord.bin.gz",
+  "fmt": "GB03",
+  "kind": "pointskin",
+  "scale": 1.2,
+  "bytes": 101916,
+  "verts": 7000,
+  "tris": 14020,
+  "full": {
+   "file": "mon_mindlord.bin.gz",
+   "fmt": "GB02",
+   "bytes": 589314
+  }
+ },
+ "minerorc": {
+  "file": "lite/mon_minerorc.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped+weapon",
+  "scale": 1.25,
+  "bytes": 110304,
+  "verts": 7000,
+  "tris": 13996,
+  "full": {
+   "file": "mon_minerorc.bin.gz",
+   "fmt": "GB1W",
+   "bytes": 693404
+  }
+ },
+ "myconid": {
+  "file": "lite/mon_myconid.bin.gz",
+  "fmt": "GB03",
+  "kind": "pointskin",
+  "scale": 0.9,
+  "bytes": 94947,
+  "verts": 7000,
+  "tris": 13880,
+  "full": {
+   "file": "mon_myconid.bin.gz",
+   "fmt": "GB02",
+   "bytes": 285715
+  }
+ },
+ "nightspider": {
+  "file": "lite/mon_nightspider.bin.gz",
+  "fmt": "GB03",
+  "kind": "pointskin",
+  "scale": 0.9,
+  "bytes": 101061,
+  "verts": 7000,
+  "tris": 13981,
+  "full": {
+   "file": "mon_nightspider.bin.gz",
+   "fmt": "GB02",
+   "bytes": 407127
+  }
+ },
+ "nightwolf": {
+  "file": "lite/mon_nightwolf.bin.gz",
+  "fmt": "GB03",
+  "kind": "pointskin",
+  "scale": 1.0,
+  "bytes": 92908,
+  "verts": 7000,
+  "tris": 13996,
+  "full": {
+   "file": "mon_nightwolf.bin.gz",
+   "fmt": "GB02",
+   "bytes": 309453
+  }
+ },
+ "noble": {
+  "file": "lite/mon_noble.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped",
+  "scale": 1.0,
+  "bytes": 117942,
+  "verts": 8000,
+  "tris": 15913,
+  "full": {
+   "file": "mon_noble.bin.gz",
+   "fmt": "GB01",
+   "bytes": 631373
+  }
+ },
+ "ogremage": {
+  "file": "lite/mon_ogremage.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped",
+  "scale": 1.7,
+  "bytes": 107214,
+  "verts": 7000,
+  "tris": 13918,
+  "full": {
+   "file": "mon_ogremage.bin.gz",
+   "fmt": "GB01",
+   "bytes": 653414
+  }
+ },
+ "orc": {
+  "file": "lite/mon_orc.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped+weapon",
+  "scale": 1.25,
+  "bytes": 108175,
+  "verts": 7000,
+  "tris": 13992,
+  "full": {
+   "file": "mon_orc.bin.gz",
+   "fmt": "GB1W",
+   "bytes": 569676
+  }
+ },
+ "priest": {
+  "file": "lite/mon_priest.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped+weapon",
+  "scale": 0.95,
+  "bytes": 122206,
+  "verts": 8000,
+  "tris": 15988,
+  "full": {
+   "file": "mon_priest.bin.gz",
+   "fmt": "GB1W",
+   "bytes": 592867
+  }
+ },
+ "rat": {
+  "file": "lite/mon_rat.bin.gz",
+  "fmt": "GB03",
+  "kind": "pointskin",
+  "scale": 0.3,
+  "bytes": 95241,
+  "verts": 7000,
+  "tris": 13996,
+  "full": {
+   "file": "mon_rat.bin.gz",
+   "fmt": "GB02",
+   "bytes": 234956
+  }
+ },
+ "ratking": {
+  "file": "lite/mon_ratking.bin.gz",
+  "fmt": "GB03",
+  "kind": "pointskin",
+  "scale": 0.9,
+  "bytes": 116333,
+  "verts": 7000,
+  "tris": 13941,
+  "full": {
+   "file": "mon_ratking.bin.gz",
+   "fmt": "GB02",
+   "bytes": 544894
+  }
+ },
+ "rotlord": {
+  "file": "lite/mon_rotlord.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped",
+  "scale": 2.0,
+  "bytes": 95647,
+  "verts": 7000,
+  "tris": 13996,
+  "full": {
+   "file": "mon_rotlord.bin.gz",
+   "fmt": "GB01",
+   "bytes": 337493
+  }
+ },
+ "rotslime": {
+  "file": "lite/mon_rotslime.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped",
+  "scale": 0.8,
+  "bytes": 90167,
+  "verts": 7000,
+  "tris": 13996,
+  "full": {
+   "file": "mon_rotslime.bin.gz",
+   "fmt": "GB01",
+   "bytes": 300156
+  }
+ },
+ "salamander": {
+  "file": "lite/mon_salamander.bin.gz",
+  "fmt": "GB03",
+  "kind": "pointskin",
+  "scale": 1.1,
+  "bytes": 94132,
+  "verts": 7000,
+  "tris": 13996,
+  "full": {
+   "file": "mon_salamander.bin.gz",
+   "fmt": "GB02",
+   "bytes": 255617
+  }
+ },
+ "sapper": {
+  "file": "lite/mon_sapper.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped",
+  "scale": 0.75,
+  "bytes": 97821,
+  "verts": 7000,
+  "tris": 13974,
+  "full": {
+   "file": "mon_sapper.bin.gz",
+   "fmt": "GB01",
+   "bytes": 687477
+  }
+ },
+ "serpent": {
+  "file": "lite/mon_serpent.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped",
+  "scale": null,
+  "bytes": 118047,
+  "verts": 7000,
+  "tris": 13899,
+  "full": {
+   "file": "mon_serpent.bin.gz",
+   "fmt": "GB01",
+   "bytes": 1031326
+  }
+ },
+ "shaman": {
+  "file": "lite/mon_shaman.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped",
+  "scale": 0.75,
+  "bytes": 109289,
+  "verts": 7000,
+  "tris": 14004,
+  "full": {
+   "file": "mon_shaman.bin.gz",
+   "fmt": "GB01",
+   "bytes": 633837
+  }
+ },
+ "skeleton": {
+  "file": "lite/mon_skeleton.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped+weapon",
+  "scale": 1.0,
+  "bytes": 106114,
+  "verts": 7000,
+  "tris": 14008,
+  "full": {
+   "file": "mon_skeleton.bin.gz",
+   "fmt": "GB1W",
+   "bytes": 359020
+  }
+ },
+ "slime": {
+  "file": "lite/mon_slime.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped",
+  "scale": 0.7,
+  "bytes": 88629,
+  "verts": 7000,
+  "tris": 13996,
+  "full": {
+   "file": "mon_slime.bin.gz",
+   "fmt": "GB01",
+   "bytes": 296785
+  }
+ },
+ "slimeknight": {
+  "file": "lite/mon_slimeknight.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped+weapon",
+  "scale": 1.1,
+  "bytes": 127251,
+  "verts": 8000,
+  "tris": 15892,
+  "full": {
+   "file": "mon_slimeknight.bin.gz",
+   "fmt": "GB1W",
+   "bytes": 627276
+  }
+ },
+ "spider": {
+  "file": "lite/mon_spider.bin.gz",
+  "fmt": "GB03",
+  "kind": "pointskin",
+  "scale": 0.8,
+  "bytes": 100046,
+  "verts": 7000,
+  "tris": 13981,
+  "full": {
+   "file": "mon_spider.bin.gz",
+   "fmt": "GB02",
+   "bytes": 405189
+  }
+ },
+ "sporerat": {
+  "file": "lite/mon_sporerat.bin.gz",
+  "fmt": "GB03",
+  "kind": "pointskin",
+  "scale": 0.35,
+  "bytes": 98743,
+  "verts": 7000,
+  "tris": 13996,
+  "full": {
+   "file": "mon_sporerat.bin.gz",
+   "fmt": "GB02",
+   "bytes": 301292
+  }
+ },
+ "sporewraith": {
+  "file": "lite/mon_sporewraith.bin.gz",
+  "fmt": "GB03",
+  "kind": "pointskin",
+  "scale": 0.9,
+  "bytes": 101209,
+  "verts": 7000,
+  "tris": 13996,
+  "full": {
+   "file": "mon_sporewraith.bin.gz",
+   "fmt": "GB02",
+   "bytes": 432607
+  }
+ },
+ "stoneeye": {
+  "file": "lite/mon_stoneeye.bin.gz",
+  "fmt": "GB03",
+  "kind": "pointskin",
+  "scale": 1.0,
+  "bytes": 94768,
+  "verts": 7000,
+  "tris": 14016,
+  "full": {
+   "file": "mon_stoneeye.bin.gz",
+   "fmt": "GB02",
+   "bytes": 540453
+  }
+ },
+ "stonespider": {
+  "file": "lite/mon_stonespider.bin.gz",
+  "fmt": "GB03",
+  "kind": "pointskin",
+  "scale": 1.0,
+  "bytes": 98655,
+  "verts": 7000,
+  "tris": 13981,
+  "full": {
+   "file": "mon_stonespider.bin.gz",
+   "fmt": "GB02",
+   "bytes": 403856
+  }
+ },
+ "thief": {
+  "file": "lite/mon_thief.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped+weapon",
+  "scale": 0.9,
+  "bytes": 127279,
+  "verts": 8000,
+  "tris": 15980,
+  "full": {
+   "file": "mon_thief.bin.gz",
+   "fmt": "GB1W",
+   "bytes": 864819
+  }
+ },
+ "underlord": {
+  "file": "lite/mon_underlord.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped",
+  "scale": 1.8,
+  "bytes": 130502,
+  "verts": 8000,
+  "tris": 15906,
+  "full": {
+   "file": "mon_underlord.bin.gz",
+   "fmt": "GB01",
+   "bytes": 656300
+  }
+ },
+ "vampire": {
+  "file": "lite/mon_vampire.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped",
+  "scale": 1.0,
+  "bytes": 118222,
+  "verts": 8000,
+  "tris": 15912,
+  "full": {
+   "file": "mon_vampire.bin.gz",
+   "fmt": "GB01",
+   "bytes": 631157
+  }
+ },
+ "vaultkeeper": {
+  "file": "lite/mon_vaultkeeper.bin.gz",
+  "fmt": "GB03",
+  "kind": "pointskin",
+  "scale": 2.0,
+  "bytes": 92013,
+  "verts": 7000,
+  "tris": 14004,
+  "full": {
+   "file": "mon_vaultkeeper.bin.gz",
+   "fmt": "GB02",
+   "bytes": 342390
+  }
+ },
+ "warrior": {
+  "file": "lite/mon_warrior.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped+weapon",
+  "scale": 1.0,
+  "bytes": 124959,
+  "verts": 8000,
+  "tris": 15892,
+  "full": {
+   "file": "mon_warrior.bin.gz",
+   "fmt": "GB1W",
+   "bytes": 622067
+  }
+ },
+ "webgoblin": {
+  "file": "lite/mon_webgoblin.bin.gz",
+  "fmt": "GB03",
+  "kind": "biped+weapon",
+  "scale": 0.7,
+  "bytes": 113912,
+  "verts": 7000,
+  "tris": 13948,
+  "full": {
+   "file": "mon_webgoblin.bin.gz",
+   "fmt": "GB1W",
+   "bytes": 867724
+  }
+ },
+ "wolf": {
+  "file": "lite/mon_wolf.bin.gz",
+  "fmt": "GB03",
+  "kind": "pointskin",
+  "scale": 0.9,
+  "bytes": 98848,
+  "verts": 7000,
+  "tris": 13996,
+  "full": {
+   "file": "mon_wolf.bin.gz",
+   "fmt": "GB02",
+   "bytes": 314465
+  }
+ },
+ "wolfrider": {
+  "file": "lite/mon_wolfrider.bin.gz",
+  "fmt": "GB03",
+  "kind": "pointskin",
+  "scale": 1.4,
+  "bytes": 104311,
+  "verts": 7000,
+  "tris": 13996,
+  "full": {
+   "file": "mon_wolfrider.bin.gz",
+   "fmt": "GB02",
+   "bytes": 418816
+  }
+ },
+ "wraitheye": {
+  "file": "lite/mon_wraitheye.bin.gz",
+  "fmt": "GB03",
+  "kind": "pointskin",
+  "scale": 0.8,
+  "bytes": 91103,
+  "verts": 7000,
+  "tris": 13996,
+  "full": {
+   "file": "mon_wraitheye.bin.gz",
+   "fmt": "GB02",
+   "bytes": 295777
+  }
+ }
+}
