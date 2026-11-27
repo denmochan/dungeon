@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層79／No.350（11/25 00:49）";
+const VER20 = "層80／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -14925,6 +14925,16 @@ diffScreen15 = (prev => function () { const h = prev.apply(this, arguments); try
 .stage:has(>.raidban)>.hint,.stage:has(>.raidban)>.achpop{flex:0 0 auto}
 .stage:has(>.raidban)::after{flex:0 0 100%!important;height:64px}
 .stage:has(>.raidban) .rs-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+}`; document.head.appendChild(st); media30(); }
+/* 引き継ぎコード（横持ち）：コードの欄が大きく、読みこむボタンが下に隠れていた */
+{ const st = document.createElement("style"); st.textContent = `@media (orientation:landscape) and (max-height:500px){.mbox textarea{height:44px!important;min-height:0!important;font-size:11px!important;line-height:1.25!important}}`; document.head.appendChild(st); media30(); }
+/* 引き継ぎコード（横持ち）：左＝このデータのコード、右＝読みこむ（下のボタンまで1画面に） */
+{ const st = document.createElement("style"); st.textContent = `@media (orientation:landscape) and (max-height:500px){
+.mbox:has([data-a="xcopy20"]){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:10px;row-gap:5px!important;align-content:start}
+.mbox:has([data-a="xcopy20"])>*{margin:0!important;width:auto!important;min-width:0}
+.mbox:has([data-a="xcopy20"])>:nth-child(1),.mbox:has([data-a="xcopy20"])>:nth-child(2),.mbox:has([data-a="xcopy20"])>[data-a="close"]{grid-column:1/-1}
+.mbox:has([data-a="xcopy20"])>:nth-child(3){grid-column:1;grid-row:3}.mbox:has([data-a="xcopy20"])>:nth-child(4){grid-column:1;grid-row:4}.mbox:has([data-a="xcopy20"])>:nth-child(5){grid-column:1;grid-row:5}
+.mbox:has([data-a="xcopy20"])>:nth-child(6){grid-column:2;grid-row:3}.mbox:has([data-a="xcopy20"])>:nth-child(7){grid-column:2;grid-row:4}.mbox:has([data-a="xcopy20"])>[data-a="xpaste20"]{grid-column:2;grid-row:5}.mbox:has([data-a="xcopy20"])>[data-a="xload20"]{grid-column:2;grid-row:6}.mbox:has([data-a="xcopy20"])>.hint.bad{grid-column:1/-1;grid-row:7}
 }`; document.head.appendChild(st); media30(); }
 
 // ================= 第6回テストのあと：壊れの修正 =================
