@@ -16011,7 +16011,10 @@ overlay25 = (prev => function (now) { prev.apply(this, arguments);
     NX+=w*(M[0][0]*nx+M[0][1]*ny+M[0][2]*nz);NY+=w*(M[1][0]*nx+M[1][1]*ny+M[1][2]*nz);NZ+=w*(M[2][0]*nx+M[2][1]*ny+M[2][2]*nz);}
    place(X,Y,Z,i*3);const l=Math.hypot(NX,NY,NZ)||1;nor[i*3]=(NX*cy+NZ*sy)/l;nor[i*3+1]=NY/l;nor[i*3+2]=(-NX*sy+NZ*cy)/l;}
   /* 剣：ゲームの「道具」の関節（握り→切っ先、横向き）に合わせる */
-  {const h=R.J[34],u=nrm(sub(R.J[35],R.J[34]));let sd=R.J[36];sd=nrm(sub(sd,[u[0]*dot(sd,u),u[1]*dot(sd,u),u[2]*dot(sd,u)]));const w=crs(u,sd);const base=G3.NV;
+  {const h=R.J[34];let u=nrm(sub(R.J[35],R.J[34]));
+   /* 床にめりこまない：切っ先（握りから1.02）が床の6cm上より下なら、向きはそのままで刃先を持ち上げる */
+   {const tx=h[0]+u[0]*1.02,tz=h[2]+u[2]*1.02,wx=g.x+(tx*cy+tz*sy),wz=g.z+(-tx*sy+tz*cy);let fl=0;try{fl=o.R.Y+o.floorY(o.R,wx,wz-o.R.Z)-gy;}catch(e){}const need=Math.min(0.98,(0.06+Math.max(0,fl)-h[1])/1.02);if(u[1]<need){const hz=Math.hypot(u[0],u[2])||1,k=Math.sqrt(Math.max(0,1-need*need));u=[u[0]/hz*k,need,u[2]/hz*k];}}
+   let sd=R.J[36];sd=nrm(sub(sd,[u[0]*dot(sd,u),u[1]*dot(sd,u),u[2]*dot(sd,u)]));const w=crs(u,sd);const base=G3.NV;
    for(let i=0;i<SW.n;i++){const [a,b,c]=SW.V[i],[na,nb,nc]=SW.N[i];const x=h[0]+u[0]*a+sd[0]*b+w[0]*c,y=h[1]+u[1]*a+sd[1]*b+w[1]*c,z=h[2]+u[2]*a+sd[2]*b+w[2]*c;place(x,y,z,(base+i)*3);
     const NX=u[0]*na+sd[0]*nb+w[0]*nc,NY=u[1]*na+sd[1]*nb+w[1]*nc,NZ=u[2]*na+sd[2]*nb+w[2]*nc;nor[(base+i)*3]=NX*cy+NZ*sy;nor[(base+i)*3+1]=NY;nor[(base+i)*3+2]=-NX*sy+NZ*cy;}}
   /* 描く前の状態を覚えておく（このあとゲームが板を描く） */
