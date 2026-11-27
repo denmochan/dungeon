@@ -16216,7 +16216,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[];let seed=1;
   let moving=false;
   if(g.wait>0)g.wait-=dt;else{const dx=g.tx-g.x,dz=g.tz-g.z,d=Math.hypot(dx,dz);
    if(d<0.15){g.wait=0.8+rnd()*1.2;for(let k=0;k<60;k++){const a=rnd()*6.283,r=2.5+rnd()*4,x=g.x+Math.sin(a)*r,z=g.z+Math.cos(a)*r;let ok=true;for(let q=1;q<=8;q++){if(!free(g.x+(x-g.x)*q/8,g.z+(z-g.z)*q/8)){ok=false;break;}}if(ok){g.tx=x;g.tz=z;break;}}}
-   else{const st=Math.min(d,(window.__labSpd||1.25)*dt),nx=g.x+dx/d*st,nz=g.z+dz/d*st;if(free(nx,nz)){g.x=nx;g.z=nz;moving=true;const ty=Math.atan2(dx,dz);let dd=ty-g.yaw;dd=Math.atan2(Math.sin(dd),Math.cos(dd));g.yaw+=dd*Math.min(1,dt*8);}else{g.tx=g.x;g.tz=g.z;}}}
+   else{const st=Math.min(d,(window.__labSpd||1.25)*dt),nx=g.x+dx/d*st,nz=g.z+dz/d*st;if(g.path&&g.pi<g.path.length||free(nx,nz)){g.x=nx;g.z=nz;moving=true;const ty=Math.atan2(dx,dz);let dd=ty-g.yaw;dd=Math.atan2(Math.sin(dd),Math.cos(dd));g.yaw+=dd*Math.min(1,dt*8);}else{g.tx=g.x;g.tz=g.z;}}}
   const gy=R.Y+floorY(R,g.x,g.z-R.Z);
   if(window.__labEye)P.eye=window.__labEye;
   if(window.__labChase){const fx=Math.sin(g.yaw),fz=Math.cos(g.yaw);let rad=window.__labRad||3.4,cx=g.x,cz=g.z;for(;rad>1.0;rad-=0.1){const sd=Math.sin(t*0.25)*0.9;cx=g.x-fx*rad+fz*sd;cz=g.z-fz*rad-fx*sd;if(gFree(G,cx,cz-R.Z,0.35,1.6))break;}   /* 撮影用：うしろから追いかけるカメラ */
