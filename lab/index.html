@@ -6,7 +6,7 @@
 (()=>{try{const ls=window.localStorage,P="lab1_",pr=Storage.prototype,g=pr.getItem,st=pr.setItem,rm=pr.removeItem,ky=pr.key;
  if(g.call(ls,P+"__init")!=="1"){const ks=[];for(let i=0;i<ls.length;i++)ks.push(ky.call(ls,i));ks.forEach(k=>{if(k&&!k.startsWith(P))st.call(ls,P+k,g.call(ls,k));});st.call(ls,P+"__init","1");}
  pr.getItem=function(k){return g.call(this,P+k)};pr.setItem=function(k,v){return st.call(this,P+k,v)};pr.removeItem=function(k){return rm.call(this,P+k)};}catch(e){}
- window.__R2=2;window.__labCove=1;window.__labNoSign=true;})();
+ window.__R2=2;window.__labCove=1;window.__labNoSign=true;window.__labFewOre=true;})();
 </script>
 <base href="../">
 <meta charset="utf-8">
@@ -14041,7 +14041,7 @@ function fpOpen30(){
       altar: (w, h) => { MK.altar(w, h); glow(true); ball(0, h * 0.75, 0, 0.27, [210, 140, 255]); for (const sx of [-1, 1]) ball(sx * w * 0.4, h * 0.57 + 0.3, 0, 0.06, [255, 210, 100]); glow(false); for (let k = 0; k < 2; k++) box(0, k * 0.1, w * 0.45 + k * 0.25, w * 0.9 - k * 0.2, 0.1, 0.3, STONE); },
       grave: (w, h) => { MK.grave(w, h); for (let k = 0; k < 4; k++) spike(nz(k, w, h, 1) * w, 0, 0.5 + k * 0.12, 0.05, 0.25, [70, 100, 50]); },
       barrel: (w, h) => MK.barrel(w, h), bones: (w) => { MK.bones(w); const BN = [228, 220, 198]; ball(-w * 0.25, 0.13, 0.15, 0.15, BN, 0.9, 1.1); ball(-w * 0.25 - 0.06, 0.15, 0.27, 0.035, [40, 34, 30]); ball(-w * 0.25 + 0.06, 0.15, 0.27, 0.035, [40, 34, 30]); for (let k = 0; k < 4; k++) box(w * 0.15, 0.03, -0.15 + k * 0.1, 0.35 - k * 0.04, 0.04, 0.04, BN, 0.1 * k); }, rock: (w, h) => MK.rock(w, h), door: (w, h) => MK.door(w, h) };
-    [...(pr.up || []), ...(pr.floor || [])].forEach((q, k) => { rx = q.x; rz = q.z; ry = q.face ? 0 : (nz(q.x, k, q.z, 5) + 0.5) * Math.PI * 2; rk = 1; if (MK3[q.k] && MK3[q.k](q.w, q.h, k)) return; const f = MK2[q.k] || MK[q.k]; if (!f) return; if (/^lm_/.test(q.k)) { rk = 1.7; if (q.ry != null) ry = q.ry; } f(q.w, q.h); rk = 1; });
+    let nCr = 0; [...(pr.up || []), ...(pr.floor || [])].forEach((q, k) => { if (q.k === "crystal" && window.__labFewOre && (nCr++ % 3)) return;   /* 試し場：水晶の群れは3つに1つだけ（多すぎて部屋のじゃまだった） */ rx = q.x; rz = q.z; ry = q.face ? 0 : (nz(q.x, k, q.z, 5) + 0.5) * Math.PI * 2; rk = 1; if (MK3[q.k] && MK3[q.k](q.w, q.h, k)) return; const f = MK2[q.k] || MK[q.k]; if (!f) return; if (/^lm_/.test(q.k)) { rk = 1.7; if (q.ry != null) ry = q.ry; } f(q.w, q.h); rk = 1; });
     /* 壁のたいまつ：金具つきのたいまつ（炎は今までどおり光の絵） */ TORCH.forEach(t => { if (t[6] !== Rm.i || t[7] == null) return; rx = t[0]; rz = t[2] - Rm.Z; ry = Math.atan2(t[7], -t[8]); mdl("torch_mounted", 0.62, 0, t[1] - Rm.Y - 0.74, -0.2); });
     /* 鉱脈：壁から突き出た鉱石（光る）と、足もとのくず石・かご */
     (pr.veins || []).forEach((v, k) => { rx = v.x; rz = v.z; ry = Math.atan2(v.nz, v.nx) - Math.PI / 2;   /* +z が壁から外向き */
@@ -16311,7 +16311,12 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[];let seed=1;
   /* 影 */
   gl.uniform1f(PB.U("AM"),1);gl.uniform1f(PB.U("FL"),0);gl.uniform4f(PB.U("UR"),0,0,1,1);gl.uniform1f(PB.U("LB"),1);gl.bindTexture(gl.TEXTURE_2D,texOf(SHADOW));
   gl.uniform3f(PB.U("UPV"),0,0,1);gl.uniform3f(PB.U("R"),1,0,0);gl.uniform3f(PB.U("C"),g.x,gy+0.05,g.z);gl.uniform4f(PB.U("Q"),-0.75,-0.42,1.5,0.84);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
-  if(window.__lab3d&&G3.ok&&typeof rigSp24==="function"){draw3d(o,g,gy,t,moving);}
+  if(window.__lab3d&&G3.ok&&typeof rigSp24==="function"){   /* 足を床に止める：着いている足が前の絵と同じ場所に残るよう、体の描く位置を少しずらす（すべって見えた） */
+   if(g.ox==null){g.ox=0;g.oz=0;}const cy2=Math.cos(g.yaw),sy2=Math.sin(g.yaw);
+   if(dt<=0){}else if(moving){const Rw=rigSp24("goblin","walk",((g.wd||0)/1.3)%0.8),fi=Rw.J[11][1]<=Rw.J[14][1]?11:14,j=Rw.J[fi],fx=g.x+g.ox+j[0]*cy2+j[2]*sy2,fz=g.z+g.oz-j[0]*sy2+j[2]*cy2;
+    if(g.st===fi&&g.pf){g.ox+=g.pf[0]-fx;g.oz+=g.pf[1]-fz;}g.ox*=0.985;g.oz*=0.985;const L=Math.hypot(g.ox,g.oz);if(L>0.3){g.ox*=0.3/L;g.oz*=0.3/L;}g.st=fi;g.pf=[g.x+g.ox+j[0]*cy2+j[2]*sy2,g.z+g.oz-j[0]*sy2+j[2]*cy2];}
+   else{g.ox*=0.85;g.oz*=0.85;g.st=null;g.pf=null;}
+   draw3d(o,Object.assign({},g,{x:g.x+g.ox,z:g.z+g.oz}),gy,t,moving);}
   else if(im.complete&&im.naturalWidth){const A=Math.atan2(EYE[0]-g.x,EYE[2]-g.z)-g.yaw,k=((Math.round(A/(Math.PI/4))%8)+8)%8;const col=moving?4+Math.floor(t*7.5)%6:Math.floor(t*2.5)%4;
    gl.disable(gl.BLEND);gl.depthMask(true);gl.uniform1f(PB.U("AM"),0);gl.bindTexture(gl.TEXTURE_2D,texOf(im));gl.uniform4f(PB.U("UR"),col/10,k/8,1/10,1/8);
    const d=Math.hypot(g.x-EYE[0],g.z-EYE[2]);gl.uniform1f(PB.U("LB"),Math.min(1.15,0.5+0.8*Math.exp(-d/6)));gl.uniform3fv(PB.U("R"),Rr);gl.uniform3f(PB.U("UPV"),0,1,0);gl.uniform3f(PB.U("C"),g.x,gy,g.z);gl.uniform4f(PB.U("Q"),-SZ/2,-SZ*(1-FOOT),SZ,SZ);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);}

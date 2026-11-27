@@ -1,0 +1,29 @@
+<!DOCTYPE html><html><body><canvas id="c"></canvas><script>
+let gl,PS,PC,faceTex;
+function mkP(vs,fs){const mk=(t,s)=>{const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(o));return o;};
+ const p=gl.createProgram();gl.attachShader(p,mk(gl.VERTEX_SHADER,vs));gl.attachShader(p,mk(gl.FRAGMENT_SHADER,fs));gl.linkProgram(p);if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(p));return p;}
+function setRig(p,pack,rig,L){gl.useProgram(p);const U=n=>gl.getUniformLocation(p,n);
+ gl.uniform3fv(U('J'),new Float32Array(rig.J.flat()));gl.uniformMatrix3fv(U('HR'),false,new Float32Array(rig.HR));gl.uniformMatrix3fv(U('TR'),false,new Float32Array(rig.TR));gl.uniform1f(U('tool'),0);
+ gl.uniform4fv(U('deb'),new Float32Array(24));gl.uniform3fv(U('SKIN'),new Float32Array(L.col[0]));gl.uniform3fv(U('CLOTH'),new Float32Array(L.col[1]));gl.uniform1fv(U('FI'),new Float32Array([pack.faceIdx]));
+ gl.uniform1fv(U('EV'),new Float32Array([0]));gl.uniform1fv(U('SCL'),new Float32Array([1]));gl.uniform4fv(U('VAR'),new Float32Array(L.vr[0]));gl.uniform3fv(U('ACC'),new Float32Array(L.vr[1]));
+ gl.uniform1f(U('hasFace'),2);gl.uniform1f(U('tm'),0);gl.uniform1f(U('CS'),1);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,faceTex);gl.uniform1i(U('face'),0);}
+async function init(sh,pack){const c=document.getElementById('c');gl=c.getContext('webgl',{preserveDrawingBuffer:true,antialias:false});
+ if(!gl.getExtension('OES_texture_float'))throw new Error('no float tex');
+ PS=mkP(sh.vs,sh.samp);PC=mkP(sh.vs,sh.colr);
+ const q=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,q);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+ await new Promise(res=>{const im=new Image();im.onload=()=>{faceTex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,faceTex);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,im);
+  [gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER].forEach(k=>gl.texParameteri(gl.TEXTURE_2D,k,gl.NEAREST));[gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T].forEach(k=>gl.texParameteri(gl.TEXTURE_2D,k,gl.CLAMP_TO_EDGE));res();};im.src=pack.face;});}
+function quad(p){const al=gl.getAttribLocation(p,'a');gl.enableVertexAttribArray(al);gl.vertexAttribPointer(al,2,gl.FLOAT,false,0,0);}
+const b64=a=>{let s='';for(let i=0;i<a.length;i+=32768)s+=String.fromCharCode.apply(null,a.subarray(i,i+32768));return btoa(s);};
+// 格子の距離：z を何枚かずつ
+function sample(pack,rig,L,G0,GS,NX,NY,z0,nz){setRig(PS,pack,rig,L);const W=1024,tot=NX*NY*nz,H=Math.ceil(tot/W);gl.canvas.width=W;gl.canvas.height=H;gl.viewport(0,0,W,H);
+ const U=n=>gl.getUniformLocation(PS,n);gl.uniform3f(U('G0'),G0[0],G0[1],G0[2]+z0*GS);gl.uniform1f(U('GS'),GS);gl.uniform2f(U('GN'),NX,NY);gl.uniform1f(U('WW'),W);quad(PS);
+ gl.drawArrays(gl.TRIANGLES,0,3);const buf=new Uint8Array(W*H*4);gl.readPixels(0,0,W,H,gl.RGBA,gl.UNSIGNED_BYTE,buf);return b64(buf.subarray(0,tot*4));}
+function colors(pack,rig,L,posB64,NV){setRig(PC,pack,rig,L);const W=Math.ceil(Math.sqrt(NV));const raw=Uint8Array.from(atob(posB64),c=>c.charCodeAt(0));const f=new Float32Array(raw.buffer);
+ const data=new Float32Array(W*W*4);for(let i=0;i<NV;i++){data[i*4]=f[i*3];data[i*4+1]=f[i*3+1];data[i*4+2]=f[i*3+2];}
+ const t=gl.createTexture();gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,t);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,W,W,0,gl.RGBA,gl.FLOAT,data);
+ [gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER].forEach(k=>gl.texParameteri(gl.TEXTURE_2D,k,gl.NEAREST));[gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T].forEach(k=>gl.texParameteri(gl.TEXTURE_2D,k,gl.CLAMP_TO_EDGE));
+ const U=n=>gl.getUniformLocation(PC,n);gl.uniform1i(U('VP'),1);gl.uniform1f(U('WW'),W);gl.uniform1f(U('NV'),NV);
+ gl.canvas.width=W;gl.canvas.height=W;gl.viewport(0,0,W,W);quad(PC);gl.drawArrays(gl.TRIANGLES,0,3);const buf=new Uint8Array(W*W*4);gl.readPixels(0,0,W,W,gl.RGBA,gl.UNSIGNED_BYTE,buf);return b64(buf.subarray(0,NV*4));}
+window.init=init;window.sample=sample;window.colors=colors;
+</script></body></html>
