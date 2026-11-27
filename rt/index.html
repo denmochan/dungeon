@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層105／No.350（11/25 00:49）";
+const VER20 = "層106／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -14922,7 +14922,7 @@ function body30(o, isHero) { let B, ranged, heal;
   const [run, agi, str, tough, size, stam, brave, mag] = B, melee = 1.05 * Math.pow(size, 0.55) + (isHero && (o.job === "knight" || o.job === "warrior") ? 0.35 : 0);
   return { run, agi, str, tough, size, stam, brave, mag, reach: ranged ? 6.5 : melee, melee, ranged, heal, magic: isHero ? (o.job === "mage" || o.job === "priest") : MAGIC_SP30.test(o.sp || "") }; }
 /* リアルタイムで戦っている層では、1手ごとの殴り合いは止める（リアルタイム側が殴る）。「最後まで」で飛ばすときは今までどおり */
-const rtOn30 = (N0, i) => N0 && N0.rtRooms30 && N0.rtRooms30[i] && typeof performance !== "undefined" && performance.now() - (N0.rt30t || 0) < 400;
+const rtOn30 = (N0, i) => N0 && N0.rt30t && typeof performance !== "undefined" && performance.now() - N0.rt30t < 400 && !(typeof S !== "undefined" && S && typeof lordIdx === "function" && i === lordIdx(S));   /* リアルタイムが動いている間は、主の間より手前の層の殴り合い・撃ち合いはすべてリアルタイム側だけ（通路にいて姿の見えない勇者に、昔の計算の矢が飛んでいた） */
 monHit11 = (prev => function (S, N, m, h, d) { if (!N._rt30 && m && rtOn30(N, m.pos)) return; return prev.apply(this, arguments); })(monHit11);
 hitMon5 = (prev => function (S, N, m, d, h) { if (!N._rt30 && h && m && rtOn30(N, m.pos)) return; return prev.apply(this, arguments); })(hitMon5);
 

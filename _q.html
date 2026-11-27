@@ -15020,7 +15020,7 @@ function body30(o, isHero) { let B, ranged, heal;
   const [run, agi, str, tough, size, stam, brave, mag] = B, melee = 1.05 * Math.pow(size, 0.55) + (isHero && (o.job === "knight" || o.job === "warrior") ? 0.35 : 0);
   return { run, agi, str, tough, size, stam, brave, mag, reach: ranged ? 6.5 : melee, melee, ranged, heal, magic: isHero ? (o.job === "mage" || o.job === "priest") : MAGIC_SP30.test(o.sp || "") }; }
 /* リアルタイムで戦っている層では、1手ごとの殴り合いは止める（リアルタイム側が殴る）。「最後まで」で飛ばすときは今までどおり */
-const rtOn30 = (N0, i) => N0 && N0.rtRooms30 && N0.rtRooms30[i] && typeof performance !== "undefined" && performance.now() - (N0.rt30t || 0) < 400;
+const rtOn30 = (N0, i) => N0 && N0.rt30t && typeof performance !== "undefined" && performance.now() - N0.rt30t < 400 && !(typeof S !== "undefined" && S && typeof lordIdx === "function" && i === lordIdx(S));   /* リアルタイムが動いている間は、主の間より手前の層の殴り合い・撃ち合いはすべてリアルタイム側だけ（通路にいて姿の見えない勇者に、昔の計算の矢が飛んでいた） */
 monHit11 = (prev => function (S, N, m, h, d) { if (!N._rt30 && m && rtOn30(N, m.pos)) return; return prev.apply(this, arguments); })(monHit11);
 hitMon5 = (prev => function (S, N, m, d, h) { if (!N._rt30 && h && m && rtOn30(N, m.pos)) return; return prev.apply(this, arguments); })(hitMon5);
 
