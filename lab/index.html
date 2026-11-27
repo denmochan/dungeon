@@ -16234,8 +16234,17 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
  /* ===== ほかの魔物も同じ作り方の3Dで描く（ガイコツ・スライム…）。ファイルがある種族だけ。ない種族は今までの絵 ===== */
  const MS={};
  const baseSp=sp=>String(sp||"").replace(/\d+$/,"");   /* 勇者の色ちがい（warrior2 など）は同じ形 */
- const loadMon=sp=>{if(MS[sp])return MS[sp];const M=MS[sp]={ok:false};(async()=>{try{const r=await fetch(sp==="goblin"?"lab/gob3d.bin.gz":"lab/mon_"+sp+".bin.gz");if(!r.ok)throw new Error(r.status);const buf=await new Response(r.body.pipeThrough(new DecompressionStream("gzip"))).arrayBuffer();
-   const mg=String.fromCharCode(...new Uint8Array(buf.slice(0,4)));M.pt=mg==="GB02";M.hasW=mg==="GB1W";
+ const loadMon=sp=>{if(MS[sp])return MS[sp];const M=MS[sp]={ok:false};(async()=>{try{const LT=window.__labLite||/[?&]lite/.test(location.search),r=await fetch((LT?"lab/lite/":"lab/")+(sp==="goblin"?"gob3d.bin.gz":"mon_"+sp+".bin.gz"));if(!r.ok)throw new Error(r.status);const buf=await new Response(r.body.pipeThrough(new DecompressionStream("gzip"))).arrayBuffer();
+   const mg=String.fromCharCode(...new Uint8Array(buf.slice(0,4)));
+   if(mg==="GB03"){const dv=new DataView(buf),NV=dv.getUint32(4,true),NT=dv.getUint32(8,true),fl=dv.getUint8(12);let o=13;M.pt=fl===1;M.hasW=fl===2;   /* 軽い版 */
+    const q=[0,1,2].map(()=>{const a=new Int16Array(buf.slice(o,o+NV*2));o+=NV*2;return a;}),P0=M.P0=new Float32Array(NV*3);let ax=0,ay=0,az=0;for(let i=0;i<NV;i++){ax+=q[0][i];ay+=q[1][i];az+=q[2][i];P0[i*3]=ax*0.0005;P0[i*3+1]=ay*0.0005;P0[i*3+2]=az*0.0005;}
+    const nn=[0,1,2].map(()=>{const a=new Int8Array(buf.slice(o,o+NV));o+=NV;return a;});M.N0=new Float32Array(NV*3);for(let i=0;i<NV;i++)for(let k=0;k<3;k++)M.N0[i*3+k]=nn[k][i]/127;
+    const cc=[0,1,2].map(()=>{const a=new Uint8Array(buf.slice(o,o+NV));o+=NV;return a;});M.C=new Uint8Array(NV*3);for(let i=0;i<NV;i++)for(let k=0;k<3;k++)M.C[i*3+k]=cc[k][i];
+    const b0=new Uint8Array(buf.slice(o,o+NV));o+=NV;const b1=new Uint8Array(buf.slice(o,o+NV));o+=NV;M.B=new Uint8Array(NV*2);for(let i=0;i<NV;i++){M.B[i*2]=b0[i];M.B[i*2+1]=b1[i];}
+    M.W=new Uint8Array(buf.slice(o,o+NV));o+=NV;if(M.hasW){M.WP=new Uint8Array(buf.slice(o,o+NV));o+=NV;}
+    const u8=new Uint8Array(buf,o),I=M.I=new Uint16Array(NT*3);let pos=0,prev=0;for(let i=0;i<NT*3;i++){let v=0,sh=0,b;do{b=u8[pos++];v+=(b&127)*Math.pow(2,sh);sh+=7;}while(b&128);const d=(v%2)?-(v+1)/2:v/2;prev+=d;I[i]=prev;}
+    M.NV=NV;M.NT=NT;M.ok=true;return;}
+   M.pt=mg==="GB02";M.hasW=mg==="GB1W";
    const dv=new DataView(buf),NV=dv.getUint32(4,true),NT=dv.getUint32(8,true);let o=12;M.P0=new Float32Array(buf.slice(o,o+NV*12));o+=NV*12;const n8=new Int8Array(buf.slice(o,o+NV*3));o+=NV*3;M.N0=Float32Array.from(n8,v=>v/127);
    M.C=new Uint8Array(buf.slice(o,o+NV*3));o+=NV*3;M.B=new Uint8Array(buf.slice(o,o+NV*2));o+=NV*2;M.W=new Uint8Array(buf.slice(o,o+NV));o+=NV;M.I=new Uint16Array(buf.slice(o,o+NT*6));o+=NT*6;
    if(M.hasW)M.WP=new Uint8Array(buf.slice(o,o+NV));M.NV=NV;M.NT=NT;M.ok=true;}catch(e){M.bad=1;}})();return M;};
@@ -16352,7 +16361,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
  /* ===== 図鑑（?gallery）：全部の魔物と勇者の3Dを、ポーズを切りかえて見る。?gallery&auto で自動でめぐる（撮影用） ===== */
  const GNOW=()=>window.__galT!=null?window.__galT:performance.now();
  function startGallery(){if(document.getElementById("gal3d"))return;const auto=/auto/.test(location.search);
-  const LIST=["goblin",...Object.keys(SIZE30).filter(k=>k!=="goblin"&&k!=="human")],JA={};try{LIST.forEach(k=>{JA[k]=typeof monName5==="function"?monName5({sp:k,evos:0}):k;});}catch(e){}
+  const LIST=window.__galList||["goblin",...Object.keys(SIZE30).filter(k=>k!=="goblin"&&k!=="human")],JA={};try{LIST.forEach(k=>{JA[k]=typeof monName5==="function"?monName5({sp:k,evos:0}):k;});}catch(e){}
   const JOB={warrior:"戦士",knight:"騎士",thief:"盗賊",hunter:"狩人",mage:"魔法使い",priest:"僧侶",lord:"主",noble:"貴族",demon:"悪魔",gobx:"ゴブリン（別）"};
   const wrap=document.createElement("div");wrap.id="gal3d";try{document.getElementById("lab27").style.display="none";}catch(e){}wrap.style.cssText="position:fixed;inset:0;z-index:99999;background:#1c1512;color:#f3e2c0;font:14px sans-serif;touch-action:none";
   wrap.innerHTML=`<canvas style="position:absolute;inset:0;width:100%;height:100%"></canvas><div style="position:absolute;left:0;right:0;top:0;padding:8px;display:flex;gap:6px;align-items:center;background:#0008"><button data-g="p">◀</button><b style="flex:1;text-align:center;font-size:17px"></b><button data-g="n">▶</button></div>
@@ -16371,7 +16380,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
   let last=GNOW(),autoT=0;
   const frame=()=>{if(!document.getElementById("gal3d"))return;const now=GNOW(),dt=Math.min(0.1,(now-last)/1000);last=now;
    const W=cv.clientWidth*devicePixelRatio,H=cv.clientHeight*devicePixelRatio;if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H;}gl.viewport(0,0,W,H);gl.clearColor(0.11,0.08,0.07,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);
-   if(auto){autoT+=dt;const order=["walk","atk","run","dodge","knock"];const per=2.2;const ix=Math.floor(autoT/per);if(ix>=order.length){autoT=0;go(1);}else if(pose!==order[ix]){pose=order[ix];t0=now;mark();}}
+   if(auto){autoT+=dt;const order=window.__galOrder||["walk","atk","run","dodge","knock"];const per=window.__galPer||2.2;const ix=Math.floor(autoT/per);if(ix>=order.length){autoT=0;go(1);}else if(pose!==order[ix]){pose=order[ix];t0=now;mark();}}
    const sp=LIST[cur],M=MS[sp];const T=(now-t0)/1000;turn+=dt*0.35;
    if(M&&M.bad){title.textContent+="（まだない）";go(1);requestAnimationFrame(frame);return;}
    if(M&&M.ok){if(M.c==null){let h=0,x0=9,x1=-9,z0=9,z1=-9;for(let i=0;i<M.NV;i++){if(M.WP&&M.WP[i])continue;const x=M.P0[i*3],y=M.P0[i*3+1],z=M.P0[i*3+2];if(y>h)h=y;if(x<x0)x0=x;if(x>x1)x1=x;if(z<z0)z0=z;if(z>z1)z1=z;}M.c=Math.max(h,0.55*Math.max(x1-x0,z1-z0));M.h=h;M.L=Math.max(x1-x0,z1-z0);}
@@ -16385,7 +16394,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
     const WPn=weaponPlan(sp,M,pose==="bow"?"bow":"","idle",st),kind=WPn.kind;q.sp=sp;
     drawSkin(q,M,0,0,0,0,S,P.R,R0S[sp],slime,WPn.hide,P.root);if(bip&&kind)monTool(q,P.R,0,0,0,0,S,"idle",kind,P.root,st);toolDraw(q,new Float32Array(floorV),new Float32Array(floorN),new Float32Array(floorN),new Float32Array(floorC),floorV.length/3);}
    else{loadMon(sp);}
-   requestAnimationFrame(frame);};requestAnimationFrame(frame);
+   window.__galF=(window.__galF||0)+1;requestAnimationFrame(frame);};requestAnimationFrame(frame);
   addEventListener("keydown",e=>{if(e.key==="ArrowRight")go(1);if(e.key==="ArrowLeft")go(-1);});window.__galGo=go;window.__galPose=p=>{pose=p;t0=GNOW();mark();};}
  if(/[?&]gallery/.test(location.search))addEventListener("load",()=>setTimeout(startGallery,300));
  window.__labGob=o=>{try{drawProps(o);}catch(e){window.__labErr="props "+e;}if(window.__labGobOff)return;const {gl,PB,texOf,SHADOW,EYE,P,R,floorY,gFree,Rr}=o;if(!R||!R.G)return;
