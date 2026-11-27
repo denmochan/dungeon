@@ -16260,7 +16260,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
    for(let i=0,NV=M.NV;i<NV;i++){const px=P0[i*3],py=P0[i*3+1],pz=P0[i*3+2],nx=N0[i*3],ny=N0[i*3+1],nz=N0[i*3+2],w0=W[i]/255;let x=0,y=0,z=0,NX=0,NY=0,NZ=0;
     for(let k=0;k<2;k++){const b=T[B[i*2+k]],w=k?1-w0:w0;if(w<0.004||!b)continue;const m=b.M,dx=px-b.a[0],dy=py-b.a[1],dz=pz-b.a[2];
      x+=w*(m[0][0]*dx+m[0][1]*dy+m[0][2]*dz+b.b[0]);y+=w*(m[1][0]*dx+m[1][1]*dy+m[1][2]*dz+b.b[1]);z+=w*(m[2][0]*dx+m[2][1]*dy+m[2][2]*dz+b.b[2]);NX+=w*(m[0][0]*nx+m[0][1]*ny+m[0][2]*nz);NY+=w*(m[1][0]*nx+m[1][1]*ny+m[1][2]*nz);NZ+=w*(m[2][0]*nx+m[2][1]*ny+m[2][2]*nz);}
-    if(WP&&WP[i]){x=R.J[8][0];y=R.J[8][1];z=R.J[8][2];}   /* 掘るときは持っている武器をしまう */
+    if(WP&&WP[i]&&(hideW===true||hideW===1||B[i*2]===hideW)){const hh=B[i*2]===4?5:8;x=R.J[hh][0];y=R.J[hh][1];z=R.J[hh][2];}   /* 焼きこんだ武器を隠す（作りこんだ武器に持ちかえるとき）。4＝左手・6＝右手・1＝全部 */   /* 掘るときは持っている武器をしまう */
     pos[i*3]=X+(x*cy+z*sy)*S;pos[i*3+1]=Y+y*S;pos[i*3+2]=Z+(-x*sy+z*cy)*S;const l=Math.hypot(NX,NY,NZ)||1;nor[i*3]=(NX*cy+NZ*sy)/l;nor[i*3+1]=NY/l;nor[i*3+2]=(-NX*sy+NZ*cy)/l;}}
   {const RM=rootM(RT),c2=Math.cos(yaw0),s2=Math.sin(yaw0);for(let i=0,NV=M.NV;i<NV;i++){let x=pos[i*3],y=pos[i*3+1],z=pos[i*3+2],nx=nor[i*3],ny=nor[i*3+1],nz=nor[i*3+2];
     if(RM){const a=RM[0]*x+RM[1]*y+RM[2]*z+RT.dx,b=RM[3]*x+RM[4]*y+RM[5]*z+RT.dy,c=RM[6]*x+RM[7]*y+RM[8]*z+RT.dz;x=a;y=b;z=c;const d=RM[0]*nx+RM[1]*ny+RM[2]*nz,e=RM[3]*nx+RM[4]*ny+RM[5]*nz,f=RM[6]*nx+RM[7]*ny+RM[8]*nz;nx=d;ny=e;nz=f;}
@@ -16291,8 +16291,8 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
   const tube=(p0,p1,r0,r1,col,seg=8,cap=true)=>{const d=nrm(sub(p1,p0)),t=Math.abs(d[1])<0.9?[0,1,0]:[1,0,0],e1=nrm(crs(d,t)),e2=crs(d,e1);for(let k=0;k<seg;k++){const A0=k/seg*6.2832,A1=(k+1)/seg*6.2832,r=(A,p,rr)=>{const n=[e1[0]*Math.cos(A)+e2[0]*Math.sin(A),e1[1]*Math.cos(A)+e2[1]*Math.sin(A),e1[2]*Math.cos(A)+e2[2]*Math.sin(A)];return[[p[0]+n[0]*rr,p[1]+n[1]*rr,p[2]+n[2]*rr],n];};
     const q0=r(A0,p0,r0),q1=r(A1,p0,r1===undefined?r0:r0),q2=r(A0,p1,r1),q3=r(A1,p1,r1);[[q0,q2,q1],[q1,q2,q3]].forEach(T=>T.forEach(([p,n])=>push(p,n,n,col)));if(cap){const c0=[p1[0]+d[0]*r1*0.6,p1[1]+d[1]*r1*0.6,p1[2]+d[2]*r1*0.6];push(q2[0],q2[1],q2[1],col);push(c0,d,d,col);push(q3[0],q3[1],q3[1],col);}}};
   const ball=(c,r,col,seg=8)=>{for(let i=0;i<seg/2;i++)for(let j=0;j<seg;j++){const P=(a,b)=>{const th=a/(seg/2)*Math.PI,ph=b/seg*6.2832,n=[Math.sin(th)*Math.cos(ph),Math.cos(th),Math.sin(th)*Math.sin(ph)];return[[c[0]+n[0]*r,c[1]+n[1]*r,c[2]+n[2]*r],n];};const a=P(i,j),b=P(i+1,j),c2=P(i,j+1),d=P(i+1,j+1);[[a,b,c2],[c2,b,d]].forEach(T=>T.forEach(([p,n])=>push(p,n,n,col)));}};
-  if(kind==="sword"&&R.J[35]&&R.J[35][1]>-5){const h=R.J[34];const u=nrm(sub(R.J[35],R.J[34]));let sd=R.J[36];sd=nrm(sub(sd,[u[0]*dot(sd,u),u[1]*dot(sd,u),u[2]*dot(sd,u)]));const w=crs(u,sd);const L=(a,b,c)=>[h[0]+u[0]*a+sd[0]*b+w[0]*c,h[1]+u[1]*a+sd[1]*b+w[1]*c,h[2]+u[2]*a+sd[2]*b+w[2]*c];
-   for(let i=0;i<SW.n;i++){const [a,b,c]=SW.V[i],[na,nb,nc]=SW.N[i],[oa,ob,oc]=SW.O[i];push(L(a*0.85,b*0.85,c*0.85),L(na,nb,nc).map((v,k)=>v-h[k]),L(oa,ob,oc).map((v,k)=>v-h[k]),SW.C[i]);}}
+  if((kind==="sword"||kind==="dagger")&&R.J[35]&&R.J[35][1]>-5){const ks=kind==="dagger"?0.5:0.85;const h=R.J[34];const u=nrm(sub(R.J[35],R.J[34]));let sd=R.J[36];sd=nrm(sub(sd,[u[0]*dot(sd,u),u[1]*dot(sd,u),u[2]*dot(sd,u)]));const w=crs(u,sd);const L=(a,b,c)=>[h[0]+u[0]*a+sd[0]*b+w[0]*c,h[1]+u[1]*a+sd[1]*b+w[1]*c,h[2]+u[2]*a+sd[2]*b+w[2]*c];
+   for(let i=0;i<SW.n;i++){const [a,b,c]=SW.V[i],[na,nb,nc]=SW.N[i],[oa,ob,oc]=SW.O[i];push(L(a*ks,b*ks,c*ks),L(na,nb,nc).map((v,k)=>v-h[k]),L(oa,ob,oc).map((v,k)=>v-h[k]),SW.C[i]);}}
   else if(kind==="bow"){   /* 弓：左手で持つ。木の弓に、革の握り・角の弓はず・弦。引くときは右手まで弦をのばし、矢をつがえる */
    const g=R.J[5],U=nrm([-0.12,1,0.05]),F=[0,0,1],Rt=nrm(crs(U,F)),P=(y,z)=>[g[0]+U[0]*y+F[0]*z+Rt[0]*0,g[1]+U[1]*y+F[1]*z,g[2]+U[2]*y+F[2]*z],wood=[0.48,0.3,0.16],dark=[0.3,0.18,0.1],horn=[0.86,0.8,0.66],lea=[0.42,0.22,0.12];
    const lz=y=>-0.34*Math.pow(Math.abs(y)/0.62,1.8)+0.05*Math.sin(Math.abs(y)/0.62*Math.PI)*0.6;   /* 先が手前に反る形 */
@@ -16303,9 +16303,9 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
    if(st==="bowdraw"){const tip=[g[0]+0.0,g[1]+0.02,g[2]+0.32],dv=nrm(sub(tip,mid));tube(mid,tip,0.009,0.009,[0.62,0.46,0.28],5,false);   /* 矢 */
     const hd=[tip[0]+dv[0]*0.09,tip[1]+dv[1]*0.09,tip[2]+dv[2]*0.09];tube(tip,hd,0.03,0.002,[0.62,0.64,0.7],6,true);
     for(let f=0;f<3;f++){const a=f/3*6.2832,o2=[Math.cos(a)*0.025,Math.sin(a)*0.025,0];tube([mid[0]+dv[0]*0.03+o2[0],mid[1]+dv[1]*0.03+o2[1],mid[2]+dv[2]*0.03],[mid[0]+dv[0]*0.13,mid[1]+dv[1]*0.13,mid[2]+dv[2]*0.13],0.012,0.004,[0.85,0.2,0.18],4,false);}}}
-  else if(kind==="staff"&&R.J[8]&&R.J[8][1]>-5){const w=R.J[8],up=nrm([0.05,1,0.18]),a=[w[0]-up[0]*0.6,w[1]-up[1]*0.6,w[2]-up[2]*0.6],b=[w[0]+up[0]*0.78,w[1]+up[1]*0.78,w[2]+up[2]*0.78];   /* 杖：ねじれた木、上に光る玉を爪でつかむ */
+  else if(kind==="staff"&&R.J[8]&&R.J[8][1]>-5){const o2c=/priest/.test(q.sp||"")?[1.0,0.86,0.45]:/lich|shaman|ogremage/.test(q.sp||"")?[0.55,1.0,0.6]:[0.55,0.85,1.0];const w=R.J[8],up=nrm([0.05,1,0.18]),a=[w[0]-up[0]*0.6,w[1]-up[1]*0.6,w[2]-up[2]*0.6],b=[w[0]+up[0]*0.78,w[1]+up[1]*0.78,w[2]+up[2]*0.78];   /* 杖：ねじれた木、上に光る玉を爪でつかむ */
    tube(a,b,0.028,0.034,[0.42,0.27,0.15],8,true);for(let k=0;k<4;k++){const y=0.1+k*0.07;tube([w[0]-0.035,w[1]+y,w[2]],[w[0]+0.035,w[1]+y+0.03,w[2]],0.034,0.034,[0.3,0.18,0.1],8,false);}
-   const top=[b[0]+up[0]*0.11,b[1]+up[1]*0.11,b[2]+up[2]*0.11];for(let k=0;k<3;k++){const an=k/3*6.2832;tube(b,[top[0]+Math.cos(an)*0.07,top[1]+0.02,top[2]+Math.sin(an)*0.07],0.018,0.008,[0.36,0.22,0.12],5,true);}ball(top,0.075,[0.55,0.85,1.0],10);}
+   const top=[b[0]+up[0]*0.11,b[1]+up[1]*0.11,b[2]+up[2]*0.11];for(let k=0;k<3;k++){const an=k/3*6.2832;tube(b,[top[0]+Math.cos(an)*0.07,top[1]+0.02,top[2]+Math.sin(an)*0.07],0.018,0.008,[0.36,0.22,0.12],5,true);}ball(top,0.075,o2c,10);}
   else if(kind==="pick"&&R.tool===2){const a=R.J[33],b=R.J[34],hd=nrm(R.J[36]),ax=nrm(sub(b,a));const wood=[0.5,0.33,0.18],iron=[0.5,0.52,0.58],ext=[b[0]+ax[0]*0.08,b[1]+ax[1]*0.08,b[2]+ax[2]*0.08];tube([a[0]-ax[0]*0.12,a[1]-ax[1]*0.12,a[2]-ax[2]*0.12],ext,0.032,0.036,wood);
    const P=(s,bend)=>[b[0]+hd[0]*s-ax[0]*bend,b[1]+hd[1]*s-ax[1]*bend,b[2]+hd[2]*s-ax[2]*bend];tube(P(0,0),P(0.18,0.03),0.055,0.04,iron);tube(P(0.18,0.03),P(0.34,0.1),0.04,0.012,iron);tube(P(0,0),P(-0.16,0.03),0.05,0.035,iron);tube(P(-0.16,0.03),P(-0.27,0.08),0.035,0.01,iron);}
   const n=V.length/3;if(n)toolDraw(q,new Float32Array(V),new Float32Array(N),new Float32Array(O),new Float32Array(C),n);}
@@ -16336,6 +16336,10 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
   return[cr,-sr*cp,sr*sp, sr,cr*cp,-cr*sp, 0,sp,cp];};
  const R0S={};
  const MAGIC30=/lich|eye|shaman|ogremage|wraitheye|mindlord|ifrit|maou|imp|ghost/;
+ /* 何を持たせるか：作りこんだ武器に持ちかえる（焼きこんだ武器はその手の分だけ隠す）。弓役は弓、魔法の子と魔法使い・僧侶は杖、盗賊は短剣、ほかは剣 */
+ const weaponPlan=(sp,M,role,mode,st)=>{if(st==="down")return{kind:null,hide:0};if(mode==="mine")return{kind:"pick",hide:1};
+  if(role==="bow"||role==="snipe"||sp==="hunter")return{kind:"bow",hide:M.hasW?1:0};if(MAGIC30.test(sp)||sp==="mage"||sp==="priest")return{kind:"staff",hide:M.hasW?6:0};
+  if(sp==="thief")return{kind:"dagger",hide:M.hasW?6:0};return{kind:"sword",hide:M.hasW?6:0};};
  window.__labMonDraw=q=>{if((window.__R2||0)<0.5||window.__labMonOff)return false;const a=q.a,sp=baseSp(a.sp),M=MS[sp]||loadMon(sp);if(!M||!M.ok||typeof rigSp24!=="function")return false;
   const T=q.now/1000+(a.ph||0),kit=typeof kitOf24==="function"?kitOf24(sp):sp,slime=kit==="slime",bip=!M.pt&&!slime;let mode="idle",t=T*0.6,R,RT=null,st=a.bst||null;
   if(st&&window.__labPose){const P=window.__labPose(sp,st,a.bk||0,{side:a.bside||1,t:T});R=P.R;RT=P.root;mode=st==="walk"||st==="run"?"walk":"idle";}   /* 戦闘：呼ぶ側が a.bst（状態）と a.bk（0〜1）を入れる */
@@ -16343,9 +16347,10 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
   if(!R0S[sp])R0S[sp]=rigSp24(sp,"idle",0);
   if(M.c==null){let h=0,x0=9,x1=-9,z0=9,z1=-9;for(let i=0;i<M.NV;i++){if(M.WP&&M.WP[i])continue;const x=M.P0[i*3],y=M.P0[i*3+1],z=M.P0[i*3+2];if(y>h)h=y;if(x<x0)x0=x;if(x>x1)x1=x;if(z<z0)z0=z;if(z>z1)z1=z;}M.c=Math.max(h,0.55*Math.max(x1-x0,z1-z0));}
   const S=window.__labSize&&SIZE30[sp]!=null&&!window.__labOldSize?SIZE30[sp]*1.82/M.c:(typeof spScl24==="function"?spScl24(sp):1)*(a.mult||1);   /* 大きさ：人間＝1 の比率（本番 BODY30V2 の「大」）にそろえる */
-  const role=a.role||"",bowR=role==="bow"||role==="snipe",kind=st==="down"?null:mode==="mine"?"pick":bowR?"bow":MAGIC30.test(sp)?(M.hasW?null:"staff"):(M.hasW?null:"sword"),hideW=mode==="mine"||(M.hasW&&bowR);
+  const WPn=weaponPlan(sp,M,a.role||"",mode,st),kind=WPn.kind,hideW=WPn.hide;q.sp=sp;
   drawSkin(q,M,q.X,q.Y,q.Z,a.r||0,S,R,R0S[sp],slime,hideW,RT);if(bip&&kind)monTool(q,R,q.X,q.Y,q.Z,a.r||0,S,mode,kind,RT,st);return true;};
  /* ===== 図鑑（?gallery）：全部の魔物と勇者の3Dを、ポーズを切りかえて見る。?gallery&auto で自動でめぐる（撮影用） ===== */
+ const GNOW=()=>window.__galT!=null?window.__galT:performance.now();
  function startGallery(){if(document.getElementById("gal3d"))return;const auto=/auto/.test(location.search);
   const LIST=["goblin",...Object.keys(SIZE30).filter(k=>k!=="goblin"&&k!=="human")],JA={};try{LIST.forEach(k=>{JA[k]=typeof monName5==="function"?monName5({sp:k,evos:0}):k;});}catch(e){}
   const JOB={warrior:"戦士",knight:"騎士",thief:"盗賊",hunter:"狩人",mage:"魔法使い",priest:"僧侶",lord:"主",noble:"貴族",demon:"悪魔",gobx:"ゴブリン（別）"};
@@ -16353,18 +16358,18 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
   wrap.innerHTML=`<canvas style="position:absolute;inset:0;width:100%;height:100%"></canvas><div style="position:absolute;left:0;right:0;top:0;padding:8px;display:flex;gap:6px;align-items:center;background:#0008"><button data-g="p">◀</button><b style="flex:1;text-align:center;font-size:17px"></b><button data-g="n">▶</button></div>
    <div class="gp" style="position:absolute;left:0;right:0;bottom:0;padding:6px;display:flex;flex-wrap:wrap;gap:5px;justify-content:center;background:#0008"></div>`;document.body.appendChild(wrap);
   wrap.querySelectorAll("button").forEach(b=>b.style.cssText="font-size:16px;padding:6px 12px;border-radius:8px;border:0;background:#5a3a22;color:#fff");
-  const ST=[["idle","待つ"],["walk","歩く"],["run","走る"],["atk","攻撃"],["bow","弓"],["dodge","よける"],["knock","吹っ飛ぶ"],["stagger","よろける"],["tired","息切れ"],["down","倒れる"]];let cur=0,pose="walk",t0=performance.now(),turn=0;
-  const gp=wrap.querySelector(".gp");ST.forEach(([k,n])=>{const b=document.createElement("button");b.textContent=n;b.dataset.s=k;b.style.cssText="font-size:14px;padding:6px 10px;border-radius:8px;border:0;background:#3a2a1e;color:#fff";b.onclick=()=>{pose=k;t0=performance.now();mark();};gp.appendChild(b);});
+  const ST=[["idle","待つ"],["walk","歩く"],["run","走る"],["atk","攻撃"],["bow","弓"],["dodge","よける"],["knock","吹っ飛ぶ"],["stagger","よろける"],["tired","息切れ"],["down","倒れる"]];let cur=0,pose="walk",t0=GNOW(),turn=0;
+  const gp=wrap.querySelector(".gp");ST.forEach(([k,n])=>{const b=document.createElement("button");b.textContent=n;b.dataset.s=k;b.style.cssText="font-size:14px;padding:6px 10px;border-radius:8px;border:0;background:#3a2a1e;color:#fff";b.onclick=()=>{pose=k;t0=GNOW();mark();};gp.appendChild(b);});
   const mark=()=>gp.querySelectorAll("button").forEach(b=>b.style.background=b.dataset.s===pose?"#c7832e":"#3a2a1e");mark();
   const title=wrap.querySelector("b"),setT=()=>{const k=LIST[cur];title.textContent=(JOB[k]||JA[k]||k)+"（"+k+"・大きさ "+SIZE30[k]+"）　"+(cur+1)+"/"+LIST.length;};
-  const go=d=>{cur=(cur+d+LIST.length)%LIST.length;loadMon(LIST[cur]);setT();t0=performance.now();};wrap.querySelector('[data-g="p"]').onclick=()=>go(-1);wrap.querySelector('[data-g="n"]').onclick=()=>go(1);
+  const go=d=>{cur=(cur+d+LIST.length)%LIST.length;loadMon(LIST[cur]);setT();t0=GNOW();};wrap.querySelector('[data-g="p"]').onclick=()=>go(-1);wrap.querySelector('[data-g="n"]').onclick=()=>go(1);
   let dragX=null;wrap.addEventListener("pointerdown",e=>{if(e.target.tagName==="CANVAS")dragX=e.clientX;});addEventListener("pointermove",e=>{if(dragX!=null){turn+=(e.clientX-dragX)*0.01;dragX=e.clientX;}});addEventListener("pointerup",()=>dragX=null);
   const cv=wrap.querySelector("canvas"),gl=cv.getContext("webgl",{antialias:true});setT();LIST.slice(0,3).forEach(loadMon);
   const persp=(f,a,n,fr)=>{const t=1/Math.tan(f/2);return[t/a,0,0,0,0,t,0,0,0,0,(fr+n)/(n-fr),-1,0,0,2*fr*n/(n-fr),0];},look=(e,c,u)=>{const z=nrm(sub(e,c)),x=nrm(crs(u,z)),y=crs(z,x);return[x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,-dot(x,e),-dot(y,e),-dot(z,e),1];},
    mul=(a,b)=>{const r=new Array(16).fill(0);for(let i=0;i<4;i++)for(let j=0;j<4;j++)for(let k=0;k<4;k++)r[j*4+i]+=a[k*4+i]*b[j*4+k];return r;};
   const floorV=[],floorN=[],floorC=[];for(let k=0;k<32;k++){const a0=k/32*6.2832,a1=(k+1)/32*6.2832;[[0,0,0],[Math.cos(a1)*3,0,Math.sin(a1)*3],[Math.cos(a0)*3,0,Math.sin(a0)*3]].forEach(p=>{floorV.push(...p);floorN.push(0,1,0);floorC.push(0.42,0.33,0.24);});}
-  let last=performance.now(),autoT=0;
-  const frame=()=>{if(!document.getElementById("gal3d"))return;const now=performance.now(),dt=Math.min(0.1,(now-last)/1000);last=now;
+  let last=GNOW(),autoT=0;
+  const frame=()=>{if(!document.getElementById("gal3d"))return;const now=GNOW(),dt=Math.min(0.1,(now-last)/1000);last=now;
    const W=cv.clientWidth*devicePixelRatio,H=cv.clientHeight*devicePixelRatio;if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H;}gl.viewport(0,0,W,H);gl.clearColor(0.11,0.08,0.07,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);
    if(auto){autoT+=dt;const order=["walk","atk","run","dodge","knock"];const per=2.2;const ix=Math.floor(autoT/per);if(ix>=order.length){autoT=0;go(1);}else if(pose!==order[ix]){pose=order[ix];t0=now;mark();}}
    const sp=LIST[cur],M=MS[sp];const T=(now-t0)/1000;turn+=dt*0.35;
@@ -16377,11 +16382,11 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
     else if(pose==="knock"){const c=T%2.2;st=c<0.9?"knock":"idle";k=c/0.9;}else if(pose==="stagger"){const c=T%1.6;st=c<1?"stagger":"idle";k=c;}else if(pose==="tired")st="tired";else if(pose==="down"){st="down";k=Math.min(1,(T%3)/0.8);}else st="idle";
     const P=window.__labPose(sp,st,k,{side,t:T});if(!R0S[sp])R0S[sp]=rigSp24(sp,"idle",0);const kit=kitOf24(sp),slime=kit==="slime",bip=!M.pt&&!slime;
     if(st==="knock"||st==="dodge"){} 
-    const bowR=pose==="bow",kind=st==="down"?null:bowR?"bow":MAGIC30.test(sp)?(M.hasW?null:"staff"):(M.hasW?null:"sword");
-    drawSkin(q,M,0,0,0,0,S,P.R,R0S[sp],slime,M.hasW&&bowR,P.root);if(bip&&kind)monTool(q,P.R,0,0,0,0,S,"idle",kind,P.root,st);toolDraw(q,new Float32Array(floorV),new Float32Array(floorN),new Float32Array(floorN),new Float32Array(floorC),floorV.length/3);}
+    const WPn=weaponPlan(sp,M,pose==="bow"?"bow":"","idle",st),kind=WPn.kind;q.sp=sp;
+    drawSkin(q,M,0,0,0,0,S,P.R,R0S[sp],slime,WPn.hide,P.root);if(bip&&kind)monTool(q,P.R,0,0,0,0,S,"idle",kind,P.root,st);toolDraw(q,new Float32Array(floorV),new Float32Array(floorN),new Float32Array(floorN),new Float32Array(floorC),floorV.length/3);}
    else{loadMon(sp);}
    requestAnimationFrame(frame);};requestAnimationFrame(frame);
-  addEventListener("keydown",e=>{if(e.key==="ArrowRight")go(1);if(e.key==="ArrowLeft")go(-1);});window.__galGo=go;window.__galPose=p=>{pose=p;t0=performance.now();mark();};}
+  addEventListener("keydown",e=>{if(e.key==="ArrowRight")go(1);if(e.key==="ArrowLeft")go(-1);});window.__galGo=go;window.__galPose=p=>{pose=p;t0=GNOW();mark();};}
  if(/[?&]gallery/.test(location.search))addEventListener("load",()=>setTimeout(startGallery,300));
  window.__labGob=o=>{try{drawProps(o);}catch(e){window.__labErr="props "+e;}if(window.__labGobOff)return;const {gl,PB,texOf,SHADOW,EYE,P,R,floorY,gFree,Rr}=o;if(!R||!R.G)return;
   const t=(window.__labT!=null?window.__labT:o.now)/1000,G=R.G,free=(x,z)=>gFree(G,x,z-R.Z,0.45,1.7);
