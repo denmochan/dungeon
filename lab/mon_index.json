@@ -384,13 +384,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 1.0,
-  "bytes": 135099,
+  "bytes": 133747,
   "verts": 9000,
-  "tris": 18136,
+  "tris": 18128,
   "full": {
    "file": "mon_hauntchest.bin.gz",
    "fmt": "GB02",
-   "bytes": 668302
+   "bytes": 634083
   }
  },
  "human": {
@@ -566,13 +566,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 1.0,
-  "bytes": 131833,
+  "bytes": 131887,
   "verts": 9000,
   "tris": 18004,
   "full": {
    "file": "mon_mimic.bin.gz",
    "fmt": "GB02",
-   "bytes": 601219
+   "bytes": 599117
   }
  },
  "mindlord": {
