@@ -845,13 +845,13 @@
   "fmt": "GB03",
   "kind": "biped+weapon",
   "scale": 1.1,
-  "bytes": 142029,
+  "bytes": 142181,
   "verts": 9000,
   "tris": 17909,
   "full": {
    "file": "mon_slimeknight.bin.gz",
    "fmt": "GB1W",
-   "bytes": 1004931
+   "bytes": 1005263
   }
  },
  "spider": {

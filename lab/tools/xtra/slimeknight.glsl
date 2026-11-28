@@ -15,7 +15,9 @@ float arcU(vec2 u,vec2 c,float rr,float w){vec2 d=u-c;return d.y>-0.01?abs(lengt
 float arcD(vec2 u,vec2 c,float rr,float w){vec2 d=u-c;return d.y<0.01?abs(length(d)-rr)-w:1.0;}
 vec4 xcol(vec3 p,vec3 n,float m){
  if(m>16.5)return vec4(pow(vec3(0.25,0.62,1.0),vec3(2.2)),0.1);
- if(m>15.5){vec3 c=mix(vec3(0.62,0.66,0.74),vec3(0.9,0.93,0.97),smoothstep(-0.2,0.8,n.y))*(0.95+0.06*fbm(p*10.0));return vec4(pow(c,vec3(2.2)),0.6);}
+ if(m>15.5){vec3 c=mix(vec3(0.62,0.66,0.74),vec3(0.9,0.93,0.97),smoothstep(-0.2,0.8,n.y))*(0.95+0.06*fbm(p*10.0));
+  vec3 q=p-J[2];float sc=1.0;for(int i=0;i<2;i++){vec3 dd=normalize(vec3(i==0?0.9:0.7,-0.5,0.2));vec3 o=vec3(i==0?-0.18:-0.1,0.42+float(i)*0.07,0.2);float al=dot(q-o,dd);vec3 pp=q-o-dd*clamp(al,-0.13,0.13);sc=min(sc,length(pp)-0.013);}
+  c=mix(c,vec3(0.3,0.3,0.34),0.85*(1.0-smoothstep(0.0,0.012,sc)));return vec4(pow(c,vec3(2.2)),0.6);}   // かぶとの切り傷
  float t=clamp(p.y/0.97,0.0,1.0);vec3 c=mix(vec3(0.2,0.5,0.86),vec3(0.5,0.78,0.95),t*t);   // ゴブリンの肌と同じ質感に：色を少し落ち着かせ、まだらの濃淡と、うすい筋を入れる
  float f1=fbm(p*5.0),f2=fbm(p*13.0+7.0);c*=(0.84+0.3*f1)*(0.93+0.12*f2);c=mix(c,c*vec3(0.8,0.88,1.05),smoothstep(0.55,0.75,fbm(p*2.4+3.0))*0.6);
  // 顔は形に焼かず、試し場で絵を貼る（顔の表の10番目のマス。焼くとギザギザになった）
