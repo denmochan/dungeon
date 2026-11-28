@@ -10891,7 +10891,9 @@ SP3D24.noble = 1; SP3D24.gargoyle = 1; LOOPK24.gargoyle = 3.2;
     if (depth > 0 || !LEGX[sp0]) return R;   /* 中で rigSp24 が呼び直されるので、いちばん外だけでのばす */ const L = (sp0 === "vampire" || sp0 === "count") && window.__nobLeg || LEGX[sp0], HY = 0.52;
     const J = R.J.map(v => !v || v[1] < -5 ? v : [v[0], v[1] < HY ? v[1] * L : v[1] + HY * (L - 1), v[2]]);
     if (mode === "idle" || mode === "sleep") { const w = window.__nobStand == null ? 1 : window.__nobStand, lr = (a, b) => a.map((x, i) => x + (b[i] - x) * w);   /* 立ち姿は背すじをのばし、腕を体に沿わせ、脚をまっすぐ（がに股でサルのように見えた） */
+      const H0 = [J[5], J[8]].map(v => v && v.slice());
       [[3, 4, 5, -1], [6, 7, 8, 1]].forEach(([s, e, h, sg]) => { const S = J[s], E = [S[0] + sg * 0.07, S[1] - 0.3, S[2] - 0.02], H = [E[0] + sg * 0.02, E[1] - 0.28, E[2] + 0.06]; J[e] = lr(J[e], E); J[h] = lr(J[h], H); });
+      for (let i = 17; i < J.length; i++) { const v = J[i]; if (!v || v[1] < -5 || !H0[0] || !H0[1]) continue; const d0 = Math.hypot(v[0] - H0[0][0], v[1] - H0[0][1], v[2] - H0[0][2]), d1 = Math.hypot(v[0] - H0[1][0], v[1] - H0[1][1], v[2] - H0[1][2]), k = d0 < d1 ? 0 : 1, hi = k ? 8 : 5; const dl = [0, 1, 2].map(q => J[hi][q] - H0[k][q]); J[i] = [v[0] + dl[0], v[1] + dl[1], v[2] + dl[2]]; }   /* 手に持つ物（剣・盾・杖の関節）も手といっしょに動かす（剣が手から離れて浮いていた） */
       [[9, 10, 11, 15, -1], [12, 13, 14, 16, 1]].forEach(([hp, k, an, to, sg]) => { const P = J[hp], A = [P[0] + sg * 0.03, 0.12, P[2]], K = [(P[0] + A[0]) / 2, (P[1] + A[1]) / 2, P[2] + 0.03]; J[k] = lr(J[k], K); J[an] = lr(J[an], A); J[to] = lr(J[to], [A[0], 0.05, A[2] + 0.16]); }); }
     return Object.assign({}, R, { J }); }; }
 // ---------- 主（2Dの見た目に寄せた専用の体） VAR.w=段階 ----------

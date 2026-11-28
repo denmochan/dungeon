@@ -412,13 +412,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 1.0,
-  "bytes": 140681,
-  "verts": 9000,
-  "tris": 18020,
+  "bytes": 188450,
+  "verts": 12000,
+  "tris": 24012,
   "full": {
    "file": "mon_hunter.bin.gz",
    "fmt": "GB01",
-   "bytes": 654347
+   "bytes": 941167
   }
  },
  "ifrit": {
@@ -468,13 +468,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 1.05,
-  "bytes": 136383,
-  "verts": 9000,
-  "tris": 17996,
+  "bytes": 193735,
+  "verts": 12000,
+  "tris": 23992,
   "full": {
    "file": "mon_knight.bin.gz",
    "fmt": "GB01",
-   "bytes": 481927
+   "bytes": 932200
   }
  },
  "kobold": {
@@ -538,13 +538,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 0.95,
-  "bytes": 134410,
-  "verts": 9000,
-  "tris": 17988,
+  "bytes": 186788,
+  "verts": 12000,
+  "tris": 24032,
   "full": {
    "file": "mon_mage.bin.gz",
    "fmt": "GB01",
-   "bytes": 634295
+   "bytes": 946443
   }
  },
  "maou": {
@@ -692,13 +692,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 0.95,
-  "bytes": 130267,
-  "verts": 9000,
-  "tris": 17996,
+  "bytes": 183143,
+  "verts": 12000,
+  "tris": 24008,
   "full": {
    "file": "mon_priest.bin.gz",
    "fmt": "GB01",
-   "bytes": 487616
+   "bytes": 732505
   }
  },
  "rat": {
@@ -930,13 +930,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 0.9,
-  "bytes": 135934,
-  "verts": 9000,
-  "tris": 17992,
+  "bytes": 187028,
+  "verts": 12000,
+  "tris": 24004,
   "full": {
    "file": "mon_thief.bin.gz",
    "fmt": "GB01",
-   "bytes": 484024
+   "bytes": 708521
   }
  },
  "underlord": {
@@ -986,13 +986,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 1.0,
-  "bytes": 138149,
-  "verts": 9000,
-  "tris": 18020,
+  "bytes": 190007,
+  "verts": 12000,
+  "tris": 24000,
   "full": {
    "file": "mon_warrior.bin.gz",
    "fmt": "GB01",
-   "bytes": 451825
+   "bytes": 680765
   }
  },
  "webgoblin": {
