@@ -3,10 +3,10 @@
 BODY='''const float XK=0.02;
 vec2 U(vec2 a,vec2 b){return b.x<a.x?b:a;}
 vec2 vamp(vec3 p){vec3 H=J[2];vec3 h=p-H;vec3 e=vec3(abs(h.x),h.y,h.z);
- float hd=sEll(h-vec3(0.0,0.01,0.01),vec3(0.165,0.212,0.19));hd=smin(hd,sTap(h,vec3(0.0,-0.06,0.05),vec3(0.0,-0.195,0.09),0.12,0.06),0.06);hd=smin(hd,sEll(e-vec3(0.095,-0.1,0.07),vec3(0.06,0.06,0.07)),0.05);   // 小さな頭と細いあご
+ float hd=sEll(h-vec3(0.0,0.01,0.01),vec3(0.165,0.212,0.19));hd=smin(hd,sEll(h-vec3(0.0,-0.1,0.05),vec3(0.122,0.125,0.13)),0.08);hd=smin(hd,sEll(h-vec3(0.0,-0.185,0.07),vec3(0.055,0.04,0.045)),0.06);   // 小さな頭と細いあご
  hd=smin(hd,sTap(e,vec3(0.17,0.02,-0.02),vec3(0.31,0.1,-0.08),0.05,0.006),0.02);   // とがった耳
  hd=smin(hd,sTap(h,vec3(0.0,0.03,0.175),vec3(0.0,-0.045,0.215),0.022,0.016),0.02);   // 細い鼻
- float nk=sTap(p,J[1]+vec3(0.0,0.05,0.0),H+vec3(0.0,-0.18,0.0),0.065,0.06);hd=smin(hd,nk,0.04);
+ float nk=sTap(p,J[1]+vec3(0.0,0.05,-0.02),H+vec3(0.0,-0.16,-0.05),0.062,0.055);hd=smin(hd,nk,0.04);
  vec2 r=vec2(hd,1.0);
  float hr=sEll(h-vec3(0.0,0.03,-0.03),vec3(0.2,0.235,0.232));hr=smin(hr,sEll(h-vec3(0.0,0.1,-0.13),vec3(0.18,0.16,0.22)),0.06);float hl=0.115-0.6*max(0.0,0.06-abs(h.x))-0.3*max(0.0,abs(h.x)-0.11);hr=max(hr,-max(h.y-hl,-0.04-h.z));hr=max(hr,-max(h.y+0.06,-h.z));hr=max(hr,-(h.y+0.2));hr+=0.0035*sin(h.x*62.0+2.0*h.z);hr=smin(hr,sTap(h,vec3(0.02,0.18,0.15),vec3(0.06,0.06,0.2),0.026,0.007),0.02);hr=smin(hr,sTap(h,vec3(0.0,0.17,0.16),vec3(0.03,0.08,0.195),0.018,0.006),0.015);   // なでつけた髪（額のとがり・顔と耳は出す）
  r=U(r,vec2(hr,24.0));   // 後ろへなでつけた銀髪
