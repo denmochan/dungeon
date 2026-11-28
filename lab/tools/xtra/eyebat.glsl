@@ -5,17 +5,17 @@ float sdTri(vec2 p,vec2 a,vec2 b,vec2 c){vec2 e0=b-a,e1=c-b,e2=a-c,v0=p-a,v1=p-b
  float s=sign(e0.x*e2.y-e0.y*e2.x);vec2 d=min(min(vec2(dot(pq0,pq0),s*(v0.x*e0.y-v0.y*e0.x)),vec2(dot(pq1,pq1),s*(v1.x*e1.y-v1.y*e1.x))),vec2(dot(pq2,pq2),s*(v2.x*e2.y-v2.y*e2.x)));return -sqrt(d.x)*sign(d.y);}
 vec2 batBody(vec3 p){vec3 b=p-J[0];vec3 e=vec3(abs(b.x),b.y,b.z);
  float d=length(b)-0.28;vec2 r=vec2(d,15.0);   // 目玉
- float lid=max(abs(length(b)-0.29)-0.025,-(b.y-0.08-0.1*b.z));lid=max(lid,b.z-0.22);float ld2=max(abs(length(b)-0.29)-0.025,(b.y+0.16+0.06*b.z));ld2=max(ld2,b.z-0.2);lid=min(lid,ld2);if(lid<r.x)r=vec2(lid,18.0);   // 上下のまぶた
+ float lid=max(abs(length(b)-0.29)-0.014,-(b.y-0.17-0.12*b.z));lid=max(lid,b.z-0.2);if(lid<r.x)r=vec2(lid,18.0);   // うすい上まぶた（ほとんど目玉が見える）
  d=sTap(e,vec3(0.06,-0.26,-0.02),vec3(0.07,-0.42,0.0),0.035,0.014);if(d<r.x)r=vec2(d,18.0);   // 足
- vec3 w=vec3(e.x-0.25,b.y+0.0,b.z+0.05);vec2 S=vec2(0.0,0.0),W=vec2(0.36,0.32),T0=vec2(0.92,0.42),T1=vec2(0.98,0.02),T2=vec2(0.76,-0.28),T3=vec2(0.42,-0.36),B0=vec2(0.0,-0.2);
+ const float WS=1.3;vec3 w=vec3(e.x-0.25,b.y+0.06,b.z+0.04)/WS;vec2 S=vec2(0.0,0.0),W=vec2(0.36,0.32),T0=vec2(0.92,0.42),T1=vec2(0.98,0.02),T2=vec2(0.76,-0.28),T3=vec2(0.42,-0.36),B0=vec2(0.0,-0.2);
  float m2=min(min(sdTri(w.xy,S,W,T0),sdTri(w.xy,S,T0,T1)),min(sdTri(w.xy,S,T1,T2),min(sdTri(w.xy,S,T2,T3),sdTri(w.xy,S,T3,B0))));
  m2=min(m2,sdTri(w.xy,W,T0,T1));
  for(int k=0;k<4;k++){vec2 a=k==0?T0:(k==1?T1:(k==2?T2:T3)),c=k==0?T1:(k==1?T2:(k==2?T3:B0));vec2 mid=(a+c)*0.5,nrm2=normalize(mid-S*0.2-vec2(0.25,0.0));float rr=length(c-a)*0.5;m2=max(m2,-(length(w.xy-(mid+nrm2*rr*0.12))-rr*0.9));}   // 骨のあいだのえぐれ
- float mem=max(m2,abs(w.z+0.02*w.x)-0.028);if(mem<r.x)r=vec2(mem,16.0);   // 羽の膜
+ float mem=max(m2,abs(w.z+0.02*w.x)-0.022)*WS;if(mem<r.x)r=vec2(mem,16.0);   // 羽の膜
  float bn=min(sTap(w,vec3(S,0.0),vec3(W,0.0),0.04,0.03),sTap(w,vec3(W,0.0),vec3(T0,0.0),0.028,0.008));
  for(int k=1;k<4;k++){vec2 t=k==1?T1:(k==2?T2:T3);bn=min(bn,sTap(w,vec3(W,0.0),vec3(t,0.0),0.02,0.007));}
  bn=min(bn,sTap(w,vec3(W,0.0),vec3(W+vec2(0.0,0.1),0.0)+vec3(0.0,0.0,0.03),0.03,0.006));   // 親指のつめ
- if(bn<r.x)r=vec2(bn,17.0);   // 指の骨
+ bn*=WS;if(bn<r.x)r=vec2(bn,17.0);   // 指の骨
  return r;}
 vec2 xmod(vec2 b,vec3 p){return batBody(p);}
 vec2 xbody(vec3 p){return vec2(1e3,15.0);}

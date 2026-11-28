@@ -35,7 +35,7 @@ with sync_playwright() as p:
     import os
     if os.environ.get('VARZ'): L['vr'][0][2]=float(os.environ['VARZ'])   # 武器を描かない版など（悪魔の系統：VAR.z 2＝なし）
     J=np.array([j for j in info['J'] if j[1]>-5]);print(sp,info['kit'],'FI',info['FI'],'scl',info['scl'],'tool',info['tool'],'J',J.min(0),J.max(0))
-    lo=np.array([J[:,0].min()-0.8,-0.05,J[:,2].min()-0.7]);hi=np.array([J[:,0].max()+0.8,J[:,1].max()+0.8,J[:,2].max()+0.7])
+    PX=float(__import__('os').environ.get('PADX','0'));lo=np.array([J[:,0].min()-0.8-PX,-0.05,J[:,2].min()-0.7]);hi=np.array([J[:,0].max()+0.8+PX,J[:,1].max()+0.8,J[:,2].max()+0.7])   # PADX：横に広い羽などが箱で切れないように
     N=np.ceil((hi-lo)/GS).astype(int)+1;NX,NY,NZ=map(int,N);print('grid',NX,NY,NZ)
     pg2=b.new_page();pg2.goto('file://'+__import__('os').path.abspath('sampler.html')+'');pg2.evaluate('([s,p])=>init(s,p)',[sh,pack]);pg2.evaluate('p=>{window.__P=p}',pack)
     # sampler setRig uses tool=0, deb zeros

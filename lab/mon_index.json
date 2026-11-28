@@ -18,13 +18,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 0.35,
-  "bytes": 90688,
+  "bytes": 94734,
   "verts": 7000,
-  "tris": 13906,
+  "tris": 14000,
   "full": {
    "file": "mon_bat.bin.gz",
    "fmt": "GB02",
-   "bytes": 283184
+   "bytes": 318231
   }
  },
  "berserker": {
@@ -186,13 +186,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 0.4,
-  "bytes": 93586,
+  "bytes": 94782,
   "verts": 7000,
-  "tris": 13897,
+  "tris": 13996,
   "full": {
    "file": "mon_eyebat.bin.gz",
    "fmt": "GB02",
-   "bytes": 343074
+   "bytes": 460893
   }
  },
  "eyespider": {
@@ -214,13 +214,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 0.35,
-  "bytes": 82849,
+  "bytes": 85931,
   "verts": 7000,
-  "tris": 13912,
+  "tris": 14000,
   "full": {
    "file": "mon_firebat.bin.gz",
    "fmt": "GB02",
-   "bytes": 292059
+   "bytes": 328675
   }
  },
  "flamechimera": {
