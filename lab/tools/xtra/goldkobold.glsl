@@ -25,7 +25,10 @@ vec2 xbody(vec3 p){vec3 H=J[2];vec3 h=p-H;vec3 e=vec3(abs(h.x),h.y,h.z);
  {float sk=sEll(p-J[1]-vec3(0.06,0.06,-0.36),vec3(0.3,0.34,0.26));sk=smin(sk,sTap(p,J[1]+vec3(0.06,0.36,-0.36),J[1]+vec3(0.06,0.46,-0.34),0.09,0.06),0.06);sk+=0.015*(fbm(p*12.0)-0.5);if(sk<r.x)r=vec2(sk,20.0);   // 背中の重い袋
   float sp=sTap(p,J[3]+vec3(0.0,0.08,0.18),J[0]+vec3(0.24,0.1,0.2),0.03,0.03);if(sp<r.x)r=vec2(sp,18.0);   // 袋のひも
   float gc=9.0;for(int k=0;k<5;k++){float a=float(k)*1.3;gc=min(gc,max(length((p-J[1]-vec3(0.06+0.12*cos(a),0.38+0.02*float(k),-0.36+0.1*sin(a))).xz)-0.055,abs(p.y-J[1].y-0.38-0.02*float(k))-0.012));}if(gc<r.x)r=vec2(gc,21.0);   // 袋からのぞく金貨
-  float gm=9.0;for(int k=0;k<2;k++){vec3 c=J[1]+vec3(-0.08+0.2*float(k),0.42,-0.3);vec3 q=abs(p-c);gm=min(gm,(q.x+q.y+q.z-0.06)*0.577);}if(gm<r.x)r=vec2(gm,22.0);}   // 宝石
+  float gm=9.0;for(int k=0;k<2;k++){vec3 c=J[1]+vec3(-0.08+0.2*float(k),0.42,-0.3);vec3 q=abs(p-c);gm=min(gm,(q.x+q.y+q.z-0.06)*0.577);}if(gm<r.x)r=vec2(gm,22.0);   // 宝石
+  float ch=max(abs(length((p-J[1]-vec3(0.0,0.2,0.04)).xz*vec2(1.0,1.15))-0.23)-0.014,abs(p.y-J[1].y-0.2+0.5*max(0.0,(p-J[1]).z-0.1))-0.014);ch=max(ch,-(p-J[1]).z+0.02);if(ch<r.x)r=vec2(ch,19.0);   // 首の金の鎖
+  vec3 gq=abs(p-J[1]-vec3(0.0,0.06,0.33));float bg=(gq.x*0.9+gq.y*0.7+gq.z*1.2-0.08)*0.6;if(bg<r.x)r=vec2(bg,22.0);float st=max(abs(length((p-J[1]-vec3(0.0,0.06,0.31)).xy)-0.075)-0.02,abs((p-J[1]).z-0.31)-0.02);if(st<r.x)r=vec2(st,19.0);   // 大きな宝石の首飾り
+  float er=max(abs(length((p-J[2]-vec3(0.27,0.28,-0.05)).xy)-0.05)-0.012,abs(p.z-J[2].z+0.05)-0.012);if(er<r.x)r=vec2(er,19.0);}   // 耳の金の輪
  return r;}
 vec4 xcol(vec3 p,vec3 n,float m){
  if(m>21.5)return vec4(pow(vec3(0.3,0.85,1.0),vec3(2.2))*1.6,0.6);   // 宝石

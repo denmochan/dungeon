@@ -16309,12 +16309,14 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
   const[mx,my]=P(16,22.4);g.fillStyle="#2a0a12";g.beginPath();g.moveTo(mx-4.4*K,my-1.0*K);g.quadraticCurveTo(mx,my+0.6*K,mx+4.4*K,my-1.0*K);g.quadraticCurveTo(mx,my+3.4*K,mx-4.4*K,my-1.0*K);g.fill();   // 口
   g.fillStyle="#f4ecd8";for(let k=-3;k<=3;k++){const x=mx+k*1.15*K,big=Math.abs(k)===2,h=(big?2.6:1.1)*K;g.beginPath();g.moveTo(x-0.5*K,my-0.5*K);g.lineTo(x+0.5*K,my-0.5*K);g.lineTo(x,my-0.5*K+h);g.closePath();g.fill();}}   // 上の牙の列（2本が長い）
  /* コボルトの目（11/28）：形の目玉の上に、琥珀色の目・丸い黒目（犬の目）・光・黒いふち・目の下の涙のすじを描く。顔の表の12番目のマス */
- function koboldFace(g,ox,K){g.clearRect(ox,0,32*K,32*K);const P=(c,r)=>[ox+c*K,r*K];
-  for(const[c,fl]of[[9.9,1],[22.1,-1]]){const[x,y]=P(c,13.0);
-   g.fillStyle="#140c08";g.beginPath();g.ellipse(x,y,2.5*K,2.2*K,0,0,6.283);g.fill();
-   g.fillStyle="#f0a020";g.beginPath();g.ellipse(x,y,1.9*K,1.75*K,0,0,6.283);g.fill();g.fillStyle="#ffd860";g.beginPath();g.ellipse(x,y+0.5*K,1.2*K,0.9*K,0,0,6.283);g.fill();
-   g.fillStyle="#140c08";g.beginPath();g.ellipse(x+fl*0.15*K,y+0.1*K,1.0*K,1.0*K,0,0,6.283);g.fill();g.fillStyle="#fff";g.beginPath();g.ellipse(x-fl*0.55*K,y-0.6*K,0.55*K,0.55*K,0,0,6.283);g.fill();
-   g.strokeStyle="rgba(30,18,10,0.75)";g.lineWidth=0.7*K;g.lineCap="round";g.beginPath();g.moveTo(x+fl*1.6*K,y+1.6*K);g.quadraticCurveTo(x+fl*2.8*K,y+3.4*K,x+fl*4.0*K,y+4.2*K);g.stroke();}}   // 目の下のすじ
+ function koboldFace(g,ox,K){g.clearRect(ox,0,32*K,32*K);const P=(c,r)=>[ox+c*K,r*K];   /* 11/28 本人：目を細く鋭く（アーモンド形・上まぶたを重く・目じりを上げる） */
+  for(const[c,fl0]of[[9.9,1],[22.1,-1]]){const fl=-fl0;   /* 目じり（外側）を上げる */const[x,y]=P(c,13.1);
+   const eye=(rx,ry)=>{g.beginPath();g.moveTo(x-fl*rx*K,y+0.5*ry*K);g.quadraticCurveTo(x-fl*0.1*rx*K,y-1.15*ry*K,x+fl*rx*K,y-0.9*ry*K);g.quadraticCurveTo(x+fl*0.2*rx*K,y+1.25*ry*K,x-fl*rx*K,y+0.5*ry*K);g.closePath();};
+   g.fillStyle="#140c08";eye(3.1,1.9);g.fill();
+   g.save();eye(2.5,1.35);g.clip();g.fillStyle="#e8901a";g.fillRect(x-3*K,y-3*K,6*K,6*K);g.fillStyle="#ffd050";g.beginPath();g.ellipse(x,y+0.5*K,1.3*K,0.8*K,0,0,6.283);g.fill();
+    g.fillStyle="#140c08";g.beginPath();g.ellipse(x+fl*0.2*K,y,0.75*K,0.9*K,0,0,6.283);g.fill();g.fillStyle="#fff";g.beginPath();g.ellipse(x-fl*0.5*K,y-0.35*K,0.4*K,0.4*K,0,0,6.283);g.fill();
+    g.fillStyle="rgba(20,12,8,0.85)";g.beginPath();g.moveTo(x-fl*3*K,y-2*K);g.lineTo(x+fl*3*K,y-2.4*K);g.lineTo(x+fl*3*K,y-0.55*K);g.lineTo(x-fl*3*K,y-0.15*K);g.closePath();g.fill();g.restore();   // 重い上まぶた
+   g.strokeStyle="rgba(30,18,10,0.75)";g.lineWidth=0.7*K;g.lineCap="round";g.beginPath();g.moveTo(x+fl*2.2*K,y+1.3*K);g.quadraticCurveTo(x+fl*0.6*K,y+3.0*K,x-fl*1.6*K,y+3.8*K);g.stroke();}}   // 目の下のすじ
  function faceAtlasSmooth(gl){const K=8,W=512*K,H=32*K,out=new ImageData(W,H),up=(m)=>{const a=document.createElement("canvas");a.width=32;a.height=32;const g0=a.getContext("2d"),im=g0.createImageData(32,32);for(let q=0;q<1024;q++){im.data[q*4]=im.data[q*4+1]=im.data[q*4+2]=255;im.data[q*4+3]=m[q];}g0.putImageData(im,0,0);
    const b=document.createElement("canvas");b.width=32*K;b.height=32*K;const g=b.getContext("2d");g.imageSmoothingEnabled=true;g.imageSmoothingQuality="high";g.filter="blur("+(K*0.35)+"px)";g.drawImage(a,0,0,32*K,32*K);return g.getImageData(0,0,32*K,32*K).data;};
   ["goblin","slime","bat","ghost","imp","myconid","orc","human"].forEach((sp,fi)=>{const F=FACE24[sp],cols={};F.rows.forEach((r,y)=>[...r].forEach((ch,k)=>{if(!F.pal[ch])return;(cols[ch]=cols[ch]||new Uint8Array(1024))[y*32+k]=255;}));

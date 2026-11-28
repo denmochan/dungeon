@@ -24,7 +24,10 @@ vec2 xbody(vec3 p){vec3 H=J[2];vec3 h=p-H;vec3 e=vec3(abs(h.x),h.y,h.z);
  float po=sEll(p-J[0]-vec3(-0.22,0.06,0.2),vec3(0.08,0.09,0.06));bt=min(bt,po);if(bt<r.x)r=vec2(bt,18.0);if(bk<r.x)r=vec2(bk,19.0);   // 革のベルト・金具・小さな袋
  {float mn=9.0;for(int k=0;k<9;k++){float a=(float(k)-4.0)*0.36;vec3 c=J[2]+vec3(sin(a)*0.26,-0.08,-0.12+cos(a)*0.1);mn=min(mn,sTap(p,c,c+vec3(sin(a)*0.12,-0.2,-0.1),0.08,0.012));}r.x=smin(r.x,mn,0.03);   // 首の後ろのたてがみ
   float tl=sTap(p,J[0]+vec3(0.06,0.0,-0.3),J[0]+vec3(0.2,-0.3,-0.62),0.1,0.13);tl=min(tl,sTap(p,J[0]+vec3(0.2,-0.3,-0.62),J[0]+vec3(0.32,-0.35,-0.9),0.13,0.03));tl+=0.02*(fbm(p*12.0)-0.5);r.x=smin(r.x,tl,0.04);   // ふさふさの尾（本音がばれる）
-  float sh=sEll(p-J[6]-vec3(0.08,0.1,0.0),vec3(0.2,0.1,0.19));sh=max(sh,-sEll(p-J[6]-vec3(0.08,0.06,0.0),vec3(0.17,0.08,0.16)));if(sh<r.x)r=vec2(sh,18.0);}   // 片方の肩に革の肩当て
+  float sh=sEll(p-J[6]-vec3(0.08,0.1,0.0),vec3(0.2,0.1,0.19));sh=max(sh,-sEll(p-J[6]-vec3(0.08,0.06,0.0),vec3(0.17,0.08,0.16)));if(sh<r.x)r=vec2(sh,18.0);   // 片方の肩に革の肩当て
+  float bp=sEll(p-J[1]-vec3(0.0,0.0,0.05),vec3(0.36,0.32,0.27));bp=max(abs(bp)-0.03,-(p.z-J[1].z-0.02));bp=max(bp,abs(p.y-J[1].y+0.02)-0.24);if(bp<r.x)r=vec2(bp,18.0);   // 革の胸当て
+  float rv=9.0;for(int k=0;k<6;k++){float a=(float(k)-2.5)*0.42;vec3 c=J[1]+vec3(sin(a)*0.32,0.16-0.02*abs(float(k)-2.5),0.05+cos(a)*0.25);rv=min(rv,length(p-c)-0.03);}if(rv<r.x)r=vec2(rv,19.0);   // 胸当ての鋲
+  float sc=sTap(p,J[1]+vec3(-0.16,0.12,0.33),J[1]+vec3(0.12,-0.12,0.33),0.022,0.022);if(sc<r.x)r=vec2(sc,19.0);}   // 胸当ての金具のすじ
  return r;}
 vec4 xcol(vec3 p,vec3 n,float m){
  if(m>21.5)return vec4(pow(vec3(0.3,0.85,1.0),vec3(2.2))*1.6,0.6);   // 宝石
