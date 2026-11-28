@@ -1,0 +1,1 @@
+{"name": "ダンジョンマスター（仮）戦闘作り直し版", "short_name": "ダンジョンrt", "start_url": "./rt/", "scope": "./", "display": "standalone", "orientation": "landscape", "background_color": "#120c0a", "theme_color": "#120c0a", "icons": [{"src": "icon.png", "sizes": "512x512", "type": "image/png"}]}
