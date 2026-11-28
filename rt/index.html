@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層121／No.350（11/25 00:49）";
+const VER20 = "層122／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -14372,7 +14372,7 @@ function fpOpen30(){
       L.querySelectorAll("[data-r]").forEach(b => b.onclick = () => { const j = +b.dataset.r; m.home = j; m.job19 = null; m.job19h = j; try { save(); } catch (e) {} mkActs(rooms[R.i]); mkActs(rooms[j]); menu.hidden = true; toast(`${m.nick || ""} を ${rooms[j].name} へ`); }); }; }
   const toast = t => { const d = document.createElement("div"); d.className = "f26toast"; d.textContent = t; wrap.appendChild(d); setTimeout(() => d.remove(), 1800); };
   // 魔物の暮らし（軽く）
-  const LIFEH30 = { fitsM: (...q) => fitsM(...q), sepOK: (...q) => sepOK(...q), where: (...q) => where(...q), bfs30: (...q) => bfs30(...q), cellW: (...q) => cellW(...q), rooms: () => rooms, player: () => P, cur: () => curRoom };   /* 暮らしAI（life30）に渡す道具 */
+  const LIFEH30 = { fitsM: (...q) => fitsM(...q), sepOK: (...q) => sepOK(...q), where: (...q) => where(...q), bfs30: (...q) => bfs30(...q), cellW: (...q) => cellW(...q), rooms: () => rooms, player: () => P, cur: () => curRoom, pop: (R, a, txt, col) => { if (R.i !== curRoom) return; POPS30.push({ x: a.x, y: R.Y + (a.H || 1.6) + 0.5, z: R.Z + a.z, txt, col: col || "#ffe9b0", big: 0, t: performance.now(), cue: 1, life: 1500 }); } };   /* 暮らしAI（life30）に渡す道具 */
   function stepActs(R, dt){ const NIGHT = typeof N !== "undefined" && N && !N.done; (R.acts || []).forEach(a => { if (a.stay) return; if (!NIGHT && typeof window.__life30 === "function") { try { if (window.__life30(R, a, dt, LIFEH30)) return; } catch (e) { console.warn('life30', e); } }
     /* 近くに来たら足を止めて、こちらを向く（気づいたら ♪） */ { const dx = P.x - a.x, dz = P.z - (R.Z + a.z), d = Math.hypot(dx, dz); if (R.i === curRoom && d < 3.4 + (a.H || 0) * 0.45) { a.walking = false; a.wait = Math.max(a.wait, 1.5); const tr = Math.atan2(dx, dz), dr = ((tr - a.r) % 6.2832 + 9.4248) % 6.2832 - 3.1416; a.r += dr * Math.min(1, dt * 5); if (!a.nt) a.nt = performance.now(); return; } else if (d > 6 + (a.H || 0) * 0.45) a.nt = 0; }
     if (!a.walking) { a.wait -= dt; if (a.wait <= 0) { for (let k = 0; k < 8; k++) { const ang = Math.random() * 6.28, d = 2 + Math.random() * 5, x = a.hx + Math.cos(ang) * d, z = a.hz + Math.sin(ang) * d; let okp = fitsM(R, a, x, z) && sepOK(R, a, x, z, 1); for (let t = 0.25; okp && t < 1; t += 0.25) okp = fitsM(R, a, a.x + (x - a.x) * t, a.z + (z - a.z) * t); if (okp) { a.tx = x; a.tz = z; a.walking = true; break; }   /* 体の大きさで通れる所だけ（大きい子が壁にめりこんでいた） */ } a.wait = 2 + Math.random() * 4; } return; }
@@ -15468,6 +15468,23 @@ setInterval(() => { try { const w = document.getElementById("fp26"); if (!w) ret
     if (s.ph === "go") { const r = goStep(R, a, B, nv, H, dt, s.x, s.z); if (r === "fail") { s.ph = "pick"; s.rack = 1; return; } if (r !== "arrived") return; s.ph = "hit"; s.t = 0; }
     if (s.ph === "hit") { s.t += dt; pose(a, s.t % 9 < 6 ? "slash" : "spar", s.lx, s.lz); if (s.t > s.dur) { reserve(C, B, a, null); s.ph = "pick"; s.rack = 1; s.n++; }   /* 打ちこみ6秒・跳びかかり3秒をくり返す */
       else if (s.t > 3 && Math.random() < dt * 0.15) { const mate = trainMate(R, a, B); if (mate) { reserve(C, B, a, null); if (!pairUp(R, a, B, mate, C, nv, H)) reserve(C, B, a, null); } } } };   /* 人形を叩いている間に相手が空いたら、手合わせに切りかえる */
+  /* 教える（本人 11/28「教える側が何もしてないの気になる」）：前は教える子に仕事の動きがなく、見回りをしていた。
+     鍛えている子のそばへ行って向かい合い、ときどき声をかけて手本を見せる。鍛える子がいなければ、人形で手本の素振り */
+  const TEACH30 = ["そこだ！", "腰が高い", "もう一回！", "いいぞ", "脇をしめろ", "足を使え", "見てろ、こうだ"];
+  WORK.teach = (R, a, B, C, nv, H, dt) => { const s = B.st; tire(B, dt, 0.5);
+    const pupils = () => (R.acts || []).filter(b => b !== a && !b.hide && b.l30 && b.l30.b && b.l30.b.job === "train" && b.l30.b.act === "work");
+    if (s.ph === "pick") { const L = pupils(); if (!L.length) { const q = C.dummies[0]; if (q) { const p = spotAround(R, a, B, C, nv, H, q.x, q.z, objR(q) + bodyR(a) + 0.5, "dummyT" + Math.round(q.x * 10)); if (p) { reserve(C, B, a, p.key); Object.assign(s, { ph: "goD", x: p.x, z: p.z, lx: q.x, lz: q.z, t: 0 }); return; } } return WORK.guard(R, a, B, C, nv, H, dt); }
+      const pu = L[Math.abs(s.n || 0) % L.length]; s.pu = pu; s.n = (s.n || 0) + 1; const p = spotAround(R, a, B, C, nv, H, pu.x, pu.z, bodyR(a) + bodyR(pu) + 1.0, "teach" + a.m.id); if (!p) { s.ph = "pickD"; return; }
+      reserve(C, B, a, p.key); Object.assign(s, { ph: "go", x: p.x, z: p.z, t: 0, dur: 10 + hsh(B.seed++) * 6, px: pu.x, pz: pu.z, say: 1.5 }); return; }
+    if (s.ph === "pickD") { s.ph = "pick"; s.n++; return WORK.guard(R, a, B, C, nv, H, dt); }
+    if (s.ph === "go") { const r = goStep(R, a, B, nv, H, dt, s.x, s.z); if (r === "fail") { reserve(C, B, a, null); s.ph = "pick"; return; } if (r !== "arrived") return; s.ph = "watch"; s.t = 0; }
+    if (s.ph === "watch") { const pu = s.pu; s.t += dt; if (!pu || !pu.l30 || !pu.l30.b || pu.l30.b.job !== "train") { reserve(C, B, a, null); s.ph = "pick"; return; }
+      face(a, pu.x, pu.z, dt); if (Math.hypot(pu.x - s.px, pu.z - s.pz) > 3.0 && s.t > 3.5) { reserve(C, B, a, null); s.ph = "pick"; s.n--; return; }   /* 教え子が動いた（武器を取りに行った・手合わせを始めた）：そばへ行き直す */
+      s.say -= dt; if (s.say <= 0) { s.say = 2.8 + hsh(B.seed++) * 2.5; s.show = 0.6; try { H.pop && H.pop(R, a, TEACH30[Math.floor(hsh(B.seed++) * TEACH30.length)]); } catch (e) {} pu.nt = now(); }
+      if (s.show > 0) { s.show -= dt; pose(a, "slash", pu.x, pu.z); } else pose(a, "idle", pu.x, pu.z);   /* 声をかけるときに手本の一振り */
+      if (s.t > s.dur) { reserve(C, B, a, null); s.ph = "pick"; } return; }
+    if (s.ph === "goD") { const r = goStep(R, a, B, nv, H, dt, s.x, s.z); if (r === "fail") { s.ph = "pickD"; return; } if (r !== "arrived") return; s.ph = "demo"; s.t = 0; }
+    if (s.ph === "demo") { s.t += dt; pose(a, s.t % 4 < 2.5 ? "slash" : "idle", s.lx, s.lz); if (s.t > 8) { reserve(C, B, a, null); s.ph = "pick"; } } };
   /* 見張り（狙撃も）：のぞき穴・物見台のそばに立って外を見る。ときどき入口の方をふり返り、別の穴へ移る */
   WORK.watch = WORK.snipe = (R, a, B, C, nv, H, dt) => { const s = B.st; tire(B, dt, 0.6);
     if (s.ph === "pick") { let p = null, q = null; for (let t = 0; t < C.slits.length && !p; t++) { q = C.slits[(s.n + a.m.id + t) % C.slits.length]; p = spotAround(R, a, B, C, nv, H, q.x, q.z, objR(q) + bodyR(a) + 0.3, "slit" + Math.round(q.x * 10) + "_" + Math.round(q.z * 10)); }
