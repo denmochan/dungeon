@@ -46,13 +46,13 @@
   "fmt": "GB03",
   "kind": "biped+weapon",
   "scale": 1.7,
-  "bytes": 128790,
+  "bytes": 128726,
   "verts": 8000,
-  "tris": 15867,
+  "tris": 15915,
   "full": {
    "file": "mon_bogtroll.bin.gz",
    "fmt": "GB1W",
-   "bytes": 639334
+   "bytes": 640618
   }
  },
  "bonedragon": {
@@ -60,13 +60,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 4.0,
-  "bytes": 129629,
+  "bytes": 128069,
   "verts": 8000,
   "tris": 15968,
   "full": {
    "file": "mon_bonedragon.bin.gz",
    "fmt": "GB02",
-   "bytes": 972113
+   "bytes": 604815
   }
  },
  "bonewarden": {
@@ -88,13 +88,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 2.2,
-  "bytes": 121443,
-  "verts": 8000,
-  "tris": 15996,
+  "bytes": 107795,
+  "verts": 7000,
+  "tris": 13996,
   "full": {
    "file": "mon_chimera.bin.gz",
    "fmt": "GB02",
-   "bytes": 574545
+   "bytes": 574429
   }
  },
  "count": {
@@ -102,13 +102,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 1.0,
-  "bytes": 122957,
+  "bytes": 123469,
   "verts": 8000,
-  "tris": 15858,
+  "tris": 15942,
   "full": {
    "file": "mon_count.bin.gz",
    "fmt": "GB01",
-   "bytes": 952701
+   "bytes": 975395
   }
  },
  "demon": {
@@ -130,13 +130,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 5.0,
-  "bytes": 128111,
+  "bytes": 128003,
   "verts": 8000,
-  "tris": 15897,
+  "tris": 15920,
   "full": {
    "file": "mon_dragon.bin.gz",
    "fmt": "GB02",
-   "bytes": 767840
+   "bytes": 750460
   }
  },
  "elderdragon": {
@@ -200,13 +200,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 0.85,
-  "bytes": 92825,
+  "bytes": 92888,
   "verts": 7000,
-  "tris": 13934,
+  "tris": 13996,
   "full": {
    "file": "mon_eyespider.bin.gz",
    "fmt": "GB02",
-   "bytes": 316840
+   "bytes": 328226
   }
  },
  "firebat": {
@@ -228,13 +228,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 2.2,
-  "bytes": 104663,
+  "bytes": 104884,
   "verts": 7000,
   "tris": 13996,
   "full": {
    "file": "mon_flamechimera.bin.gz",
    "fmt": "GB02",
-   "bytes": 529005
+   "bytes": 530218
   }
  },
  "fortgolem": {
@@ -242,13 +242,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 2.8,
-  "bytes": 109851,
+  "bytes": 109792,
   "verts": 7000,
-  "tris": 13985,
+  "tris": 13996,
   "full": {
    "file": "mon_fortgolem.bin.gz",
    "fmt": "GB01",
-   "bytes": 590479
+   "bytes": 591915
   }
  },
  "fungus": {
@@ -256,13 +256,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 0.8,
-  "bytes": 108405,
+  "bytes": 109444,
   "verts": 7000,
-  "tris": 13890,
+  "tris": 13951,
   "full": {
    "file": "mon_fungus.bin.gz",
    "fmt": "GB02",
-   "bytes": 441252
+   "bytes": 476668
   }
  },
  "gargoyle": {
@@ -270,13 +270,13 @@
   "fmt": "GB03",
   "kind": "biped+weapon",
   "scale": 1.3,
-  "bytes": 108752,
+  "bytes": 108860,
   "verts": 7000,
   "tris": 13984,
   "full": {
    "file": "mon_gargoyle.bin.gz",
    "fmt": "GB1W",
-   "bytes": 772400
+   "bytes": 777211
   },
   "shape": "imp"
  },
@@ -313,13 +313,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 0.7,
-  "bytes": 88832,
+  "bytes": 89012,
   "verts": 7000,
-  "tris": 13956,
+  "tris": 13984,
   "full": {
    "file": "mon_ghostslime.bin.gz",
    "fmt": "GB01",
-   "bytes": 335725
+   "bytes": 339684
   }
  },
  "ghoul": {
@@ -355,13 +355,13 @@
   "fmt": "GB03",
   "kind": "biped+weapon",
   "scale": 0.75,
-  "bytes": 109665,
+  "bytes": 109325,
   "verts": 7000,
-  "tris": 13997,
+  "tris": 13992,
   "full": {
    "file": "mon_goldkobold.bin.gz",
    "fmt": "GB1W",
-   "bytes": 584048
+   "bytes": 585736
   }
  },
  "golem": {
@@ -383,13 +383,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 1.0,
-  "bytes": 98460,
+  "bytes": 100522,
   "verts": 7000,
-  "tris": 14040,
+  "tris": 14128,
   "full": {
    "file": "mon_hauntchest.bin.gz",
    "fmt": "GB02",
-   "bytes": 393044
+   "bytes": 408621
   }
  },
  "human": {
@@ -425,13 +425,13 @@
   "fmt": "GB03",
   "kind": "biped+weapon",
   "scale": 1.6,
-  "bytes": 106802,
+  "bytes": 106863,
   "verts": 7000,
-  "tris": 13982,
+  "tris": 13992,
   "full": {
    "file": "mon_ifrit.bin.gz",
    "fmt": "GB1W",
-   "bytes": 562488
+   "bytes": 562873
   }
  },
  "imp": {
@@ -439,13 +439,13 @@
   "fmt": "GB03",
   "kind": "biped+weapon",
   "scale": 0.5,
-  "bytes": 108511,
+  "bytes": 108585,
   "verts": 7000,
-  "tris": 13986,
+  "tris": 13988,
   "full": {
    "file": "mon_imp.bin.gz",
    "fmt": "GB1W",
-   "bytes": 629706
+   "bytes": 629021
   }
  },
  "jackal": {
@@ -453,13 +453,13 @@
   "fmt": "GB03",
   "kind": "biped+weapon",
   "scale": 0.8,
-  "bytes": 109042,
+  "bytes": 108854,
   "verts": 7000,
-  "tris": 13996,
+  "tris": 13992,
   "full": {
    "file": "mon_jackal.bin.gz",
    "fmt": "GB1W",
-   "bytes": 583788
+   "bytes": 584266
   }
  },
  "knight": {
@@ -481,13 +481,13 @@
   "fmt": "GB03",
   "kind": "biped+weapon",
   "scale": 0.75,
-  "bytes": 109838,
+  "bytes": 109723,
   "verts": 7000,
-  "tris": 13996,
+  "tris": 13992,
   "full": {
    "file": "mon_kobold.bin.gz",
    "fmt": "GB1W",
-   "bytes": 584168
+   "bytes": 584707
   }
  },
  "lavaslime": {
@@ -523,13 +523,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 1.5,
-  "bytes": 130998,
+  "bytes": 130864,
   "verts": 8000,
-  "tris": 15688,
+  "tris": 15755,
   "full": {
    "file": "mon_lord.bin.gz",
    "fmt": "GB01",
-   "bytes": 828518
+   "bytes": 1025412
   }
  },
  "mage": {
@@ -537,13 +537,13 @@
   "fmt": "GB03",
   "kind": "biped+weapon",
   "scale": 0.95,
-  "bytes": 121984,
+  "bytes": 122431,
   "verts": 8000,
-  "tris": 15959,
+  "tris": 15988,
   "full": {
    "file": "mon_mage.bin.gz",
    "fmt": "GB1W",
-   "bytes": 685458
+   "bytes": 698608
   }
  },
  "maou": {
@@ -551,13 +551,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 2.4,
-  "bytes": 127543,
+  "bytes": 128240,
   "verts": 8000,
-  "tris": 15892,
+  "tris": 15913,
   "full": {
    "file": "mon_maou.bin.gz",
    "fmt": "GB01",
-   "bytes": 684672
+   "bytes": 701022
   }
  },
  "mimic": {
@@ -565,13 +565,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 1.0,
-  "bytes": 91903,
+  "bytes": 92900,
   "verts": 7000,
   "tris": 14004,
   "full": {
    "file": "mon_mimic.bin.gz",
    "fmt": "GB02",
-   "bytes": 340409
+   "bytes": 340337
   }
  },
  "mindlord": {
@@ -607,13 +607,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 0.9,
-  "bytes": 94947,
+  "bytes": 96109,
   "verts": 7000,
-  "tris": 13880,
+  "tris": 13966,
   "full": {
    "file": "mon_myconid.bin.gz",
    "fmt": "GB02",
-   "bytes": 285715
+   "bytes": 317097
   }
  },
  "nightspider": {
@@ -621,13 +621,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 0.9,
-  "bytes": 101061,
+  "bytes": 101042,
   "verts": 7000,
-  "tris": 13981,
+  "tris": 14008,
   "full": {
    "file": "mon_nightspider.bin.gz",
    "fmt": "GB02",
-   "bytes": 407127
+   "bytes": 407545
   }
  },
  "nightwolf": {
@@ -719,13 +719,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 0.9,
-  "bytes": 116333,
+  "bytes": 115864,
   "verts": 7000,
-  "tris": 13941,
+  "tris": 13972,
   "full": {
    "file": "mon_ratking.bin.gz",
    "fmt": "GB02",
-   "bytes": 544894
+   "bytes": 571180
   }
  },
  "rotlord": {
@@ -733,13 +733,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 2.0,
-  "bytes": 103922,
+  "bytes": 104111,
   "verts": 7000,
-  "tris": 13858,
+  "tris": 13919,
   "full": {
    "file": "mon_rotlord.bin.gz",
    "fmt": "GB01",
-   "bytes": 522687
+   "bytes": 548546
   }
  },
  "rotslime": {
@@ -747,13 +747,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 0.8,
-  "bytes": 98195,
+  "bytes": 98399,
   "verts": 7000,
   "tris": 13996,
   "full": {
    "file": "mon_rotslime.bin.gz",
    "fmt": "GB01",
-   "bytes": 430000
+   "bytes": 430081
   }
  },
  "salamander": {
@@ -775,13 +775,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 0.75,
-  "bytes": 97810,
+  "bytes": 97692,
   "verts": 7000,
-  "tris": 13974,
+  "tris": 13968,
   "full": {
    "file": "mon_sapper.bin.gz",
    "fmt": "GB01",
-   "bytes": 687827
+   "bytes": 706872
   }
  },
  "serpent": {
@@ -803,13 +803,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 0.75,
-  "bytes": 109266,
+  "bytes": 109379,
   "verts": 7000,
-  "tris": 14004,
+  "tris": 13992,
   "full": {
    "file": "mon_shaman.bin.gz",
    "fmt": "GB01",
-   "bytes": 633850
+   "bytes": 634403
   }
  },
  "skeleton": {
@@ -845,13 +845,13 @@
   "fmt": "GB03",
   "kind": "biped+weapon",
   "scale": 1.1,
-  "bytes": 142181,
+  "bytes": 142307,
   "verts": 9000,
-  "tris": 17909,
+  "tris": 17984,
   "full": {
    "file": "mon_slimeknight.bin.gz",
    "fmt": "GB1W",
-   "bytes": 1005263
+   "bytes": 1037934
   }
  },
  "spider": {
@@ -859,13 +859,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 0.8,
-  "bytes": 100046,
+  "bytes": 100392,
   "verts": 7000,
-  "tris": 13981,
+  "tris": 14008,
   "full": {
    "file": "mon_spider.bin.gz",
    "fmt": "GB02",
-   "bytes": 405189
+   "bytes": 405587
   }
  },
  "sporerat": {
@@ -915,13 +915,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 1.0,
-  "bytes": 98655,
+  "bytes": 98385,
   "verts": 7000,
-  "tris": 13981,
+  "tris": 14008,
   "full": {
    "file": "mon_stonespider.bin.gz",
    "fmt": "GB02",
-   "bytes": 403856
+   "bytes": 404198
   }
  },
  "thief": {
@@ -943,13 +943,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 1.8,
-  "bytes": 130352,
+  "bytes": 130007,
   "verts": 8000,
-  "tris": 15936,
+  "tris": 15952,
   "full": {
    "file": "mon_underlord.bin.gz",
    "fmt": "GB01",
-   "bytes": 976681
+   "bytes": 978902
   }
  },
  "vampire": {
@@ -971,13 +971,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 2.0,
-  "bytes": 105938,
+  "bytes": 106460,
   "verts": 7000,
-  "tris": 13942,
+  "tris": 13984,
   "full": {
    "file": "mon_vaultkeeper.bin.gz",
    "fmt": "GB02",
-   "bytes": 477817
+   "bytes": 490100
   }
  },
  "warrior": {
@@ -999,13 +999,13 @@
   "fmt": "GB03",
   "kind": "biped+weapon",
   "scale": 0.7,
-  "bytes": 113761,
+  "bytes": 114217,
   "verts": 7000,
-  "tris": 13948,
+  "tris": 14000,
   "full": {
    "file": "mon_webgoblin.bin.gz",
    "fmt": "GB1W",
-   "bytes": 868165
+   "bytes": 912949
   }
  },
  "wolf": {
