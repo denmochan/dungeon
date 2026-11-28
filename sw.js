@@ -21,6 +21,11 @@ self.addEventListener("fetch", e => {
   if (u.origin !== location.origin) { // 字体など：あれば保存して使う
     e.respondWith(caches.open(C).then(c => c.match(e.request).then(m => m || fetch(e.request).then(r => { if (r && (r.ok || r.type === "opaque")) c.put(e.request, r.clone()); return r; }).catch(() => m)))); return; }
   if (e.request.mode === "navigate" || u.pathname.endsWith("/index.html") || u.pathname.endsWith("/")) { // 本体：つながれば新しいもの、だめなら保存したもの
-    e.respondWith((async () => { const c = await caches.open(C); try { const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 4000); const r = await fetch(e.request, { signal: ctl.signal, cache: "no-cache" }); clearTimeout(t); if (r.ok && !/\/layer\//.test(u.pathname)) c.put("index.html", r.clone()); return r; } catch (er) { return (await caches.match("index.html")) || (await caches.match("./")) || Response.error(); } })()); return; }
+    /* 本体：ページごとに別に保存する（前は rt/・layer/ も本番も "index.html" 1つに上書きしていて、4秒でつながらないと別の古いページが出ていた：本人のスマホで「層107」）。
+       つながれば新しいもの。8秒待ってもだめなら、そのページの保存分を出しつつ、裏で取りに行って次に開くときは新しくする */
+    const key = (u.pathname.endsWith("/") ? u.pathname + "index.html" : u.pathname), main = /\/dungeon\/(index\.html)?$/.test(u.pathname) || u.pathname === "/" || u.pathname.endsWith("/index.html") && !/\/(rt|layer|lab)\//.test(u.pathname);
+    e.respondWith((async () => { const c = await caches.open(C); const net = fetch(e.request, { cache: "no-cache" }).then(r => { if (r.ok) { c.put(key, r.clone()); if (main) c.put("index.html", r.clone()); } return r; });
+      const old = await c.match(key); if (!old) { try { return await net; } catch (er) { return (main && (await caches.match("index.html"))) || Response.error(); } }
+      const late = new Promise(res => setTimeout(() => res(null), 8000)); try { const r = await Promise.race([net, late]); if (r) return r; e.waitUntil(net.catch(() => {})); return old; } catch (er) { return old; } })()); return; }
   e.respondWith((async () => { const m = await caches.match(e.request); if (m) return m; try { const r = await fetch(e.request); if (r.ok) (await caches.open(C)).put(e.request, r.clone()); return r; } catch (er) { return (await caches.match(e.request, { ignoreSearch: true })) || Response.error(); } })());
 });
