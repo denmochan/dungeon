@@ -102,13 +102,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 1.0,
-  "bytes": 123469,
+  "bytes": 118704,
   "verts": 8000,
-  "tris": 15942,
+  "tris": 15944,
   "full": {
    "file": "mon_count.bin.gz",
    "fmt": "GB01",
-   "bytes": 975395
+   "bytes": 697629
   }
  },
  "demon": {
@@ -300,13 +300,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 0.9,
-  "bytes": 96428,
+  "bytes": 99490,
   "verts": 7000,
-  "tris": 13996,
+  "tris": 14004,
   "full": {
    "file": "mon_ghost.bin.gz",
    "fmt": "GB02",
-   "bytes": 292561
+   "bytes": 317459
   }
  },
  "ghostslime": {
@@ -888,13 +888,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 0.9,
-  "bytes": 105886,
+  "bytes": 105964,
   "verts": 7000,
-  "tris": 13996,
+  "tris": 13980,
   "full": {
    "file": "mon_sporewraith.bin.gz",
    "fmt": "GB02",
-   "bytes": 468793
+   "bytes": 473831
   }
  },
  "stoneeye": {
@@ -958,13 +958,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 1.0,
-  "bytes": 118222,
+  "bytes": 118085,
   "verts": 8000,
-  "tris": 15912,
+  "tris": 15946,
   "full": {
    "file": "mon_vampire.bin.gz",
    "fmt": "GB01",
-   "bytes": 631157
+   "bytes": 625246
   }
  },
  "vaultkeeper": {
@@ -1042,13 +1042,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 0.8,
-  "bytes": 91103,
+  "bytes": 100298,
   "verts": 7000,
-  "tris": 13996,
+  "tris": 13968,
   "full": {
    "file": "mon_wraitheye.bin.gz",
    "fmt": "GB02",
-   "bytes": 295777
+   "bytes": 390948
   }
  }
 }

@@ -26,7 +26,7 @@ with sync_playwright() as p:
         a0=fs.index('vec2 body(vec3 p){');fs=fs[:a0]+'vec2 body0(vec3 p){'+fs[a0+len('vec2 body(vec3 p){'):];e=fend(fs,a0)
         fs=fs[:e]+'\n'+snip+'\nvec2 body(vec3 p){vec2 b=xmod(body0(p),p);vec2 x=xbody(p);float d=smin(b.x,x.x,XK);return vec2(d,x.x<b.x?x.y:b.y);}\n'+fs[e:]
         c0=fs.index('vec4 charCol(vec3 p,vec3 n,float m){');fs=fs[:c0]+'vec4 charCol0(vec3 p,vec3 n,float m){'+fs[c0+len('vec4 charCol(vec3 p,vec3 n,float m){'):];e=fend(fs,c0)
-        fs=fs[:e]+'\nvec4 charCol(vec3 p,vec3 n,float m){if(m>14.5)return xcol(p,n,m);\n#ifdef XSKIN\nif(m<1.5)return xskin(p,n,m);\n#endif\nreturn charCol0(p,n,m);}\n'+fs[e:]
+        fs=fs[:e]+'\nvec4 charCol(vec3 p,vec3 n,float m){if(m>'+os.environ.get('XMIN','14.5')+')return xcol(p,n,m);\n#ifdef XSKIN\nif(m<1.5)return xskin(p,n,m);\n#endif\nreturn charCol0(p,n,m);}\n'+fs[e:]
     i=fs.index('void main(){')
     sh={'vs':sh0['vs'],'samp':fs[:i]+SAMP_MAIN,'colr':fs[:i]+COLR_MAIN}
     pack={'face':pk0['face'],'faceIdx':info['FI']}
