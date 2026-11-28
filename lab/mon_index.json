@@ -257,13 +257,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 0.8,
-  "bytes": 109444,
-  "verts": 7000,
-  "tris": 13951,
+  "bytes": 186595,
+  "verts": 12000,
+  "tris": 24008,
   "full": {
    "file": "mon_fungus.bin.gz",
    "fmt": "GB02",
-   "bytes": 476668
+   "bytes": 778396
   }
  },
  "gargoyle": {
@@ -608,13 +608,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 0.9,
-  "bytes": 96109,
-  "verts": 7000,
-  "tris": 13966,
+  "bytes": 139122,
+  "verts": 9000,
+  "tris": 18000,
   "full": {
    "file": "mon_myconid.bin.gz",
    "fmt": "GB02",
-   "bytes": 317097
+   "bytes": 683066
   }
  },
  "nightspider": {
