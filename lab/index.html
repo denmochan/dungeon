@@ -16345,6 +16345,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
  if(/^(bat|firebat|eyebat)$/.test(sp)){const R=rigSp24(rigOf(sp),"idle",0),J0=R.J[0],hc=[J0[0],J0[1]+0.17,J0[2]+0.02],F=new Float32Array(M.NV*3),WG=new Int8Array(M.NV),EB=sp==="eyebat",TH=EB?0.29:0.15;M.WHX=EB?0.26:0.13;   /* コウモリ：頭の前に顔の絵（11番目のマス）。羽の頂点にしるし（はばたく） */
    for(let i=0;i<M.NV;i++){const x=M.P0[i*3],y=M.P0[i*3+1],z=M.P0[i*3+2],dx=x-J0[0];if(Math.abs(dx)>TH)WG[i]=dx>0?1:-1;if(EB)continue;const d=Math.hypot(x-hc[0],y-hc[1],z-hc[2]);if(d>0.2||WG[i])continue;const nz=M.N0[i*3+2];if(nz<0.05)continue;const t=Math.max(0,Math.min(1,(nz-0.05)/0.3));F[i*3]=(x-hc[0])/0.34+0.5;F[i*3+1]=0.5-(y-hc[1])/0.34;F[i*3+2]=t*t*(3-2*t);}
    M.F=EB?null:F;M.FI=10;M.WING=WG;return;}
+ if(kitOf24(rigOf(sp))==="kobold"){const R=rigSp24(rigOf(sp),"idle",0),J2=R.J[2],OW=new Float32Array(M.NV).fill(1);for(let i=0;i<M.NV;i++){const hx=M.P0[i*3]-J2[0],hy=M.P0[i*3+1]-J2[1],hz=M.P0[i*3+2]-J2[2];if(Math.abs(hx)<0.22&&hy>-0.28&&hy<0.14){const t=Math.max(0,Math.min(1,(hz-0.18)/0.12));OW[i]=1-0.9*t*t*(3-2*t);}if(Math.abs(hx)<0.3&&hy>0.04&&hy<0.36&&hz>0.1)OW[i]=Math.min(OW[i],0.3);if(Math.abs(hx)<0.2&&hy>=0.2&&hy<0.6&&hz>-0.15)OW[i]=Math.min(OW[i],0.3);}M.OWS=OW;}   /* 眉とひたいの線も細く */   /* コボルトの鼻づらは輪郭をほぼ消す */
  const kit=kitOf24(rigOf(sp)),fi=kit==="kobold"?-1:FACEIDX24[kit];if(fi==null||fi<0)return;   /* コボルトは目を形で作ったので絵は貼らない（絵だと顔が浮いた） */const R=rigSp24(rigOf(sp),"idle",0),A=R.HR,J2=R.J[2];if(!J2||J2[1]<-5)return;   /* 頭の空間で、顔の絵のどこに当たるか（ゲームの charCol と同じ式） */
    const F=new Float32Array(M.NV*3),hm=(v)=>[A[0]*v[0]+A[3]*v[1]+A[6]*v[2],A[1]*v[0]+A[4]*v[1]+A[7]*v[2],A[2]*v[0]+A[5]*v[1]+A[8]*v[2]];
    const GRY=/^(slimeknight|berserker)$/.test(sp);   /* かぶとをかぶる子：灰色の金属の頂点には顔を貼らない */
@@ -16411,7 +16412,9 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
     if(!gl.__facet3){gl.__facet3=faceAtlasSmooth(gl);}
     gl.activeTexture(gl.TEXTURE3);gl.bindTexture(gl.TEXTURE_2D,gl.__facet3);gl.uniform1i(MP.U("FT"),3);gl.uniform1f(MP.U("FI"),M.FI);gl.activeTexture(gl.TEXTURE0);}
    else{gl.disableVertexAttribArray(MP.af);gl.vertexAttrib3f(MP.af,0,0,0);gl.uniform1f(MP.U("FI"),-1);}}
-  if(!o.alpha){gl.cullFace(gl.FRONT);gl.uniform1f(MP.U("OUT"),1);gl.uniform1f(MP.U("OW"),0.018*Math.sqrt(S0));gl.drawElements(gl.TRIANGLES,M.NT*3,gl.UNSIGNED_SHORT,0);}   /* すける子は輪郭の殻を描かない（中から黒く見える） */
+  if(!o.alpha){if(M.OWS){if(!g.ob)g.ob=gl.createBuffer();const ob=g.obA||(g.obA=new Float32Array(M.NV*3));for(let i=0;i<M.NV;i++){const k=M.OWS[i];ob[i*3]=nor[i*3]*k;ob[i*3+1]=nor[i*3+1]*k;ob[i*3+2]=nor[i*3+2]*k;}gl.bindBuffer(gl.ARRAY_BUFFER,g.ob);gl.bufferData(gl.ARRAY_BUFFER,ob,gl.DYNAMIC_DRAW);gl.vertexAttribPointer(MP.an,3,gl.FLOAT,false,0,0);}   /* 輪郭を細くする所（コボルトの鼻づら：顔の中に黒い線が出た） */
+   gl.cullFace(gl.FRONT);gl.uniform1f(MP.U("OUT"),1);gl.uniform1f(MP.U("OW"),0.018*Math.sqrt(S0));gl.drawElements(gl.TRIANGLES,M.NT*3,gl.UNSIGNED_SHORT,0);
+   if(M.OWS){gl.bindBuffer(gl.ARRAY_BUFFER,g.nb);gl.vertexAttribPointer(MP.an,3,gl.FLOAT,false,0,0);}}   /* すける子は輪郭の殻を描かない（中から黒く見える） */
   const al=o.alpha||0;if(al){gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);}gl.uniform1f(MP.U("AL"),al);   /* すけて見える子（霊） */
   gl.cullFace(gl.BACK);gl.uniform1f(MP.U("OUT"),0);gl.uniform1f(MP.U("OW"),0);gl.drawElements(gl.TRIANGLES,M.NT*3,gl.UNSIGNED_SHORT,0);gl.disable(gl.CULL_FACE);gl.uniform1f(MP.U("AL"),0);if(al)gl.disable(gl.BLEND);
   if(MP.af>=0&&MP.af!==lq){gl.disableVertexAttribArray(MP.af);gl.vertexAttrib3f(MP.af,0,0,0);}

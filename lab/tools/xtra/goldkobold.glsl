@@ -20,8 +20,8 @@ vec2 xbody(vec3 p){vec3 H=J[2];vec3 h=p-H;vec3 e=vec3(abs(h.x),h.y,h.z);
 
  for(int k=0;k<7;k++){float a=(float(k)-3.0)*0.38;vec3 c=J[1]+vec3(sin(a)*0.24,0.16-0.05*abs(float(k)-3.0),0.16+cos(a)*0.08);d=min(d,sTap(p,c,c+vec3(sin(a)*0.05,-0.16,0.05),0.075,0.012));}   // 胸の毛のふさ
  for(int s=0;s<2;s++){float sg=s==0?-1.0:1.0;vec3 sh=(s==0?J[3]:J[6]);for(int k=0;k<3;k++){vec3 c=sh+vec3(sg*(0.04+0.06*float(k)),0.08,0.06-0.08*float(k));d=min(d,sTap(p,c,c+vec3(sg*0.08,-0.08,-0.02),0.06,0.01));}}   // 肩の毛
- {float um=sTap(h,vec3(0.0,0.0,0.2),vec3(0.0,-0.015,0.64),0.16,0.075);float lj=sTap(h,vec3(0.0,-0.115,0.22),vec3(0.0,-0.13,0.56),0.1,0.05);float mz=min(um,lj);   // なめらかな鼻づらと下あご
-  float gv=max(max(abs(h.y+0.088+0.01*h.z)-0.011,abs(h.z-0.4)-0.13),-(abs(h.x)-0.055));mz=max(mz,-gv);d=smin(d,mz,0.03);}   // 口の切れこみ（横だけ、形で）
+ {float um=sTap(h,vec3(0.0,0.0,0.2),vec3(0.0,-0.015,0.64),0.16,0.075);float lj=sTap(h,vec3(0.0,-0.115,0.22),vec3(0.0,-0.13,0.56),0.1,0.05);float mz=smin(um,lj,0.06);   // なめらかな鼻づらと下あご
+  d=smin(d,mz,0.07);}   // みぞは作らない（へこみに黒い輪郭線が出た）
  vec2 r=vec2(d,1.0);
  {vec3 c=vec3(0.16,0.08,0.32);float eb=length(e-c)-0.06;if(eb<r.x)r=vec2(eb,24.0);float lid=length(e-c)-0.07;lid=max(lid,-((e.y-c.y)-0.016-0.45*(e.x-c.x)));r.x=smin(r.x,lid,0.012);   // 目にかぶさる斜めのまぶた（内が低く、けわしい目）
   float pu=sEll(e-c-vec3(-0.006,-0.008,0.052),vec3(0.022,0.026,0.014));if(pu<r.x)r=vec2(pu,23.0);}   // 黒目
