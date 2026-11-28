@@ -16450,6 +16450,14 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
   else{HR=pitchHR(HR,-0.3*w+0.4*sv);root.dz+=0.35*sv;root.pitch+=0.15*sv;}   /* 体ごとぶつかる（目玉など） */
   if(st==="recover"){/* 戻り：ゆるやかに */}
   return Object.assign({},R,{J,HR,lid});};
+ /* 胸を張る：上半身を後ろへそらし、あごを上げ、剣を持つ手を胸の前に。剣はまっすぐ上へ立てる（11/28 本人の指示） */
+ const proudPose=(R0)=>{try{const J=R0.J.map(v=>v?v.slice():v),P=J[0],a=-0.16,ca=Math.cos(a),sa=Math.sin(a);
+   const rot=v=>{const dy=v[1]-P[1],dz=v[2]-P[2];return[v[0],P[1]+dy*ca-dz*sa,P[2]+dz*ca+dy*sa];};
+   const up=[1,2,3,4,5,6,7,8,34,35,36,37,38,39];up.forEach(i=>{if(J[i]&&J[i][1]>-5)J[i]=rot(J[i]);});
+   if(J[34]&&J[34][1]>-5&&J[35]&&J[35][1]>-5){const d5=Math.hypot(...sub(J[34],J[5])),d8=Math.hypot(...sub(J[34],J[8])),R=d8<d5,si=R?6:3,ei=R?7:4,hi=R?8:5,sg=Math.sign(J[si][0])||1;
+    const H2=[J[1][0]+sg*0.4,J[1][1]-0.1,J[1][2]+0.26],E2=[J[si][0]+sg*0.26,J[si][1]-0.26,J[si][2]+0.08],off=sub(J[34],J[hi]),od=nrm(sub(J[35],J[34])),M=rotAB(od,nrm([sg*0.1,1.0,0.06]));
+    J[ei]=E2;const G=[H2[0]+off[0],H2[1]+off[1],H2[2]+off[2]],G0=J[34];[34,35,36,37,38,39].forEach(i=>{if(J[i]&&J[i][1]>-5){const r=mv3(M,sub(J[i],G0));J[i]=[G[0]+r[0],G[1]+r[1],G[2]+r[2]];}});J[hi]=H2;}
+   const o=Object.assign({},R0,{J});if(typeof pitchHR==="function"&&R0.HR)o.HR=pitchHR(R0.HR,-0.22);return o;}catch(e){return R0;}};
  window.__labPose=(sp,st,k,o={})=>{k=Math.max(0,Math.min(1,k||0));const kit=typeof kitOf24==="function"?kitOf24(sp):sp,bip=/^(goblin|skeleton|imp|kobold|orc|golem|human|demon|gobx|lich|noble|lordk)$/.test(kit),rg=(m,t)=>rigSp24(sp,m,t);
   const root={dx:0,dy:0,dz:0,pitch:0,roll:0};let R;const T=o.t||0,side=o.side||1;
   if(st==="walk"){R=rg("walk",bip?(k*0.8):k);if(!bip)R=Object.assign({},R,{gait:k});}
@@ -16468,6 +16476,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
   else if(st==="tired"){R=rg("idle",T*0.5);root.pitch=0.14;root.dy=-0.04+0.025*Math.sin(T*6);}   /* 前かがみで肩で息をする */
   else if(st==="down"){R=bip?rg("hurt",0.3):rg("idle",0);const f=ease(k);if(bip){root.pitch=-1.45*f;root.dz=-0.15*f;root.dy=0.06*f;}else{root.roll=1.5*f;root.dy=0.05*f;}}   /* 人の形はあおむけ、四つ足などは横だおし */   /* あおむけに倒れる */
   else R=rg("idle",T);
+  if(sp==="slimeknight"&&!/^(walk|run|windup|strike|recover|knock|down|dodge|stagger|bowdraw|bowshoot)$/.test(st||""))R=proudPose(R);   /* スライム騎兵：胸を張って剣を立てる（騎士きどり） */
   if(!bip&&/^(windup|strike|recover)$/.test(st))R=beastAtk(kit,R,st,k,root);   /* 人の形でない子の攻撃：かみつく・体当たり・ふたを開く */
   return{R,root};};
  const rootM=r=>{if(!r)return null;const cp=Math.cos(r.pitch||0),sp=Math.sin(r.pitch||0),cr=Math.cos(r.roll||0),sr=Math.sin(r.roll||0);   /* 足もと中心：前後（x軸まわり、＋で前へ倒れる）→左右（z軸まわり） */
