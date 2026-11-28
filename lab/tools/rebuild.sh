@@ -1,7 +1,7 @@
 #!/bin/bash
 # 1種族を作り直す：./rebuild.sh 種族 [形を借りる種族] [GLSLの足し形] [軽い版の頂点数]
 cd "$(dirname "$0")"; SP=$1; SH=${2:-$1}; XT=$3; T=${4:-7000}
-SHAPE=$SH XTRA=$XT timeout 900 python3 extract2.py $SP 2>&1 | grep -E "^mesh|ERROR|Error" | head -3
+SHAPE=$SH XTRA=$XT timeout 900 python3 extract2.py $SP ${GS:-0.017} 2>&1 | grep -E "^mesh|ERROR|Error" | head -3
 python3 - "$SP" <<'PY'
 import numpy as np,sys,subprocess
 sp=sys.argv[1];d=np.load(sp+'_mesh.npz');J=d['J'];bip=all(J[i][1]>-5 for i in (3,6,9,12,15,16));kit=str(d['kit'])

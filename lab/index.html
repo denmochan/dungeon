@@ -10687,7 +10687,7 @@ KIT24.gobx = () => ({ common: COMMON24, body: ROOM_PARTS24.handTxt + addBody24(R
   if(VAR.x>1.5&&VAR.x<2.5){vec3 bc=J[2]+vec3(0.0,0.55,-0.05);float bm=length(p-bc)-0.34;if(bm<r.x)r=vec2(bm,8.0);float fu=sTap(p,bc+vec3(0.1,0.3,0.0),bc+vec3(0.2,0.48,0.05),0.025,0.02);if(fu<r.x)r=vec2(fu,4.0);
    float sp=length(p-(bc+vec3(0.2,0.5,0.05)))-0.05;if(sp<r.x)r=vec2(sp,6.0);
    float gg=max(abs(sEll(h-vec3(0.0,0.12,0.0),vec3(0.46,0.14,0.46)))-0.03,0.0);if(gg<r.x)r=vec2(gg,4.0);for(int s=0;s<2;s++){vec3 g=vec3(s==0?-0.15:0.15,0.1,0.38);float gl=max(abs(length((h-g).xy)-0.09)-0.025,abs(h.z-g.z)-0.05);if(gl<r.x)r=vec2(gl,5.0);float ln=max(length((h-g).xy)-0.09,abs(h.z-g.z)-0.02);if(ln<r.x)r=vec2(ln,6.0);}}}
- if(VAR.x>2.5){vec3 sc=vec3(J[0].x,0.42,J[0].z-0.15);float ab=sEll(p-sc-vec3(0.0,0.0,-0.35),vec3(0.42,0.34,0.46));ab=smin(ab,sEll(p-sc-vec3(0.0,-0.02,0.2),vec3(0.3,0.22,0.28)),0.06);
+ if(VAR.x>2.5&&VAR.x<3.5){vec3 sc=vec3(J[0].x,0.42,J[0].z-0.15);float ab=sEll(p-sc-vec3(0.0,0.0,-0.35),vec3(0.42,0.34,0.46));ab=smin(ab,sEll(p-sc-vec3(0.0,-0.02,0.2),vec3(0.3,0.22,0.28)),0.06);
   for(int i=0;i<8;i++){float sx=i<4?-1.0:1.0;float k=float(i<4?i:i-4);float ph=tm*8.0+k*1.57+(sx>0.0?0.8:0.0);vec3 base=sc+vec3(sx*0.2,0.0,0.25-k*0.15);vec3 foot=vec3(sc.x+sx*(0.85+0.06*sin(k*1.3)),0.02+max(0.0,sin(ph))*0.08,sc.z+0.55-k*0.38);
    vec3 knee=mix(base,foot,0.45)+vec3(sx*0.05,0.4,0.0);ab=min(ab,min(sTap(p,base,knee,0.05,0.035),sTap(p,knee,foot,0.035,0.012)));}if(ab<r.x)r=vec2(ab,10.0);
   vec3 e=p-sc-vec3(0.0,0.05,0.42);e.x=abs(e.x);float ey=length(e-vec3(0.08,0.0,0.0))-0.045;if(ey<r.x)r=vec2(ey,6.0);}
@@ -10714,6 +10714,11 @@ Object.assign(SPVAR24, { lich: [[0, 0, 0, 0], [0.4, 1.0, 0.5]] }); SPCOLX24.lich
     return R; }
   const k = kitOf24(sp0); if (k === "gobx" || k === "lich") return rig24(mode, t); return R1(sp0, mode, t); }; }
 SP3D24.gobx = 1; SP3D24.lich = 1;
+// 11/28 スライム騎兵（slimeknight）：ゴブリンがスライムに乗る（本人の選択。乗り物のスライムの形は lab/tools/xtra/slimeknight.glsl で足す）
+Object.assign(KITOF24, { slimeknight: "gobx" }); SPVAR24.slimeknight = [[4, 0, 0, 0], [0.3, 0.6, 0.35]]; SPCOL24.slimeknight = SPCOL24.goblin;
+{ const R2 = rigSp24; rigSp24 = function (sp0, mode, t){ if (sp0 === "slimeknight") { const R = rig24(mode === "sleep" ? "idle" : mode, t); const LIFT = window.__skLift || 0.5; R.J = R.J.map(v => v[1] < -5 ? v : [v[0], v[1] + LIFT, v[2] - 0.05]);
+    [[9, 10, 11, 15, -1], [12, 13, 14, 16, 1]].forEach(([h, k, an, to, sg]) => { const H = R.J[h]; R.J[k] = [H[0] + sg * 0.24, H[1] - 0.06, H[2] + 0.16]; R.J[an] = [H[0] + sg * 0.34, H[1] - 0.26, H[2] + 0.02]; R.J[to] = [H[0] + sg * 0.36, H[1] - 0.29, H[2] + 0.1]; });
+    return R; } return R2(sp0, mode, t); }; }
 // ---------- 広い洞窟：壁を高く、坑道を大きく、壁ぎわに松明 ----------
 { const C0 = caveFS24; caveFS24 = function (room, sps){ let s = C0(room, sps);
   const WX = W24[0] * 0.96, WZ = W24[1] * 0.96, f = v => (+v).toFixed(3), V = (x, y, z) => `vec3(${f(x * WX)},${f(y)},${f(z * WZ)})`;
@@ -16295,7 +16300,8 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
  const faceUV=(sp,M)=>{try{if(/^(ghost|sporewraith)$/.test(sp))return;   /* 目と口を形でくりぬいた子は、顔の絵を貼らない */
  const kit=kitOf24(rigOf(sp)),fi=FACEIDX24[kit];if(fi==null||fi<0)return;const R=rigSp24(rigOf(sp),"idle",0),A=R.HR,J2=R.J[2];if(!J2||J2[1]<-5)return;   /* 頭の空間で、顔の絵のどこに当たるか（ゲームの charCol と同じ式） */
    const F=new Float32Array(M.NV*3),hm=(v)=>[A[0]*v[0]+A[3]*v[1]+A[6]*v[2],A[1]*v[0]+A[4]*v[1]+A[7]*v[2],A[2]*v[0]+A[5]*v[1]+A[8]*v[2]];
-   for(let i=0;i<M.NV;i++){if(M.WP&&M.WP[i])continue;const hp=hm([M.P0[i*3]-J2[0],M.P0[i*3+1]-J2[1],M.P0[i*3+2]-J2[2]]);if(Math.hypot(hp[0],hp[1],hp[2])>=0.52)continue;const hn=hm([M.N0[i*3],M.N0[i*3+1],M.N0[i*3+2]]),t=Math.max(0,Math.min(1,(hn[2]-0.05)/0.25)),fz=t*t*(3-2*t);
+   const GRY=/^(slimeknight)$/.test(sp);   /* かぶとをかぶる子：灰色の金属の頂点には顔を貼らない */
+   for(let i=0;i<M.NV;i++){if(M.WP&&M.WP[i])continue;if(GRY){const r=M.C[i*3],g=M.C[i*3+1],b=M.C[i*3+2];if(Math.max(r,g,b)-Math.min(r,g,b)<28&&r>90)continue;}const hp=hm([M.P0[i*3]-J2[0],M.P0[i*3+1]-J2[1],M.P0[i*3+2]-J2[2]]);if(Math.hypot(hp[0],hp[1],hp[2])>=0.52)continue;const hn=hm([M.N0[i*3],M.N0[i*3+1],M.N0[i*3+2]]),t=Math.max(0,Math.min(1,(hn[2]-0.05)/0.25)),fz=t*t*(3-2*t);
     F[i*3]=hp[0]/0.84+0.5;F[i*3+1]=0.5-hp[1]/0.86;F[i*3+2]=fz;}M.F=F;M.FI=fi;}catch(e){}};
  const loadMon=sp=>{if(MS[sp])return MS[sp];const M=MS[sp]={ok:false};(async()=>{try{const LT=window.__labLite!==false&&!/[?&]full/.test(location.search),r=await fetch((LT?"lab/lite/":"lab/")+(sp==="goblin"?"gob3d.bin.gz":"mon_"+sp+".bin.gz"));if(!r.ok)throw new Error(r.status);const buf=await new Response(r.body.pipeThrough(new DecompressionStream("gzip"))).arrayBuffer();
    const mg=String.fromCharCode(...new Uint8Array(buf.slice(0,4)));
