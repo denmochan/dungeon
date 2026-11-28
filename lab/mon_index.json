@@ -74,13 +74,13 @@
   "fmt": "GB03",
   "kind": "biped+weapon",
   "scale": 1.3,
-  "bytes": 106046,
-  "verts": 7000,
-  "tris": 14008,
+  "bytes": 131752,
+  "verts": 8000,
+  "tris": 16200,
   "full": {
    "file": "mon_bonewarden.bin.gz",
    "fmt": "GB1W",
-   "bytes": 358884
+   "bytes": 718933
   }
  },
  "chimera": {
@@ -158,13 +158,13 @@
   "fmt": "GB03",
   "kind": "biped+weapon",
   "scale": 1.0,
-  "bytes": 105712,
-  "verts": 7000,
-  "tris": 14008,
+  "bytes": 125802,
+  "verts": 8000,
+  "tris": 15988,
   "full": {
    "file": "mon_emberskel.bin.gz",
    "fmt": "GB1W",
-   "bytes": 358844
+   "bytes": 423151
   }
  },
  "eye": {
@@ -510,13 +510,13 @@
   "fmt": "GB03",
   "kind": "biped+weapon",
   "scale": 1.0,
-  "bytes": 114882,
-  "verts": 7000,
-  "tris": 13919,
+  "bytes": 130561,
+  "verts": 8000,
+  "tris": 15922,
   "full": {
    "file": "mon_lich.bin.gz",
    "fmt": "GB1W",
-   "bytes": 1031772
+   "bytes": 1042433
   }
  },
  "lord": {
@@ -818,13 +818,13 @@
   "fmt": "GB03",
   "kind": "biped+weapon",
   "scale": 1.0,
-  "bytes": 106114,
-  "verts": 7000,
-  "tris": 14008,
+  "bytes": 120661,
+  "verts": 8000,
+  "tris": 15988,
   "full": {
    "file": "mon_skeleton.bin.gz",
    "fmt": "GB1W",
-   "bytes": 359020
+   "bytes": 376053
   }
  },
  "slime": {
