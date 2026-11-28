@@ -10886,6 +10886,9 @@ SP3D24.noble = 1; SP3D24.gargoyle = 1; LOOPK24.gargoyle = 3.2;
     const HR = mode === "sleep" ? rotX(0.35) : m3mul(rotY(0.25 * Math.sin(ph / 3.2)), rotX(-0.05)); J[9] = [mode === "sleep" ? -0.3 : 0.05 * Math.sin(ph / 1.6), 0, 0];
     return { J, HR, TR: rotX(0), tool: 0, deb: [] }; }
   return R2(sp0, mode, t); }; }
+// 11/28 吸血鬼の系統：背を高く脚を長く（本人「スタイリッシュに」）。腰より下を1.7倍にのばし、上はその分持ち上げる
+{ const R3 = rigSp24; let depth = 0; rigSp24 = function (sp0, mode, t){ depth++; let R; try { R = R3(sp0, mode, t); } finally { depth--; } if (depth > 0 || (sp0 !== "vampire" && sp0 !== "count")) return R;   /* 中で rigSp24 が呼び直されるので、いちばん外だけでのばす */ const L = window.__nobLeg || 2.0, HY = 0.52;
+    return Object.assign({}, R, { J: R.J.map(v => !v || v[1] < -5 ? v : [v[0], v[1] < HY ? v[1] * L : v[1] + HY * (L - 1), v[2]]) }); }; }
 // ---------- 主（2Dの見た目に寄せた専用の体） VAR.w=段階 ----------
 KIT24.lordk = () => ({ common: COMMON24, body: (ROOM_PARTS24.handTxt + addBody24(ROOM_PARTS24.bodyTxt.replace("sHead(", "sHeadNE(").replace("if(tool>0.5&&tool<1.5){", "if(tool>9.0){")
     .replace("d=smin(d,sHeadNE(HR*(p-J[2])),0.07);", "d=smin(d,sHeadNE((HR*(p-J[2])-vec3(0.0,-0.02,0.0))/0.95)*0.95,0.07);"), `
