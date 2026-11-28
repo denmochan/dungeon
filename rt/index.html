@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層123／No.350（11/25 00:49）";
+const VER20 = "層124／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -14699,6 +14699,8 @@ function fpOpen30(){
      ・あいている子は、仲間と打ち合っている相手の横・背中へ回りこむ。回りこむ相手に気づいた子は止めに入る
      ・ダメージは今までの計算（monHit11・hitMon5）を通すので、スキル・倒れた・経験値はそのまま */
   const RTT30 = { sense: 9, losT: 0 };
+  /* 層の中（入口・出口のトンネルと階段をのぞく）にいるか。主の間（classic）はどこでも */
+  const inHall30 = (Rm, a) => Rm.classic || (a.z < 0.3 && a.z <= (Rm.ZS ?? 0) - 2 && a.z >= (Rm.ZE ?? -1e9) + 2);
   function rtUnit(a, Rm) { const u = a.rt || (a.rt = {}); if (a.lord) { const L = N.lord; if (!L || L.down || L.hp <= 0) return null; if (!u.b) u.b = { run: 0.75, agi: 0.9, str: 2.2, tough: 2, size: 2.8, stam: 3, brave: 3, mag: 1, reach: 2.6, melee: 2.6, ranged: false, heal: false, magic: false }; u.o = L; u.side = 1; }   /* 主もリアルタイムで戦う（主の間だけ昔の1手ずつの戦いで、勇者が主から29mも離れた所で倒れていた） */
     else if (a.hero) { const h = a.h; if (!h || !(h.st === "in" || h.st === "hold30") || h.walk != null || h.hp <= 0) return null; if (!u.b || u.lv !== h.lv) { u.b = body30(h, true); u.lv = h.lv; } u.o = h; u.side = 0; }
     else { const M = a.M30 || (a.M30 = N.mons.find(q => q.ref && a.m && q.ref.id === a.m.id)); if (!M || M.down || M.hp <= 0 || M.pos !== Rm.i || M.mto != null || (M.guard30 && !Rm.classic) || a.hide) return null; if (!u.b) { u.b = body30(M, false); const wk = WZ30.of(a); if (wk === "drain" || wk === "bone" || wk === "gaze") u.b = Object.assign({}, u.b, { ranged: true, reach: Math.max(u.b.reach || 0, 4.8) }); }   /* 手をかざす・魔法陣・視線の子は離れて使う（くっついていると、吸い出す筋が見えなかった：録画で発見） */ u.o = M; u.side = 1; }
@@ -14922,7 +14924,7 @@ function fpOpen30(){
     const dx = tx - a.x, dz = tz - a.z, L = Math.hypot(dx, dz); if (L < 1e-4) return 0; const sl = Math.min(st, L), ox = a.x, oz = a.z; step30(Rm, a, dx / L * sl, dz / L * sl); const mv = Math.hypot(a.x - ox, a.z - oz); if (a.wp30 && sl > 0.02 && mv < sl * 0.3) a.wp30.bad = 1; return mv; };
   function rt30Step(dt, now) { if (!RTON30 || typeof N === "undefined" || !N || N.scout || N.done) return; N.rtRooms30 = {}; let any = false; NAV30.frame(5000); PERF30.f = (PERF30.f || 0) + 1;
     /* 夜のはじめ（勇者が来た前ぶれのあいだ）に、層の地図を1コマに1つずつ作っておく（戦いが始まってから作ると、そのコマだけ20ms以上かかった） */ { const Rw = rooms.find(R => !R.classic && R.G30 && !(R.nav30 && R.nav30.G === R.G && R.nav30.ck === R.G30.c)); if (Rw) navOf30(Rw); }
-    rooms.forEach(Rm => { Rm.rtOn30 = false; const acts = Rm.acts || []; const U = acts.filter(a => (a.al30 ?? 1) > 0 && (a.hero || a.m) && rtUnit(a, Rm)); const Hs = U.filter(a => a.rt.side === 0), Ms = U.filter(a => a.rt.side === 1);
+    rooms.forEach(Rm => { Rm.rtOn30 = false; const acts = Rm.acts || []; const U = acts.filter(a => (a.al30 ?? 1) > 0 && (a.hero || a.m) && inHall30(Rm, a) && rtUnit(a, Rm));   /* 層の中に入るまでは、お互い手を出さない（本人 11/28 案1：入口の階段・トンネルで、めりこんだまま殴られていた） */ const Hs = U.filter(a => a.rt.side === 0), Ms = U.filter(a => a.rt.side === 1);
       WZ30.tick(Rm, Hs, dt, now); WZH30.tick(Rm, Hs, Ms, dt, now);   /* 床に残ったもの（霜・炎・巣・骨の手・胞子）を、上にいる勇者に効かせる */
       if (!Hs.length || !Ms.length) { U.forEach(a => { a.rt.tg = null; }); Rm.rtPrev30 = null; return; }   /* 同じ層に敵がいれば戦う（見えなくても、戦いの音がする所へ駆けつける） */
       Rm.rtOn30 = true; N.rtRooms30[Rm.i] = 1; any = true; if (Rm.classic) N.rtL30t = performance.now();
