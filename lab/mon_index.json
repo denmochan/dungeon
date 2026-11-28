@@ -88,13 +88,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 2.2,
-  "bytes": 133228,
+  "bytes": 134558,
   "verts": 8000,
-  "tris": 16028,
+  "tris": 16012,
   "full": {
    "file": "mon_chimera.bin.gz",
    "fmt": "GB02",
-   "bytes": 938693
+   "bytes": 1024327
   }
  },
  "count": {
@@ -228,13 +228,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 2.2,
-  "bytes": 130645,
+  "bytes": 131446,
   "verts": 8000,
-  "tris": 16028,
+  "tris": 16012,
   "full": {
    "file": "mon_flamechimera.bin.gz",
    "fmt": "GB02",
-   "bytes": 936914
+   "bytes": 1023574
   }
  },
  "fortgolem": {
@@ -1027,13 +1027,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 1.4,
-  "bytes": 125912,
+  "bytes": 125984,
   "verts": 8000,
   "tris": 16012,
   "full": {
    "file": "mon_wolfrider.bin.gz",
    "fmt": "GB02",
-   "bytes": 704516
+   "bytes": 697136
   }
  },
  "wraitheye": {

@@ -35,12 +35,13 @@ vec2 chim(vec3 p){
  r=U(r,vec2(sEll(p-G-Gd*0.22-vec3(0.0,-0.1,0.0),vec3(0.05,0.03,0.07)),27.0));
  {float fg=9.0;for(int s=0;s<2;s++){float sg=s==0?-1.0:1.0;vec3 q=G+Gd*0.3+vec3(0.05*sg,-0.06,0.0);fg=min(fg,sTap(p,q,q+vec3(0.0,-0.09,0.0),0.022,0.003));}r=U(r,vec2(fg,26.0));}
  for(int s=0;s<2;s++){float sg=s==0?-1.0:1.0;r=U(r,vec2(sEll(p-G-Gd*0.14-vec3(0.07*sg,0.04,0.0),vec3(0.035,0.02,0.02)),24.0));}   // 石像の赤い目
- for(int s=0;s<2;s++){float sg=s==0?-1.0:1.0;vec3 w=vec3(p.x*sg-0.16,p.y-1.08,p.z+0.08);float ca=cos(0.45),sa=sin(0.45);w=vec3(ca*w.x-sa*w.z,w.y,sa*w.x+ca*w.z);float cb=cos(0.75),sb=sin(0.75);w=vec3(cb*w.x+sb*w.y,-sb*w.x+cb*w.y,w.z);vec2 q=w.xy/1.55;
+ for(int s=0;s<2;s++){float sg=s==0?-1.0:1.0;vec3 w=vec3(p.x*sg-0.16,p.y-1.08,p.z+0.08);float ca=cos(0.95),sa=sin(0.95);w=vec3(ca*w.x-sa*w.z,w.y,sa*w.x+ca*w.z);float cb=cos(0.6),sb=sin(0.6);w=vec3(cb*w.x+sb*w.y,-sb*w.x+cb*w.y,w.z);vec2 q=w.xy/1.55;
   vec2 S=vec2(0.0),Wr=vec2(0.36,0.3),T0=vec2(0.92,0.4),T1=vec2(0.98,0.0),T2=vec2(0.76,-0.3),T3=vec2(0.42,-0.38),B0=vec2(0.0,-0.22);
   float m2=min(min(cTri(q,S,Wr,T0),cTri(q,S,T0,T1)),min(cTri(q,S,T1,T2),min(cTri(q,S,T2,T3),cTri(q,S,T3,B0))));m2=min(m2,cTri(q,Wr,T0,T1));
   for(int k=0;k<4;k++){vec2 a=k==0?T0:(k==1?T1:(k==2?T2:T3)),c=k==0?T1:(k==1?T2:(k==2?T3:B0));vec2 mid=(a+c)*0.5,nn=normalize(mid-vec2(0.25,0.0));float rr=length(c-a)*0.5;m2=max(m2,-(length(q-(mid+nn*rr*0.15))-rr*0.9));}
-  float wg=max(m2*1.55,abs(w.z)-0.03);vec3 q3=vec3(q*1.55,w.z);float bn=min(sTap(q3,vec3(0.0),vec3(Wr*1.55,0.0),0.06,0.05),sTap(q3,vec3(Wr*1.55,0.0),vec3(T0*1.55,0.0),0.05,0.012));for(int k=1;k<4;k++){vec2 t=k==1?T1:(k==2?T2:T3);bn=min(bn,sTap(q3,vec3(Wr*1.55,0.0),vec3(t*1.55,0.0),0.035,0.01));}wg=min(wg,bn);r=U(r,vec2(wg,19.0));}   // 石の翼（横に広げて上へ）
- float tl=min(sTap(p,vec3(0.0,0.8,-0.55),J[2],0.09,0.08),min(sTap(p,J[2],J[3],0.08,0.07),sTap(p,J[3],J[4],0.07,0.06)));tl=smin(tl,sEll(p-J[4]-vec3(0.0,0.02,-0.06),vec3(0.07,0.06,0.1)),0.03);r=U(r,vec2(tl,20.0));   // 蛇の尾と蛇の頭
+  float bend=0.42*q.x*q.x-0.16*q.y+0.1*q.x;float wg=max(m2*1.55,abs(w.z-bend)-0.03);vec3 q3=vec3(q*1.55,w.z-bend);float bn=min(sTap(q3,vec3(0.0),vec3(Wr*1.55,0.0),0.06,0.05),sTap(q3,vec3(Wr*1.55,0.0),vec3(T0*1.55,0.0),0.05,0.012));for(int k=1;k<4;k++){vec2 t=k==1?T1:(k==2?T2:T3);bn=min(bn,sTap(q3,vec3(Wr*1.55,0.0),vec3(t*1.55,0.0),0.035,0.01));}wg=min(wg,bn);r=U(r,vec2(wg,19.0));}   // 石の翼（上へ立て、膜は後ろへそらせて丸み）
+ vec3 t0=vec3(0.0,0.8,-0.5),t1=vec3(0.14,0.74,-0.82),t2=vec3(-0.04,0.6,-1.08),t3=vec3(0.1,0.58,-1.3);float tl=min(min(sTap(p,t0,t1,0.1,0.08),sTap(p,t1,t2,0.08,0.06)),sTap(p,t2,t3,0.06,0.05));
+ vec3 sh=t3+vec3(0.03,0.04,-0.06);tl=smin(tl,sEll(p-sh,vec3(0.08,0.06,0.11)),0.03);r=U(r,vec2(tl,20.0));for(int s=0;s<2;s++){float sg=s==0?-1.0:1.0;r=U(r,vec2(length(p-sh-vec3(0.05*sg,0.03,-0.05))-0.018,24.0));}r=U(r,vec2(sTap(p,sh+vec3(0.0,-0.02,-0.1),sh+vec3(0.0,-0.06,-0.12),0.012,0.003),26.0));   // 蛇の尾と蛇の頭
  {float fr=9.0;vec3 M0=vec3(0.0,0.85,1.12),M1=vec3(0.68,1.24,0.98),M2=vec3(-0.66,1.27,0.88);   // 3つの口からもれる小さな炎
   for(int k=0;k<3;k++){vec3 m=k==0?M0:(k==1?M1:M2);for(int j=0;j<3;j++){float a=(float(j)-1.0)*0.5;fr=min(fr,sTap(p,m,m+vec3(0.05*sin(a),0.1+0.04*float(j==1),0.05),0.035,0.006));}}fr+=0.01*(fbm(p*20.0)-0.5);r=U(r,vec2(fr,25.0));}
  return r;}
