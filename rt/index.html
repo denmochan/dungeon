@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層115／No.350（11/25 00:49）";
+const VER20 = "層116／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -14699,11 +14699,16 @@ function fpOpen30(){
   /* 手の届く長さは体の表面から：大きい相手には少し離れていても届く。近づく距離は、体が重ならない距離より近くしない */
   const rtSz = T => (T && T.rt && T.rt.b && T.rt.b.size) || 1, rtR = (b, T) => b.reach + (b.ranged ? 0 : 0.6 * (Math.sqrt(rtSz(T)) - 1)), rtSep = (a, T) => 0.6 * (Math.sqrt(rtSz(a)) + Math.sqrt(rtSz(T))) + 0.03;
   const rtInt = b => 1.05 / Math.sqrt(b.agi) * Math.pow(b.size, 0.15), rtWind = b => 0.42 / Math.sqrt(b.agi) * Math.pow(b.size, 0.25), rtSpd = b => 3.0 * Math.pow(b.run, 0.8);   /* 走る速さは「走」、振りは「身」。大きい子は振りかぶりが長い */
+  /* RTD30：リアルタイムの打ち合いの傷の倍率。AIが「とどめ・横腹・背中」を狙えるようになって、1夜が70秒→20秒に縮んだ（勝ち負けの割合は前と同じ）。
+     両方の傷を同じだけ減らして、駆け引きが見える長さに戻す */
+  const RTD30 = 0.55;
   function rtHit(Rm, A, T, now) { const ua = A.rt, ut = T.rt, oa = ua.o, ot = ut.o;
     const ang = Math.atan2(A.x - T.x, A.z - T.z), rel = Math.abs(Math.atan2(Math.sin(ang - ut.fa), Math.cos(ang - ut.fa))); let mul = 1, tag = "";
-    if (rel > 2.35) { mul = 1.6; tag = "背後！"; } else if (rel > 1.3) { mul = 1.3; tag = "横から！"; }
+    /* 背中合わせ：背中のすぐ後ろに仲間が立っていたら、背後からでも「横」あつかい（数で負けている側の守り方。囲まれて一方的に背中を斬られ、入口で16秒で全滅していた） */
+    let cov = false; if (rel > 2.35) cov = (Rm.acts || []).some(o => o !== T && o.rt && o.rt.side === ut.side && Math.hypot(o.x - T.x, o.z - T.z) < 1.6 && Math.abs(Math.atan2(Math.sin(Math.atan2(o.x - T.x, o.z - T.z) - ang), Math.cos(Math.atan2(o.x - T.x, o.z - T.z) - ang))) < 0.9);
+    if (rel > 2.35 && !cov) { mul = 1.6; tag = "背後！"; } else if (rel > 1.3) { mul = 1.3; tag = cov ? "背中を守った" : "横から！"; }
     if (!tag && T.hero && T.h && T.h.job === "knight" && ut.ph !== "wind" && !ua.b.magic) { mul *= 0.6; POPS30.push({ x: T.x, y: Rm.Y + 2.2, z: Rm.Z + T.z, txt: "🛡 受け止めた", col: "#d8e8ff", big: 0, t: now }); }   /* 騎士は正面の攻撃を盾で受ける */
-    const I = rtInt(ua.b), pace = I * Math.pow(ua.b.agi, 0.3), r = (0.8 + Math.random() * 0.4) * (ua.b.magic ? Math.pow(Math.max(0.3, ua.b.mag) / Math.max(0.3, ut.b.mag), 0.25) : 1); N._rt30 = 1;   /* 魔法は、受ける側の魔力が高いほど効きにくい */
+    const I = rtInt(ua.b), pace = I * Math.pow(ua.b.agi, 0.3), r = (0.8 + Math.random() * 0.4) * (ua.b.magic ? Math.pow(Math.max(0.3, ua.b.mag) / Math.max(0.3, ut.b.mag), 0.25) : 1); N._rt30 = 1; const mulK = mul; mul *= RTD30;   /* 傷はリアルタイムでは控えめに（mulK はノックバック用の元の倍率） */   /* 魔法は、受ける側の魔力が高いほど効きにくい */
     try { if (A.hero && T.lord) { const L = N.lord; let dd = Math.round(oa.atk * r * pace * (1 + 0.15 * ((oa.sk || {}).sword || 0)) * mul); if (L.ward > 0) { const w = Math.min(L.ward, dd); L.ward -= w; dd -= w; } L.hp -= dd; if (L.hp <= 0) { L.hp = 0; L.down = true; } POPS30.push({ x: T.x, y: Rm.Y + 3.4, z: Rm.Z + T.z, txt: dd > 0 ? String(dd) : "🛡 防いだ", col: dd > 0 ? "#ff7a6a" : "#d8e8ff", big: dd > 0 ? 1 : 0, t: now }); }
       else if (A.lord) { const dL = N.lord.atk * r * pace * mul * (A.lmag30 ? 0.7 : 1); hurtHero5(S, N, ot, Math.round(dL), null); try { const v = typeof V27 === "function" ? V27() : {}; if (v.sweep && !A.lmag30) (Rm.acts || []).forEach(o2 => { if (o2 !== T && o2.hero && o2.h && o2.h.st === "in" && Math.hypot(o2.x - A.x, o2.z - A.z) < 2.6) hurtHero5(S, N, o2.h, Math.round(dL * 0.35 * v.sweep), null); }); } catch (e2) {} }   /* 主のなぎ払いは、そばにいる勇者だけに */
       else if (A.hero) { const h = oa, sk = h.sk || {}; let d = h.atk * r * pace * (1 + 0.15 * (sk.sword || 0)) * mul; const fam = (MON[ot.sp] || {}).fam; if (sk.holy && fam === "undead") d *= 1.3 + 0.3 * sk.holy;
@@ -14712,7 +14717,7 @@ function fpOpen30(){
         tgts.forEach(h => { monHit11(S, N, m, h, d * (m.aoe || 1)); if (m.fx.steal) m.hp = Math.min(m.max, m.hp + Math.round(d * m.fx.steal)); if (h.st === "in" && m.fx.net && Math.random() < m.fx.net) h.stuck = Math.max(h.stuck, 1); if (h.st === "in" && m.fx.scare && !h.boss && !h.flee && Math.random() < m.fx.scare) h.flee = true; }); } } catch (e) {}
     N._rt30 = 0; const H = N.hit25 || []; for (let k = H.length - 1; k >= 0 && k >= H.length - 6; k--) if (H[k].rtq == null) H[k].rtq = 1;
     if (tag) POPS30.push({ x: T.x, y: Rm.Y + 2.9, z: Rm.Z + T.z, txt: tag, col: "#ffcf70", big: 0, t: now });
-    const kx = T.x - A.x, kz = T.z - A.z, KL = Math.hypot(kx, kz) || 1, kb = Math.min(2.2, 0.28 * mul * ua.b.str / Math.max(0.3, ut.b.size)); T.kb30 = { vx: kx / KL * kb / 0.2, vz: kz / KL * kb / 0.2, u: now + 200 };   /* ノックバックは0.2秒かけて押し出す（一瞬で2mも飛んで、瞬間移動に見えた） */ if (kb > 1.1) { T.stag30 = now + 350; POPS30.push({ x: T.x, y: Rm.Y + 2.6, z: Rm.Z + T.z, txt: "吹っ飛んだ！", col: "#ffd27a", big: 0, t: now }); } }   /* 力の強い子が小さい子を叩くと吹き飛ぶ */
+    const kx = T.x - A.x, kz = T.z - A.z, KL = Math.hypot(kx, kz) || 1, kb = Math.min(2.2, 0.28 * mulK * ua.b.str / Math.max(0.3, ut.b.size)); T.kb30 = { vx: kx / KL * kb / 0.2, vz: kz / KL * kb / 0.2, u: now + 200 };   /* ノックバックは0.2秒かけて押し出す（一瞬で2mも飛んで、瞬間移動に見えた） */ if (kb > 1.1) { T.stag30 = now + 350; POPS30.push({ x: T.x, y: Rm.Y + 2.6, z: Rm.Z + T.z, txt: "吹っ飛んだ！", col: "#ffd27a", big: 0, t: now }); } }   /* 力の強い子が小さい子を叩くと吹き飛ぶ */
   const RTON30 = (() => { try { return /\/rt\//.test(location.pathname) || /[?&]rt\b/.test(location.search) || localStorage.getItem("rt30") === "1"; } catch (e) { return false; } })();   /* 作り直し版（/rt/）だけで動かす。いつもの版は今までの戦い */
   /* ===================== rt30 の考える所（作り直し 11/28） =====================
      前の作りは「見えたら直進して、ぶつかってから回りこむ」継ぎはぎだった（本人：カス）。いまは毎回この順に決める：
@@ -16358,32 +16363,40 @@ html.land30 .mph30{font-size:40px}
 
   /* 見せ方：歩く画面の上に夜の幕。押した瞬間に計算はせず、夜が明けてから元の nextDay を呼ぶ */
   const st = document.createElement("style"); st.textContent = `
-#qn30{position:fixed;inset:0;z-index:9000;pointer-events:auto;background:radial-gradient(ellipse at 50% 40%,rgba(14,22,60,.58),rgba(3,5,18,.9));opacity:0;transition:opacity .9s ease;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:calc(14px + env(safe-area-inset-top,0px));font-family:"Zen Antique","Noto Sans JP",serif;color:#dfe6ff}
+#qn30{position:fixed;inset:0;z-index:9000;pointer-events:none;background:radial-gradient(ellipse at 50% 40%,rgba(14,22,60,.58),rgba(3,5,18,.9));opacity:0;transition:opacity .9s ease;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:calc(14px + env(safe-area-inset-top,0px));font-family:"Zen Antique","Noto Sans JP",serif;color:#dfe6ff}
 #qn30.on{opacity:1}#qn30.out{opacity:0;transition:opacity 1.1s ease}
 #qn30 .t{font-size:22px;letter-spacing:.2em;text-shadow:0 0 12px #6f86ff}
 #qn30 .s{font-size:13px;margin-top:6px;opacity:.85;font-family:"Noto Sans JP",sans-serif}
-#qn30 .k{position:absolute;right:calc(14px + env(safe-area-inset-right,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));font-size:12px;opacity:.7;font-family:"Noto Sans JP",sans-serif}
+#qn30 .k{position:absolute;right:calc(14px + env(safe-area-inset-right,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));pointer-events:auto;font:700 14px "Noto Sans JP",sans-serif;color:#2a1c06;background:linear-gradient(#ffe7a0,#f0b850);border:0;border-radius:10px;padding:10px 16px;box-shadow:0 2px 10px rgba(0,0,0,.5)}
+#qn30 .h{font-size:12px;margin-top:4px;opacity:.7;font-family:"Noto Sans JP",sans-serif}
+#qn30.walk{background:radial-gradient(ellipse at 50% 45%,rgba(14,22,60,.42),rgba(3,5,18,.86))}
+#qn30.walk .t{font-size:14px;letter-spacing:.1em;margin-top:34px}#qn30.walk .s,#qn30.walk .bar,#qn30.walk .h{display:none}
 #qn30 .bar{width:160px;height:3px;background:rgba(255,255,255,.15);margin-top:10px;border-radius:2px;overflow:hidden}#qn30 .bar i{display:block;height:100%;width:0;background:#9fb2ff;transition:width linear}
 `; document.head.appendChild(st);
 
   let busy = false;
   nextDay = (prev => function () {
     try {
-      if (busy) return;
+      if (busy) { if (window.__qnMorning30) window.__qnMorning30(); return; }   /* 夜のあいだに「次の日へ」を押した＝朝にする */
       const fp = document.getElementById("fp26");
       const quiet = S && !S.ended && !S.contractDone && !N && !isRaid9(S) && S.scoutDay !== S.day && !(typeof tutOn === "function" && tutOn()) && fp && !window.__noqn30;
       if (!quiet) return prev.apply(this, arguments);
       busy = true; const args = arguments, self = this;
       let nn = 0, nw = 0; S.mons.forEach(m => { if (m.home == null) return; if (noct(m)) nn++; else nw++; });
       const el = document.createElement("div"); el.id = "qn30";
-      el.innerHTML = `<div class="t">🌙 静かな夜</div><div class="s">${nn ? `夜行性 ${nn}体が起きて働いている・ほかの${nw}体は寝床へ` : `みんな寝床へ。夜行性の子がいれば、夜も働く`}</div><div class="bar"><i></i></div><div class="k">タップで朝へ ≫</div>`;
+      el.innerHTML = `<div class="t">🌙 静かな夜</div><div class="s">${nn ? `夜行性 ${nn}体が起きて働いている・ほかの${nw}体は寝床へ` : `みんな寝床へ。夜行性の子がいれば、夜も働く`}</div><div class="bar"><i></i></div><div class="h">画面をさわると夜のまま歩ける</div><button class="k">☀ 朝にする</button>`;
       document.body.appendChild(el);
       window.__qn30 = { end: performance.now() + QN_MS + 400 }; if (window.__life30kick) window.__life30kick(false);
       requestAnimationFrame(() => { el.classList.add("on"); const b = el.querySelector(".bar i"); b.style.transitionDuration = QN_MS + "ms"; b.style.width = "100%"; });
       let done = false; const morning = () => { if (done) return; done = true; clearTimeout(tm); window.__qn30 = null; if (window.__life30kick) window.__life30kick(true);
         el.classList.add("out"); setTimeout(() => el.remove(), 1200); busy = false;
         try { prev.apply(self, args); } catch (e) { console.warn("yoru30", e); } };
-      const tm = setTimeout(morning, QN_MS); el.addEventListener("pointerdown", e => { e.stopPropagation(); morning(); });
+      /* 画面をさわったら（歩く・見回す）時計を止めて、夜のまま歩けるようにする。朝にするのは ☀ ボタンか「次の日へ」 */
+      let tm = setTimeout(morning, QN_MS); const walk = e => { if (e.target.closest && e.target.closest("#qn30 .k")) return; if (el.classList.contains("walk")) return; clearTimeout(tm); el.classList.add("walk"); window.__qn30 = { end: Infinity }; };
+      document.addEventListener("pointerdown", walk, true); document.addEventListener("touchstart", walk, { capture: true, passive: true });
+      const off = () => { document.removeEventListener("pointerdown", walk, true); document.removeEventListener("touchstart", walk, true); window.__qnMorning30 = null; };
+      window.__qnMorning30 = () => { off(); morning(); };
+      el.querySelector(".k").addEventListener("click", e => { e.stopPropagation(); off(); morning(); }); setTimeout(() => { if (done) off(); }, QN_MS + 50);
       return;
     } catch (e) { busy = false; console.warn("yoru30", e); return prev.apply(this, arguments); }
   })(nextDay);
