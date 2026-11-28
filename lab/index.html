@@ -16241,7 +16241,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
  /* ===== ほかの魔物も同じ作り方の3Dで描く（ガイコツ・スライム…）。ファイルがある種族だけ。ない種族は今までの絵 ===== */
  const MS={};
  const baseSp=sp=>String(sp||"").replace(/\d+$/,"");
- const SHAPE30={gargoyle:"imp",jackal:"kobold"},GHOST30=/^(ghostslime|ghost|wraitheye|sporewraith)$/;const rigOf=sp=>SHAPE30[sp]||sp;   /* 形を別の種族から借りた子は、動きもその種族のリグで */   /* 勇者の色ちがい（warrior2 など）は同じ形 */
+ const SHAPE30={gargoyle:"imp",jackal:"kobold",eyespider:"spider"},GHOST30=/^(ghostslime|ghost|wraitheye|sporewraith)$/;const rigOf=sp=>SHAPE30[sp]||sp;   /* 形を別の種族から借りた子は、動きもその種族のリグで */   /* 勇者の色ちがい（warrior2 など）は同じ形 */
  /* 顔の絵をなめらかに：32マスのドット絵を8倍にのばして、ふちを整える（四角いドットが3Dの中で浮いていた） */
  /* 顔の絵をなめらかに：ドット絵の色ごとに形をなめらかにのばして、いちばん強い色をとる（四角いドットが3Dの中で浮いていた。色はぼかさず、ふちだけ丸く） */
  /* 人の顔を描き直す（DQ8のような、白目・黒目・光・まぶた・眉のある目。ドットの点の目だと表情がなかった）。位置は元のドット絵と同じ */

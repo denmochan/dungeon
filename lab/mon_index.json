@@ -200,14 +200,15 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 0.85,
-  "bytes": 92888,
-  "verts": 7000,
-  "tris": 13996,
+  "bytes": 122736,
+  "verts": 8000,
+  "tris": 15992,
   "full": {
    "file": "mon_eyespider.bin.gz",
    "fmt": "GB02",
-   "bytes": 328226
-  }
+   "bytes": 634282
+  },
+  "shape": "spider"
  },
  "firebat": {
   "file": "lite/mon_firebat.bin.gz",
@@ -621,13 +622,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 0.9,
-  "bytes": 101042,
-  "verts": 7000,
-  "tris": 14008,
+  "bytes": 127303,
+  "verts": 8000,
+  "tris": 16000,
   "full": {
    "file": "mon_nightspider.bin.gz",
    "fmt": "GB02",
-   "bytes": 407545
+   "bytes": 830854
   }
  },
  "nightwolf": {
@@ -859,13 +860,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 0.8,
-  "bytes": 100392,
-  "verts": 7000,
-  "tris": 14008,
+  "bytes": 123491,
+  "verts": 8000,
+  "tris": 15992,
   "full": {
    "file": "mon_spider.bin.gz",
    "fmt": "GB02",
-   "bytes": 405587
+   "bytes": 609913
   }
  },
  "sporerat": {
@@ -915,13 +916,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 1.0,
-  "bytes": 98385,
-  "verts": 7000,
-  "tris": 14008,
+  "bytes": 125796,
+  "verts": 8000,
+  "tris": 15992,
   "full": {
    "file": "mon_stonespider.bin.gz",
    "fmt": "GB02",
-   "bytes": 404198
+   "bytes": 720719
   }
  },
  "thief": {
