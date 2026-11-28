@@ -35,6 +35,11 @@ vec2 vamp(vec3 p){vec3 H=J[2];vec3 h=p-H;vec3 e=vec3(abs(h.x),h.y,h.z);
  {vec3 c=J[2]+vec3(0.0,-0.22,-0.2);for(int s=0;s<2;s++){float sg=s==0?-1.0:1.0;vec3 q=p-c;q.x*=sg;
    vec2 A=vec2(0.1,0.0),B=vec2(0.56,0.36),C=vec2(0.14,0.56);vec2 u=vec2(q.x,q.y);vec2 e0=B-A,e1=C-B,e2=A-C,v0=u-A,v1=u-B,v2=u-C;vec2 pq0=v0-e0*clamp(dot(v0,e0)/dot(e0,e0),0.0,1.0),pq1=v1-e1*clamp(dot(v1,e1)/dot(e1,e1),0.0,1.0),pq2=v2-e2*clamp(dot(v2,e2)/dot(e2,e2),0.0,1.0);float sgn=sign(e0.x*e2.y-e0.y*e2.x);vec2 dd=min(min(vec2(dot(pq0,pq0),sgn*(v0.x*e0.y-v0.y*e0.x)),vec2(dot(pq1,pq1),sgn*(v1.x*e1.y-v1.y*e1.x))),vec2(dot(pq2,pq2),sgn*(v2.x*e2.y-v2.y*e2.x)));float tri=-sqrt(dd.x)*sign(dd.y);
    float bend=0.55*q.x*q.x-0.12*q.y;float cl=max(tri,abs(q.z-bend)-0.03);r=U(r,vec2(cl,q.z-bend>0.0?21.0:20.0));}}   // 横へとがって張り出す襟（前は赤、後ろは黒）
+ {vec3 h3=p-H-vec3(0.0,0.185,-0.02);h3.yz=vec2(h3.y*0.989+h3.z*0.15,-h3.y*0.15+h3.z*0.989);float rr=length(h3.xz*vec2(1.0,0.95));
+  float cr=max(rr-0.185+0.06*h3.y,abs(h3.y-0.075)-0.075)-0.012;cr=max(cr,-(sEll(h3-vec3(0.0,0.2,0.0),vec3(0.05,0.06,0.15))));   // 丸い山（上に縦のへこみ）
+  float br=max(rr-0.36,abs(h3.y+0.05*smoothstep(0.2,0.37,rr)*(0.4+0.6*smoothstep(-0.1,0.3,h3.z)))-0.013)-0.004;   // 広いつば（前が下がる）
+  r=U(r,vec2(min(cr,br),5.0));
+  float bd=max(rr-0.192+0.06*h3.y,abs(h3.y-0.03)-0.022)-0.006;r=U(r,vec2(bd,14.0));}   // 赤い帯
  return r;}
 vec2 xmod(vec2 b,vec3 p){return vamp(p);}
 vec2 xbody(vec3 p){return vec2(1e3,1.0);}
