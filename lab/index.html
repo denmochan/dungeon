@@ -9324,7 +9324,7 @@ const KITOF24 = { hunter: "human", lord: "human", warrior: "human", thief: "huma
   nightwolf: "wolf", jackal: "wolf", sporerat: "rat", ratking: "rat", minerorc: "orc", berserker: "orc", ogremage: "orc", bogtroll: "orc", wraitheye: "ghost", sporewraith: "ghost", fungus: "myconid" };
 const kitOf24 = sp => KITOF24[sp] || sp;
 const SPCOLX24 = { hunter: [[0.95, 0.74, 0.58], [0.4, 0.55, 0.28]], lord: [[0.6, 0.6, 0.66], [0.28, 0.22, 0.33]], warrior: [[0.95, 0.74, 0.58], [0.6, 0.4, 0.22]], thief: [[0.95, 0.74, 0.58], [0.33, 0.58, 0.3]], priest: [[0.95, 0.76, 0.6], [0.92, 0.9, 0.85]], mage: [[0.95, 0.74, 0.58], [0.3, 0.45, 0.82]],
-  knight: [[0.95, 0.74, 0.58], [0.7, 0.72, 0.8]], vampire: [[0.9, 0.88, 0.86], [0.14, 0.12, 0.17]], count: [[0.9, 0.88, 0.86], [0.14, 0.12, 0.17]], slimeknight: [[0.45, 0.62, 0.42], [0.5, 0.58, 0.52]],
+  knight: [[0.95, 0.74, 0.58], [0.7, 0.72, 0.8]], vampire: [[0.95, 0.92, 0.92], [0.14, 0.12, 0.17]], count: [[0.95, 0.92, 0.92], [0.14, 0.12, 0.17]], slimeknight: [[0.45, 0.62, 0.42], [0.5, 0.58, 0.52]],
   bonedragon: [[0.85, 0.82, 0.72], [0.3, 0.28, 0.32]], elderdragon: [[0.25, 0.4, 0.3], [0.5, 0.42, 0.2]], flamechimera: [[0.85, 0.5, 0.2], [0.9, 0.35, 0.1]], maou: [[0.45, 0.32, 0.55], [0.6, 0.1, 0.12]], rotlord: [[0.5, 0.36, 0.55], [0.5, 0.4, 0.6]], gargoyle: [[0.5, 0.5, 0.52], [0.36, 0.36, 0.4]], ifrit: [[0.95, 0.5, 0.15], [0.9, 0.3, 0.08]], underlord: [[0.42, 0.2, 0.42], [0.2, 0.1, 0.25]], lich: [[0.78, 0.78, 0.72], [0.38, 0.2, 0.5]],
   vaultkeeper: [[0.7, 0.6, 0.3], [0.85, 0.3, 0.35]], hauntchest: [[0.4, 0.42, 0.5], [0.4, 0.8, 0.7]], stoneeye: [[0.6, 0.6, 0.58], [0.85, 0.3, 0.2]], fortgolem: [[0.5, 0.48, 0.45], [0.3, 0.7, 1.0]], webgoblin: [[0.57, 0.627, 0.24], [0.47, 0.35, 0.41]], sapper: [[0.5, 0.58, 0.26], [0.3, 0.3, 0.3]], shaman: [[0.6, 0.66, 0.28], [0.6, 0.45, 0.15]], ghoul: [[0.4, 0.45, 0.3], [0.35, 0.28, 0.35]],
   goldkobold: [[0.78, 0.58, 0.22], [0.45, 0.29, 0.16]], emberskel: [[0.9, 0.72, 0.52], [0.85, 0.4, 0.1]], bonewarden: [[0.8, 0.82, 0.75], [0.35, 0.45, 0.42]],
@@ -16325,16 +16325,17 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
     g.fillStyle="rgba(20,12,8,0.85)";g.beginPath();g.moveTo(x-fl*3*K,y-2*K);g.lineTo(x+fl*3*K,y-2.4*K);g.lineTo(x+fl*3*K,y-0.55*K);g.lineTo(x-fl*3*K,y-0.15*K);g.closePath();g.fill();g.restore();   // 重い上まぶた
    g.strokeStyle="rgba(30,18,10,0.75)";g.lineWidth=0.7*K;g.lineCap="round";g.beginPath();g.moveTo(x+fl*2.2*K,y+1.3*K);g.quadraticCurveTo(x+fl*0.6*K,y+3.0*K,x-fl*1.6*K,y+3.8*K);g.stroke();}}   // 目の下のすじ
  /* 吸血鬼の顔（11/28 燕尾服の紳士）：切れ長のつり目（赤い瞳・黒いふち・目の上の影）、細くつり上がった眉、口の片はしを上げた薄い笑い。顔の表の13番目のマス */
+ /* 吸血鬼の顔（11/28 本人が見せた絵のイメージ：けわしく寄せた眉・深い目に赤い瞳・長い牙をのぞかせた口）。顔の表の13番目のマス */
  function vampFace(g,ox,K){g.clearRect(ox,0,32*K,32*K);const P=(c,r)=>[ox+c*K,r*K];
-  for(const[c,fl]of[[10.0,1],[22.0,-1]]){const[x,y]=P(c,14.2);
-   g.fillStyle="rgba(60,30,50,0.35)";g.beginPath();g.ellipse(x,y-0.6*K,4.2*K,2.4*K,fl*0.25,0,6.283);g.fill();   // 目の上の影
-   g.fillStyle="#140a0e";g.beginPath();g.moveTo(x+fl*3.4*K,y+0.4*K);g.quadraticCurveTo(x,y-2.2*K,x-fl*3.6*K,y-1.6*K);g.quadraticCurveTo(x-fl*0.6*K,y+1.6*K,x+fl*3.4*K,y+0.4*K);g.fill();   // 切れ長のふち（目じりが上）
-   g.save();g.beginPath();g.moveTo(x+fl*2.6*K,y+0.2*K);g.quadraticCurveTo(x,y-1.5*K,x-fl*2.8*K,y-1.1*K);g.quadraticCurveTo(x-fl*0.4*K,y+1.0*K,x+fl*2.6*K,y+0.2*K);g.clip();
-    g.fillStyle="#f2e8e8";g.fillRect(x-4*K,y-3*K,8*K,6*K);g.fillStyle="#d01020";g.beginPath();g.ellipse(x-fl*0.3*K,y-0.2*K,1.15*K,1.15*K,0,0,6.283);g.fill();g.fillStyle="#2a0006";g.beginPath();g.ellipse(x-fl*0.3*K,y-0.2*K,0.42*K,0.9*K,0,0,6.283);g.fill();g.restore();
-   g.strokeStyle="#140a0e";g.lineCap="round";g.lineWidth=0.8*K;g.beginPath();g.moveTo(x+fl*2.8*K,y-2.6*K);g.quadraticCurveTo(x,y-3.4*K,x-fl*3.6*K,y-4.6*K);g.stroke();}   // つり上がった細い眉
-  const[mx,my]=P(16,22.0);g.strokeStyle="#3a0a14";g.lineWidth=0.6*K;g.lineCap="round";g.beginPath();g.moveTo(mx-3.0*K,my+0.3*K);g.quadraticCurveTo(mx,my+0.8*K,mx+3.4*K,my-0.9*K);g.stroke();   // 片はしを上げた薄い笑い
-  g.fillStyle="#fffaf0";for(const d of[-1.6,1.4]){g.beginPath();g.moveTo(mx+d*K-0.45*K,my+0.5*K);g.lineTo(mx+d*K+0.45*K,my+0.45*K);g.lineTo(mx+d*K,my+2.0*K);g.closePath();g.fill();}
-  g.strokeStyle="rgba(120,70,80,0.5)";g.lineWidth=0.4*K;g.beginPath();g.moveTo(mx+0.2*K,my-4.5*K);g.lineTo(mx-0.6*K,my-2.6*K);g.lineTo(mx+0.5*K,my-2.4*K);g.stroke();}   // 鼻すじ
+  for(const[c,fl]of[[10.6,-1],[21.4,1]]){const[x,y]=P(c,15.2);
+   g.fillStyle="rgba(70,40,60,0.38)";g.beginPath();g.ellipse(x,y-0.8*K,3.6*K,2.2*K,0,0,6.283);g.fill();   // 目のくぼみの影
+   g.save();g.beginPath();g.moveTo(x-fl*2.8*K,y-0.7*K);g.lineTo(x+fl*2.4*K,y-1.4*K);g.quadraticCurveTo(x+fl*1.2*K,y+1.5*K,x-fl*1.6*K,y+1.1*K);g.closePath();g.clip();
+    g.fillStyle="#f6eeee";g.fillRect(x-4*K,y-3*K,8*K,6*K);g.fillStyle="#c8101c";g.beginPath();g.ellipse(x,y,1.3*K,1.3*K,0,0,6.283);g.fill();g.fillStyle="#2a0006";g.beginPath();g.ellipse(x,y,0.55*K,0.75*K,0,0,6.283);g.fill();g.fillStyle="#fff";g.beginPath();g.ellipse(x-0.45*K,y-0.5*K,0.35*K,0.35*K,0,0,6.283);g.fill();g.restore();
+   g.strokeStyle="#16101a";g.lineWidth=0.75*K;g.lineCap="round";g.lineJoin="round";g.beginPath();g.moveTo(x-fl*2.8*K,y-0.7*K);g.lineTo(x+fl*2.4*K,y-1.4*K);g.stroke();   // 上まぶた（目頭が下）
+   g.lineWidth=1.05*K;g.beginPath();g.moveTo(x+fl*3.4*K,y-4.4*K);g.lineTo(x-fl*0.3*K,y-3.0*K);g.lineTo(x-fl*3.0*K,y-2.0*K);g.stroke();}   // 寄せた眉（内が下）
+  {const[x,y]=P(16,13.3);g.strokeStyle="rgba(90,50,70,0.55)";g.lineWidth=0.4*K;g.beginPath();g.moveTo(x-0.6*K,y);g.lineTo(x-0.3*K,y+1.6*K);g.moveTo(x+0.6*K,y);g.lineTo(x+0.3*K,y+1.6*K);g.stroke();}   // 眉間のしわ
+  const[mx,my]=P(16,22.6);g.fillStyle="#3a0a14";g.beginPath();g.moveTo(mx-2.8*K,my);g.quadraticCurveTo(mx,my+0.7*K,mx+2.8*K,my);g.quadraticCurveTo(mx,my+0.25*K,mx-2.8*K,my);g.fill();   // 口
+  g.fillStyle="#fffaf2";g.strokeStyle="#3a0a14";g.lineWidth=0.25*K;for(const d of[-1.5,1.5]){g.beginPath();g.moveTo(mx+d*K-0.55*K,my+0.3*K);g.lineTo(mx+d*K+0.55*K,my+0.3*K);g.lineTo(mx+d*K,my+2.6*K);g.closePath();g.fill();g.stroke();}}   // 長い牙
  function faceAtlasSmooth(gl){const K=8,W=512*K,H=32*K,out=new ImageData(W,H),up=(m)=>{const a=document.createElement("canvas");a.width=32;a.height=32;const g0=a.getContext("2d"),im=g0.createImageData(32,32);for(let q=0;q<1024;q++){im.data[q*4]=im.data[q*4+1]=im.data[q*4+2]=255;im.data[q*4+3]=m[q];}g0.putImageData(im,0,0);
    const b=document.createElement("canvas");b.width=32*K;b.height=32*K;const g=b.getContext("2d");g.imageSmoothingEnabled=true;g.imageSmoothingQuality="high";g.filter="blur("+(K*0.35)+"px)";g.drawImage(a,0,0,32*K,32*K);return g.getImageData(0,0,32*K,32*K).data;};
   ["goblin","slime","bat","ghost","imp","myconid","orc","human"].forEach((sp,fi)=>{const F=FACE24[sp],cols={};F.rows.forEach((r,y)=>[...r].forEach((ch,k)=>{if(!F.pal[ch])return;(cols[ch]=cols[ch]||new Uint8Array(1024))[y*32+k]=255;}));
@@ -16602,7 +16603,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
    const sp=LIST[cur],M=MS[sp];const T=(now-t0)/1000;turn+=dt*0.35;
    if(M&&M.bad){title.textContent+="（まだない）";go(1);requestAnimationFrame(frame);return;}
    if(M&&M.ok){if(M.c==null){let h=0,x0=9,x1=-9,z0=9,z1=-9;for(let i=0;i<M.NV;i++){if(M.WP&&M.WP[i])continue;const x=M.P0[i*3],y=M.P0[i*3+1],z=M.P0[i*3+2];if(y>h)h=y;if(x<x0)x0=x;if(x>x1)x1=x;if(z<z0)z0=z;if(z>z1)z1=z;}M.c=Math.max(h,0.55*Math.max(x1-x0,z1-z0));M.h=h;M.L=Math.max(x1-x0,z1-z0);}
-    if(window.__galTurn!=null)turn=window.__galTurn;const Z=window.__galZoom||0,S=1.6/M.c,ht=M.h*S,dist=Math.max(ht*1.05,M.L*S*0.75)*2.9*(Z?0.45:1)*(window.__galFar||1),EYE=[Math.sin(turn)*dist,ht*(Z?0.72:0.75),Math.cos(turn)*dist],tg=[0,ht*(Z?0.66:0.42),0],VP=mul(persp(0.62,W/H,0.1,60),look(EYE,tg,[0,1,0]));
+    if(window.__galTurn!=null)turn=window.__galTurn;const Z=window.__galZoom||0,S=1.6/M.c,ht=M.h*S,dist=Math.max(ht*1.05,M.L*S*0.75)*2.9*(Z?0.45:1)*(window.__galFar||1),EYE=[Math.sin(turn)*dist,ht*(Z?(window.__galZy||0.66)+0.06:0.75),Math.cos(turn)*dist],tg=[0,ht*(Z?(window.__galZy||0.66):0.42),0],VP=mul(persp(0.62,W/H,0.1,60),look(EYE,tg,[0,1,0]));
     const L=[[EYE[0]*0.6+1.2,2.6,EYE[2]*0.6+0.8],[-2,1.5,-2],[0,-99,0],[0,-99,0],[0,-99,0],[0,-99,0]],q={gl,PB:null,PM:null,EYE,VP,LT:L,LF:[1.3,0.5,0,0,0,0],LC:[1,0.62,0.32]};
     let st=null,k=0,side=1,dz=0;if(pose==="walk"){st="walk";k=(T*1.25/1.3/0.8)%1;}else if(pose==="run"){st="run";k=(T*2.6/1.3/0.8)%1;}else if(pose==="atk"){const c=T%1.4;if(c<0.45){st="windup";k=c/0.45;}else if(c<0.57){st="strike";k=(c-0.45)/0.12;}else if(c<1.0){st="recover";k=(c-0.57)/0.43;}else st="idle";}
     else if(pose==="bow"){const c=T%1.8;if(c<0.9){st="bowdraw";k=c/0.9;}else if(c<1.1){st="bowshoot";k=(c-0.9)/0.2;}else st="idle";}else if(pose==="dodge"){const c=T%1.6;st=c<0.5?"dodge":"idle";k=c/0.5;side=Math.floor(T/1.6)%2?1:-1;}
