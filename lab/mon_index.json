@@ -60,13 +60,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 4.0,
-  "bytes": 128069,
+  "bytes": 135390,
   "verts": 8000,
-  "tris": 15968,
+  "tris": 16017,
   "full": {
    "file": "mon_bonedragon.bin.gz",
    "fmt": "GB02",
-   "bytes": 604815
+   "bytes": 794838
   }
  },
  "bonewarden": {
@@ -370,13 +370,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 2.2,
-  "bytes": 110531,
-  "verts": 7000,
-  "tris": 13996,
+  "bytes": 152381,
+  "verts": 9000,
+  "tris": 18012,
   "full": {
    "file": "mon_golem.bin.gz",
    "fmt": "GB01",
-   "bytes": 441749
+   "bytes": 745034
   }
  },
  "hauntchest": {
