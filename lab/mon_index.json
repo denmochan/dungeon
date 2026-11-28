@@ -271,13 +271,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 1.3,
-  "bytes": 144593,
+  "bytes": 142408,
   "verts": 9000,
-  "tris": 17980,
+  "tris": 18000,
   "full": {
    "file": "mon_gargoyle.bin.gz",
    "fmt": "GB01",
-   "bytes": 846153
+   "bytes": 824471
   },
   "shape": "imp"
  },

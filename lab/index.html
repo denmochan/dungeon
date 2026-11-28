@@ -10896,6 +10896,10 @@ SP3D24.noble = 1; SP3D24.gargoyle = 1; LOOPK24.gargoyle = 3.2;
       for (let i = 17; i < J.length; i++) { const v = J[i]; if (!v || v[1] < -5 || !H0[0] || !H0[1]) continue; const d0 = Math.hypot(v[0] - H0[0][0], v[1] - H0[0][1], v[2] - H0[0][2]), d1 = Math.hypot(v[0] - H0[1][0], v[1] - H0[1][1], v[2] - H0[1][2]), k = d0 < d1 ? 0 : 1, hi = k ? 8 : 5; const dl = [0, 1, 2].map(q => J[hi][q] - H0[k][q]); J[i] = [v[0] + dl[0], v[1] + dl[1], v[2] + dl[2]]; }   /* 手に持つ物（剣・盾・杖の関節）も手といっしょに動かす（剣が手から離れて浮いていた） */
       [[9, 10, 11, 15, -1], [12, 13, 14, 16, 1]].forEach(([hp, k, an, to, sg]) => { const P = J[hp], A = [P[0] + sg * 0.03, 0.12, P[2]], K = [(P[0] + A[0]) / 2, (P[1] + A[1]) / 2, P[2] + 0.03]; J[k] = lr(J[k], K); J[an] = lr(J[an], A); J[to] = lr(J[to], [A[0], 0.05, A[2] + 0.16]); }); }
     return Object.assign({}, R, { J }); }; }
+{ const R4 = rigSp24; rigSp24 = function (sp0, mode, t){ if (sp0 !== "gargoyle") return R4(sp0, mode, t); const R = R4("imp", mode, t), J = R.J.map(v => v && v.slice());   /* ガーゴイル（11/28 やり直し）：インプの骨で、背中を丸めて頭を前へ・待つときは腕を前に垂らす（こぶしがひざの前） */
+    const dz = 0.06, dy = -0.07; if (J[2] && J[2][1] > -5) J[2] = [J[2][0], J[2][1] + dy, J[2][2] + dz]; if (J[1] && J[1][1] > -5) J[1] = [J[1][0], J[1][1] - 0.02, J[1][2] + 0.04];
+    if (mode === "idle" || mode === "sleep") [[3, 4, 5, -1], [6, 7, 8, 1]].forEach(([s, e, h, sg]) => { const S = J[s]; J[e] = [S[0] + sg * 0.1, S[1] - 0.2, S[2] + 0.1]; J[h] = [J[e][0] - sg * 0.02, J[e][1] - 0.2, J[e][2] + 0.12]; });
+    return Object.assign({}, R, { J }); }; }
 // ---------- 主（2Dの見た目に寄せた専用の体） VAR.w=段階 ----------
 KIT24.lordk = () => ({ common: COMMON24, body: (ROOM_PARTS24.handTxt + addBody24(ROOM_PARTS24.bodyTxt.replace("sHead(", "sHeadNE(").replace("if(tool>0.5&&tool<1.5){", "if(tool>9.0){")
     .replace("d=smin(d,sHeadNE(HR*(p-J[2])),0.07);", "d=smin(d,sHeadNE((HR*(p-J[2])-vec3(0.0,-0.02,0.0))/0.95)*0.95,0.07);"), `
@@ -16251,7 +16255,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
  /* ===== ほかの魔物も同じ作り方の3Dで描く（ガイコツ・スライム…）。ファイルがある種族だけ。ない種族は今までの絵 ===== */
  const MS={};
  const baseSp=sp=>String(sp||"").replace(/\d+$/,"");
- const SHAPE30={gargoyle:"imp",jackal:"kobold",eyespider:"spider",fungus:"spider"},GHOST30=/^(ghostslime|ghost|wraitheye|sporewraith)$/;const rigOf=sp=>SHAPE30[sp]||sp;   /* 形を別の種族から借りた子は、動きもその種族のリグで */   /* 勇者の色ちがい（warrior2 など）は同じ形 */
+ const SHAPE30={jackal:"kobold",eyespider:"spider",fungus:"spider"},GHOST30=/^(ghostslime|ghost|wraitheye|sporewraith)$/;const rigOf=sp=>SHAPE30[sp]||sp;   /* 形を別の種族から借りた子は、動きもその種族のリグで */   /* 勇者の色ちがい（warrior2 など）は同じ形 */
  /* 顔の絵をなめらかに：32マスのドット絵を8倍にのばして、ふちを整える（四角いドットが3Dの中で浮いていた） */
  /* 顔の絵をなめらかに：ドット絵の色ごとに形をなめらかにのばして、いちばん強い色をとる（四角いドットが3Dの中で浮いていた。色はぼかさず、ふちだけ丸く） */
  /* 人の顔を描き直す（DQ8のような、白目・黒目・光・まぶた・眉のある目。ドットの点の目だと表情がなかった）。位置は元のドット絵と同じ */
@@ -16587,7 +16591,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
   else if(st==="strike"){const e=ease(Math.min(1,k*2.2));tg=L(back,out,e);pole=[sg*0.9,-1,-0.2];root.pitch=0.1*e;root.dz=0.16*e;root.roll=-0.03*sg*e;}
   else{const e=ease(k);tg=L(out,rest,e);pole=[sg*0.9,-1,-0.4];root.pitch=0.1*(1-e);root.dz=0.16*(1-e);}
   armTo(J,6,7,8,tg,pole);return Object.assign({},R0,{J});};
- window.__labPose=(sp,st,k,o={})=>{k=Math.max(0,Math.min(1,k||0));const kit=typeof kitOf24==="function"?kitOf24(sp):sp,bip=/^(goblin|skeleton|imp|kobold|orc|golem|human|demon|gobx|lich|noble|lordk)$/.test(kit),rg=(m,t)=>rigSp24(sp,m,t);
+ window.__labPose=(sp,st,k,o={})=>{k=Math.max(0,Math.min(1,k||0));const kit=typeof kitOf24==="function"?kitOf24(sp):sp,bip=/^(goblin|skeleton|imp|kobold|orc|golem|human|demon|gobx|lich|noble|lordk|gargoyle)$/.test(kit),rg=(m,t)=>rigSp24(sp,m,t);
   const root={dx:0,dy:0,dz:0,pitch:0,roll:0};let R;const T=o.t||0,side=o.side||1;
   if(st==="walk"){R=rg("walk",bip?(k*0.8):k);if(!bip)R=Object.assign({},R,{gait:k});}
   else if(st==="run"){R=rg("walk",bip?(k*0.8):k);if(!bip)R=Object.assign({},R,{gait:k,gaitAmp:1.35});root.pitch=0.16;root.dy=0.05*Math.abs(Math.sin(k*Math.PI*2));}   /* 歩きを前のめりに・はずむ（速さは呼ぶ側で k を速く進める） */
