@@ -299,13 +299,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 0.9,
-  "bytes": 87778,
+  "bytes": 96428,
   "verts": 7000,
   "tris": 13996,
   "full": {
    "file": "mon_ghost.bin.gz",
    "fmt": "GB02",
-   "bytes": 246805
+   "bytes": 292561
   }
  },
  "ghostslime": {
@@ -887,13 +887,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 0.9,
-  "bytes": 101209,
+  "bytes": 105886,
   "verts": 7000,
   "tris": 13996,
   "full": {
    "file": "mon_sporewraith.bin.gz",
    "fmt": "GB02",
-   "bytes": 432607
+   "bytes": 468793
   }
  },
  "stoneeye": {

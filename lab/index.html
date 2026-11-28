@@ -16276,7 +16276,8 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
  window.__labGaitLen=sp=>{const M=MS[baseSp(sp)];return M&&M.LEGS?M.LEGS[0].L*0.32*4:0;};   /* 1歩（1周）で体が進む長さ（形の空間） */
  const lidMark=(sp,M)=>{try{if(kitOf24(rigOf(sp))!=="mimic")return;const a=0.15,ca=Math.cos(a),sa=Math.sin(a),L=new Uint8Array(M.NV);   /* 箱のふたの頂点（ゲームの形と同じ、うしろのちょうつがい y0.48・z-0.36、角度0.15） */
    for(let i=0;i<M.NV;i++){const y=M.P0[i*3+1]-0.48,z=M.P0[i*3+2]+0.36,ly=ca*y-sa*z,lz=sa*y+ca*z;L[i]=ly>-0.04&&lz>-0.06&&M.P0[i*3+1]>0.4?1:0;}M.LID=L;}catch(e){}};
- const faceUV=(sp,M)=>{try{const kit=kitOf24(rigOf(sp)),fi=FACEIDX24[kit];if(fi==null||fi<0)return;const R=rigSp24(rigOf(sp),"idle",0),A=R.HR,J2=R.J[2];if(!J2||J2[1]<-5)return;   /* 頭の空間で、顔の絵のどこに当たるか（ゲームの charCol と同じ式） */
+ const faceUV=(sp,M)=>{try{if(/^(ghost|sporewraith)$/.test(sp))return;   /* 目と口を形でくりぬいた子は、顔の絵を貼らない */
+ const kit=kitOf24(rigOf(sp)),fi=FACEIDX24[kit];if(fi==null||fi<0)return;const R=rigSp24(rigOf(sp),"idle",0),A=R.HR,J2=R.J[2];if(!J2||J2[1]<-5)return;   /* 頭の空間で、顔の絵のどこに当たるか（ゲームの charCol と同じ式） */
    const F=new Float32Array(M.NV*3),hm=(v)=>[A[0]*v[0]+A[3]*v[1]+A[6]*v[2],A[1]*v[0]+A[4]*v[1]+A[7]*v[2],A[2]*v[0]+A[5]*v[1]+A[8]*v[2]];
    for(let i=0;i<M.NV;i++){if(M.WP&&M.WP[i])continue;const hp=hm([M.P0[i*3]-J2[0],M.P0[i*3+1]-J2[1],M.P0[i*3+2]-J2[2]]);if(Math.hypot(hp[0],hp[1],hp[2])>=0.52)continue;const hn=hm([M.N0[i*3],M.N0[i*3+1],M.N0[i*3+2]]),t=Math.max(0,Math.min(1,(hn[2]-0.05)/0.25)),fz=t*t*(3-2*t);
     F[i*3]=hp[0]/0.84+0.5;F[i*3+1]=0.5-hp[1]/0.86;F[i*3+2]=fz;}M.F=F;M.FI=fi;}catch(e){}};
@@ -16452,7 +16453,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
   const S=window.__labSize&&SIZE30[sp]!=null&&!window.__labOldSize?SIZE30[sp]*1.82/M.c:(typeof spScl24==="function"?spScl24(sp):1)*(a.mult||1);   /* 大きさ：人間＝1 の比率（本番 BODY30V2 の「大」）にそろえる */
   if(M.LEGS&&a.walking&&!st){const gl=window.__labGaitLen(sp)*S||1;R=Object.assign({},R,{gait:((a.dist||0)/gl)%1});}   /* 四つ足：進んだ距離で足を運ぶ */
   const WPn=weaponPlan(sp,M,a.role||"",mode,st),kind=WPn.kind,hideW=WPn.hide;q.sp=sp;q.shield=WPn.shield;
-  q.alpha=GHOST30.test(sp)?0.62:0;drawSkin(q,M,q.X,q.Y,q.Z,a.r||0,S,R,R0S[sp],slime,hideW,RT);if(bip&&kind)monTool(q,R,q.X,q.Y,q.Z,a.r||0,S,mode,kind,RT,st);return true;};
+  q.alpha=GHOST30.test(sp)?0.82:0;drawSkin(q,M,q.X,q.Y,q.Z,a.r||0,S,R,R0S[sp],slime,hideW,RT);if(bip&&kind)monTool(q,R,q.X,q.Y,q.Z,a.r||0,S,mode,kind,RT,st);return true;};
  /* ===== 図鑑（?gallery）：全部の魔物と勇者の3Dを、ポーズを切りかえて見る。?gallery&auto で自動でめぐる（撮影用） ===== */
  const GNOW=()=>window.__galT!=null?window.__galT:performance.now();
  function startGallery(){if(document.getElementById("gal3d"))return;const auto=/auto/.test(location.search);
@@ -16487,7 +16488,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
     const P=window.__labPose(rigOf(sp),st,k,{side,t:T,unarmed:NOWPN30.test(sp)});if(window.__galNoRoot){P.root.dx=0;P.root.dz=0;}if(!R0S[sp])R0S[sp]=rigSp24(rigOf(sp),"idle",0);const kit=kitOf24(rigOf(sp)),slime=kit==="slime",bip=!M.pt&&!slime;
     if(st==="knock"||st==="dodge"){} 
     const WPn=weaponPlan(sp,M,pose==="bow"?"bow":"","idle",st),kind=WPn.kind;q.sp=sp;q.shield=WPn.shield;
-    q.alpha=GHOST30.test(sp)?0.62:0;drawSkin(q,M,0,0,0,0,S,P.R,R0S[sp],slime,WPn.hide,P.root);if(bip&&kind)monTool(q,P.R,0,0,0,0,S,"idle",kind,P.root,st);toolDraw(q,new Float32Array(floorV),new Float32Array(floorN),new Float32Array(floorN),new Float32Array(floorC),floorV.length/3);}
+    q.alpha=GHOST30.test(sp)?0.82:0;drawSkin(q,M,0,0,0,0,S,P.R,R0S[sp],slime,WPn.hide,P.root);if(bip&&kind)monTool(q,P.R,0,0,0,0,S,"idle",kind,P.root,st);toolDraw(q,new Float32Array(floorV),new Float32Array(floorN),new Float32Array(floorN),new Float32Array(floorC),floorV.length/3);}
    else{loadMon(sp);}
    window.__galF=(window.__galF||0)+1;requestAnimationFrame(frame);};requestAnimationFrame(frame);
   addEventListener("keydown",e=>{if(e.key==="ArrowRight")go(1);if(e.key==="ArrowLeft")go(-1);});window.__galGo=go;window.__galPose=p=>{pose=p;t0=GNOW();mark();};}
