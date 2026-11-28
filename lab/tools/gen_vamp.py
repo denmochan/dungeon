@@ -3,12 +3,12 @@
 BODY='''const float XK=0.02;
 vec2 U(vec2 a,vec2 b){return b.x<a.x?b:a;}
 vec2 vamp(vec3 p){vec3 H=J[2];vec3 h=p-H;vec3 e=vec3(abs(h.x),h.y,h.z);
- float hd=sEll(h-vec3(0.0,0.01,0.01),vec3(0.165,0.212,0.19));hd=smin(hd,sTap(h,vec3(0.0,-0.06,0.05),vec3(0.0,-0.2,0.095),0.11,0.05),0.05);hd=smin(hd,sEll(e-vec3(0.11,-0.02,0.12),vec3(0.05,0.035,0.05)),0.04);   // 小さな頭と細いあご
+ float hd=sEll(h-vec3(0.0,0.01,0.01),vec3(0.165,0.212,0.19));hd=smin(hd,sTap(h,vec3(0.0,-0.06,0.05),vec3(0.0,-0.195,0.09),0.12,0.06),0.06);hd=smin(hd,sEll(e-vec3(0.095,-0.1,0.07),vec3(0.06,0.06,0.07)),0.05);   // 小さな頭と細いあご
  hd=smin(hd,sTap(e,vec3(0.17,0.02,-0.02),vec3(0.31,0.1,-0.08),0.05,0.006),0.02);   // とがった耳
  hd=smin(hd,sTap(h,vec3(0.0,0.03,0.175),vec3(0.0,-0.045,0.215),0.022,0.016),0.02);   // 細い鼻
  float nk=sTap(p,J[1]+vec3(0.0,0.05,0.0),H+vec3(0.0,-0.18,0.0),0.065,0.06);hd=smin(hd,nk,0.04);
  vec2 r=vec2(hd,1.0);
- float hr=sEll(h-vec3(0.0,0.03,-0.03),vec3(0.2,0.235,0.232));hr=smin(hr,sEll(h-vec3(0.0,0.1,-0.13),vec3(0.18,0.16,0.22)),0.06);float hl=0.05-0.9*max(0.0,0.06-abs(h.x))-0.5*max(0.0,abs(h.x)-0.11);hr=max(hr,-max(h.y-hl,-0.04-h.z));hr=max(hr,-max(h.y+0.06,-h.z));hr=max(hr,-(h.y+0.2));hr+=0.006*sin(h.x*62.0+2.0*h.z);   // なでつけた髪（額のとがり・顔と耳は出す）
+ float hr=sEll(h-vec3(0.0,0.03,-0.03),vec3(0.2,0.235,0.232));hr=smin(hr,sEll(h-vec3(0.0,0.1,-0.13),vec3(0.18,0.16,0.22)),0.06);float hl=0.115-0.6*max(0.0,0.06-abs(h.x))-0.3*max(0.0,abs(h.x)-0.11);hr=max(hr,-max(h.y-hl,-0.04-h.z));hr=max(hr,-max(h.y+0.06,-h.z));hr=max(hr,-(h.y+0.2));hr+=0.0035*sin(h.x*62.0+2.0*h.z);hr=smin(hr,sTap(h,vec3(0.02,0.18,0.15),vec3(0.06,0.06,0.2),0.026,0.007),0.02);hr=smin(hr,sTap(h,vec3(0.0,0.17,0.16),vec3(0.03,0.08,0.195),0.018,0.006),0.015);   // なでつけた髪（額のとがり・顔と耳は出す）
  r=U(r,vec2(hr,24.0));   // 後ろへなでつけた銀髪
  float fg=sTap(e,vec3(0.035,-0.13,0.18),vec3(0.035,-0.18,0.18),0.012,0.002);r=U(r,vec2(fg,2.0));   // 牙
  // 体
@@ -41,7 +41,7 @@ END=''' return r;}
 vec2 xmod(vec2 b,vec3 p){return vamp(p);}
 vec2 xbody(vec3 p){return vec2(1e3,1.0);}
 vec4 xcol(vec3 p,vec3 n,float m){
- if(m>23.5){vec3 hh=p-J[2];float st=0.5+0.5*sin(hh.x*70.0+hh.y*10.0);vec3 c=mix(vec3(0.4,0.43,0.5),vec3(0.8,0.83,0.9),smoothstep(-0.3,0.9,n.y))*(0.72+0.34*st);return vec4(pow(c,vec3(2.2)),0.5);}   // 銀髪（なでつけた筋）
+ if(m>23.5){vec3 hh=p-J[2];float st=0.5+0.5*sin(hh.x*70.0+hh.y*10.0);vec3 c=mix(vec3(0.3,0.33,0.42),vec3(0.86,0.9,0.98),smoothstep(-0.2,0.95,n.y))*(0.7+0.36*st);return vec4(pow(c,vec3(2.2)),0.2);}   // 銀髪（なでつけた筋）
  if(m>22.5){vec3 c=vec3(0.28,0.27,0.3)*(0.8+0.3*fbm(p*vec3(30.0,30.0,30.0)));return vec4(pow(c,vec3(2.2)),0.2);}   // 灰色のベスト
  if(m>21.5)return vec4(pow(vec3(0.85,0.08,0.12),vec3(2.2))*1.3,0.8);   // 赤い留め具・ボタン
  if(m>20.5)return vec4(pow(vec3(0.62,0.05,0.09)*(0.85+0.2*fbm(p*8.0)),vec3(2.2)),0.3);   // 赤い裏地
