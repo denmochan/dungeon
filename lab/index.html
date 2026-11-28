@@ -16295,6 +16295,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
    g.strokeStyle="#120c0a";g.lineCap="round";g.lineWidth=1.15*K;g.beginPath();g.moveTo(x-fl*3.4*K,y-4.4*K);g.lineTo(x+fl*2.6*K,y-1.9*K);g.stroke();}   // 怒った眉
   /* かばってできた傷（本人の指示）：右下に爪あと3本（ふさがった明るい筋）。ばんそうこうは本人NG */
   for(let k=0;k<3;k++){const[x0,y0]=P(20.8+k*1.7,26.0-k*0.7),[x1,y1]=P(26.2+k*1.7,18.4-k*0.7);g.lineCap="round";g.strokeStyle="rgba(15,30,60,0.8)";g.lineWidth=1.25*K;g.beginPath();g.moveTo(x0,y0);g.lineTo(x1,y1);g.stroke();g.strokeStyle="#bfe6ff";g.lineWidth=0.45*K;g.beginPath();g.moveTo(x0,y0);g.lineTo(x1,y1);g.stroke();}
+  {const[x0,y0]=P(3.8,11.2),[xm,ym]=P(6.6,7.8),[x1,y1]=P(10.4,4.6);g.lineCap="round";g.strokeStyle="rgba(15,30,60,0.8)";g.lineWidth=1.3*K;g.beginPath();g.moveTo(x0,y0);g.quadraticCurveTo(xm,ym,x1,y1);g.stroke();g.strokeStyle="#c6e8ff";g.lineWidth=0.5*K;g.beginPath();g.moveTo(x0,y0);g.quadraticCurveTo(xm,ym,x1,y1);g.stroke();}   /* 左上のふさがった古い切り傷 */
   const[mx,my]=P(16,21.0);g.strokeStyle="#120c0a";g.lineWidth=0.85*K;g.lineCap="round";g.beginPath();g.moveTo(mx-2.2*K,my+0.9*K);g.quadraticCurveTo(mx,my-1.4*K,mx+2.2*K,my+0.9*K);g.stroke();}   // への字の口
  function faceAtlasSmooth(gl){const K=8,W=512*K,H=32*K,out=new ImageData(W,H),up=(m)=>{const a=document.createElement("canvas");a.width=32;a.height=32;const g0=a.getContext("2d"),im=g0.createImageData(32,32);for(let q=0;q<1024;q++){im.data[q*4]=im.data[q*4+1]=im.data[q*4+2]=255;im.data[q*4+3]=m[q];}g0.putImageData(im,0,0);
    const b=document.createElement("canvas");b.width=32*K;b.height=32*K;const g=b.getContext("2d");g.imageSmoothingEnabled=true;g.imageSmoothingQuality="high";g.filter="blur("+(K*0.35)+"px)";g.drawImage(a,0,0,32*K,32*K);return g.getImageData(0,0,32*K,32*K).data;};
@@ -16429,13 +16430,15 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
   else if(kind==="pick"&&R.tool===2){const a=R.J[33],b=R.J[34],hd=nrm(R.J[36]),ax=nrm(sub(b,a));const wood=[0.5,0.33,0.18],iron=[0.5,0.52,0.58],ext=[b[0]+ax[0]*0.08,b[1]+ax[1]*0.08,b[2]+ax[2]*0.08];tube([a[0]-ax[0]*0.12,a[1]-ax[1]*0.12,a[2]-ax[2]*0.12],ext,0.032,0.036,wood);
    const P=(s,bend)=>[b[0]+hd[0]*s-ax[0]*bend,b[1]+hd[1]*s-ax[1]*bend,b[2]+hd[2]*s-ax[2]*bend];tube(P(0,0),P(0.18,0.03),0.055,0.04,iron);tube(P(0.18,0.03),P(0.34,0.1),0.04,0.012,iron);tube(P(0,0),P(-0.16,0.03),0.05,0.035,iron);tube(P(-0.16,0.03),P(-0.27,0.08),0.035,0.01,iron);}
   if(q.shield&&R.J[5]&&R.J[5][1]>-5){   /* 盾：木の板に鉄のふち・まんなかの鉄の玉。騎士は青地に白い十字 */
-   const c0=[R.J[5][0]-0.1,R.J[5][1]+0.02,R.J[5][2]+0.08],nx=[-1,0,0.15],ax=nrm(nx),u1=nrm(crs(ax,[0,1,0])),u2=crs(u1,ax),knight=/knight/.test(q.sp||""),face=knight?[0.22,0.4,0.82]:[0.55,0.36,0.2],rim=[0.62,0.64,0.7],rr=0.27,seg=20;
+   const c0=[R.J[5][0]-0.1,R.J[5][1]+0.02,R.J[5][2]+0.08],nx=[-1,0,0.15],ax=nrm(nx),u1=nrm(crs(ax,[0,1,0])),u2=crs(u1,ax),knight=/knight/.test(q.sp||"")&&q.sp!=="slimeknight",worn=q.sp==="slimeknight",face=knight?[0.22,0.4,0.82]:[0.55,0.36,0.2],rim=[0.62,0.64,0.7],rr=0.27,seg=20;
    const P=(r,a,h)=>[c0[0]+u1[0]*Math.cos(a)*r+u2[0]*Math.sin(a)*r+ax[0]*h,c0[1]+u1[1]*Math.cos(a)*r+u2[1]*Math.sin(a)*r+ax[1]*h,c0[2]+u1[2]*Math.cos(a)*r+u2[2]*Math.sin(a)*r+ax[2]*h];
    for(let k=0;k<seg;k++){const a0=k/seg*6.2832,a1=(k+1)/seg*6.2832;const ring=[[0,0.05],[0.5,0.04],[0.85,0.025],[1,0.0]];
-    for(let j=0;j<ring.length-1;j++){const [ra,ha]=ring[j],[rb,hb]=ring[j+1];const col=knight&&(Math.abs(Math.sin(a0))*ra<0.13||Math.abs(Math.cos(a0))*ra<0.13)?[0.92,0.92,0.9]:face;const nA=nrm([ax[0]+u1[0]*0.4*ra,ax[1],ax[2]+u1[2]*0.4*ra]);
+    for(let j=0;j<ring.length-1;j++){const [ra,ha]=ring[j],[rb,hb]=ring[j+1];let col=knight&&(Math.abs(Math.sin(a0))*ra<0.13||Math.abs(Math.cos(a0))*ra<0.13)?[0.92,0.92,0.9]:face;if(worn){const h=Math.abs(Math.sin(k*12.9898+j*78.233)*43758.5)%1;col=col.map(v=>v*(0.78+0.3*h));}const nA=nrm([ax[0]+u1[0]*0.4*ra,ax[1],ax[2]+u1[2]*0.4*ra]);
      [[P(ra*rr,a0,ha),P(rb*rr,a0,hb),P(ra*rr,a1,ha)],[P(ra*rr,a1,ha),P(rb*rr,a0,hb),P(rb*rr,a1,hb)]].forEach(T=>T.forEach(p=>push(p,ax,ax,col)));}
-    tube(P(rr,a0,0),P(rr,a1,0),0.022,0.022,rim,6,false);[[P(rr*0.9,a0,-0.02),P(rr*0.9,a1,-0.02),P(0,0,-0.02)]].forEach(T=>T.forEach(p=>push(p,[-ax[0],-ax[1],-ax[2]],[-ax[0],-ax[1],-ax[2]],[0.35,0.24,0.14])));}
-   ball(P(0,0,0.06),0.055,rim,8);}
+    if(!(worn&&(k===3||k===4)))tube(P(rr,a0,0),P(rr,a1,0),0.022,0.022,rim,6,false);   /* ボロボロの盾：ふちが欠けている */[[P(rr*0.9,a0,-0.02),P(rr*0.9,a1,-0.02),P(0,0,-0.02)]].forEach(T=>T.forEach(p=>push(p,[-ax[0],-ax[1],-ax[2]],[-ax[0],-ax[1],-ax[2]],[0.35,0.24,0.14])));}
+   ball(P(0,0,0.06),0.055,rim,8);
+   if(worn){const dk=[0.16,0.1,0.06];[[0.75,2.3,0.35,3.3],[0.8,2.15,0.4,3.05],[0.7,5.1,0.55,0.4],[0.45,4.2,0.75,4.9]].forEach(([r0,a0,r1,a1])=>tube(P(r0*rr,a0,0.04),P(r1*rr,a1,0.042),0.011,0.007,dk,5,false));   /* かばってついた切り傷 */
+    [[0.6,1.0],[0.55,3.9]].forEach(([r,a])=>ball(P(r*rr,a,0.035),0.035,[0.3,0.2,0.12],6));}}   /* へこみ */
   const n=V.length/3;if(n)toolDraw(q,new Float32Array(V),new Float32Array(N),new Float32Array(O),new Float32Array(C),n);}
  /* ===== 戦闘のポーズ（実装チャットの頼み 11/28）。window.__labPose(種族, 状態, 進み0〜1, {side}) → {R:リグ, root:{dx,dy,dz,pitch,roll}} =====
    状態：idle 待つ / walk 歩く / run 走る / windup 振りかぶる / strike 当てる / recover 戻す / bowdraw 弓を引く / bowshoot 放つ / dodge 横へ跳ぶ / knock 吹っ飛ぶ / stagger よろける / tired 息が上がる / down 倒れる
