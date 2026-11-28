@@ -29,7 +29,7 @@ vec2 xbody(vec3 p){vec3 H=J[2];
 vec4 xcol(vec3 p,vec3 n,float m){
  if(m>29.5)return vec4(pow(vec3(0.42,0.55,0.3),vec3(2.2)),0.8);   // 泡
  if(m>28.5)return vec4(pow(vec3(0.05,0.04,0.04),vec3(2.2)),0.5);   // 狼の鼻と目
- if(m>27.5){vec3 c=mix(vec3(0.34,0.34,0.37),vec3(0.62,0.62,0.66),smoothstep(-0.3,0.8,n.y))*(0.8+0.35*fbm(p*vec3(9.0,22.0,9.0)));return vec4(pow(c,vec3(2.2)),0.04);}   // 狼の灰色の毛
+ if(m>27.5){vec3 c=mix(vec3(0.22,0.22,0.25),vec3(0.5,0.5,0.54),smoothstep(-0.3,0.8,n.y))*(0.75+0.45*fbm(p*vec3(9.0,26.0,9.0)));c=mix(c,vec3(0.12,0.12,0.14),smoothstep(0.55,0.7,fbm(p*vec3(3.0,12.0,3.0)+5.0))*0.7);return vec4(pow(c,vec3(2.2)),0.04);}   // 狼の灰色の毛
  if(m>26.5){vec3 c=vec3(0.36,0.16,0.5)*(0.85+0.25*fbm(p*vec3(8.0,20.0,8.0)));return vec4(pow(c,vec3(2.2)),0.05);}   // 紫の布
  if(m>25.5){float w=fbm(p*6.0);vec3 c=mix(vec3(0.24,0.36,0.14),vec3(0.42,0.58,0.24),w);c=mix(c,vec3(0.62,0.78,0.4),smoothstep(0.62,0.72,fbm(p*11.0+3.0))*0.6);c=mix(c,vec3(0.16,0.2,0.08),smoothstep(0.6,0.75,fbm(p*3.0+7.0))*0.6);return vec4(pow(c,vec3(2.2)),0.75);}   // ぬるぬるの肌
  if(m>24.5)return vec4(pow(vec3(0.3,0.18,0.09)*(0.85+0.3*fbm(p*20.0)),vec3(2.2)),0.2);   // 革
