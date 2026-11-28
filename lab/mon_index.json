@@ -410,15 +410,15 @@
  "hunter": {
   "file": "lite/mon_hunter.bin.gz",
   "fmt": "GB03",
-  "kind": "biped+weapon",
+  "kind": "biped",
   "scale": 1.0,
-  "bytes": 127031,
-  "verts": 8000,
-  "tris": 15976,
+  "bytes": 140681,
+  "verts": 9000,
+  "tris": 18020,
   "full": {
    "file": "mon_hunter.bin.gz",
-   "fmt": "GB1W",
-   "bytes": 872540
+   "fmt": "GB01",
+   "bytes": 654347
   }
  },
  "ifrit": {
@@ -466,15 +466,15 @@
  "knight": {
   "file": "lite/mon_knight.bin.gz",
   "fmt": "GB03",
-  "kind": "biped+weapon",
+  "kind": "biped",
   "scale": 1.05,
-  "bytes": 127160,
-  "verts": 8000,
-  "tris": 15892,
+  "bytes": 136383,
+  "verts": 9000,
+  "tris": 17996,
   "full": {
    "file": "mon_knight.bin.gz",
-   "fmt": "GB1W",
-   "bytes": 628437
+   "fmt": "GB01",
+   "bytes": 481927
   }
  },
  "kobold": {
@@ -536,15 +536,15 @@
  "mage": {
   "file": "lite/mon_mage.bin.gz",
   "fmt": "GB03",
-  "kind": "biped+weapon",
+  "kind": "biped",
   "scale": 0.95,
-  "bytes": 122431,
-  "verts": 8000,
-  "tris": 15988,
+  "bytes": 134410,
+  "verts": 9000,
+  "tris": 17988,
   "full": {
    "file": "mon_mage.bin.gz",
-   "fmt": "GB1W",
-   "bytes": 698608
+   "fmt": "GB01",
+   "bytes": 634295
   }
  },
  "maou": {
@@ -690,15 +690,15 @@
  "priest": {
   "file": "lite/mon_priest.bin.gz",
   "fmt": "GB03",
-  "kind": "biped+weapon",
+  "kind": "biped",
   "scale": 0.95,
-  "bytes": 122216,
-  "verts": 8000,
-  "tris": 15988,
+  "bytes": 130267,
+  "verts": 9000,
+  "tris": 17996,
   "full": {
    "file": "mon_priest.bin.gz",
-   "fmt": "GB1W",
-   "bytes": 592864
+   "fmt": "GB01",
+   "bytes": 487616
   }
  },
  "rat": {
@@ -928,15 +928,15 @@
  "thief": {
   "file": "lite/mon_thief.bin.gz",
   "fmt": "GB03",
-  "kind": "biped+weapon",
+  "kind": "biped",
   "scale": 0.9,
-  "bytes": 127256,
-  "verts": 8000,
-  "tris": 15980,
+  "bytes": 135934,
+  "verts": 9000,
+  "tris": 17992,
   "full": {
    "file": "mon_thief.bin.gz",
-   "fmt": "GB1W",
-   "bytes": 864808
+   "fmt": "GB01",
+   "bytes": 484024
   }
  },
  "underlord": {
@@ -984,15 +984,15 @@
  "warrior": {
   "file": "lite/mon_warrior.bin.gz",
   "fmt": "GB03",
-  "kind": "biped+weapon",
+  "kind": "biped",
   "scale": 1.0,
-  "bytes": 124969,
-  "verts": 8000,
-  "tris": 15892,
+  "bytes": 138149,
+  "verts": 9000,
+  "tris": 18020,
   "full": {
    "file": "mon_warrior.bin.gz",
-   "fmt": "GB1W",
-   "bytes": 622071
+   "fmt": "GB01",
+   "bytes": 451825
   }
  },
  "webgoblin": {
