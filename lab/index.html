@@ -16326,16 +16326,24 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
    g.strokeStyle="rgba(30,18,10,0.75)";g.lineWidth=0.7*K;g.lineCap="round";g.beginPath();g.moveTo(x+fl*2.2*K,y+1.3*K);g.quadraticCurveTo(x+fl*0.6*K,y+3.0*K,x-fl*1.6*K,y+3.8*K);g.stroke();}}   // 目の下のすじ
  /* 吸血鬼の顔（11/28 燕尾服の紳士）：切れ長のつり目（赤い瞳・黒いふち・目の上の影）、細くつり上がった眉、口の片はしを上げた薄い笑い。顔の表の13番目のマス */
  /* 吸血鬼の顔（11/28 本人が見せた絵のイメージ：けわしく寄せた眉・深い目に赤い瞳・長い牙をのぞかせた口）。顔の表の13番目のマス */
- function vampFace(g,ox,K){g.clearRect(ox,0,32*K,32*K);const P=(c,r)=>[ox+c*K,r*K];
-  for(const[c,fl]of[[10.6,-1],[21.4,1]]){const[x,y]=P(c,15.2);
-   g.fillStyle="rgba(70,40,60,0.38)";g.beginPath();g.ellipse(x,y-0.8*K,3.6*K,2.2*K,0,0,6.283);g.fill();   // 目のくぼみの影
-   g.save();g.beginPath();g.moveTo(x-fl*2.8*K,y-0.7*K);g.lineTo(x+fl*2.4*K,y-1.4*K);g.quadraticCurveTo(x+fl*1.2*K,y+1.5*K,x-fl*1.6*K,y+1.1*K);g.closePath();g.clip();
-    g.fillStyle="#f6eeee";g.fillRect(x-4*K,y-3*K,8*K,6*K);g.fillStyle="#c8101c";g.beginPath();g.ellipse(x,y,1.3*K,1.3*K,0,0,6.283);g.fill();g.fillStyle="#2a0006";g.beginPath();g.ellipse(x,y,0.55*K,0.75*K,0,0,6.283);g.fill();g.fillStyle="#fff";g.beginPath();g.ellipse(x-0.45*K,y-0.5*K,0.35*K,0.35*K,0,0,6.283);g.fill();g.restore();
-   g.strokeStyle="#16101a";g.lineWidth=0.75*K;g.lineCap="round";g.lineJoin="round";g.beginPath();g.moveTo(x-fl*2.8*K,y-0.7*K);g.lineTo(x+fl*2.4*K,y-1.4*K);g.stroke();   // 上まぶた（目頭が下）
-   g.lineWidth=1.05*K;g.beginPath();g.moveTo(x+fl*3.4*K,y-4.4*K);g.lineTo(x-fl*0.3*K,y-3.0*K);g.lineTo(x-fl*3.0*K,y-2.0*K);g.stroke();}   // 寄せた眉（内が下）
-  {const[x,y]=P(16,13.3);g.strokeStyle="rgba(90,50,70,0.55)";g.lineWidth=0.4*K;g.beginPath();g.moveTo(x-0.6*K,y);g.lineTo(x-0.3*K,y+1.6*K);g.moveTo(x+0.6*K,y);g.lineTo(x+0.3*K,y+1.6*K);g.stroke();}   // 眉間のしわ
-  const[mx,my]=P(16,22.6);g.fillStyle="#3a0a14";g.beginPath();g.moveTo(mx-2.8*K,my);g.quadraticCurveTo(mx,my+0.7*K,mx+2.8*K,my);g.quadraticCurveTo(mx,my+0.25*K,mx-2.8*K,my);g.fill();   // 口
-  g.fillStyle="#fffaf2";g.strokeStyle="#3a0a14";g.lineWidth=0.25*K;for(const d of[-1.5,1.5]){g.beginPath();g.moveTo(mx+d*K-0.55*K,my+0.3*K);g.lineTo(mx+d*K+0.55*K,my+0.3*K);g.lineTo(mx+d*K,my+2.6*K);g.closePath();g.fill();g.stroke();}}   // 長い牙
+ /* 吸血鬼の顔（11/28 本人「かっこよくないとダメ、主に顔」）：切れ長でつり上がった目・赤い瞳に縦長の瞳孔・細く鋭い眉・ほお骨の影・薄い唇と小さな牙。顔の表の13番目のマス */
+ function vampFace(g,ox,K){g.clearRect(ox,0,32*K,32*K);const P=(c,r)=>[ox+c*K,r*K];g.lineCap="round";g.lineJoin="round";
+  for(const o of[-1,1]){const[x,y]=P(o<0?10.2:21.8,14.4),E=1.5*K;
+   g.strokeStyle="rgba(90,60,90,0.28)";g.lineWidth=0.7*E;g.beginPath();g.moveTo(x+o*1.6*E,y+3.6*E);g.quadraticCurveTo(x+o*0.6*E,y+5.6*E,x-o*0.6*E,y+7.0*E);g.stroke();   // ほお骨の下の影
+   g.fillStyle="rgba(80,45,70,0.22)";g.beginPath();g.ellipse(x+o*0.4*E,y-1.2*E,3.4*E,1.6*E,o*-0.25,0,6.283);g.fill();   // 目の上のくぼみ
+   const ix=x-o*2.7*E,iy=y+0.4*E,qx=x+o*3.0*E,qy=y-1.1*E;
+   g.save();g.beginPath();g.moveTo(ix,iy);g.quadraticCurveTo(x,y-1.9*E,qx,qy);g.quadraticCurveTo(x+o*0.4*E,y+1.1*E,ix,iy);g.closePath();g.clip();
+    g.fillStyle="#f3e6e6";g.fillRect(x-4*E,y-3*E,8*E,6*E);
+    const gx=x+o*0.15*E,gy=y-0.3*E,gr=g.createRadialGradient(gx,gy,0.1*E,gx,gy,1.25*E);gr.addColorStop(0,"#ff4a3a");gr.addColorStop(0.6,"#c0101c");gr.addColorStop(1,"#5a0008");g.fillStyle=gr;g.beginPath();g.arc(gx,gy,1.25*E,0,6.283);g.fill();
+    g.fillStyle="#1a0004";g.beginPath();g.ellipse(gx,gy,0.28*E,0.95*E,0,0,6.283);g.fill();g.fillStyle="#fff";g.beginPath();g.arc(gx-0.45*E,gy-0.5*E,0.28*E,0,6.283);g.fill();
+    g.fillStyle="rgba(30,10,20,0.35)";g.fillRect(x-4*E,y-3*E,8*E,1.75*E);g.restore();   // 上まぶたの影
+   g.strokeStyle="#140c14";g.lineWidth=0.85*E;g.beginPath();g.moveTo(ix,iy);g.quadraticCurveTo(x,y-1.9*E,qx,qy);g.lineTo(x+o*3.7*E,y-1.7*E);g.stroke();   // 上まぶた（目じりへはね上げる）
+   g.lineWidth=0.3*E;g.strokeStyle="rgba(40,20,30,0.6)";g.beginPath();g.moveTo(ix+o*0.8*E,iy+0.3*E);g.quadraticCurveTo(x+o*0.4*E,y+1.1*E,qx-o*0.6*E,qy+0.5*E);g.stroke();
+   g.fillStyle="#18101a";g.beginPath();g.moveTo(x-o*2.5*E,y-2.5*E);g.lineTo(x+o*3.6*E,y-4.6*E);g.lineTo(x+o*3.4*E,y-4.1*E);g.lineTo(x-o*2.4*E,y-1.9*E);g.closePath();g.fill();}   // 細く鋭い眉（内が下）
+  {const[x,y]=P(16,13.6);g.strokeStyle="rgba(90,50,70,0.5)";g.lineWidth=0.35*K;g.beginPath();g.moveTo(x-0.5*K,y);g.lineTo(x-0.25*K,y+1.3*K);g.moveTo(x+0.5*K,y);g.lineTo(x+0.25*K,y+1.3*K);g.stroke();}   // 眉間のしわ
+  const[mx,my]=P(16,22.2);g.strokeStyle="#3a0a14";g.lineWidth=0.5*K;g.beginPath();g.moveTo(mx-2.4*K,my+0.1*K);g.quadraticCurveTo(mx,my+0.6*K,mx+2.6*K,my-0.4*K);g.stroke();   // 薄い唇（片方だけ上がる）
+  g.strokeStyle="rgba(120,60,80,0.4)";g.lineWidth=0.3*K;g.beginPath();g.moveTo(mx-1.2*K,my+1.5*K);g.quadraticCurveTo(mx,my+1.9*K,mx+1.2*K,my+1.5*K);g.stroke();   // 下唇の影
+  g.fillStyle="#fffaf2";for(const d of[-1.3,1.4]){g.beginPath();g.moveTo(mx+d*K-0.4*K,my+0.3*K);g.lineTo(mx+d*K+0.4*K,my+0.25*K);g.lineTo(mx+d*K,my+1.5*K);g.closePath();g.fill();}}   // 小さな牙
  function faceAtlasSmooth(gl){const K=8,W=512*K,H=32*K,out=new ImageData(W,H),up=(m)=>{const a=document.createElement("canvas");a.width=32;a.height=32;const g0=a.getContext("2d"),im=g0.createImageData(32,32);for(let q=0;q<1024;q++){im.data[q*4]=im.data[q*4+1]=im.data[q*4+2]=255;im.data[q*4+3]=m[q];}g0.putImageData(im,0,0);
    const b=document.createElement("canvas");b.width=32*K;b.height=32*K;const g=b.getContext("2d");g.imageSmoothingEnabled=true;g.imageSmoothingQuality="high";g.filter="blur("+(K*0.35)+"px)";g.drawImage(a,0,0,32*K,32*K);return g.getImageData(0,0,32*K,32*K).data;};
   ["goblin","slime","bat","ghost","imp","myconid","orc","human"].forEach((sp,fi)=>{const F=FACE24[sp],cols={};F.rows.forEach((r,y)=>[...r].forEach((ch,k)=>{if(!F.pal[ch])return;(cols[ch]=cols[ch]||new Uint8Array(1024))[y*32+k]=255;}));
