@@ -44,15 +44,15 @@
  "bogtroll": {
   "file": "lite/mon_bogtroll.bin.gz",
   "fmt": "GB03",
-  "kind": "biped",
+  "kind": "biped+weapon",
   "scale": 1.7,
-  "bytes": 111268,
-  "verts": 7000,
-  "tris": 13996,
+  "bytes": 124048,
+  "verts": 8000,
+  "tris": 15907,
   "full": {
    "file": "mon_bogtroll.bin.gz",
-   "fmt": "GB01",
-   "bytes": 666617
+   "fmt": "GB1W",
+   "bytes": 612884
   }
  },
  "bonedragon": {
@@ -661,15 +661,15 @@
  "ogremage": {
   "file": "lite/mon_ogremage.bin.gz",
   "fmt": "GB03",
-  "kind": "biped",
+  "kind": "biped+weapon",
   "scale": 1.7,
-  "bytes": 107204,
-  "verts": 7000,
-  "tris": 13918,
+  "bytes": 122579,
+  "verts": 8000,
+  "tris": 15984,
   "full": {
    "file": "mon_ogremage.bin.gz",
-   "fmt": "GB01",
-   "bytes": 652909
+   "fmt": "GB1W",
+   "bytes": 469544
   }
  },
  "orc": {

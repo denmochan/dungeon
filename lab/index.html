@@ -10714,6 +10714,8 @@ Object.assign(SPVAR24, { lich: [[0, 0, 0, 0], [0.4, 1.0, 0.5]] }); SPCOLX24.lich
     return R; }
   const k = kitOf24(sp0); if (k === "gobx" || k === "lich") return rig24(mode, t); return R1(sp0, mode, t); }; }
 SP3D24.gobx = 1; SP3D24.lich = 1;
+// 11/28 沼トロル・鬼の術師を作り直し（本人の選択）：オークの式の飾り（ローブ・苔のかたまり）は使わず、lab/tools/xtra/bogtroll.glsl・ogremage.glsl で足す
+SPVAR24.ogremage = [[0, 0, 0, 0], [0.5, 0.25, 0.6]]; SPVAR24.bogtroll = [[0, 0, 0, 0], [0.5, 0.66, 0.3]];
 // 11/28 スライム騎兵（slimeknight）：ゴブリンがスライムに乗る（本人の選択。乗り物のスライムの形は lab/tools/xtra/slimeknight.glsl で足す）
 Object.assign(KITOF24, { slimeknight: "gobx" }); SPVAR24.slimeknight = [[4, 0, 0, 0], [0.3, 0.6, 0.35]]; SPCOL24.slimeknight = SPCOL24.goblin;
 { const R2 = rigSp24; rigSp24 = function (sp0, mode, t){ if (sp0 === "slimeknight") { const R = rig24(mode === "sleep" ? "idle" : mode, t); const LIFT = window.__skLift || 0.5; R.J = R.J.map(v => v[1] < -5 ? v : [v[0], v[1] + LIFT, v[2] - 0.05]);
@@ -16425,7 +16427,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
    if(st==="bowdraw"){const tip=[g[0]+0.0,g[1]+0.02,g[2]+0.32],dv=nrm(sub(tip,mid));tube(mid,tip,0.009,0.009,[0.62,0.46,0.28],5,false);   /* 矢 */
     const hd=[tip[0]+dv[0]*0.09,tip[1]+dv[1]*0.09,tip[2]+dv[2]*0.09];tube(tip,hd,0.03,0.002,[0.62,0.64,0.7],6,true);
     for(let f=0;f<3;f++){const a=f/3*6.2832,o2=[Math.cos(a)*0.025,Math.sin(a)*0.025,0];tube([mid[0]+dv[0]*0.03+o2[0],mid[1]+dv[1]*0.03+o2[1],mid[2]+dv[2]*0.03],[mid[0]+dv[0]*0.13,mid[1]+dv[1]*0.13,mid[2]+dv[2]*0.13],0.012,0.004,[0.85,0.2,0.18],4,false);}}}
-  else if(kind==="staff"&&R.J[8]&&R.J[8][1]>-5){const o2c=/priest/.test(q.sp||"")?[1.0,0.86,0.45]:/lich|shaman|ogremage/.test(q.sp||"")?[0.55,1.0,0.6]:[0.55,0.85,1.0];const w=R.J[8],up=nrm([0.05,1,0.18]),a=[w[0]-up[0]*0.6,w[1]-up[1]*0.6,w[2]-up[2]*0.6],b=[w[0]+up[0]*0.78,w[1]+up[1]*0.78,w[2]+up[2]*0.78];   /* 杖：ねじれた木、上に光る玉を爪でつかむ */
+  else if(kind==="staff"&&R.J[8]&&R.J[8][1]>-5){const o2c=/priest/.test(q.sp||"")?[1.0,0.86,0.45]:/ogremage/.test(q.sp||"")?[0.85,0.5,1.0]:/lich|shaman/.test(q.sp||"")?[0.55,1.0,0.6]:[0.55,0.85,1.0];const w=R.J[8],up=nrm([0.05,1,0.18]),a=[w[0]-up[0]*0.6,w[1]-up[1]*0.6,w[2]-up[2]*0.6],b=[w[0]+up[0]*0.78,w[1]+up[1]*0.78,w[2]+up[2]*0.78];   /* 杖：ねじれた木、上に光る玉を爪でつかむ */
    tube(a,b,0.028,0.034,[0.42,0.27,0.15],8,true);for(let k=0;k<4;k++){const y=0.1+k*0.07;tube([w[0]-0.035,w[1]+y,w[2]],[w[0]+0.035,w[1]+y+0.03,w[2]],0.034,0.034,[0.3,0.18,0.1],8,false);}
    const top=[b[0]+up[0]*0.11,b[1]+up[1]*0.11,b[2]+up[2]*0.11];for(let k=0;k<3;k++){const an=k/3*6.2832;tube(b,[top[0]+Math.cos(an)*0.07,top[1]+0.02,top[2]+Math.sin(an)*0.07],0.018,0.008,[0.36,0.22,0.12],5,true);}ball(top,0.075,o2c,10);}
   else if(kind==="pick"&&R.tool===2){const a=R.J[33],b=R.J[34],hd=nrm(R.J[36]),ax=nrm(sub(b,a));const wood=[0.5,0.33,0.18],iron=[0.5,0.52,0.58],ext=[b[0]+ax[0]*0.08,b[1]+ax[1]*0.08,b[2]+ax[2]*0.08];tube([a[0]-ax[0]*0.12,a[1]-ax[1]*0.12,a[2]-ax[2]*0.12],ext,0.032,0.036,wood);
@@ -16510,7 +16512,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
  const MAGIC30=/lich|eye|shaman|ogremage|wraitheye|mindlord|ifrit|maou|imp|ghost/;
  /* 何を持たせるか：作りこんだ武器に持ちかえる（焼きこんだ武器はその手の分だけ隠す）。弓役は弓、魔法の子と魔法使い・僧侶は杖、盗賊は短剣、ほかは剣 */
  const NOWPN30=/golem|gargoyle|vaultkeeper|hauntchest|mimic|ghoul|^(vampire|count|noble|demon|gemeater|underlord|rotlord|slime|ghostslime|lavaslime|rotslime|elderdragon|serpent|lord)$/,CLUB30=/^(bogtroll|sapper)$/;   /* 素手で戦う子（爪・牙・こぶし。11/28 本人の指示）／こん棒の子 */   /* 素手で戦う子（石の体・爪） */
- const weaponPlan=(sp,M,role,mode,st)=>{if(st==="down")return{kind:null,hide:0};if(mode==="mine")return{kind:"pick",hide:1};if(NOWPN30.test(sp))return{kind:null,hide:M.hasW?1:0};if(CLUB30.test(sp))return{kind:"club",hide:M.hasW?6:0};if(sp==="minerorc")return{kind:"pickaxe",hide:M.hasW?6:0};if(sp==="ogremage")return{kind:null,hide:0};   /* 坑道オークはつるはし、鬼の術師は絵の槍だけ */
+ const weaponPlan=(sp,M,role,mode,st)=>{if(st==="down")return{kind:null,hide:0};if(mode==="mine")return{kind:"pick",hide:1};if(NOWPN30.test(sp))return{kind:null,hide:M.hasW?1:0};if(CLUB30.test(sp))return{kind:"club",hide:M.hasW?6:0};if(sp==="minerorc")return{kind:"pickaxe",hide:M.hasW?6:0};if(sp==="ogremage")return{kind:"staff",hide:M.hasW?1:0};   /* 坑道オークはつるはし、鬼の術師は杖（形に焼いた武器は隠す） */
   if(role==="bow"||role==="snipe"||sp==="hunter")return{kind:"bow",hide:M.hasW?1:0};if(MAGIC30.test(sp)||sp==="mage"||sp==="priest")return{kind:"staff",hide:M.hasW?6:0};
   if(sp==="thief")return{kind:"dagger",hide:M.hasW?6:0};if(/^(warrior|knight|slimeknight)$/.test(sp))return{kind:"sword",hide:1,shield:1};return{kind:"sword",hide:M.hasW?6:0};};
  window.__labMonDraw=q=>{if((window.__R2||0)<0.5||window.__labMonOff)return false;const a=q.a,sp=baseSp(a.sp),M=MS[sp]||loadMon(sp);if(!M||!M.ok||typeof rigSp24!=="function")return false;
