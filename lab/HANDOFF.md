@@ -9,6 +9,8 @@
 - 3D（試し場）：体はゴブリンの式（gobx）。乗り物の青いスライム（おまんじゅう型・にっこり顔は形の色に焼いた）、ゴブリンに羽つきの騎士かぶと（顔は出す）、剣と盾
   - `KITOF24.slimeknight="gobx"`、`SPVAR24.slimeknight` の VAR.x=4（蜘蛛は VAR.x=3 だけに直した）、`rigSp24` で乗り手を 0.5 持ち上げて足をまたがせる
   - 顔の絵は、かぶとの灰色の頂点には貼らない（`faceUV` の GRY）
+  - 10:30 本人の指示で、乗り手のゴブリンの顔を「騎士きどりの得意げな顔」に（半分閉じた目・片方上げた眉・にやりと笑う口。`smugGobFace`）
+    - 顔の表を16マスに広げた（試し場の drawSkin は `(vf.x+FI)/16.0`）。9番目のマスがこの顔で、slimeknight だけ `M.FI=8`
   - `lab/tools/xtra/slimeknight.glsl`。頂点が多いので `GS=0.019 ./rebuild.sh slimeknight slimeknight xtra/slimeknight.glsl 9000`
 
 ## 2026-11-28 10時半（企画チャットより）：オークを作り直し（本人が2D案A「肩の大きい重戦士」を選んだ）

@@ -16164,7 +16164,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
  const VS3=`attribute vec3 ap;attribute vec3 an;attribute vec3 ac;attribute vec3 af;varying vec3 vf;uniform mat4 VP;uniform float OW;varying vec3 vc;varying vec3 vn;varying vec3 vw;
    void main(){vec3 w=ap+an*OW;gl_Position=VP*vec4(w,1.0);if(OW>0.0)gl_Position.z+=0.0015*gl_Position.w;vc=ac;vn=an;vw=ap;vf=af;}`,FS3=`precision mediump float;varying vec3 vc;varying vec3 vn;varying vec3 vw;varying vec3 vf;uniform sampler2D FT;uniform float FI;uniform float AL;uniform highp vec3 EYE;uniform vec3 LT[6];uniform float LF[6];uniform vec3 LC;uniform float OUT;
    void main(){float vd=distance(vw,EYE);if(OUT>0.5){gl_FragColor=vec4(mix(vec3(0.09,0.06,0.04),vec3(0.03,0.04,0.07),smoothstep(18.0,52.0,vd)),1.0);return;}
-    vec3 n=normalize(vn);vec3 base=vc;if(vf.z>0.01&&FI>-0.5&&vf.x>0.0&&vf.x<1.0&&vf.y>0.0&&vf.y<1.0){vec4 tx=texture2D(FT,vec2((vf.x+FI)/8.0,vf.y));base=mix(base,tx.rgb,tx.a*vf.z);}   /* 顔：2Dの顔の絵をそのまま貼る（形の色だけだとぼやけた） */if(base.g>base.r*0.9&&base.b<base.g*0.6)base*=vec3(0.86,1.0,0.82);   /* 肌は少し緑に寄せる（黄色く見えた） */
+    vec3 n=normalize(vn);vec3 base=vc;if(vf.z>0.01&&FI>-0.5&&vf.x>0.0&&vf.x<1.0&&vf.y>0.0&&vf.y<1.0){vec4 tx=texture2D(FT,vec2((vf.x+FI)/16.0,vf.y));   /* 顔の表は16マス（9番目から先は試し場で足した顔） */base=mix(base,tx.rgb,tx.a*vf.z);}   /* 顔：2Dの顔の絵をそのまま貼る（形の色だけだとぼやけた） */if(base.g>base.r*0.9&&base.b<base.g*0.6)base*=vec3(0.86,1.0,0.82);   /* 肌は少し緑に寄せる（黄色く見えた） */
     float kd=dot(n,normalize(vec3(0.3,0.9,0.35)));float tb=kd>0.42?1.0:(kd>-0.05?0.74:0.52);
     vec3 hemi=mix(vec3(0.34,0.35,0.47),vec3(0.8,0.8,0.86),n.y*0.5+0.5);
     vec3 c=base*tb*hemi*(0.5+0.3*exp(-vd/11.0));
@@ -16273,13 +16273,26 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
   g.fillStyle="rgba(25,35,12,0.75)";for(const c of[14.5,17.5]){const[x,y]=P(c,17.4);g.beginPath();g.ellipse(x,y,0.8*K,0.6*K,0,0,6.283);g.fill();}   // 鼻の穴
   const[mx,my]=P(16,21.2);g.fillStyle="#1e0c06";g.beginPath();g.moveTo(mx-4.6*K,my-0.8*K);g.lineTo(mx+4.6*K,my-0.8*K);g.lineTo(mx+3.8*K,my+1.4*K);g.lineTo(mx-3.8*K,my+1.4*K);g.closePath();g.fill();   // 歯をむいた口
   g.fillStyle="#e8dcb8";for(let k=-3;k<=3;k++){if(k===0)continue;const x=mx+k*1.15*K;g.beginPath();g.moveTo(x-0.5*K,my+1.3*K);g.lineTo(x+0.5*K,my+1.3*K);g.lineTo(x+0.3*K,my+0.1*K);g.lineTo(x-0.3*K,my+0.1*K);g.closePath();g.fill();}}   // 下の歯
- function faceAtlasSmooth(gl){const K=8,W=256*K,H=32*K,out=new ImageData(W,H),up=(m)=>{const a=document.createElement("canvas");a.width=32;a.height=32;const g0=a.getContext("2d"),im=g0.createImageData(32,32);for(let q=0;q<1024;q++){im.data[q*4]=im.data[q*4+1]=im.data[q*4+2]=255;im.data[q*4+3]=m[q];}g0.putImageData(im,0,0);
+ /* スライム騎兵のゴブリン：騎士きどりの得意げな顔（11/28 本人の指示）。ゴブリンの顔と同じ位置で、半分閉じた目・片方上がった眉・にやりと笑う口。顔の表の9番目のマス */
+ function smugGobFace(g,ox,K){g.clearRect(ox,0,32*K,32*K);const P=(c,r)=>[ox+c*K,r*K];
+  g.fillStyle="#aa2e26";g.beginPath();const[sx,sy]=P(21.5,1.5);g.moveTo(sx,sy);g.lineTo(sx+1.6*K,sy);g.lineTo(sx+2.6*K,sy+7*K);g.lineTo(sx+1.2*K,sy+7*K);g.closePath();g.fill();   // ひたいの傷
+  for(const[c,fl]of[[9.6,1],[21.4,-1]]){const[x,y]=P(c,13.8);
+   g.fillStyle="#160e0c";g.beginPath();g.ellipse(x,y,3.6*K,2.5*K,0,0,6.283);g.fill();   // 目のふち
+   g.save();g.beginPath();g.ellipse(x,y,3.0*K,1.95*K,0,0,6.283);g.clip();
+   g.fillStyle="#c42218";g.fillRect(x-3*K,y-2*K,6*K,4*K);g.fillStyle="#ff7814";g.beginPath();g.ellipse(x-fl*0.6*K,y+0.4*K,1.7*K,1.5*K,0,0,6.283);g.fill();g.fillStyle="#ffe250";g.beginPath();g.ellipse(x-fl*0.6*K,y+0.5*K,0.8*K,0.8*K,0,0,6.283);g.fill();   // 赤い目・光る黒目（横目で得意げ）
+   g.fillStyle="#160e0c";g.fillRect(x-3.2*K,y-2.2*K,6.4*K,(fl>0?1.9:1.5)*K);g.restore();   // 下ろしたまぶた（半分閉じる）
+   g.strokeStyle="#160e0c";g.lineCap="round";g.lineWidth=1.1*K;g.beginPath();if(fl>0){g.moveTo(x-3.4*K,y-3.4*K);g.quadraticCurveTo(x,y-4.6*K,x+3.0*K,y-3.0*K);}else{g.moveTo(x-3.0*K,y-4.8*K);g.quadraticCurveTo(x,y-6.4*K,x+3.4*K,y-5.6*K);}g.stroke();}   // 眉（右の眉だけ上げる）
+  g.fillStyle="#be1c1a";for(const c of[8.2,22.6]){const[x,y]=P(c,17.2);g.beginPath();g.moveTo(x-1.4*K,y);g.lineTo(x+1.4*K,y);g.lineTo(x+0.3*K,y+3.2*K);g.lineTo(x-0.3*K,y+3.2*K);g.closePath();g.fill();}   // 戦の化粧
+  const[mx,my]=P(16,23.4);g.fillStyle="#160e0c";g.beginPath();g.moveTo(mx-7.6*K,my-0.6*K);g.quadraticCurveTo(mx-1*K,my+2.2*K,mx+8.2*K,my-3.0*K);g.quadraticCurveTo(mx+1*K,my+4.8*K,mx-7.6*K,my-0.6*K);g.fill();   // にやりと上がる口
+  g.save();g.beginPath();g.moveTo(mx-6.6*K,my-0.2*K);g.quadraticCurveTo(mx-1*K,my+2.0*K,mx+7.2*K,my-2.4*K);g.quadraticCurveTo(mx+1*K,my+3.6*K,mx-6.6*K,my-0.2*K);g.clip();
+   g.fillStyle="#f4ecd6";g.fillRect(mx-8*K,my-4*K,16*K,8*K);g.strokeStyle="#160e0c";g.lineWidth=0.45*K;for(let k=-5;k<=6;k+=1.8){g.beginPath();g.moveTo(mx+k*K,my-3*K);g.lineTo(mx+k*K,my+4*K);g.stroke();}g.restore();}   // 歯
+ function faceAtlasSmooth(gl){const K=8,W=512*K,H=32*K,out=new ImageData(W,H),up=(m)=>{const a=document.createElement("canvas");a.width=32;a.height=32;const g0=a.getContext("2d"),im=g0.createImageData(32,32);for(let q=0;q<1024;q++){im.data[q*4]=im.data[q*4+1]=im.data[q*4+2]=255;im.data[q*4+3]=m[q];}g0.putImageData(im,0,0);
    const b=document.createElement("canvas");b.width=32*K;b.height=32*K;const g=b.getContext("2d");g.imageSmoothingEnabled=true;g.imageSmoothingQuality="high";g.filter="blur("+(K*0.35)+"px)";g.drawImage(a,0,0,32*K,32*K);return g.getImageData(0,0,32*K,32*K).data;};
   ["goblin","slime","bat","ghost","imp","myconid","orc","human"].forEach((sp,fi)=>{const F=FACE24[sp],cols={};F.rows.forEach((r,y)=>[...r].forEach((ch,k)=>{if(!F.pal[ch])return;(cols[ch]=cols[ch]||new Uint8Array(1024))[y*32+k]=255;}));
    const all=new Uint8Array(1024);Object.values(cols).forEach(m=>m.forEach((v,q)=>{if(v)all[q]=255;}));const A=up(all),U=Object.keys(cols).map(ch=>[F.pal[ch],up(cols[ch])]);
    for(let y=0;y<32*K;y++)for(let x=0;x<32*K;x++){const q=(y*32*K+x)*4;let best=-1,bc=null;for(const[c,m]of U){if(m[q+3]>best){best=m[q+3];bc=c;}}const o=(y*W+fi*32*K+x)*4,a=A[q+3]/255,t=Math.max(0,Math.min(1,(a-0.4)/0.2));
     if(bc){out.data[o]=bc[0];out.data[o+1]=bc[1];out.data[o+2]=bc[2];}out.data[o+3]=t*t*(3-2*t)*255;}});
-  const cv=document.createElement("canvas");cv.width=W;cv.height=H;const g=cv.getContext("2d");g.putImageData(out,0,0);humanFace(g,7*32*K,K);slimeFace(g,1*32*K,K);orcFace(g,6*32*K,K);
+  const cv=document.createElement("canvas");cv.width=W;cv.height=H;const g=cv.getContext("2d");g.putImageData(out,0,0);humanFace(g,7*32*K,K);slimeFace(g,1*32*K,K);orcFace(g,6*32*K,K);smugGobFace(g,8*32*K,K);
   const t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,cv);[gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER].forEach(k=>gl.texParameteri(gl.TEXTURE_2D,k,gl.LINEAR));[gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T].forEach(k=>gl.texParameteri(gl.TEXTURE_2D,k,gl.CLAMP_TO_EDGE));return t;}
  /* ===== 四つ足の歩き（11/28）：ゲームのリグは足を動かさないので、脚ごとに「腰→ひざ→足」の2本の骨を入れて、足を床に止めて歩かせる ===== */
  const rotAB=(a,b)=>{a=nrm(a);b=nrm(b);const v=crs(a,b),c=dot(a,b),s=Math.hypot(v[0],v[1],v[2]);if(s<1e-6)return c>0?[1,0,0,0,1,0,0,0,1]:[-1,0,0,0,1,0,0,0,-1];const k=nrm(v),K=[0,-k[2],k[1],k[2],0,-k[0],-k[1],k[0],0],K2=[0,1,2].map(i=>[0,1,2].map(j=>K[i*3]*K[j]+K[i*3+1]*K[3+j]+K[i*3+2]*K[6+j]));
@@ -16302,7 +16315,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
    const F=new Float32Array(M.NV*3),hm=(v)=>[A[0]*v[0]+A[3]*v[1]+A[6]*v[2],A[1]*v[0]+A[4]*v[1]+A[7]*v[2],A[2]*v[0]+A[5]*v[1]+A[8]*v[2]];
    const GRY=/^(slimeknight)$/.test(sp);   /* かぶとをかぶる子：灰色の金属の頂点には顔を貼らない */
    for(let i=0;i<M.NV;i++){if(M.WP&&M.WP[i])continue;if(GRY){const r=M.C[i*3],g=M.C[i*3+1],b=M.C[i*3+2];if(Math.max(r,g,b)-Math.min(r,g,b)<28&&r>90)continue;}const hp=hm([M.P0[i*3]-J2[0],M.P0[i*3+1]-J2[1],M.P0[i*3+2]-J2[2]]);if(Math.hypot(hp[0],hp[1],hp[2])>=0.52)continue;const hn=hm([M.N0[i*3],M.N0[i*3+1],M.N0[i*3+2]]),t=Math.max(0,Math.min(1,(hn[2]-0.05)/0.25)),fz=t*t*(3-2*t);
-    F[i*3]=hp[0]/0.84+0.5;F[i*3+1]=0.5-hp[1]/0.86;F[i*3+2]=fz;}M.F=F;M.FI=fi;}catch(e){}};
+    F[i*3]=hp[0]/0.84+0.5;F[i*3+1]=0.5-hp[1]/0.86;F[i*3+2]=fz;}M.F=F;M.FI=sp==="slimeknight"?8:fi;}catch(e){}};
  const loadMon=sp=>{if(MS[sp])return MS[sp];const M=MS[sp]={ok:false};(async()=>{try{const LT=window.__labLite!==false&&!/[?&]full/.test(location.search),r=await fetch((LT?"lab/lite/":"lab/")+(sp==="goblin"?"gob3d.bin.gz":"mon_"+sp+".bin.gz"));if(!r.ok)throw new Error(r.status);const buf=await new Response(r.body.pipeThrough(new DecompressionStream("gzip"))).arrayBuffer();
    const mg=String.fromCharCode(...new Uint8Array(buf.slice(0,4)));
    if(mg==="GB03"){const dv=new DataView(buf),NV=dv.getUint32(4,true),NT=dv.getUint32(8,true),fl=dv.getUint8(12);let o=13;M.pt=fl===1;M.hasW=fl===2;   /* 軽い版 */
