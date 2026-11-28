@@ -7308,7 +7308,7 @@ roleSlots18 = (prev => function (i) { return prev(i).replace(`<button class="min
 let SW19 = null;
 let sw19Bar = function (i) {
   const m = SW19 != null && S.mons.find(o => o.id === SW19);
-  if (!m || m.home !== i) { if (SW19 != null) SW19 = null; return `<div class="hint swh19">👆 子をタップ → 入れかえたい子か「＋」をタップ</div>`; }
+  if (!m || (m.home !== i && m.home != null)) { if (SW19 != null) SW19 = null; return `<div class="hint swh19">👆 子をタップ → 入れかえたい子か「＋」をタップ</div>`; }
   return `<div class="swb19"><span>${simg23(m, m.evos, "sp", "width:28px;height:28px")}<b>${esc(m.nick)}</b>を選んだ　<small>相手の子か「ここへ」をタップ</small></span><span class="sp"></span><button class="mini" data-a="swcard">くわしく</button>${m.job ? `<button class="mini" data-a="swfree">🪄戻す</button>` : ""}<button class="mini" data-a="swno">やめる</button></div>`;
 }
 function swapRole19(S, a, b) {
@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層119／No.350（11/25 00:49）";
+const VER20 = "層120／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -16515,14 +16515,14 @@ html.land30 .mph30{font-size:40px}
 #qn30 .bar{width:160px;height:3px;background:rgba(255,255,255,.15);margin-top:10px;border-radius:2px;overflow:hidden}#qn30 .bar i{display:block;height:100%;width:0;background:#9fb2ff;transition:width linear}
 `; document.head.appendChild(st);
 
-  let busy = false;
+  let busy = false, qnAt = 0;
   nextDay = (prev => function () {
     try {
-      if (busy) { if (window.__qnMorning30) window.__qnMorning30(); return; }   /* 夜のあいだに「次の日へ」を押した＝朝にする */
+      if (busy) { if (window.__qnMorning30 && performance.now() - qnAt > 1200) window.__qnMorning30(); return; }   /* 夜のあいだに「次の日へ」を押した＝朝にする。ただし押した直後の2回目の呼び出しは無視（1回のタップで nextDay が2回呼ばれ、夜が一瞬で終わっていた：本人「夜来んかった」） */
       const fp = document.getElementById("fp26");
-      const quiet = S && !S.ended && !S.contractDone && !N && !isRaid9(S) && S.scoutDay !== S.day && !(typeof tutOn === "function" && tutOn()) && fp && !window.__noqn30;
+      const quiet = S && !S.ended && !S.contractDone && !N && !isRaid9(S) && S.scoutDay !== S.day && !(typeof tutOn === "function" && tutOn()) && !window.__noqn30;   /* 歩く画面でなくても夜にする（2Dの画面から押すと夜が来なかった） */
       if (!quiet) return prev.apply(this, arguments);
-      busy = true; const args = arguments, self = this;
+      busy = true; qnAt = performance.now(); const args = arguments, self = this;
       let nn = 0, nw = 0; S.mons.forEach(m => { if (m.home == null) return; if (noct(m)) nn++; else nw++; });
       const el = document.createElement("div"); el.id = "qn30";
       el.innerHTML = `<div class="t">🌙 静かな夜</div><div class="s">${nn ? `夜行性 ${nn}体が起きて働いている・ほかの${nw}体は寝床へ` : `みんな寝床へ。夜行性の子がいれば、夜も働く`}</div><div class="bar"><i></i></div><div class="h">画面をさわると夜のまま歩ける</div><button class="k">☀ 朝にする</button>`;
