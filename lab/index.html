@@ -10896,9 +10896,15 @@ SP3D24.noble = 1; SP3D24.gargoyle = 1; LOOPK24.gargoyle = 3.2;
       for (let i = 17; i < J.length; i++) { const v = J[i]; if (!v || v[1] < -5 || !H0[0] || !H0[1]) continue; const d0 = Math.hypot(v[0] - H0[0][0], v[1] - H0[0][1], v[2] - H0[0][2]), d1 = Math.hypot(v[0] - H0[1][0], v[1] - H0[1][1], v[2] - H0[1][2]), k = d0 < d1 ? 0 : 1, hi = k ? 8 : 5; const dl = [0, 1, 2].map(q => J[hi][q] - H0[k][q]); J[i] = [v[0] + dl[0], v[1] + dl[1], v[2] + dl[2]]; }   /* 手に持つ物（剣・盾・杖の関節）も手といっしょに動かす（剣が手から離れて浮いていた） */
       [[9, 10, 11, 15, -1], [12, 13, 14, 16, 1]].forEach(([hp, k, an, to, sg]) => { const P = J[hp], A = [P[0] + sg * 0.03, 0.12, P[2]], K = [(P[0] + A[0]) / 2, (P[1] + A[1]) / 2, P[2] + 0.03]; J[k] = lr(J[k], K); J[an] = lr(J[an], A); J[to] = lr(J[to], [A[0], 0.05, A[2] + 0.16]); }); }
     return Object.assign({}, R, { J }); }; }
-{ const R4 = rigSp24; rigSp24 = function (sp0, mode, t){ if (sp0 !== "gargoyle") return R4(sp0, mode, t); const R = R4("imp", mode, t), J = R.J.map(v => v && v.slice());   /* ガーゴイル（11/28 やり直し）：インプの骨で、背中を丸めて頭を前へ・待つときは腕を前に垂らす（こぶしがひざの前） */
-    const dz = 0.06, dy = -0.07; if (J[2] && J[2][1] > -5) J[2] = [J[2][0], J[2][1] + dy, J[2][2] + dz]; if (J[1] && J[1][1] > -5) J[1] = [J[1][0], J[1][1] - 0.02, J[1][2] + 0.04];
-    if (mode === "idle" || mode === "sleep") [[3, 4, 5, -1], [6, 7, 8, 1]].forEach(([s, e, h, sg]) => { const S = J[s]; J[e] = [S[0] + sg * 0.1, S[1] - 0.2, S[2] + 0.1]; J[h] = [J[e][0] - sg * 0.02, J[e][1] - 0.2, J[e][2] + 0.12]; });
+{ const R4 = rigSp24; rigSp24 = function (sp0, mode, t){ if (sp0 !== "gargoyle") return R4(sp0, mode, t); const R = R4("imp", mode, t), J = R.J.map(v => v && v.slice());   /* ガーゴイル（11/28 本人「もとの2Dが良かった」）：インプの骨で、待つときは台座の上に犬のように座る（後ろ脚をたたみ、前脚をまっすぐ台座につく）。動くときはインプの動きのまま */
+    { const P = 0.2, br = mode === "idle" || mode === "sleep" ? 0.012 * Math.sin((t || 0) * 1.5) : 0;   /* 台座の高さ・息。動くときも座った形のまま（石像は台座ごと動く。脚を動かすと台座とつながった所がのびる） */
+      const set = (i, v) => { if (J[i] && J[i][1] > -5) J[i] = v; };
+      set(0, [0, P + 0.2, -0.08]); set(1, [0, P + 0.55 + br, 0.08]); set(2, [0, P + 0.85 + br, 0.24]);
+      set(3, [-0.22, P + 0.6 + br, 0.12]); set(4, [-0.22, P + 0.34, 0.22]); set(5, [-0.2, P + 0.08, 0.3]);
+      set(6, [0.22, P + 0.6 + br, 0.12]); set(7, [0.22, P + 0.34, 0.22]); set(8, [0.2, P + 0.08, 0.3]);
+      set(9, [-0.17, P + 0.2, -0.06]); set(10, [-0.3, P + 0.33, 0.16]); set(11, [-0.3, P + 0.12, -0.02]); set(15, [-0.32, P + 0.06, 0.14]);
+      set(12, [0.17, P + 0.2, -0.06]); set(13, [0.3, P + 0.33, 0.16]); set(14, [0.3, P + 0.12, -0.02]); set(16, [0.32, P + 0.06, 0.14]);
+      if (mode === "walk") { const hy = 0.1 * Math.abs(Math.sin(Math.PI * 2 * (t || 0))); for (let i = 0; i < J.length; i++) if (J[i] && J[i][1] > -5) J[i] = [J[i][0], J[i][1] + hy, J[i][2]]; } }   /* 歩くときは台座ごとはねる */
     return Object.assign({}, R, { J }); }; }
 // ---------- 主（2Dの見た目に寄せた専用の体） VAR.w=段階 ----------
 KIT24.lordk = () => ({ common: COMMON24, body: (ROOM_PARTS24.handTxt + addBody24(ROOM_PARTS24.bodyTxt.replace("sHead(", "sHeadNE(").replace("if(tool>0.5&&tool<1.5){", "if(tool>9.0){")
@@ -16596,9 +16602,9 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
   if(st==="walk"){R=rg("walk",bip?(k*0.8):k);if(!bip)R=Object.assign({},R,{gait:k});}
   else if(st==="run"){R=rg("walk",bip?(k*0.8):k);if(!bip)R=Object.assign({},R,{gait:k,gaitAmp:1.35});root.pitch=0.16;root.dy=0.05*Math.abs(Math.sin(k*Math.PI*2));}   /* 歩きを前のめりに・はずむ（速さは呼ぶ側で k を速く進める） */
   else if(kit==="noble"&&/^(windup|strike|recover)$/.test(st))R=drainPose(rg("idle",T),st,k,root);   /* 吸血鬼：手をかざす */
-  else if(bip&&o.unarmed&&st==="windup"){R=clawArms(rg("idle",T),ease(k),0);root.pitch=-0.16*ease(k);root.dz=-0.15*ease(k);root.dy=-0.05*ease(k);}   /* 素手：身をかがめて、両手の爪を頭の横にふり上げる */
-  else if(bip&&o.unarmed&&st==="strike"){R=clawArms(rg("idle",T),1,ease(k));root.dz=0.55*sn1(k*0.85);root.pitch=0.32*sn1(k);root.dy=0.06*sn1(k);}   /* とびかかって、両手で前へつかみかかる（ひっかく・かみつく） */
-  else if(bip&&o.unarmed&&st==="recover"){R=clawArms(rg("idle",T),1-ease(k),1-ease(k));root.dz=0.55*(1-ease(k))*0.5;root.pitch=0.32*(1-ease(k))*0.4;}
+  else if(bip&&o.unarmed&&kit!=="gargoyle"&&st==="windup"){R=clawArms(rg("idle",T),ease(k),0);root.pitch=-0.16*ease(k);root.dz=-0.15*ease(k);root.dy=-0.05*ease(k);}   /* 素手：身をかがめて、両手の爪を頭の横にふり上げる */
+  else if(bip&&o.unarmed&&kit!=="gargoyle"&&st==="strike"){R=clawArms(rg("idle",T),1,ease(k));root.dz=0.55*sn1(k*0.85);root.pitch=0.32*sn1(k);root.dy=0.06*sn1(k);}   /* とびかかって、両手で前へつかみかかる（ひっかく・かみつく） */
+  else if(bip&&o.unarmed&&kit!=="gargoyle"&&st==="recover"){R=clawArms(rg("idle",T),1-ease(k),1-ease(k));root.dz=0.55*(1-ease(k))*0.5;root.pitch=0.32*(1-ease(k))*0.4;}
   else if(st==="windup"){R=bip?rigLerp(rg("idle",T),rg("slash",0),ease(k)):rg("idle",T);root.pitch=-0.12*ease(k);root.dz=-0.1*ease(k);root.dy=bip?0:-0.06*ease(k);}   /* 足のない子は身をかがめて後ろへ */
   else if(st==="strike"){R=bip?rg("slash",0.6*ease(k)):rg("idle",T);root.dz=0.3*sn1(k*0.9);root.pitch=bip?0.12*sn1(k):0.3*sn1(k);root.dy=bip?0:0.12*sn1(k);}   /* 踏みこんで振り下ろす／体当たり */
   else if(st==="recover"){R=bip?rigLerp(rg("slash",0.6),rg("idle",T),ease(k)):rg("idle",T);root.dz=0.3*(1-ease(k))*0.6;}
