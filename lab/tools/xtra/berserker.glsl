@@ -19,18 +19,20 @@ vec2 xbody(vec3 p){vec3 H=J[2];
  vec2 r=vec2(d,1.0);
  float tk=9.0;for(int s=0;s<2;s++){float sg=s==0?-1.0:1.0;vec3 a=H+vec3(0.13*sg,-0.14,0.2),m=H+vec3(0.16*sg,-0.06,0.22),t=H+vec3(0.13*sg,0.0,0.19);tk=min(tk,min(sTap(p,a,m,0.042,0.03),sTap(p,m,t,0.03,0.006)));}
  if(tk<r.x)r=vec2(tk,17.0);   // あごの両はしから上へ反る牙
- {vec3 q=p-H-vec3(0.0,0.2,-0.06);float wh=sEll(q,vec3(0.31,0.19,0.33));wh=max(wh,-max(q.z-0.06,q.y+0.02));   // 狼の頭の毛皮（顔は出す）
-  wh=smin(wh,sTap(p,H+vec3(0.0,0.3,0.12),H+vec3(0.0,0.26,0.46),0.12,0.07),0.05);   // 鼻づら
-  for(int s=0;s<2;s++){float sg=s==0?-1.0:1.0;wh=smin(wh,sTap(p,H+vec3(0.15*sg,0.32,-0.04),H+vec3(0.21*sg,0.56,-0.1),0.08,0.012),0.03);}   // 耳
-  float cp=sEll(p-J[1]-vec3(0.0,0.0,-0.24),vec3(0.48,0.52,0.11));cp=smin(cp,sEll(p-J[1]-vec3(0.0,0.2,-0.05),vec3(0.52,0.15,0.3)),0.08);cp=max(cp,-(p.y-(J[0].y-0.15+0.08*fbm(p*6.0))));   // 背中の毛皮マント
-  wh=smin(wh,cp,0.06);wh+=0.03*(fbm(p*12.0)-0.5);if(wh<r.x)r=vec2(wh,28.0);
-  float ns=length(p-H-vec3(0.0,0.29,0.53))-0.045;for(int s=0;s<2;s++){float sg=s==0?-1.0:1.0;ns=min(ns,sEll(p-H-vec3(0.085*sg,0.36,0.27),vec3(0.035,0.018,0.02)));}if(ns<r.x)r=vec2(ns,29.0);   // 黒い鼻と目
-  float fg=9.0;for(int s=0;s<2;s++){float sg=s==0?-1.0:1.0;fg=min(fg,sTap(p,H+vec3(0.05*sg,0.21,0.44),H+vec3(0.05*sg,0.13,0.42),0.022,0.004));}if(fg<r.x)r=vec2(fg,17.0);}   // 上の牙
+ {vec3 q=p-H-vec3(0.0,0.17,-0.05);float wh=sEll(q,vec3(0.36,0.2,0.39));wh=max(wh,-max(q.z-0.1,q.y+0.04));   // 狼の頭の毛皮（頭を深くおおう。顔は出す）
+  wh=smin(wh,sTap(p,H+vec3(0.0,0.27,0.16),H+vec3(0.0,0.2,0.58),0.13,0.06),0.05);   // 長い鼻づら
+  for(int s=0;s<2;s++){float sg=s==0?-1.0:1.0;wh=smin(wh,sEll(p-H-vec3(0.11*sg,0.31,0.24),vec3(0.085,0.04,0.075)),0.03);   // 狼のけわしい眉
+   wh=smin(wh,sTap(p,H+vec3(0.17*sg,0.29,-0.06),H+vec3(0.25*sg,0.4,-0.32),0.075,0.01),0.03);}   // 後ろに寝かせた耳
+  for(int k=0;k<9;k++){float fk=float(k),a=(fk-4.0)*0.33;vec3 b=H+vec3(sin(a)*0.34,0.14+0.1*cos(a),-0.06-0.3*cos(a)*0.6);wh=smin(wh,sTap(p,b,b+vec3(sin(a)*0.12,-0.04,-0.16),0.06,0.008),0.03);}   // とげとげの毛
+  float cp=sEll(p-J[1]-vec3(0.0,0.0,-0.31),vec3(0.52,0.54,0.17));cp=smin(cp,sEll(p-J[1]-vec3(0.0,0.2,-0.05),vec3(0.56,0.16,0.32)),0.08);cp=max(cp,-(p.y-(J[0].y-0.2+0.12*fbm(p*6.0))));   // 背中の毛皮マント
+  wh=smin(wh,cp,0.06);wh+=0.035*(fbm(p*13.0)-0.5);if(wh<r.x)r=vec2(wh,28.0);
+  float ns=length(p-H-vec3(0.0,0.24,0.62))-0.05;for(int s=0;s<2;s++){float sg=s==0?-1.0:1.0;ns=min(ns,sEll(p-H-vec3(0.1*sg,0.275,0.29),vec3(0.05,0.012,0.02)));}if(ns<r.x)r=vec2(ns,29.0);   // 黒い鼻と細い目
+  float fg=9.0;for(int s=0;s<2;s++){float sg=s==0?-1.0:1.0;for(int k=0;k<4;k++){float z=0.26+0.1*float(k);float w=0.08-0.012*float(k);fg=min(fg,sTap(p,H+vec3(w*sg,0.17,z),H+vec3(w*sg,0.08+0.01*float(k),z+0.01),k==0?0.03:0.018,0.004));}}if(fg<r.x)r=vec2(fg,17.0);}   // 上あごの牙の列
  return r;}
 vec4 xcol(vec3 p,vec3 n,float m){
  if(m>29.5)return vec4(pow(vec3(0.42,0.55,0.3),vec3(2.2)),0.8);   // 泡
  if(m>28.5)return vec4(pow(vec3(0.05,0.04,0.04),vec3(2.2)),0.5);   // 狼の鼻と目
- if(m>27.5){vec3 c=mix(vec3(0.34,0.34,0.37),vec3(0.62,0.62,0.66),smoothstep(-0.3,0.8,n.y))*(0.8+0.35*fbm(p*vec3(9.0,22.0,9.0)));return vec4(pow(c,vec3(2.2)),0.04);}   // 狼の灰色の毛
+ if(m>27.5){vec3 c=mix(vec3(0.22,0.22,0.25),vec3(0.5,0.5,0.54),smoothstep(-0.3,0.8,n.y))*(0.75+0.45*fbm(p*vec3(9.0,26.0,9.0)));c=mix(c,vec3(0.12,0.12,0.14),smoothstep(0.55,0.7,fbm(p*vec3(3.0,12.0,3.0)+5.0))*0.7);return vec4(pow(c,vec3(2.2)),0.04);}   // 狼の灰色の毛
  if(m>26.5){vec3 c=vec3(0.36,0.16,0.5)*(0.85+0.25*fbm(p*vec3(8.0,20.0,8.0)));return vec4(pow(c,vec3(2.2)),0.05);}   // 紫の布
  if(m>25.5){float w=fbm(p*6.0);vec3 c=mix(vec3(0.24,0.36,0.14),vec3(0.42,0.58,0.24),w);c=mix(c,vec3(0.62,0.78,0.4),smoothstep(0.62,0.72,fbm(p*11.0+3.0))*0.6);c=mix(c,vec3(0.16,0.2,0.08),smoothstep(0.6,0.75,fbm(p*3.0+7.0))*0.6);return vec4(pow(c,vec3(2.2)),0.75);}   // ぬるぬるの肌
  if(m>24.5)return vec4(pow(vec3(0.3,0.18,0.09)*(0.85+0.3*fbm(p*20.0)),vec3(2.2)),0.2);   // 革

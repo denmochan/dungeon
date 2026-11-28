@@ -32,13 +32,13 @@
   "fmt": "GB03",
   "kind": "biped+weapon",
   "scale": 1.3,
-  "bytes": 119906,
+  "bytes": 117166,
   "verts": 8000,
   "tris": 15992,
   "full": {
    "file": "mon_berserker.bin.gz",
    "fmt": "GB1W",
-   "bytes": 476103
+   "bytes": 506484
   }
  },
  "bogtroll": {
