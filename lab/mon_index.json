@@ -285,13 +285,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 0.9,
-  "bytes": 95638,
+  "bytes": 95223,
   "verts": 7000,
   "tris": 13996,
   "full": {
    "file": "mon_gemeater.bin.gz",
    "fmt": "GB01",
-   "bytes": 338202
+   "bytes": 335981
   }
  },
  "ghost": {
@@ -313,13 +313,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 0.7,
-  "bytes": 89729,
+  "bytes": 88832,
   "verts": 7000,
   "tris": 13956,
   "full": {
    "file": "mon_ghostslime.bin.gz",
    "fmt": "GB01",
-   "bytes": 338373
+   "bytes": 335725
   }
  },
  "ghoul": {
@@ -495,13 +495,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 0.9,
-  "bytes": 96823,
+  "bytes": 96555,
   "verts": 7000,
   "tris": 13996,
   "full": {
    "file": "mon_lavaslime.bin.gz",
    "fmt": "GB01",
-   "bytes": 347783
+   "bytes": 346189
   }
  },
  "lich": {
@@ -747,13 +747,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 0.8,
-  "bytes": 98682,
+  "bytes": 98195,
   "verts": 7000,
   "tris": 13996,
   "full": {
    "file": "mon_rotslime.bin.gz",
    "fmt": "GB01",
-   "bytes": 430535
+   "bytes": 430000
   }
  },
  "salamander": {
@@ -831,13 +831,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 0.7,
-  "bytes": 88629,
+  "bytes": 80178,
   "verts": 7000,
   "tris": 13996,
   "full": {
    "file": "mon_slime.bin.gz",
    "fmt": "GB01",
-   "bytes": 296785
+   "bytes": 318763
   }
  },
  "slimeknight": {
