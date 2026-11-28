@@ -28,7 +28,7 @@ vec2 vamp(vec3 p){vec3 H=J[2];vec3 h=p-H;vec3 e=vec3(abs(h.x),h.y,h.z);
  {vec3 q=p-J[1]-vec3(0.0,-0.1,0.0);float vs=max(sEll(q,vec3(0.255,0.23,0.172)),-sEll(q,vec3(0.24,0.21,0.15)));vs=max(vs,-(q.z-0.05));vs=max(vs,abs(q.x)-(0.11-0.25*max(0.0,q.y-0.05)));vs=max(vs,q.y-0.09);r=U(r,vec2(vs-0.004,23.0));
   for(int k=0;k<3;k++)r=U(r,vec2(length(p-J[1]-vec3(0.0,-0.06-0.07*float(k),0.175))-0.016,22.0));}
  // マント（肩から床まで、前は開く。外は黒・内とふちは赤）と、横へ大きく張り出すとがった襟
- {vec3 S=J[1]+vec3(0.0,0.1,-0.04);float top=S.y;vec3 q=p-vec3(0.0,0.0,S.z);float t=clamp((top-p.y)/top,0.0,1.0);float rad=0.32+0.3*t+0.05*t*t+(0.012+0.05*t)*sin(atan(p.x,-(p.z-S.z))*8.0);float rr=length(q.xz*vec2(1.0,1.15));float ang=atan(q.x,-q.z);
+ {vec3 S=J[1]+vec3(0.0,0.1,-0.04);float top=S.y;vec3 q=p-vec3(0.0,0.0,S.z);float t=clamp((top-p.y)/top,0.0,1.0);float rad=mix(0.3,0.53,smoothstep(0.0,0.14,top-p.y))+0.17*t+0.04*t*t+(0.012+0.05*t)*sin(atan(p.x,-(p.z-S.z))*8.0);float rr=length(q.xz*vec2(1.0,1.15));float ang=atan(q.x,-q.z);
   float sh=rr-rad;float cp=max(abs(sh)-0.035,max(p.y-top-0.04*(1.0-abs(ang)/3.14),-(p.y-0.05)));cp=max(cp,abs(ang)-2.35+0.2*t);
   float ed=abs(abs(ang)-2.35+0.2*t);r=U(r,vec2(cp,sh<-0.008||ed<0.08?21.0:20.0));
   for(int s=0;s<2;s++){float sg=s==0?-1.0:1.0;r=U(r,vec2(length(p-S-vec3(0.2*sg,-0.06,0.24))-0.035,22.0));}}   // 赤い留め具
@@ -46,6 +46,6 @@ vec4 xcol(vec3 p,vec3 n,float m){
  if(m>23.5){vec3 hh=p-J[2];float st=0.5+0.5*sin(hh.x*70.0+hh.y*10.0);vec3 c=mix(vec3(0.3,0.33,0.42),vec3(0.86,0.9,0.98),smoothstep(-0.2,0.95,n.y))*(0.7+0.36*st);return vec4(pow(c,vec3(2.2)),0.2);}   // 銀髪（なでつけた筋）
  if(m>22.5){vec3 c=vec3(0.28,0.27,0.3)*(0.8+0.3*fbm(p*vec3(30.0,30.0,30.0)));return vec4(pow(c,vec3(2.2)),0.2);}   // 灰色のベスト
  if(m>21.5)return vec4(pow(vec3(0.85,0.08,0.12),vec3(2.2))*1.3,0.8);   // 赤い留め具・ボタン
- if(m>20.5)return vec4(pow(vec3(0.62,0.05,0.09)*(0.85+0.2*fbm(p*8.0)),vec3(2.2)),0.3);   // 赤い裏地
- if(m>19.5){vec3 c=mix(vec3(0.05,0.045,0.06),vec3(0.24,0.22,0.27),smoothstep(-0.3,0.9,n.y))*(0.85+0.2*fbm(p*vec3(6.0,18.0,6.0)));return vec4(pow(c,vec3(2.2)),0.5);}   // 黒いマント（つや）
+ if(m>20.5)return vec4(pow(vec3(0.62,0.05,0.09)*(0.85+0.2*fbm(p*8.0)),vec3(2.2)),0.8);   // 赤い裏地
+ if(m>19.5){vec3 c=mix(vec3(0.05,0.045,0.06),vec3(0.24,0.22,0.27),smoothstep(-0.3,0.9,n.y))*(0.85+0.2*fbm(p*vec3(6.0,18.0,6.0)));return vec4(pow(c,vec3(2.2)),0.8);}   // 黒いマント（つや）
  return vec4(1.0);}

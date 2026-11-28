@@ -102,13 +102,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 1.0,
-  "bytes": 180289,
+  "bytes": 180387,
   "verts": 12000,
-  "tris": 23964,
+  "tris": 23984,
   "full": {
    "file": "mon_count.bin.gz",
    "fmt": "GB01",
-   "bytes": 974267
+   "bytes": 948600
   }
  },
  "demon": {
@@ -958,13 +958,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 1.0,
-  "bytes": 181682,
+  "bytes": 182471,
   "verts": 12000,
-  "tris": 23976,
+  "tris": 23992,
   "full": {
    "file": "mon_vampire.bin.gz",
    "fmt": "GB01",
-   "bytes": 965726
+   "bytes": 1023455
   }
  },
  "vaultkeeper": {

@@ -16528,10 +16528,24 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
     const H2=[J[1][0]+sg*0.4,J[1][1]-0.1,J[1][2]+0.26],E2=[J[si][0]+sg*0.26,J[si][1]-0.26,J[si][2]+0.08],off=sub(J[34],J[hi]),od=nrm(sub(J[35],J[34])),M=rotAB(od,nrm([sg*0.1,1.0,0.06]));
     J[ei]=E2;const G=[H2[0]+off[0],H2[1]+off[1],H2[2]+off[2]],G0=J[34];[34,35,36,37,38,39].forEach(i=>{if(J[i]&&J[i][1]>-5){const r=mv3(M,sub(J[i],G0));J[i]=[G[0]+r[0],G[1]+r[1],G[2]+r[2]];}});J[hi]=H2;}
    const o=Object.assign({},R0,{J});if(typeof pitchHR==="function"&&R0.HR)o.HR=pitchHR(R0.HR,-0.22);return o;}catch(e){return R0;}};
+ /* 片腕だけ、手を tg へ（肩から手までの長さはそのまま。pole は肘を曲げる向き） */
+ const armTo=(J,s,e,h,tg,pole)=>{const S=J[s],E=J[e],H=J[h];if(!S||!E||!H||S[1]<-5||H[1]<-5)return;const L1=Math.hypot(E[0]-S[0],E[1]-S[1],E[2]-S[2]),L2=Math.hypot(H[0]-E[0],H[1]-E[1],H[2]-E[2]);
+  const dx=tg[0]-S[0],dy=tg[1]-S[1],dz=tg[2]-S[2],dl=Math.hypot(dx,dy,dz)||1e-6,d=Math.min(dl,(L1+L2)*0.995),u=[dx/dl,dy/dl,dz/dl];
+  const a=(L1*L1-L2*L2+d*d)/(2*d),hh=Math.sqrt(Math.max(0,L1*L1-a*a)),pl=nrm(sub(pole,u.map(v=>v*dot(u,pole))));J[e]=[S[0]+u[0]*a+pl[0]*hh,S[1]+u[1]*a+pl[1]*hh,S[2]+u[2]*a+pl[2]*hh];J[h]=[S[0]+u[0]*d,S[1]+u[1]*d,S[2]+u[2]*d];};
+ /* 吸血鬼・屍の伯爵の攻撃（実装チャットの頼み 11/28「殴らず、手をかざすと何か起きる」）：ためで右手を胸の横へ引き、当てるで前へまっすぐ突き出して止める（てのひらを相手へ）。左手は体のわきのまま */
+ const drainPose=(R0,st,k,root)=>{const J=R0.J.map(v=>v&&v.slice());const S=J[6],E=J[7],H=J[8];if(!S||!H||S[1]<-5)return R0;
+  const Lt=Math.hypot(...sub(E,S))+Math.hypot(...sub(H,E)),sg=Math.sign(S[0]-J[0][0])||1,rest=H.slice();
+  const back=[S[0]+sg*0.12*Lt,S[1]-0.15*Lt,S[2]-0.22*Lt],out=[S[0]-sg*0.12*Lt,S[1]+0.1*Lt,S[2]+1.0*Lt];
+  const L=(A,B,t)=>A.map((v,i)=>v+(B[i]-v)*t);let tg,pole;
+  if(st==="windup"){const e=ease(k);tg=L(rest,back,e);pole=[sg*0.4,-0.6,-1];root.pitch=-0.07*e;root.dz=-0.06*e;root.roll=0.04*sg*e;}
+  else if(st==="strike"){const e=ease(Math.min(1,k*2.2));tg=L(back,out,e);pole=[sg*0.9,-1,-0.2];root.pitch=0.1*e;root.dz=0.16*e;root.roll=-0.03*sg*e;}
+  else{const e=ease(k);tg=L(out,rest,e);pole=[sg*0.9,-1,-0.4];root.pitch=0.1*(1-e);root.dz=0.16*(1-e);}
+  armTo(J,6,7,8,tg,pole);return Object.assign({},R0,{J});};
  window.__labPose=(sp,st,k,o={})=>{k=Math.max(0,Math.min(1,k||0));const kit=typeof kitOf24==="function"?kitOf24(sp):sp,bip=/^(goblin|skeleton|imp|kobold|orc|golem|human|demon|gobx|lich|noble|lordk)$/.test(kit),rg=(m,t)=>rigSp24(sp,m,t);
   const root={dx:0,dy:0,dz:0,pitch:0,roll:0};let R;const T=o.t||0,side=o.side||1;
   if(st==="walk"){R=rg("walk",bip?(k*0.8):k);if(!bip)R=Object.assign({},R,{gait:k});}
   else if(st==="run"){R=rg("walk",bip?(k*0.8):k);if(!bip)R=Object.assign({},R,{gait:k,gaitAmp:1.35});root.pitch=0.16;root.dy=0.05*Math.abs(Math.sin(k*Math.PI*2));}   /* 歩きを前のめりに・はずむ（速さは呼ぶ側で k を速く進める） */
+  else if(kit==="noble"&&/^(windup|strike|recover)$/.test(st))R=drainPose(rg("idle",T),st,k,root);   /* 吸血鬼：手をかざす */
   else if(bip&&o.unarmed&&st==="windup"){R=clawArms(rg("idle",T),ease(k),0);root.pitch=-0.16*ease(k);root.dz=-0.15*ease(k);root.dy=-0.05*ease(k);}   /* 素手：身をかがめて、両手の爪を頭の横にふり上げる */
   else if(bip&&o.unarmed&&st==="strike"){R=clawArms(rg("idle",T),1,ease(k));root.dz=0.55*sn1(k*0.85);root.pitch=0.32*sn1(k);root.dy=0.06*sn1(k);}   /* とびかかって、両手で前へつかみかかる（ひっかく・かみつく） */
   else if(bip&&o.unarmed&&st==="recover"){R=clawArms(rg("idle",T),1-ease(k),1-ease(k));root.dz=0.55*(1-ease(k))*0.5;root.pitch=0.32*(1-ease(k))*0.4;}
