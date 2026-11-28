@@ -16532,12 +16532,12 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
  const armTo=(J,s,e,h,tg,pole)=>{const S=J[s],E=J[e],H=J[h];if(!S||!E||!H||S[1]<-5||H[1]<-5)return;const L1=Math.hypot(E[0]-S[0],E[1]-S[1],E[2]-S[2]),L2=Math.hypot(H[0]-E[0],H[1]-E[1],H[2]-E[2]);
   const dx=tg[0]-S[0],dy=tg[1]-S[1],dz=tg[2]-S[2],dl=Math.hypot(dx,dy,dz)||1e-6,d=Math.min(dl,(L1+L2)*0.995),u=[dx/dl,dy/dl,dz/dl];
   const a=(L1*L1-L2*L2+d*d)/(2*d),hh=Math.sqrt(Math.max(0,L1*L1-a*a)),pl=nrm(sub(pole,u.map(v=>v*dot(u,pole))));J[e]=[S[0]+u[0]*a+pl[0]*hh,S[1]+u[1]*a+pl[1]*hh,S[2]+u[2]*a+pl[2]*hh];J[h]=[S[0]+u[0]*d,S[1]+u[1]*d,S[2]+u[2]*d];};
- /* 吸血鬼・屍の伯爵の攻撃（実装チャットの頼み 11/28「殴らず、手をかざすと何か起きる」）：ためで右手を胸の横へ引き、当てるで前へまっすぐ突き出して止める（てのひらを相手へ）。左手は体のわきのまま */
+ /* 吸血鬼・屍の伯爵の攻撃（実装チャットの頼み 11/28「殴らず、手をかざすと何か起きる」）：ためで右手を顔の前へ持ち上げ、当てるで前へまっすぐ突き出して止める（てのひらを相手へ）。左手は体のわきのまま */
  const drainPose=(R0,st,k,root)=>{const J=R0.J.map(v=>v&&v.slice());const S=J[6],E=J[7],H=J[8];if(!S||!H||S[1]<-5)return R0;
   const Lt=Math.hypot(...sub(E,S))+Math.hypot(...sub(H,E)),sg=Math.sign(S[0]-J[0][0])||1,rest=H.slice();
-  const back=[S[0]+sg*0.12*Lt,S[1]-0.15*Lt,S[2]-0.22*Lt],out=[S[0]-sg*0.12*Lt,S[1]+0.1*Lt,S[2]+1.0*Lt];
+  const back=[S[0]-sg*0.3*Lt,S[1]+0.42*Lt,S[2]+0.42*Lt],out=[S[0]-sg*0.12*Lt,S[1]+0.1*Lt,S[2]+1.0*Lt];
   const L=(A,B,t)=>A.map((v,i)=>v+(B[i]-v)*t);let tg,pole;
-  if(st==="windup"){const e=ease(k);tg=L(rest,back,e);pole=[sg*0.4,-0.6,-1];root.pitch=-0.07*e;root.dz=-0.06*e;root.roll=0.04*sg*e;}
+  if(st==="windup"){const e=ease(k);tg=L(rest,back,e);pole=[sg*1,-0.8,-0.3];root.pitch=-0.1*e;root.dz=-0.08*e;root.roll=0.05*sg*e;}
   else if(st==="strike"){const e=ease(Math.min(1,k*2.2));tg=L(back,out,e);pole=[sg*0.9,-1,-0.2];root.pitch=0.1*e;root.dz=0.16*e;root.roll=-0.03*sg*e;}
   else{const e=ease(k);tg=L(out,rest,e);pole=[sg*0.9,-1,-0.4];root.pitch=0.1*(1-e);root.dz=0.16*(1-e);}
   armTo(J,6,7,8,tg,pole);return Object.assign({},R0,{J});};

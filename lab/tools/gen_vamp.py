@@ -29,10 +29,10 @@ vec2 vamp(vec3 p){vec3 H=J[2];vec3 h=p-H;vec3 e=vec3(abs(h.x),h.y,h.z);
  {vec3 q=p-J[1]-vec3(0.0,-0.1,0.0);float vs=max(sEll(q,vec3(0.255,0.23,0.172)),-sEll(q,vec3(0.24,0.21,0.15)));vs=max(vs,-(q.z-0.05));vs=max(vs,abs(q.x)-(0.11-0.25*max(0.0,q.y-0.05)));vs=max(vs,q.y-0.09);r=U(r,vec2(vs-0.004,23.0));
   for(int k=0;k<3;k++)r=U(r,vec2(length(p-J[1]-vec3(0.0,-0.06-0.07*float(k),0.175))-0.016,22.0));}
  // マント（肩から床まで、前は開く。外は黒・内とふちは赤）と、横へ大きく張り出すとがった襟
- {vec3 S=J[1]+vec3(0.0,0.1,-0.04);float top=S.y;vec3 q=p-vec3(0.0,0.0,S.z);float t=clamp((top-p.y)/top,0.0,1.0);float rad=mix(0.3,0.53,smoothstep(0.0,0.14,top-p.y))+0.17*t+0.04*t*t+(0.012+0.05*t)*sin(atan(p.x,-(p.z-S.z))*8.0);float rr=length(q.xz*vec2(1.0,1.15));float ang=atan(q.x,-q.z);
-  float sh=rr-rad;float cp=max(abs(sh)-0.035,max(p.y-top-0.04*(1.0-abs(ang)/3.14),-(p.y-0.05)));cp=max(cp,abs(ang)-2.35+0.2*t);
-  float ed=abs(abs(ang)-2.35+0.2*t);r=U(r,vec2(cp,sh<-0.008||ed<0.08?21.0:20.0));
-  for(int s=0;s<2;s++){float sg=s==0?-1.0:1.0;r=U(r,vec2(length(p-S-vec3(0.2*sg,-0.06,0.24))-0.035,22.0));}}   // 赤い留め具
+ {vec3 S=J[1]+vec3(0.0,0.1,-0.04);float top=S.y;vec3 q=p-vec3(0.0,0.0,S.z);float t=clamp((top-p.y)/top,0.0,1.0);float lim=mix(1.95,1.3,smoothstep(0.03,0.2,top-p.y))+0.9*smoothstep(0.55,1.0,t);float rad=mix(0.3,0.43,smoothstep(0.0,0.14,top-p.y))+0.2*t+0.04*t*t+(0.012+0.05*t)*sin(atan(p.x,-(p.z-S.z))*8.0);float rr=length(q.xz*vec2(1.0,1.15));float ang=atan(q.x,-q.z);
+  float sh=rr-rad;float cp=max(abs(sh)-0.035,max(p.y-top-0.04*(1.0-abs(ang)/3.14),-(p.y-0.05)));cp=max(cp,abs(ang)-lim);
+  float ed=abs(abs(ang)-lim);r=U(r,vec2(cp,sh<-0.008||ed<0.08?21.0:20.0));
+  for(int s=0;s<2;s++){float sg=s==0?-1.0:1.0;vec3 c0=S+vec3(0.17*sg,-0.05,0.1);r=U(r,vec2(length(p-c0)-0.035,22.0));r=U(r,vec2(sTap(p,c0,S+vec3(0.0,-0.13,0.19),0.009,0.009),22.0));}}   // 赤い留め具と、胸の前にたれる鎖   // 赤い留め具
  {vec3 c=J[2]+vec3(0.0,-0.22,-0.2);for(int s=0;s<2;s++){float sg=s==0?-1.0:1.0;vec3 q=p-c;q.x*=sg;
    vec2 A=vec2(0.1,0.0),B=vec2(0.56,0.36),C=vec2(0.14,0.56);vec2 u=vec2(q.x,q.y);vec2 e0=B-A,e1=C-B,e2=A-C,v0=u-A,v1=u-B,v2=u-C;vec2 pq0=v0-e0*clamp(dot(v0,e0)/dot(e0,e0),0.0,1.0),pq1=v1-e1*clamp(dot(v1,e1)/dot(e1,e1),0.0,1.0),pq2=v2-e2*clamp(dot(v2,e2)/dot(e2,e2),0.0,1.0);float sgn=sign(e0.x*e2.y-e0.y*e2.x);vec2 dd=min(min(vec2(dot(pq0,pq0),sgn*(v0.x*e0.y-v0.y*e0.x)),vec2(dot(pq1,pq1),sgn*(v1.x*e1.y-v1.y*e1.x))),vec2(dot(pq2,pq2),sgn*(v2.x*e2.y-v2.y*e2.x)));float tri=-sqrt(dd.x)*sign(dd.y);
    float bend=0.55*q.x*q.x-0.12*q.y;float cl=max(tri,abs(q.z-bend)-0.03);r=U(r,vec2(cl,q.z-bend>0.0?21.0:20.0));}}   // 横へとがって張り出す襟（前は赤、後ろは黒）
