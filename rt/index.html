@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層128／No.350（11/25 00:49）";
+const VER20 = "層129／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -13997,13 +13997,13 @@ function fpOpen30(){
       #endif
       float kd=dot(nn,normalize(vec3(0.3,0.9,0.35))); float tb=kd>0.55?1.0:(kd>0.12?0.78:0.6);
       vec3 hemi=mix(vec3(0.3,0.32,0.44),vec3(0.72,0.72,0.8),nn.y*0.5+0.5);   /* 洞窟のつめたい青い光 */
-      vec3 c=bc*tb*hemi*(0.62+(R2>1.5?0.3:0.5)*exp(-vd/11.0));
+      vec3 c=bc*tb*hemi*(0.7+(R2>1.5?0.3:0.5)*exp(-vd/16.0));   /* 遠くを暗くしすぎない（夜の戦い・主の間を上から見ると、床がほぼ真っ暗だった） */
       vec3 L=vec3(0.0);for(int i=0;i<6;i++){vec3 q=LT[i]-vw;float dd=dot(q,q);float ld=dot(nn,q*inversesqrt(dd+0.0001));float tl=ld>0.35?1.0:(ld>0.05?0.62:0.3);L+=LC*LF[i]*tl/(1.0+0.16*dd);}
       c*=1.0+pil;c+=bc*L*(1.0+pil*1.5)*(R2>1.5?1.15:(R2>0.5?1.55:2.3));float lu=dot(c,vec3(0.3,0.59,0.11));c=mix(vec3(lu),c,R2>1.5?1.3:1.15);c=1.0-exp(-c*1.5);   /* たいまつのまわりだけ暖かく明るい */
-      c=mix(c,vec3(0.03,0.04,0.07),smoothstep(18.0,52.0,vd));c=mix(c,c*vec3(0.42,0.38,0.36),inkA*smoothstep(20.0,5.0,vd));gl_FragColor=vec4(c,1.0);return; }
+      c=mix(c,vec3(0.03,0.04,0.07),smoothstep(28.0,64.0,vd));c=mix(c,c*vec3(0.42,0.38,0.36),inkA*smoothstep(20.0,5.0,vd));gl_FragColor=vec4(c,1.0);return; }
     vec3 c=bc*g*(0.55+0.8*exp(-vd/7.0));c+=vec3(0.05,0.03,0.012)*exp(-vd/4.0);
     vec3 L=vec3(0.0);for(int i=0;i<6;i++){vec3 q=vw-LT[i];L+=LC*0.95*LF[i]/(1.0+0.22*dot(q,q));}c+=bc*L*1.05+L*0.02;c=1.0-exp(-c*1.35);
-    c=mix(c,vec3(0.012,0.01,0.01),smoothstep(18.0,48.0,vd));gl_FragColor=vec4(c,1.0);}`);   /* 部屋の出入口の壁をくりぬく（門の黒い板も）／たいまつの明かり */
+    c=mix(c,vec3(0.012,0.01,0.01),smoothstep(28.0,60.0,vd));gl_FragColor=vec4(c,1.0);}`);   /* 部屋の出入口の壁をくりぬく（門の黒い板も）／たいまつの明かり */
   const PB = prog(`attribute vec2 aq;uniform mat4 VP;uniform vec3 C;uniform vec3 R;uniform vec3 UPV;uniform vec4 Q;varying vec2 uv;void main(){uv=vec2(aq.x,1.0-aq.y);vec3 p=C+R*(Q.x+aq.x*Q.z)+UPV*(Q.y+aq.y*Q.w);gl_Position=VP*vec4(p,1.0);}`,
     `precision mediump float;uniform sampler2D tx;uniform float FL;uniform vec4 UR;uniform float LB;uniform float AM;uniform float OL;uniform vec2 TS;uniform float DK;varying vec2 uv;void main(){vec2 u=UR.xy+vec2(FL>0.5?1.0-uv.x:uv.x,uv.y)*UR.zw;vec4 c=texture2D(tx,u);if(DK>0.5){if(c.a<0.5)discard;gl_FragColor=vec4(c.rgb*LB*DK*0.25,1.0);return;}   /* 厚み：うしろの層は暗い色で塗る */if(OL>0.5){ /* キャラ：黒いふちどりと、陰影を3段に（アニメ塗り） */ if(c.a<0.5){float a=max(max(texture2D(tx,u+vec2(TS.x*1.6,0.0)).a,texture2D(tx,u-vec2(TS.x*1.6,0.0)).a),max(texture2D(tx,u+vec2(0.0,TS.y*1.6)).a,texture2D(tx,u-vec2(0.0,TS.y*1.6)).a));if(a>0.5){gl_FragColor=vec4(vec3(0.1,0.07,0.08)*LB,1.0);return;}discard;}float l=dot(c.rgb,vec3(0.3,0.59,0.11));float q=l>0.6?1.0:(l>0.33?0.78:0.56);c.rgb=clamp(c.rgb/max(l,0.04)*mix(l,q*0.7,0.55)*1.12,0.0,1.0);gl_FragColor=vec4(c.rgb*LB,1.0);return;}if(AM>0.5){if(c.a<0.02)discard;gl_FragColor=vec4(c.rgb*LB,c.a);return;}if(c.a<0.5)discard;gl_FragColor=vec4(c.rgb*LB,1.0);}`);
   const qb = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, qb); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]), gl.STATIC_DRAW);
@@ -14550,7 +14550,7 @@ function fpOpen30(){
   let curRoom = rooms.reduce((b, R, i) => { const zc = R.Z + ((R.ZS || 0) + (R.ZE || 0)) / 2, zb = rooms[b].Z + ((rooms[b].ZS || 0) + (rooms[b].ZE || 0)) / 2; return Math.abs(zc - P.z) < Math.abs(zb - P.z) ? i : b; }, 0), lastT = performance.now()   /* 始まりの層を、立っている場所から決める（層が増えたあと、まっ暗なところに出ていた） */, ft = [];
   const FPQ = window.__FPQ29 = window.__FPQ29 || { q: 1, t: 0 };
   function loop(now){ if (now - (loop.t30 || 0) > 700) (loop.t30 = now, rooms).forEach(Rm => { if (!Rm.classic && Rm.mb && Rm.ck !== Rm.G30.c) rebuild(Rm); });   /* 部屋の画面で広げたら、層の絵も作り直す */ if (!alive) return; requestAnimationFrame(loop);
-    let dt = Math.max(0.001, Math.min(0.1, (now - lastT) / 1000)); lastT = now; ft.push(dt); if (ft.length > 20) ft.shift(); fpsEl.textContent = Math.round(ft.length / ft.reduce((x, y) => x + y, 0)) + "fps"; LOD30(ft.length / ft.reduce((x, y) => x + y, 0), now); if (now < FXS.hs) dt *= 0.04; else if (now < FXS.slo) dt *= 0.3; else if (FF30(now)) dt *= 1.8;   /* 早送り（本人 11/28 おまかせ：勇者が歩くだけの時間が長い）：夜、どこでも戦っていない間だけ1.8倍（2.5倍だと走りが速すぎて飛んで見えた）。戦いが始まったら1倍に戻る */   /* ヒットストップとスロー */
+    let dt = Math.max(0.001, Math.min(0.1, (now - lastT) / 1000)); lastT = now; ft.push(dt); if (ft.length > 20) ft.shift(); fpsEl.textContent = Math.round(ft.length / ft.reduce((x, y) => x + y, 0)) + "fps"; LOD30(ft.length / ft.reduce((x, y) => x + y, 0), now); if (now < FXS.hs) dt *= 0.04; else if (now < FXS.slo) dt *= 0.3; else if ((FXS.ff30 = FF30(now))) dt *= 1.8; else FXS.ff30 = false;   /* 早送り中は勇者の走る上限を 7.5→5（×1.8 で 9m/s。速すぎて飛んで見えた） */   /* 早送り（本人 11/28 おまかせ：勇者が歩くだけの時間が長い）：夜、どこでも戦っていない間だけ1.8倍（2.5倍だと走りが速すぎて飛んで見えた）。戦いが始まったら1倍に戻る */   /* ヒットストップとスロー */
     const busy = !!document.querySelector("#peek24[style*='flex'], .modal") ; if (busy) return;
     // 歩く（壁で止まったら、横すべり）
     /* 重い端末でも同じ速さで歩けるように、1コマで進む量は細かく分けて当たりを見る（前は10fps以下だとほとんど進まなかった） */
@@ -15029,7 +15029,7 @@ function fpOpen30(){
       else if (z.k === "wall") { const d = z.dir || { dx: 0, dz: 1 }, px = -d.dz, pz = d.dx, A0 = W(z.x - px * z.r, 0, z.z - pz * z.r), A1 = W(z.x + px * z.r, 0, z.z + pz * z.r), B0 = W(z.x - px * z.r, 2.2, z.z - pz * z.r), B1 = W(z.x + px * z.r, 2.2, z.z + pz * z.r); if (A0 && A1 && B0 && B1) { g.globalCompositeOperation = "lighter"; g.fillStyle = `rgba(140,200,255,${0.12 * al})`; g.strokeStyle = `rgba(200,235,255,${0.85 * al})`; g.lineWidth = 2; g.beginPath(); g.moveTo(A0[0], A0[1]); g.lineTo(A1[0], A1[1]); g.lineTo(B1[0], B1[1]); g.lineTo(B0[0], B0[1]); g.closePath(); g.fill(); g.stroke(); for (let n = 1; n < 4; n++) { const f = n / 4, ph = ((now - z.t0) / 900 + f) % 1; g.strokeStyle = `rgba(220,240,255,${0.4 * al * (1 - ph)})`; g.beginPath(); g.moveTo(A0[0] + (B0[0] - A0[0]) * ph, A0[1] + (B0[1] - A0[1]) * ph); g.lineTo(A1[0] + (B1[0] - A1[0]) * ph, A1[1] + (B1[1] - A1[1]) * ph); g.stroke(); } } }
       else if (z.k === "hfire") return "fire";
       return null; } };
-  window.__wz30 = { of: a => WZ30.of(a), sp: WZSP30 };
+  window.__wz30 = { of: a => WZ30.of(a), sp: WZSP30, T: { WZ30, WZH30, rooms: () => rooms } };   /* T：確かめる道具用（打ち消しを場面を作って試す） */
   const RTON30 = (() => { try { return /\/rt\//.test(location.pathname) || /[?&]rt\b/.test(location.search) || localStorage.getItem("rt30") === "1"; } catch (e) { return false; } })();   /* 作り直し版（/rt/）だけで動かす。いつもの版は今までの戦い */
   /* ===================== rt30 の考える所（作り直し 11/28） =====================
      前の作りは「見えたら直進して、ぶつかってから回りこむ」継ぎはぎだった（本人：カス）。いまは毎回この順に決める：
@@ -15252,7 +15252,7 @@ function fpOpen30(){
       if (!at) { if (A) { A.al30 = Math.max(0, (A.al30 ?? 1) - dt * (h.st === "dead" ? 1.2 : 3)); if (A.al30 === 0) RA.acts.splice(RA.acts.indexOf(A), 1); } return; }
       if (A && RA.i !== at.i) { RA.acts.splice(RA.acts.indexOf(A), 1); A = null; }
       if (!A) { const Rm = rooms[at.i]; A = { hero: 1, hid: id, h, m: { nick: h.name, id: -1 - h.id }, sp: heroSp25(h), evo: heroEvo25(h), x: at.x, z: at.z, r: 3.14, hx: at.x, hz: at.z, tx: at.x, tz: at.z, wait: 99, ph: Math.random() * 6, walking: false, dist: 0, mode: "idle", y: 0, stay: true, fixd: 1 }; (Rm.acts = Rm.acts || []).push(A); }
-      A.h = h; if (rooms[at.i] && rooms[at.i].rtOn30 && A.rt30 && now - A.rt30 < 300) { A.wq = []; return; } { const mp = A.bt; if (mp) { at = { ...at, x: mp[0], z: mp[1], rest: 0 }; A.wq = []; } else { const q = A.wq || (A.wq = []), lst = q[q.length - 1]; if (!lst || Math.hypot(lst[0] - at.x, lst[1] - at.z) > 0.3) q.push([at.x, at.z]); while (q.length > 1 && Math.hypot(q[0][0] - A.x, q[0][1] - A.z) < 0.35) q.shift(); if (q.length) { const rest = q.reduce((s2, p2, k) => s2 + (k ? Math.hypot(p2[0] - q[k - 1][0], p2[1] - q[k - 1][1]) : Math.hypot(p2[0] - A.x, p2[1] - A.z)), 0); at = { ...at, x: q[0][0], z: q[0][1], rest }; } } }   /* 通ったマスを順にたどる（角で岩を突っ切っていた） */ if (A.bt) A.btT30 = performance.now(); const dx = at.x - A.x, dz = at.z - A.z, L = Math.hypot(dx, dz); if (L > 0.15) { const tac = A.btT30 && performance.now() - A.btT30 < 2500, dashH = tac && L > 2.2, st = Math.min(L, (tac ? (dashH ? 8.5 : 4.2) : Math.min(7.5, Math.max(2.6, (at.rest || L) * 1.6))) * dt); A.y = dashH ? 0.45 * Math.abs(Math.sin((A.dist || 0) * 1.6)) : (A.y || 0) * Math.max(0, 1 - dt * 10);   /* 駆け引きで動くときは走る速さまで（止めに入る子が瞬間移動して見えた） */ const mvd = navStep30(rooms[at.i], A, at.x, at.z, st); A.dist += mvd; A.walking = mvd > st * 0.2; A.r = Math.atan2(dx, dz); } else A.walking = false; });
+      A.h = h; if (rooms[at.i] && rooms[at.i].rtOn30 && A.rt30 && now - A.rt30 < 300) { A.wq = []; return; } { const mp = A.bt; if (mp) { at = { ...at, x: mp[0], z: mp[1], rest: 0 }; A.wq = []; } else { const q = A.wq || (A.wq = []), lst = q[q.length - 1]; if (!lst || Math.hypot(lst[0] - at.x, lst[1] - at.z) > 0.3) q.push([at.x, at.z]); while (q.length > 1 && Math.hypot(q[0][0] - A.x, q[0][1] - A.z) < 0.35) q.shift(); if (q.length) { const rest = q.reduce((s2, p2, k) => s2 + (k ? Math.hypot(p2[0] - q[k - 1][0], p2[1] - q[k - 1][1]) : Math.hypot(p2[0] - A.x, p2[1] - A.z)), 0); at = { ...at, x: q[0][0], z: q[0][1], rest }; } } }   /* 通ったマスを順にたどる（角で岩を突っ切っていた） */ if (A.bt) A.btT30 = performance.now(); const dx = at.x - A.x, dz = at.z - A.z, L = Math.hypot(dx, dz); if (L > 0.15) { const tac = A.btT30 && performance.now() - A.btT30 < 2500, dashH = tac && L > 2.2, st = Math.min(L, (tac ? (dashH ? 8.5 : 4.2) : Math.min(FXS.ff30 ? 5 : 7.5, Math.max(2.6, (at.rest || L) * 1.6))) * dt); A.y = dashH ? 0.45 * Math.abs(Math.sin((A.dist || 0) * 1.6)) : (A.y || 0) * Math.max(0, 1 - dt * 10);   /* 駆け引きで動くときは走る速さまで（止めに入る子が瞬間移動して見えた） */ const mvd = navStep30(rooms[at.i], A, at.x, at.z, st); A.dist += mvd; A.walking = mvd > st * 0.2; A.r = Math.atan2(dx, dz); } else A.walking = false; });
     rooms.forEach(Rm => (Rm.acts || []).forEach(a => { const t = a.hero ? a.face : a.tg; if (a.bt && t) { a.r = Math.atan2(t.x - a.x, t.z - a.z); } }));   /* 戦っている相手のほうを向く */
     /* 打ち合いのあいだ（計算の1手と1手のあいだ）も手を止めない：近い相手には斬りかかり・受け止めて火花（数字は出さない）。前は1手ごとに1回だけ動いて、あとは見つめ合っていた */
     rooms.forEach(Rm => (Rm.acts || []).forEach(a => { const t = a.hero ? a.face : a.tg; if (Rm.rtOn30 || !a.bt || !t || (a.al30 ?? 1) <= 0 || (t.al30 ?? 1) <= 0) return; const d = Math.hypot(t.x - a.x, t.z - a.z); if (d > 1.9) return; if (a.hero && RANGED30(a)) return;
@@ -17136,12 +17136,16 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
    if(M.hasW)M.WP=new Uint8Array(buf.slice(o,o+NV));M.NV=NV;M.NT=NT;faceUV(sp,M);lidMark(sp,M);legMark(sp,M);M.ok=true;}catch(e){M.bad=1;}})();return M;};
  loadMon("goblin");
  let MP=null;
- function drawSkin(o,M,X,Y,Z,yaw,S,R,R0,slime,hideW,RT){const {gl,PB,PM,EYE,VP}=o;const X0=X,Y0=Y,Z0=Z,yaw0=yaw,S0=S;X=0;Y=0;Z=0;yaw=0;S=1;   /* まず体の空間で作り、最後に root・向き・大きさ・位置をまとめてかける */
+ const LZ30={now:-1,v:null};let SKF30=0,SKN30=-1;const skF30=now=>{if(now!==SKN30){SKN30=now;SKF30++;}return SKF30;};
+function drawSkin(o,M,X,Y,Z,yaw,S,R,R0,slime,hideW,RT){const {gl,PB,PM,EYE,VP}=o;const X0=X,Y0=Y,Z0=Z,yaw0=yaw,S0=S;X=0;Y=0;Z=0;yaw=0;S=1;   /* まず体の空間で作り、最後に root・向き・大きさ・位置をまとめてかける */
   if(!MP){const mk=(t,src)=>{const x=gl.createShader(t);gl.shaderSource(x,src);gl.compileShader(x);if(!gl.getShaderParameter(x,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(x));return x;};
    const p=gl.createProgram();gl.attachShader(p,mk(gl.VERTEX_SHADER,VS3));gl.attachShader(p,mk(gl.FRAGMENT_SHADER,FS3));gl.linkProgram(p);const U={};MP={p,U:k=>k in U?U[k]:(U[k]=gl.getUniformLocation(p,k)),ap:gl.getAttribLocation(p,"ap"),an:gl.getAttribLocation(p,"an"),ac:gl.getAttribLocation(p,"ac"),af:gl.getAttribLocation(p,"af")};}
   if(!M.g){const NV=M.NV,g={pb:gl.createBuffer(),nb:gl.createBuffer(),cb:gl.createBuffer(),ib:gl.createBuffer(),pos:new Float32Array(NV*3),nor:new Float32Array(NV*3)};const col=new Float32Array(NV*3);for(let i=0;i<NV*3;i++)col[i]=M.C[i]/255;
    gl.bindBuffer(gl.ARRAY_BUFFER,g.cb);gl.bufferData(gl.ARRAY_BUFFER,col,gl.STATIC_DRAW);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,g.ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,M.I,gl.STATIC_DRAW);M.g=g;}
   const g=M.g,pos=g.pos,nor=g.nor,cy=Math.cos(yaw),sy=Math.sin(yaw),P0=M.P0,N0=M.N0;
+  /* 本番で軽くする（実装チャット）：体の形の計算（頂点ごとの骨の重み）は重い。近い子は毎コマ、離れた子は2〜3コマに1回だけ計算し、間は前の形を使う（向き・位置は毎コマ） */
+  const SKF=skF30(o.now),SKd=Math.hypot(X0-EYE[0],Z0-EYE[2]),SKk=SKd<9?1:SKd<16?2:3,SKa=o.a,SKC=SKa&&(SKa.__sk30&&SKa.__sk30.M===M?SKa.__sk30:(SKa.__sk30={M,bp:new Float32Array(M.NV*3),bn:new Float32Array(M.NV*3),f:-99}));
+  if(SKC&&SKF-SKC.f<SKk&&SKF>=SKC.f){pos.set(SKC.bp);nor.set(SKC.bn);}else{
   if(slime){const sx=R.J[1][0]/0.55,sy2=R.J[1][1]/0.44,sz=R.J[1][2]/0.5,lift=Math.max(0,R.J[0][1]-0.34);   /* スライム：つぶれて、のびて、はねる */
    for(let i=0,NV=M.NV;i<NV;i++){const x=P0[i*3]*sx,y=P0[i*3+1]*sy2+lift,z=P0[i*3+2]*sz;pos[i*3]=X+(x*cy+z*sy)*S;pos[i*3+1]=Y+y*S;pos[i*3+2]=Z+(-x*sy+z*cy)*S;let nx=N0[i*3]/sx,ny=N0[i*3+1]/sy2,nz=N0[i*3+2]/sz;const l=Math.hypot(nx,ny,nz)||1;nx/=l;ny/=l;nz/=l;nor[i*3]=nx*cy+nz*sy;nor[i*3+1]=ny;nor[i*3+2]=-nx*sy+nz*cy;}}
   else if(M.pt){const B=M.B,W=M.W,hj=R.J[1]&&R.J[1][1]>-5?1:0,MH=mt(rows(R.HR),rows(R0.HR)),GL=R.gait!=null?gaitLegs(M,R.gait,R.gaitAmp||1):null,bob=GL?R.J[0][1]-R0.J[0][1]:0;   /* 人の形でない子：近い関節について動く。頭は頭の回転で回す */
@@ -17164,12 +17168,13 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
     if(M.MOUNT&&M.MOUNT[i]){const q2=R.sq||1,w2=1/Math.sqrt(q2);x=px*w2;y=py*q2;z=pz*w2+(R.sh||0)*py*q2;NX=nx*q2;NY=ny*w2-(R.sh||0)*nz;NZ=nz*q2;}   /* 乗り物のスライム：乗り手の骨について行かず、はねるときにつぶれる・のびる */
     if(WP&&WP[i]&&(hideW===true||hideW===1||B[i*2]===hideW)){const hh=B[i*2]===4?5:8;x=R.J[hh][0];y=R.J[hh][1];z=R.J[hh][2];}   /* 焼きこんだ武器を隠す（作りこんだ武器に持ちかえるとき）。4＝左手・6＝右手・1＝全部 */   /* 掘るときは持っている武器をしまう */
     pos[i*3]=X+(x*cy+z*sy)*S;pos[i*3+1]=Y+y*S;pos[i*3+2]=Z+(-x*sy+z*cy)*S;const l=Math.hypot(NX,NY,NZ)||1;nor[i*3]=(NX*cy+NZ*sy)/l;nor[i*3+1]=NY/l;nor[i*3+2]=(-NX*sy+NZ*cy)/l;}}
+  if(SKC){SKC.bp.set(pos);SKC.bn.set(nor);SKC.f=SKF;}}
   {const RM=rootM(RT),c2=Math.cos(yaw0),s2=Math.sin(yaw0);for(let i=0,NV=M.NV;i<NV;i++){let x=pos[i*3],y=pos[i*3+1],z=pos[i*3+2],nx=nor[i*3],ny=nor[i*3+1],nz=nor[i*3+2];
     if(RM){const a=RM[0]*x+RM[1]*y+RM[2]*z+RT.dx,b=RM[3]*x+RM[4]*y+RM[5]*z+RT.dy,c=RM[6]*x+RM[7]*y+RM[8]*z+RT.dz;x=a;y=b;z=c;const d=RM[0]*nx+RM[1]*ny+RM[2]*nz,e=RM[3]*nx+RM[4]*ny+RM[5]*nz,f=RM[6]*nx+RM[7]*ny+RM[8]*nz;nx=d;ny=e;nz=f;}
     pos[i*3]=X0+(x*c2+z*s2)*S0;pos[i*3+1]=Y0+y*S0;pos[i*3+2]=Z0+(-x*s2+z*c2)*S0;nor[i*3]=nx*c2+nz*s2;nor[i*3+1]=ny;nor[i*3+2]=-nx*s2+nz*c2;}}
   const lq=PB?PB.A("aq"):-1,qbuf=PB?gl.getVertexAttrib(lq,gl.VERTEX_ATTRIB_ARRAY_BUFFER_BINDING):null;
   gl.useProgram(MP.p);gl.uniformMatrix4fv(MP.U("VP"),false,new Float32Array(VP));gl.uniform3fv(MP.U("EYE"),EYE);
-  try{for(let i=0;i<6;i++){gl.uniform3fv(MP.U("LT["+i+"]"),o.LT?o.LT[i]:gl.getUniform(PM.p,PM.U("LT["+i+"]"))||[0,-999,0]);gl.uniform1f(MP.U("LF["+i+"]"),o.LF?o.LF[i]:gl.getUniform(PM.p,PM.U("LF["+i+"]"))||0);}gl.uniform3fv(MP.U("LC"),o.LC||gl.getUniform(PM.p,PM.U("LC"))||[1,0.56,0.24]);}catch(e){}
+  try{const LZ=LZ30.now===o.now&&LZ30.v?LZ30.v:(LZ30.now=o.now,LZ30.v={LT:[0,1,2,3,4,5].map(i=>o.LT?o.LT[i]:gl.getUniform(PM.p,PM.U("LT["+i+"]"))||[0,-999,0]),LF:[0,1,2,3,4,5].map(i=>o.LF?o.LF[i]:gl.getUniform(PM.p,PM.U("LF["+i+"]"))||0),LC:o.LC||gl.getUniform(PM.p,PM.U("LC"))||[1,0.56,0.24]});for(let i=0;i<6;i++){gl.uniform3fv(MP.U("LT["+i+"]"),LZ.LT[i]);gl.uniform1f(MP.U("LF["+i+"]"),LZ.LF[i]);}gl.uniform3fv(MP.U("LC"),LZ.LC);}catch(e){}   /* 本番：灯りの値をGPUから読むのは1コマに1回だけ（子ごとに読むと、そのたびに描くのを待たされて重い） */
   gl.bindBuffer(gl.ARRAY_BUFFER,g.pb);gl.bufferData(gl.ARRAY_BUFFER,pos,gl.DYNAMIC_DRAW);gl.enableVertexAttribArray(MP.ap);gl.vertexAttribPointer(MP.ap,3,gl.FLOAT,false,0,0);
   gl.bindBuffer(gl.ARRAY_BUFFER,g.nb);gl.bufferData(gl.ARRAY_BUFFER,nor,gl.DYNAMIC_DRAW);gl.enableVertexAttribArray(MP.an);gl.vertexAttribPointer(MP.an,3,gl.FLOAT,false,0,0);
   gl.bindBuffer(gl.ARRAY_BUFFER,g.cb);gl.enableVertexAttribArray(MP.ac);gl.vertexAttribPointer(MP.ac,3,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,g.ib);
