@@ -37,7 +37,7 @@ vec2 vamp(vec3 p){vec3 H=J[2];vec3 h=p-H;vec3 e=vec3(abs(h.x),h.y,h.z);
    float bend=0.55*q.x*q.x-0.12*q.y;float cl=max(tri,abs(q.z-bend)-0.03);r=U(r,vec2(cl,q.z-bend>0.0?21.0:20.0));}}   // 横へとがって張り出す襟（前は赤、後ろは黒）
  {vec3 h3=p-H-vec3(0.0,0.185,-0.02);h3.yz=vec2(h3.y*0.989+h3.z*0.15,-h3.y*0.15+h3.z*0.989);float rr=length(h3.xz*vec2(1.0,0.95));
   float cr=max(rr-0.185+0.06*h3.y,abs(h3.y-0.075)-0.075)-0.012;cr=max(cr,-(sEll(h3-vec3(0.0,0.2,0.0),vec3(0.05,0.06,0.15))));   // 丸い山（上に縦のへこみ）
-  float br=max(rr-0.36,abs(h3.y+0.05*smoothstep(0.2,0.37,rr)*(0.4+0.6*smoothstep(-0.1,0.3,h3.z)))-0.013)-0.004;   // 広いつば（前が下がる）
+  float ed=smoothstep(0.18,0.36,rr);float br=max(rr-0.36,abs(h3.y+0.05*ed*smoothstep(-0.05,0.3,h3.z)-0.06*ed*smoothstep(0.0,-0.3,h3.z)-0.015*ed*smoothstep(0.1,0.3,abs(h3.x))*step(h3.z,0.05))-0.012)-0.004;   // 広いつば（前が下がる）
   r=U(r,vec2(min(cr,br),5.0));
   float bd=max(rr-0.192+0.06*h3.y,abs(h3.y-0.03)-0.022)-0.006;r=U(r,vec2(bd,14.0));}   // 赤い帯
  return r;}

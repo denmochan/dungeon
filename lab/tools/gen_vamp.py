@@ -48,14 +48,14 @@ vec4 xcol(vec3 p,vec3 n,float m){
  if(m>19.5){vec3 c=mix(vec3(0.05,0.045,0.06),vec3(0.24,0.22,0.27),smoothstep(-0.3,0.9,n.y))*(0.85+0.2*fbm(p*vec3(6.0,18.0,6.0)));return vec4(pow(c,vec3(2.2)),0.5);}   // 黒いマント（つや）
  return vec4(1.0);}
 '''
-COUNT=''' {vec3 h2=p-H-vec3(0.0,0.14,-0.02);h2.yz=vec2(h2.y*0.98+h2.z*0.2,-h2.y*0.2+h2.z*0.98);float hat=max(length(h2.xz*vec2(1.0,1.1))-0.19,abs(h2.y-0.18)-0.2)-0.01;hat=min(hat,max(length(h2.xz*vec2(1.0,1.1))-0.32,abs(h2.y+0.01)-0.016)-0.006);r=U(r,vec2(hat,5.0));   // シルクハット（目深に・前へかたむける）
+COUNT=''' {vec3 h2=p-H-vec3(0.0,0.14,-0.02);h2.yz=vec2(h2.y*0.98+h2.z*0.2,-h2.y*0.2+h2.z*0.98);float hat=max(length(h2.xz*vec2(1.0,1.1))-0.19-0.05*smoothstep(0.3,0.5,h2.y),abs(h2.y-0.25)-0.27)-0.01;hat=min(hat,max(length(h2.xz*vec2(1.0,1.1))-0.32,abs(h2.y+0.01)-0.016)-0.006);r=U(r,vec2(hat,5.0));   // シルクハット（目深に・前へかたむける）
   float bd=max(abs(length(h2.xz*vec2(1.0,1.1))-0.192)-0.012,abs(h2.y-0.06)-0.04);r=U(r,vec2(bd,14.0));   // 赤い帯
   vec3 nq=p-J[1]-vec3(0.0,0.0,0.19);float nap=max(sEll(nq,vec3(0.15,0.17,0.04)),-(nq.y-0.1+0.4*abs(nq.x)));nap=min(nap,sEll(nq-vec3(0.0,0.11,-0.01),vec3(0.05,0.035,0.03)));for(int s=0;s<2;s++){float sg=s==0?-1.0:1.0;nap=min(nap,sEll(nq-vec3(0.06*sg,0.13,-0.02),vec3(0.05,0.03,0.025)));}r=U(r,vec2(nap,2.0));   // 首に結んだナプキン
   vec3 mo2=H+vec3(0.085,0.02,0.215);float mc=max(abs(length((p-mo2).xy)-0.05)-0.01,abs(p.z-mo2.z)-0.01);mc=min(mc,sTap(p,mo2+vec3(0.04,-0.03,0.0),J[1]+vec3(0.14,0.06,0.16),0.005,0.005));r=U(r,vec2(mc,7.0));}   // 金の片めがねと鎖
 '''
 VHAT=''' {vec3 h3=p-H-vec3(0.0,0.185,-0.02);h3.yz=vec2(h3.y*0.989+h3.z*0.15,-h3.y*0.15+h3.z*0.989);float rr=length(h3.xz*vec2(1.0,0.95));
   float cr=max(rr-0.185+0.06*h3.y,abs(h3.y-0.075)-0.075)-0.012;cr=max(cr,-(sEll(h3-vec3(0.0,0.2,0.0),vec3(0.05,0.06,0.15))));   // 丸い山（上に縦のへこみ）
-  float br=max(rr-0.36,abs(h3.y+0.05*smoothstep(0.2,0.37,rr)*(0.4+0.6*smoothstep(-0.1,0.3,h3.z)))-0.013)-0.004;   // 広いつば（前が下がる）
+  float ed=smoothstep(0.18,0.36,rr);float br=max(rr-0.36,abs(h3.y+0.05*ed*smoothstep(-0.05,0.3,h3.z)-0.06*ed*smoothstep(0.0,-0.3,h3.z)-0.015*ed*smoothstep(0.1,0.3,abs(h3.x))*step(h3.z,0.05))-0.012)-0.004;   // 広いつば（前が下がる）
   r=U(r,vec2(min(cr,br),5.0));
   float bd=max(rr-0.192+0.06*h3.y,abs(h3.y-0.03)-0.022)-0.006;r=U(r,vec2(bd,14.0));}   // 赤い帯
 '''
