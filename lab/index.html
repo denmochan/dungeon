@@ -10715,7 +10715,7 @@ Object.assign(SPVAR24, { lich: [[0, 0, 0, 0], [0.4, 1.0, 0.5]] }); SPCOLX24.lich
   const k = kitOf24(sp0); if (k === "gobx" || k === "lich") return rig24(mode, t); return R1(sp0, mode, t); }; }
 SP3D24.gobx = 1; SP3D24.lich = 1;
 // 11/28 沼トロル・鬼の術師を作り直し（本人の選択）：オークの式の飾り（ローブ・苔のかたまり）は使わず、lab/tools/xtra/bogtroll.glsl・ogremage.glsl で足す
-SPVAR24.ogremage = [[0, 0, 0, 0], [0.5, 0.25, 0.6]]; SPVAR24.bogtroll = [[0, 0, 0, 0], [0.5, 0.66, 0.3]];
+SPVAR24.ogremage = [[0, 0, 0, 0], [0.5, 0.25, 0.6]]; SPVAR24.bogtroll = [[0, 0, 0, 0], [0.5, 0.66, 0.3]]; SPVAR24.berserker = [[0, 0, 0, 0], [0.55, 0.55, 0.6]];   /* 牙のオークの丸いかぶとも使わない（狼の毛皮を足す） */
 // 11/28 スライム騎兵（slimeknight）：ゴブリンがスライムに乗る（本人の選択。乗り物のスライムの形は lab/tools/xtra/slimeknight.glsl で足す）
 Object.assign(KITOF24, { slimeknight: "gobx" }); SPVAR24.slimeknight = [[4, 0, 0, 0], [0.3, 0.6, 0.35]]; SPCOL24.slimeknight = SPCOL24.goblin;
 { const R2 = rigSp24; rigSp24 = function (sp0, mode, t){ if (sp0 === "slimeknight") { const R = rig24(mode === "sleep" ? "idle" : mode, t); const LIFT = window.__skLift || 0.5; R.J = R.J.map(v => v[1] < -5 ? v : [v[0], v[1] + LIFT, v[2] - 0.05]);
@@ -16326,7 +16326,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
  const faceUV=(sp,M)=>{try{if(/^(ghost|sporewraith)$/.test(sp))return;   /* 目と口を形でくりぬいた子は、顔の絵を貼らない */
  const kit=kitOf24(rigOf(sp)),fi=FACEIDX24[kit];if(fi==null||fi<0)return;const R=rigSp24(rigOf(sp),"idle",0),A=R.HR,J2=R.J[2];if(!J2||J2[1]<-5)return;   /* 頭の空間で、顔の絵のどこに当たるか（ゲームの charCol と同じ式） */
    const F=new Float32Array(M.NV*3),hm=(v)=>[A[0]*v[0]+A[3]*v[1]+A[6]*v[2],A[1]*v[0]+A[4]*v[1]+A[7]*v[2],A[2]*v[0]+A[5]*v[1]+A[8]*v[2]];
-   const GRY=/^(slimeknight)$/.test(sp);   /* かぶとをかぶる子：灰色の金属の頂点には顔を貼らない */
+   const GRY=/^(slimeknight|berserker)$/.test(sp);   /* かぶとをかぶる子：灰色の金属の頂点には顔を貼らない */
    for(let i=0;i<M.NV;i++){if(M.WP&&M.WP[i])continue;if(GRY){const r=M.C[i*3],g=M.C[i*3+1],b=M.C[i*3+2];if(Math.max(r,g,b)-Math.min(r,g,b)<28&&r>90)continue;}const hp=hm([M.P0[i*3]-J2[0],M.P0[i*3+1]-J2[1],M.P0[i*3+2]-J2[2]]);if(Math.hypot(hp[0],hp[1],hp[2])>=0.52)continue;const hn=hm([M.N0[i*3],M.N0[i*3+1],M.N0[i*3+2]]),t=Math.max(0,Math.min(1,(hn[2]-0.05)/0.25)),fz=t*t*(3-2*t);
     F[i*3]=hp[0]/0.84+0.5;F[i*3+1]=0.5-hp[1]/0.86;F[i*3+2]=fz;}
    if(sp==="slimeknight")for(let i=0;i<M.NV;i++){if(F[i*3+2]>0||(M.WP&&M.WP[i]))continue;const x=M.P0[i*3],y=M.P0[i*3+1],z=M.P0[i*3+2],nz=M.N0[i*3+2];if(y>0.98||z<0.2||nz<0.05)continue;const t=Math.max(0,Math.min(1,(nz-0.05)/0.25));   /* 乗り物のスライムの前の面：となりのマス（+1）に、怒った顔の絵を貼る */
@@ -16511,7 +16511,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
  const R0S={};
  const MAGIC30=/lich|eye|shaman|ogremage|wraitheye|mindlord|ifrit|maou|imp|ghost/;
  /* 何を持たせるか：作りこんだ武器に持ちかえる（焼きこんだ武器はその手の分だけ隠す）。弓役は弓、魔法の子と魔法使い・僧侶は杖、盗賊は短剣、ほかは剣 */
- const NOWPN30=/golem|gargoyle|vaultkeeper|hauntchest|mimic|ghoul|^(vampire|count|noble|demon|gemeater|underlord|rotlord|slime|ghostslime|lavaslime|rotslime|elderdragon|serpent|lord)$/,CLUB30=/^(bogtroll|sapper)$/;   /* 素手で戦う子（爪・牙・こぶし。11/28 本人の指示）／こん棒の子 */   /* 素手で戦う子（石の体・爪） */
+ const NOWPN30=/golem|gargoyle|vaultkeeper|hauntchest|mimic|ghoul|^(vampire|count|noble|demon|gemeater|underlord|rotlord|slime|ghostslime|lavaslime|rotslime|elderdragon|serpent|lord|bogtroll)$/,CLUB30=/^(orc|sapper)$/;   /* 素手で戦う子（爪・牙・こぶし。11/28 本人の指示）／こん棒の子 */   /* 素手で戦う子（石の体・爪） */
  const weaponPlan=(sp,M,role,mode,st)=>{if(st==="down")return{kind:null,hide:0};if(mode==="mine")return{kind:"pick",hide:1};if(NOWPN30.test(sp))return{kind:null,hide:M.hasW?1:0};if(CLUB30.test(sp))return{kind:"club",hide:M.hasW?6:0};if(sp==="minerorc")return{kind:"pickaxe",hide:M.hasW?6:0};if(sp==="ogremage")return{kind:"staff",hide:M.hasW?1:0};   /* 坑道オークはつるはし、鬼の術師は杖（形に焼いた武器は隠す） */
   if(role==="bow"||role==="snipe"||sp==="hunter")return{kind:"bow",hide:M.hasW?1:0};if(MAGIC30.test(sp)||sp==="mage"||sp==="priest")return{kind:"staff",hide:M.hasW?6:0};
   if(sp==="thief")return{kind:"dagger",hide:M.hasW?6:0};if(/^(warrior|knight|slimeknight)$/.test(sp))return{kind:"sword",hide:1,shield:1};return{kind:"sword",hide:M.hasW?6:0};};
