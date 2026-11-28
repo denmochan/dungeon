@@ -11,6 +11,7 @@
   - 顔の絵は、かぶとの灰色の頂点には貼らない（`faceUV` の GRY）
   - 10:30 本人の指示で、乗り手のゴブリンの顔を「騎士きどりの得意げな顔」に（半分閉じた目・片方上げた眉・にやりと笑う口。`smugGobFace`）
     - 10:35 立ち姿も騎士きどりに：上半身を後ろへそらし、あごを上げ、剣を顔の横にまっすぐ立てて持つ（`proudPose`。`__labPose` の待機のときだけ。歩き・攻撃はそのまま）
+    - 10:40 乗り物のスライムを「怒って構えた顔」に（本人「かばう役なのにニコニコは違和感」）。顔は形に焼かず絵を貼る（`guardSlimeFace`、10番目のマス）。`faceUV` でスライムの前の面の頂点に u+1 を入れ、シェーダーは `vf.x<2.0` まで通す（1〜2 はとなりのマス）
     - 顔の表を16マスに広げた（試し場の drawSkin は `(vf.x+FI)/16.0`）。9番目のマスがこの顔で、slimeknight だけ `M.FI=8`
   - `lab/tools/xtra/slimeknight.glsl`。頂点が多いので `GS=0.019 ./rebuild.sh slimeknight slimeknight xtra/slimeknight.glsl 9000`
 
