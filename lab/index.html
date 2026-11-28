@@ -16244,6 +16244,20 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
    for(let y=0;y<32*K;y++)for(let x=0;x<32*K;x++){const q=(y*32*K+x)*4;let best=-1,bc=null;for(const[c,m]of U){if(m[q+3]>best){best=m[q+3];bc=c;}}const o=(y*W+fi*32*K+x)*4,a=A[q+3]/255,t=Math.max(0,Math.min(1,(a-0.4)/0.2));
     if(bc){out.data[o]=bc[0];out.data[o+1]=bc[1];out.data[o+2]=bc[2];}out.data[o+3]=t*t*(3-2*t)*255;}});
   const t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,out);gl.generateMipmap&&0;[gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER].forEach(k=>gl.texParameteri(gl.TEXTURE_2D,k,gl.LINEAR));[gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T].forEach(k=>gl.texParameteri(gl.TEXTURE_2D,k,gl.CLAMP_TO_EDGE));return t;}
+ /* ===== 四つ足の歩き（11/28）：ゲームのリグは足を動かさないので、脚ごとに「腰→ひざ→足」の2本の骨を入れて、足を床に止めて歩かせる ===== */
+ const rotAB=(a,b)=>{a=nrm(a);b=nrm(b);const v=crs(a,b),c=dot(a,b),s=Math.hypot(v[0],v[1],v[2]);if(s<1e-6)return c>0?[1,0,0,0,1,0,0,0,1]:[-1,0,0,0,1,0,0,0,-1];const k=nrm(v),K=[0,-k[2],k[1],k[2],0,-k[0],-k[1],k[0],0],K2=[0,1,2].map(i=>[0,1,2].map(j=>K[i*3]*K[j]+K[i*3+1]*K[3+j]+K[i*3+2]*K[6+j]));
+  return[0,1,2,3,4,5,6,7,8].map(q=>{const i=Math.floor(q/3),j=q%3;return(i===j?1:0)+s*K[q]+(1-c)*K2[i][j];});};
+ const mv3=(M,v)=>[M[0]*v[0]+M[1]*v[1]+M[2]*v[2],M[3]*v[0]+M[4]*v[1]+M[5]*v[2],M[6]*v[0]+M[7]*v[1]+M[8]*v[2]];
+ const legMark=(sp,M)=>{try{if(!M.pt)return;const R0=rigSp24(rigOf(sp),"idle",0),F=[5,6,7,8].map(i=>R0.J[i]);if(F.some(f=>!f||f[1]>0.2||f[1]<-5)||!R0.J[0]||R0.J[0][1]<0.15)return;   /* 足の関節が4つ床にある子だけ */
+   const hipY=R0.J[0][1]*0.82,LEG=new Int8Array(M.NV).fill(-1),LS=new Float32Array(M.NV),rad=Math.max(0.16,Math.min(0.42,Math.abs(F[0][0])*1.2));
+   for(let i=0;i<M.NV;i++){const x=M.P0[i*3],y=M.P0[i*3+1],z=M.P0[i*3+2];if(y>hipY+0.05)continue;let bi=-1,bd=1e9;F.forEach((f,k)=>{const d=Math.hypot(x-f[0],z-f[2]);if(d<bd){bd=d;bi=k;}});if(bd>rad)continue;LEG[i]=bi;LS[i]=Math.max(0,Math.min(1,(hipY-y)/(hipY-F[bi][1])));}
+   const legs=F.map((f,k)=>{const H=[f[0],hipY,f[2]],L=hipY-f[1],front=f[2]>R0.J[0][2],bz=front?-1:1,K=[f[0],hipY-L*0.5,f[2]+bz*L*0.16];return{H,F:f,K,L1:Math.hypot(...sub(K,H)),L2:Math.hypot(...sub(f,K)),bz,L};});
+   M.LEG=LEG;M.LS=LS;M.LEGS=legs;}catch(e){}};
+ /* 歩きの1歩ぶん：g（0〜1）で対角の2本ずつ。半分は床に止めて後ろへ、半分は持ち上げて前へ。A＝足の前後のふれ（足の長さに対して） */
+ const gaitLegs=(M,g,amp=1)=>{if(!M.LEGS)return null;return M.LEGS.map((l,k)=>{const ph=(g+(k===0||k===3?0:0.5))%1,A=l.L*0.32*amp,st=ph<0.5;const u=st?ph/0.5:(ph-0.5)/0.5;const dz=st?A*(1-2*u):A*(-1+2*u*u*(3-2*u)),dy=st?0:l.L*0.22*amp*Math.sin(Math.PI*u);
+   const F2=[l.F[0],l.F[1]+dy,l.F[2]+dz],H2=l.H,d=Math.min(Math.hypot(...sub(F2,H2)),(l.L1+l.L2)*0.995),u2=nrm(sub(F2,H2)),a=(l.L1*l.L1-l.L2*l.L2+d*d)/(2*d),h=Math.sqrt(Math.max(0,l.L1*l.L1-a*a)),side=nrm(crs(u2,[1,0,0])),pole=dot(side,[0,0,l.bz])<0?side.map(v=>-v):side,K2=[H2[0]+u2[0]*a+pole[0]*h,H2[1]+u2[1]*a+pole[1]*h,H2[2]+u2[2]*a+pole[2]*h];
+   return{R1:rotAB(sub(l.K,l.H),sub(K2,H2)),R2:rotAB(sub(l.F,l.K),sub(F2,K2)),H2,K2,l,sK:(l.H[1]-l.K[1])/(l.H[1]-l.F[1])};});};
+ window.__labGaitLen=sp=>{const M=MS[baseSp(sp)];return M&&M.LEGS?M.LEGS[0].L*0.32*4:0;};   /* 1歩（1周）で体が進む長さ（形の空間） */
  const lidMark=(sp,M)=>{try{if(kitOf24(rigOf(sp))!=="mimic")return;const a=0.15,ca=Math.cos(a),sa=Math.sin(a),L=new Uint8Array(M.NV);   /* 箱のふたの頂点（ゲームの形と同じ、うしろのちょうつがい y0.48・z-0.36、角度0.15） */
    for(let i=0;i<M.NV;i++){const y=M.P0[i*3+1]-0.48,z=M.P0[i*3+2]+0.36,ly=ca*y-sa*z,lz=sa*y+ca*z;L[i]=ly>-0.04&&lz>-0.06&&M.P0[i*3+1]>0.4?1:0;}M.LID=L;}catch(e){}};
  const faceUV=(sp,M)=>{try{const kit=kitOf24(rigOf(sp)),fi=FACEIDX24[kit];if(fi==null||fi<0)return;const R=rigSp24(rigOf(sp),"idle",0),A=R.HR,J2=R.J[2];if(!J2||J2[1]<-5)return;   /* 頭の空間で、顔の絵のどこに当たるか（ゲームの charCol と同じ式） */
@@ -16259,11 +16273,11 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
     const b0=new Uint8Array(buf.slice(o,o+NV));o+=NV;const b1=new Uint8Array(buf.slice(o,o+NV));o+=NV;M.B=new Uint8Array(NV*2);for(let i=0;i<NV;i++){M.B[i*2]=b0[i];M.B[i*2+1]=b1[i];}
     M.W=new Uint8Array(buf.slice(o,o+NV));o+=NV;if(M.hasW){M.WP=new Uint8Array(buf.slice(o,o+NV));o+=NV;}
     const u8=new Uint8Array(buf,o),I=M.I=new Uint16Array(NT*3);let pos=0,prev=0;for(let i=0;i<NT*3;i++){let v=0,sh=0,b;do{b=u8[pos++];v+=(b&127)*Math.pow(2,sh);sh+=7;}while(b&128);const d=(v%2)?-(v+1)/2:v/2;prev+=d;I[i]=prev;}
-    M.NV=NV;M.NT=NT;faceUV(sp,M);lidMark(sp,M);M.ok=true;return;}
+    M.NV=NV;M.NT=NT;faceUV(sp,M);lidMark(sp,M);legMark(sp,M);M.ok=true;return;}
    M.pt=mg==="GB02";M.hasW=mg==="GB1W";
    const dv=new DataView(buf),NV=dv.getUint32(4,true),NT=dv.getUint32(8,true);let o=12;M.P0=new Float32Array(buf.slice(o,o+NV*12));o+=NV*12;const n8=new Int8Array(buf.slice(o,o+NV*3));o+=NV*3;M.N0=Float32Array.from(n8,v=>v/127);
    M.C=new Uint8Array(buf.slice(o,o+NV*3));o+=NV*3;M.B=new Uint8Array(buf.slice(o,o+NV*2));o+=NV*2;M.W=new Uint8Array(buf.slice(o,o+NV));o+=NV;M.I=new Uint16Array(buf.slice(o,o+NT*6));o+=NT*6;
-   if(M.hasW)M.WP=new Uint8Array(buf.slice(o,o+NV));M.NV=NV;M.NT=NT;faceUV(sp,M);lidMark(sp,M);M.ok=true;}catch(e){M.bad=1;}})();return M;};
+   if(M.hasW)M.WP=new Uint8Array(buf.slice(o,o+NV));M.NV=NV;M.NT=NT;faceUV(sp,M);lidMark(sp,M);legMark(sp,M);M.ok=true;}catch(e){M.bad=1;}})();return M;};
  loadMon("goblin");
  let MP=null;
  function drawSkin(o,M,X,Y,Z,yaw,S,R,R0,slime,hideW,RT){const {gl,PB,PM,EYE,VP}=o;const X0=X,Y0=Y,Z0=Z,yaw0=yaw,S0=S;X=0;Y=0;Z=0;yaw=0;S=1;   /* まず体の空間で作り、最後に root・向き・大きさ・位置をまとめてかける */
@@ -16274,8 +16288,12 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
   const g=M.g,pos=g.pos,nor=g.nor,cy=Math.cos(yaw),sy=Math.sin(yaw),P0=M.P0,N0=M.N0;
   if(slime){const sx=R.J[1][0]/0.55,sy2=R.J[1][1]/0.44,sz=R.J[1][2]/0.5,lift=Math.max(0,R.J[0][1]-0.34);   /* スライム：つぶれて、のびて、はねる */
    for(let i=0,NV=M.NV;i<NV;i++){const x=P0[i*3]*sx,y=P0[i*3+1]*sy2+lift,z=P0[i*3+2]*sz;pos[i*3]=X+(x*cy+z*sy)*S;pos[i*3+1]=Y+y*S;pos[i*3+2]=Z+(-x*sy+z*cy)*S;let nx=N0[i*3]/sx,ny=N0[i*3+1]/sy2,nz=N0[i*3+2]/sz;const l=Math.hypot(nx,ny,nz)||1;nx/=l;ny/=l;nz/=l;nor[i*3]=nx*cy+nz*sy;nor[i*3+1]=ny;nor[i*3+2]=-nx*sy+nz*cy;}}
-  else if(M.pt){const B=M.B,W=M.W,hj=R.J[1]&&R.J[1][1]>-5?1:0,MH=mt(rows(R.HR),rows(R0.HR));   /* 人の形でない子：近い関節について動く。頭は頭の回転で回す */
+  else if(M.pt){const B=M.B,W=M.W,hj=R.J[1]&&R.J[1][1]>-5?1:0,MH=mt(rows(R.HR),rows(R0.HR)),GL=R.gait!=null?gaitLegs(M,R.gait,R.gaitAmp||1):null,bob=GL?R.J[0][1]-R0.J[0][1]:0;   /* 人の形でない子：近い関節について動く。頭は頭の回転で回す */
    for(let i=0,NV=M.NV;i<NV;i++){const px=P0[i*3],py=P0[i*3+1],pz=P0[i*3+2],w0=W[i]/255;let x=0,y=0,z=0,NX=N0[i*3],NY=N0[i*3+1],NZ=N0[i*3+2],hw=0;
+    if(GL&&M.LEG[i]>=0){const G=GL[M.LEG[i]],s=M.LS[i],l=G.l,b=Math.max(0,Math.min(1,(s-G.sK)/0.12+0.5)),p=[px,py,pz],n=[NX,NY,NZ];   /* 脚：腰から上の骨と、ひざから下の骨をなめらかにつなぐ */
+     const a1=mv3(G.R1,sub(p,l.H)),q1=[G.H2[0]+a1[0],G.H2[1]+a1[1]+bob*(1-s),G.H2[2]+a1[2]],a2=mv3(G.R2,sub(p,l.K)),q2=[G.K2[0]+a2[0],G.K2[1]+a2[1]+bob*(1-s),G.K2[2]+a2[2]],n1=mv3(G.R1,n),n2=mv3(G.R2,n);
+     x=q1[0]+(q2[0]-q1[0])*b;y=q1[1]+(q2[1]-q1[1])*b;z=q1[2]+(q2[2]-q1[2])*b;NX=n1[0]+(n2[0]-n1[0])*b;NY=n1[1]+(n2[1]-n1[1])*b;NZ=n1[2]+(n2[2]-n1[2])*b;}
+    else
     for(let k=0;k<2;k++){const j=B[i*2+k],w=k?1-w0:w0;if(w<0.004)continue;const a=R0.J[j],c=R.J[j];if(!a||!c||c[1]<-5||a[1]<-5){x+=w*px;y+=w*py;z+=w*pz;continue;}
      if(j===hj){const dx=px-a[0],dy=py-a[1],dz=pz-a[2];x+=w*(MH[0][0]*dx+MH[0][1]*dy+MH[0][2]*dz+c[0]);y+=w*(MH[1][0]*dx+MH[1][1]*dy+MH[1][2]*dz+c[1]);z+=w*(MH[2][0]*dx+MH[2][1]*dy+MH[2][2]*dz+c[2]);hw+=w;}
      else{x+=w*(px+c[0]-a[0]);y+=w*(py+c[1]-a[1]);z+=w*(pz+c[2]-a[2]);}}
@@ -16382,8 +16400,8 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
   return Object.assign({},R,{J,HR,lid});};
  window.__labPose=(sp,st,k,o={})=>{k=Math.max(0,Math.min(1,k||0));const kit=typeof kitOf24==="function"?kitOf24(sp):sp,bip=/^(goblin|skeleton|imp|kobold|orc|golem|human|demon|gobx|lich|noble|lordk)$/.test(kit),rg=(m,t)=>rigSp24(sp,m,t);
   const root={dx:0,dy:0,dz:0,pitch:0,roll:0};let R;const T=o.t||0,side=o.side||1;
-  if(st==="walk"){R=rg("walk",bip?(k*0.8):k);}
-  else if(st==="run"){R=rg("walk",bip?(k*0.8):k);root.pitch=0.16;root.dy=0.05*Math.abs(Math.sin(k*Math.PI*2));}   /* 歩きを前のめりに・はずむ（速さは呼ぶ側で k を速く進める） */
+  if(st==="walk"){R=rg("walk",bip?(k*0.8):k);if(!bip)R=Object.assign({},R,{gait:k});}
+  else if(st==="run"){R=rg("walk",bip?(k*0.8):k);if(!bip)R=Object.assign({},R,{gait:k,gaitAmp:1.35});root.pitch=0.16;root.dy=0.05*Math.abs(Math.sin(k*Math.PI*2));}   /* 歩きを前のめりに・はずむ（速さは呼ぶ側で k を速く進める） */
   else if(bip&&o.unarmed&&st==="windup"){R=clawArms(rg("idle",T),ease(k),0);root.pitch=-0.16*ease(k);root.dz=-0.15*ease(k);root.dy=-0.05*ease(k);}   /* 素手：身をかがめて、両手の爪を頭の横にふり上げる */
   else if(bip&&o.unarmed&&st==="strike"){R=clawArms(rg("idle",T),1,ease(k));root.dz=0.55*sn1(k*0.85);root.pitch=0.32*sn1(k);root.dy=0.06*sn1(k);}   /* とびかかって、両手で前へつかみかかる（ひっかく・かみつく） */
   else if(bip&&o.unarmed&&st==="recover"){R=clawArms(rg("idle",T),1-ease(k),1-ease(k));root.dz=0.55*(1-ease(k))*0.5;root.pitch=0.32*(1-ease(k))*0.4;}
@@ -16416,6 +16434,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
   if(!R0S[sp])R0S[sp]=rigSp24(rigOf(sp),"idle",0);
   if(M.c==null){let h=0,x0=9,x1=-9,z0=9,z1=-9;for(let i=0;i<M.NV;i++){if(M.WP&&M.WP[i])continue;const x=M.P0[i*3],y=M.P0[i*3+1],z=M.P0[i*3+2];if(y>h)h=y;if(x<x0)x0=x;if(x>x1)x1=x;if(z<z0)z0=z;if(z>z1)z1=z;}M.c=Math.max(h,0.55*Math.max(x1-x0,z1-z0));}
   const S=window.__labSize&&SIZE30[sp]!=null&&!window.__labOldSize?SIZE30[sp]*1.82/M.c:(typeof spScl24==="function"?spScl24(sp):1)*(a.mult||1);   /* 大きさ：人間＝1 の比率（本番 BODY30V2 の「大」）にそろえる */
+  if(M.LEGS&&a.walking&&!st){const gl=window.__labGaitLen(sp)*S||1;R=Object.assign({},R,{gait:((a.dist||0)/gl)%1});}   /* 四つ足：進んだ距離で足を運ぶ */
   const WPn=weaponPlan(sp,M,a.role||"",mode,st),kind=WPn.kind,hideW=WPn.hide;q.sp=sp;q.shield=WPn.shield;
   q.alpha=GHOST30.test(sp)?0.62:0;drawSkin(q,M,q.X,q.Y,q.Z,a.r||0,S,R,R0S[sp],slime,hideW,RT);if(bip&&kind)monTool(q,R,q.X,q.Y,q.Z,a.r||0,S,mode,kind,RT,st);return true;};
  /* ===== 図鑑（?gallery）：全部の魔物と勇者の3Dを、ポーズを切りかえて見る。?gallery&auto で自動でめぐる（撮影用） ===== */
