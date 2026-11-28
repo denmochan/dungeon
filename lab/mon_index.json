@@ -32,13 +32,13 @@
   "fmt": "GB03",
   "kind": "biped+weapon",
   "scale": 1.3,
-  "bytes": 112878,
+  "bytes": 113717,
   "verts": 7000,
-  "tris": 14024,
+  "tris": 14028,
   "full": {
    "file": "mon_berserker.bin.gz",
    "fmt": "GB1W",
-   "bytes": 992443
+   "bytes": 1006233
   }
  },
  "bogtroll": {
@@ -593,13 +593,13 @@
   "fmt": "GB03",
   "kind": "biped+weapon",
   "scale": 1.25,
-  "bytes": 110253,
+  "bytes": 111814,
   "verts": 7000,
   "tris": 13996,
   "full": {
    "file": "mon_minerorc.bin.gz",
    "fmt": "GB1W",
-   "bytes": 693411
+   "bytes": 724784
   }
  },
  "myconid": {
@@ -677,13 +677,13 @@
   "fmt": "GB03",
   "kind": "biped+weapon",
   "scale": 1.25,
-  "bytes": 108177,
+  "bytes": 109558,
   "verts": 7000,
   "tris": 13992,
   "full": {
    "file": "mon_orc.bin.gz",
    "fmt": "GB1W",
-   "bytes": 569707
+   "bytes": 598051
   }
  },
  "priest": {
