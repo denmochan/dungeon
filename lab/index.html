@@ -16329,7 +16329,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
     F[i*3]=hp[0]/0.84+0.5;F[i*3+1]=0.5-hp[1]/0.86;F[i*3+2]=fz;}
    if(sp==="slimeknight")for(let i=0;i<M.NV;i++){if(F[i*3+2]>0||(M.WP&&M.WP[i]))continue;const x=M.P0[i*3],y=M.P0[i*3+1],z=M.P0[i*3+2],nz=M.N0[i*3+2];if(y>0.98||z<0.2||nz<0.05)continue;const t=Math.max(0,Math.min(1,(nz-0.05)/0.25));   /* 乗り物のスライムの前の面：となりのマス（+1）に、怒った顔の絵を貼る */
     F[i*3]=1+x/1.3+0.5;F[i*3+1]=0.5-(y-0.42)/1.3;F[i*3+2]=t*t*(3-2*t);}
-   M.F=F;M.FI=sp==="slimeknight"?8:fi;}catch(e){}};
+   M.F=F;M.FI=sp==="slimeknight"?8:fi;if(sp==="slimeknight"){const MO=new Uint8Array(M.NV);for(let i=0;i<M.NV;i++){const r=M.C[i*3],b=M.C[i*3+2];if(M.P0[i*3+1]<0.99&&b>r+30&&!(M.WP&&M.WP[i]))MO[i]=1;}M.MOUNT=MO;}   /* 乗り物のスライムの頂点（乗り手の骨と別に、つぶれる・のびる） */}catch(e){}};
  const loadMon=sp=>{if(MS[sp])return MS[sp];const M=MS[sp]={ok:false};(async()=>{try{const LT=window.__labLite!==false&&!/[?&]full/.test(location.search),r=await fetch((LT?"lab/lite/":"lab/")+(sp==="goblin"?"gob3d.bin.gz":"mon_"+sp+".bin.gz"));if(!r.ok)throw new Error(r.status);const buf=await new Response(r.body.pipeThrough(new DecompressionStream("gzip"))).arrayBuffer();
    const mg=String.fromCharCode(...new Uint8Array(buf.slice(0,4)));
    if(mg==="GB03"){const dv=new DataView(buf),NV=dv.getUint32(4,true),NT=dv.getUint32(8,true),fl=dv.getUint8(12);let o=13;M.pt=fl===1;M.hasW=fl===2;   /* 軽い版 */
@@ -16370,6 +16370,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
    for(let i=0,NV=M.NV;i<NV;i++){const px=P0[i*3],py=P0[i*3+1],pz=P0[i*3+2],nx=N0[i*3],ny=N0[i*3+1],nz=N0[i*3+2],w0=W[i]/255;let x=0,y=0,z=0,NX=0,NY=0,NZ=0;
     for(let k=0;k<2;k++){const b=T[B[i*2+k]],w=k?1-w0:w0;if(w<0.004||!b)continue;const m=b.M,dx=px-b.a[0],dy=py-b.a[1],dz=pz-b.a[2];
      x+=w*(m[0][0]*dx+m[0][1]*dy+m[0][2]*dz+b.b[0]);y+=w*(m[1][0]*dx+m[1][1]*dy+m[1][2]*dz+b.b[1]);z+=w*(m[2][0]*dx+m[2][1]*dy+m[2][2]*dz+b.b[2]);NX+=w*(m[0][0]*nx+m[0][1]*ny+m[0][2]*nz);NY+=w*(m[1][0]*nx+m[1][1]*ny+m[1][2]*nz);NZ+=w*(m[2][0]*nx+m[2][1]*ny+m[2][2]*nz);}
+    if(M.MOUNT&&M.MOUNT[i]){const q2=R.sq||1,w2=1/Math.sqrt(q2);x=px*w2;y=py*q2;z=pz*w2;NX=nx*q2;NY=ny*w2;NZ=nz*q2;}   /* 乗り物のスライム：乗り手の骨について行かず、はねるときにつぶれる・のびる */
     if(WP&&WP[i]&&(hideW===true||hideW===1||B[i*2]===hideW)){const hh=B[i*2]===4?5:8;x=R.J[hh][0];y=R.J[hh][1];z=R.J[hh][2];}   /* 焼きこんだ武器を隠す（作りこんだ武器に持ちかえるとき）。4＝左手・6＝右手・1＝全部 */   /* 掘るときは持っている武器をしまう */
     pos[i*3]=X+(x*cy+z*sy)*S;pos[i*3+1]=Y+y*S;pos[i*3+2]=Z+(-x*sy+z*cy)*S;const l=Math.hypot(NX,NY,NZ)||1;nor[i*3]=(NX*cy+NZ*sy)/l;nor[i*3+1]=NY/l;nor[i*3+2]=(-NX*sy+NZ*cy)/l;}}
   {const RM=rootM(RT),c2=Math.cos(yaw0),s2=Math.sin(yaw0);for(let i=0,NV=M.NV;i<NV;i++){let x=pos[i*3],y=pos[i*3+1],z=pos[i*3+2],nx=nor[i*3],ny=nor[i*3+1],nz=nor[i*3+2];
@@ -16430,7 +16431,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
   else if(kind==="pick"&&R.tool===2){const a=R.J[33],b=R.J[34],hd=nrm(R.J[36]),ax=nrm(sub(b,a));const wood=[0.5,0.33,0.18],iron=[0.5,0.52,0.58],ext=[b[0]+ax[0]*0.08,b[1]+ax[1]*0.08,b[2]+ax[2]*0.08];tube([a[0]-ax[0]*0.12,a[1]-ax[1]*0.12,a[2]-ax[2]*0.12],ext,0.032,0.036,wood);
    const P=(s,bend)=>[b[0]+hd[0]*s-ax[0]*bend,b[1]+hd[1]*s-ax[1]*bend,b[2]+hd[2]*s-ax[2]*bend];tube(P(0,0),P(0.18,0.03),0.055,0.04,iron);tube(P(0.18,0.03),P(0.34,0.1),0.04,0.012,iron);tube(P(0,0),P(-0.16,0.03),0.05,0.035,iron);tube(P(-0.16,0.03),P(-0.27,0.08),0.035,0.01,iron);}
   if(q.shield&&R.J[5]&&R.J[5][1]>-5){   /* 盾：木の板に鉄のふち・まんなかの鉄の玉。騎士は青地に白い十字 */
-   const c0=[R.J[5][0]-0.1,R.J[5][1]+0.02,R.J[5][2]+0.08],nx=[-1,0,0.15],ax=nrm(nx),u1=nrm(crs(ax,[0,1,0])),u2=crs(u1,ax),knight=/knight/.test(q.sp||"")&&q.sp!=="slimeknight",worn=q.sp==="slimeknight",face=knight?[0.22,0.4,0.82]:[0.55,0.36,0.2],rim=[0.62,0.64,0.7],rr=0.27,seg=20;
+   const c0=[R.J[5][0]-0.1,R.J[5][1]+0.02,R.J[5][2]+0.08],nx=[-1,0,0.15],ax=nrm(nx),u1=nrm(crs(ax,[0,1,0])),u2=crs(u1,ax),knight=/knight/.test(q.sp||"")&&q.sp!=="slimeknight",worn=q.sp==="slimeknight",face=knight?[0.22,0.4,0.82]:[0.55,0.36,0.2],rim=[0.62,0.64,0.7],rr=worn?0.36:0.27,seg=20;
    const P=(r,a,h)=>[c0[0]+u1[0]*Math.cos(a)*r+u2[0]*Math.sin(a)*r+ax[0]*h,c0[1]+u1[1]*Math.cos(a)*r+u2[1]*Math.sin(a)*r+ax[1]*h,c0[2]+u1[2]*Math.cos(a)*r+u2[2]*Math.sin(a)*r+ax[2]*h];
    for(let k=0;k<seg;k++){const a0=k/seg*6.2832,a1=(k+1)/seg*6.2832;const ring=[[0,0.05],[0.5,0.04],[0.85,0.025],[1,0.0]];
     for(let j=0;j<ring.length-1;j++){const [ra,ha]=ring[j],[rb,hb]=ring[j+1];let col=knight&&(Math.abs(Math.sin(a0))*ra<0.13||Math.abs(Math.cos(a0))*ra<0.13)?[0.92,0.92,0.9]:face;if(worn){const h=Math.abs(Math.sin(k*12.9898+j*78.233)*43758.5)%1;col=col.map(v=>v*(0.78+0.3*h));}const nA=nrm([ax[0]+u1[0]*0.4*ra,ax[1],ax[2]+u1[2]*0.4*ra]);
@@ -16492,7 +16493,10 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
   else if(st==="tired"){R=rg("idle",T*0.5);root.pitch=0.14;root.dy=-0.04+0.025*Math.sin(T*6);}   /* 前かがみで肩で息をする */
   else if(st==="down"){R=bip?rg("hurt",0.3):rg("idle",0);const f=ease(k);if(bip){root.pitch=-1.45*f;root.dz=-0.15*f;root.dy=0.06*f;}else{root.roll=1.5*f;root.dy=0.05*f;}}   /* 人の形はあおむけ、四つ足などは横だおし */   /* あおむけに倒れる */
   else R=rg("idle",T);
-  if(sp==="slimeknight"&&!/^(walk|run|windup|strike|recover|knock|down|dodge|stagger|bowdraw|bowshoot)$/.test(st||""))R=proudPose(R);   /* スライム騎兵：胸を張って剣を立てる（騎士きどり） */
+  if(sp==="slimeknight"&&!/^(walk|run|windup|strike|recover|knock|down|dodge|stagger|bowdraw|bowshoot)$/.test(st||""))R=proudPose(R);
+  if(sp==="slimeknight"&&/^(walk|run)$/.test(st)){const t=((k%1)+1)%1,fast=st==="run";let hy=0,sq=1;   /* スライム騎兵の歩き：乗り物のスライムがはねて進む（乗り手は足を動かさず、胸を張ったまま） */
+   if(t>0.2&&t<0.8){const u=(t-0.2)/0.6;hy=(fast?0.42:0.3)*Math.sin(Math.PI*u);sq=1+0.1*Math.sin(Math.PI*u);}else{const u=t<0.2?(t+0.2)/0.4:(t-0.8)/0.4;sq=1-(fast?0.26:0.2)*Math.sin(Math.PI*u);}
+   R=proudPose(rg("idle",T));const rdy=-(1-sq)*0.97;R=Object.assign({},R,{sq,J:R.J.map(v=>v&&v[1]>-5?[v[0],v[1]+rdy,v[2]]:v)});root.dy=hy;root.pitch=(fast?0.12:0.07)*Math.sin(2*Math.PI*t);}   /* スライム騎兵：胸を張って剣を立てる（騎士きどり） */
   if(!bip&&/^(windup|strike|recover)$/.test(st))R=beastAtk(kit,R,st,k,root);   /* 人の形でない子の攻撃：かみつく・体当たり・ふたを開く */
   return{R,root};};
  const rootM=r=>{if(!r)return null;const cp=Math.cos(r.pitch||0),sp=Math.sin(r.pitch||0),cr=Math.cos(r.roll||0),sr=Math.sin(r.roll||0);   /* 足もと中心：前後（x軸まわり、＋で前へ倒れる）→左右（z軸まわり） */
