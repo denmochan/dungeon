@@ -355,13 +355,13 @@
   "fmt": "GB03",
   "kind": "biped+weapon",
   "scale": 0.75,
-  "bytes": 121486,
+  "bytes": 121728,
   "verts": 7500,
   "tris": 14996,
   "full": {
    "file": "mon_goldkobold.bin.gz",
    "fmt": "GB1W",
-   "bytes": 672647
+   "bytes": 678994
   }
  },
  "golem": {
@@ -453,13 +453,13 @@
   "fmt": "GB03",
   "kind": "biped+weapon",
   "scale": 0.8,
-  "bytes": 122067,
+  "bytes": 122229,
   "verts": 7500,
   "tris": 14980,
   "full": {
    "file": "mon_jackal.bin.gz",
    "fmt": "GB1W",
-   "bytes": 674294
+   "bytes": 680759
   }
  },
  "knight": {
@@ -481,13 +481,13 @@
   "fmt": "GB03",
   "kind": "biped+weapon",
   "scale": 0.75,
-  "bytes": 121219,
+  "bytes": 121237,
   "verts": 7500,
   "tris": 14984,
   "full": {
    "file": "mon_kobold.bin.gz",
    "fmt": "GB1W",
-   "bytes": 618531
+   "bytes": 623942
   }
  },
  "lavaslime": {
