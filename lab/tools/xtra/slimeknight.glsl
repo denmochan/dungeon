@@ -16,8 +16,9 @@ float arcD(vec2 u,vec2 c,float rr,float w){vec2 d=u-c;return d.y<0.01?abs(length
 vec4 xcol(vec3 p,vec3 n,float m){
  if(m>16.5)return vec4(pow(vec3(0.25,0.62,1.0),vec3(2.2)),0.1);
  if(m>15.5){vec3 c=mix(vec3(0.62,0.66,0.74),vec3(0.9,0.93,0.97),smoothstep(-0.2,0.8,n.y))*(0.95+0.06*fbm(p*10.0));return vec4(pow(c,vec3(2.2)),0.6);}
- float t=clamp(p.y/0.97,0.0,1.0);vec3 c=mix(vec3(0.16,0.55,1.0),vec3(0.55,0.86,1.0),t*t);
+ float t=clamp(p.y/0.97,0.0,1.0);vec3 c=mix(vec3(0.2,0.5,0.86),vec3(0.5,0.78,0.95),t*t);   // ゴブリンの肌と同じ質感に：色を少し落ち着かせ、まだらの濃淡と、うすい筋を入れる
+ float f1=fbm(p*5.0),f2=fbm(p*13.0+7.0);c*=(0.84+0.3*f1)*(0.93+0.12*f2);c=mix(c,c*vec3(0.8,0.88,1.05),smoothstep(0.55,0.75,fbm(p*2.4+3.0))*0.6);
  // 顔は形に焼かず、試し場で絵を貼る（顔の表の10番目のマス。焼くとギザギザになった）
  vec3 d0=normalize(vec3(-0.42,0.78,0.46)),d1=normalize(vec3(-0.30,0.86,0.40));float a0=dot(n,d0),a1=dot(n,d1);
- float hl=smoothstep(0.93,0.945,a0)*(1.0-smoothstep(0.965,0.978,a1));c=mix(c,vec3(0.97,1.0,1.0),hl*0.9*smoothstep(0.45,0.55,p.y));
- return vec4(pow(c,vec3(2.2)),0.04);}
+ float hl=smoothstep(0.93,0.945,a0)*(1.0-smoothstep(0.965,0.978,a1));c=mix(c,vec3(0.85,0.95,1.0),hl*0.45*smoothstep(0.45,0.55,p.y));   // つやは弱く
+ return vec4(pow(c,vec3(2.2)),0.06);}
