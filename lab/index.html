@@ -10888,7 +10888,11 @@ SP3D24.noble = 1; SP3D24.gargoyle = 1; LOOPK24.gargoyle = 3.2;
   return R2(sp0, mode, t); }; }
 // 11/28 吸血鬼の系統：背を高く脚を長く（本人「スタイリッシュに」）。腰より下を1.7倍にのばし、上はその分持ち上げる
 { const R3 = rigSp24; let depth = 0; rigSp24 = function (sp0, mode, t){ depth++; let R; try { R = R3(sp0, mode, t); } finally { depth--; } if (depth > 0 || (sp0 !== "vampire" && sp0 !== "count")) return R;   /* 中で rigSp24 が呼び直されるので、いちばん外だけでのばす */ const L = window.__nobLeg || 2.0, HY = 0.52;
-    return Object.assign({}, R, { J: R.J.map(v => !v || v[1] < -5 ? v : [v[0], v[1] < HY ? v[1] * L : v[1] + HY * (L - 1), v[2]]) }); }; }
+    const J = R.J.map(v => !v || v[1] < -5 ? v : [v[0], v[1] < HY ? v[1] * L : v[1] + HY * (L - 1), v[2]]);
+    if (mode === "idle" || mode === "sleep") { const w = window.__nobStand == null ? 1 : window.__nobStand, lr = (a, b) => a.map((x, i) => x + (b[i] - x) * w);   /* 立ち姿は背すじをのばし、腕を体に沿わせ、脚をまっすぐ（がに股でサルのように見えた） */
+      [[3, 4, 5, -1], [6, 7, 8, 1]].forEach(([s, e, h, sg]) => { const S = J[s], E = [S[0] + sg * 0.07, S[1] - 0.3, S[2] - 0.02], H = [E[0] + sg * 0.02, E[1] - 0.28, E[2] + 0.06]; J[e] = lr(J[e], E); J[h] = lr(J[h], H); });
+      [[9, 10, 11, 15, -1], [12, 13, 14, 16, 1]].forEach(([hp, k, an, to, sg]) => { const P = J[hp], A = [P[0] + sg * 0.03, 0.12, P[2]], K = [(P[0] + A[0]) / 2, (P[1] + A[1]) / 2, P[2] + 0.03]; J[k] = lr(J[k], K); J[an] = lr(J[an], A); J[to] = lr(J[to], [A[0], 0.05, A[2] + 0.16]); }); }
+    return Object.assign({}, R, { J }); }; }
 // ---------- 主（2Dの見た目に寄せた専用の体） VAR.w=段階 ----------
 KIT24.lordk = () => ({ common: COMMON24, body: (ROOM_PARTS24.handTxt + addBody24(ROOM_PARTS24.bodyTxt.replace("sHead(", "sHeadNE(").replace("if(tool>0.5&&tool<1.5){", "if(tool>9.0){")
     .replace("d=smin(d,sHeadNE(HR*(p-J[2])),0.07);", "d=smin(d,sHeadNE((HR*(p-J[2])-vec3(0.0,-0.02,0.0))/0.95)*0.95,0.07);"), `
@@ -16320,13 +16324,24 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
     g.fillStyle="#140c08";g.beginPath();g.ellipse(x+fl*0.2*K,y,0.75*K,0.9*K,0,0,6.283);g.fill();g.fillStyle="#fff";g.beginPath();g.ellipse(x-fl*0.5*K,y-0.35*K,0.4*K,0.4*K,0,0,6.283);g.fill();
     g.fillStyle="rgba(20,12,8,0.85)";g.beginPath();g.moveTo(x-fl*3*K,y-2*K);g.lineTo(x+fl*3*K,y-2.4*K);g.lineTo(x+fl*3*K,y-0.55*K);g.lineTo(x-fl*3*K,y-0.15*K);g.closePath();g.fill();g.restore();   // 重い上まぶた
    g.strokeStyle="rgba(30,18,10,0.75)";g.lineWidth=0.7*K;g.lineCap="round";g.beginPath();g.moveTo(x+fl*2.2*K,y+1.3*K);g.quadraticCurveTo(x+fl*0.6*K,y+3.0*K,x-fl*1.6*K,y+3.8*K);g.stroke();}}   // 目の下のすじ
+ /* 吸血鬼の顔（11/28 燕尾服の紳士）：切れ長のつり目（赤い瞳・黒いふち・目の上の影）、細くつり上がった眉、口の片はしを上げた薄い笑い。顔の表の13番目のマス */
+ function vampFace(g,ox,K){g.clearRect(ox,0,32*K,32*K);const P=(c,r)=>[ox+c*K,r*K];
+  for(const[c,fl]of[[10.0,1],[22.0,-1]]){const[x,y]=P(c,14.2);
+   g.fillStyle="rgba(60,30,50,0.35)";g.beginPath();g.ellipse(x,y-0.6*K,4.2*K,2.4*K,fl*0.25,0,6.283);g.fill();   // 目の上の影
+   g.fillStyle="#140a0e";g.beginPath();g.moveTo(x+fl*3.4*K,y+0.4*K);g.quadraticCurveTo(x,y-2.2*K,x-fl*3.6*K,y-1.6*K);g.quadraticCurveTo(x-fl*0.6*K,y+1.6*K,x+fl*3.4*K,y+0.4*K);g.fill();   // 切れ長のふち（目じりが上）
+   g.save();g.beginPath();g.moveTo(x+fl*2.6*K,y+0.2*K);g.quadraticCurveTo(x,y-1.5*K,x-fl*2.8*K,y-1.1*K);g.quadraticCurveTo(x-fl*0.4*K,y+1.0*K,x+fl*2.6*K,y+0.2*K);g.clip();
+    g.fillStyle="#f2e8e8";g.fillRect(x-4*K,y-3*K,8*K,6*K);g.fillStyle="#d01020";g.beginPath();g.ellipse(x-fl*0.3*K,y-0.2*K,1.15*K,1.15*K,0,0,6.283);g.fill();g.fillStyle="#2a0006";g.beginPath();g.ellipse(x-fl*0.3*K,y-0.2*K,0.42*K,0.9*K,0,0,6.283);g.fill();g.restore();
+   g.strokeStyle="#140a0e";g.lineCap="round";g.lineWidth=0.8*K;g.beginPath();g.moveTo(x+fl*2.8*K,y-2.6*K);g.quadraticCurveTo(x,y-3.4*K,x-fl*3.6*K,y-4.6*K);g.stroke();}   // つり上がった細い眉
+  const[mx,my]=P(16,22.0);g.strokeStyle="#3a0a14";g.lineWidth=0.6*K;g.lineCap="round";g.beginPath();g.moveTo(mx-3.0*K,my+0.3*K);g.quadraticCurveTo(mx,my+0.8*K,mx+3.4*K,my-0.9*K);g.stroke();   // 片はしを上げた薄い笑い
+  g.fillStyle="#fffaf0";for(const d of[-1.6,1.4]){g.beginPath();g.moveTo(mx+d*K-0.45*K,my+0.5*K);g.lineTo(mx+d*K+0.45*K,my+0.45*K);g.lineTo(mx+d*K,my+2.0*K);g.closePath();g.fill();}
+  g.strokeStyle="rgba(120,70,80,0.5)";g.lineWidth=0.4*K;g.beginPath();g.moveTo(mx+0.2*K,my-4.5*K);g.lineTo(mx-0.6*K,my-2.6*K);g.lineTo(mx+0.5*K,my-2.4*K);g.stroke();}   // 鼻すじ
  function faceAtlasSmooth(gl){const K=8,W=512*K,H=32*K,out=new ImageData(W,H),up=(m)=>{const a=document.createElement("canvas");a.width=32;a.height=32;const g0=a.getContext("2d"),im=g0.createImageData(32,32);for(let q=0;q<1024;q++){im.data[q*4]=im.data[q*4+1]=im.data[q*4+2]=255;im.data[q*4+3]=m[q];}g0.putImageData(im,0,0);
    const b=document.createElement("canvas");b.width=32*K;b.height=32*K;const g=b.getContext("2d");g.imageSmoothingEnabled=true;g.imageSmoothingQuality="high";g.filter="blur("+(K*0.35)+"px)";g.drawImage(a,0,0,32*K,32*K);return g.getImageData(0,0,32*K,32*K).data;};
   ["goblin","slime","bat","ghost","imp","myconid","orc","human"].forEach((sp,fi)=>{const F=FACE24[sp],cols={};F.rows.forEach((r,y)=>[...r].forEach((ch,k)=>{if(!F.pal[ch])return;(cols[ch]=cols[ch]||new Uint8Array(1024))[y*32+k]=255;}));
    const all=new Uint8Array(1024);Object.values(cols).forEach(m=>m.forEach((v,q)=>{if(v)all[q]=255;}));const A=up(all),U=Object.keys(cols).map(ch=>[F.pal[ch],up(cols[ch])]);
    for(let y=0;y<32*K;y++)for(let x=0;x<32*K;x++){const q=(y*32*K+x)*4;let best=-1,bc=null;for(const[c,m]of U){if(m[q+3]>best){best=m[q+3];bc=c;}}const o=(y*W+fi*32*K+x)*4,a=A[q+3]/255,t=Math.max(0,Math.min(1,(a-0.4)/0.2));
     if(bc){out.data[o]=bc[0];out.data[o+1]=bc[1];out.data[o+2]=bc[2];}out.data[o+3]=t*t*(3-2*t)*255;}});
-  const cv=document.createElement("canvas");cv.width=W;cv.height=H;const g=cv.getContext("2d");g.putImageData(out,0,0);humanFace(g,7*32*K,K);slimeFace(g,1*32*K,K);orcFace(g,6*32*K,K);smugGobFace(g,8*32*K,K);guardSlimeFace(g,9*32*K,K);batFace(g,10*32*K,K);koboldFace(g,11*32*K,K);
+  const cv=document.createElement("canvas");cv.width=W;cv.height=H;const g=cv.getContext("2d");g.putImageData(out,0,0);humanFace(g,7*32*K,K);slimeFace(g,1*32*K,K);orcFace(g,6*32*K,K);smugGobFace(g,8*32*K,K);guardSlimeFace(g,9*32*K,K);batFace(g,10*32*K,K);koboldFace(g,11*32*K,K);vampFace(g,12*32*K,K);
   const t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,cv);[gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER].forEach(k=>gl.texParameteri(gl.TEXTURE_2D,k,gl.LINEAR));[gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T].forEach(k=>gl.texParameteri(gl.TEXTURE_2D,k,gl.CLAMP_TO_EDGE));return t;}
  /* ===== 四つ足の歩き（11/28）：ゲームのリグは足を動かさないので、脚ごとに「腰→ひざ→足」の2本の骨を入れて、足を床に止めて歩かせる ===== */
  const rotAB=(a,b)=>{a=nrm(a);b=nrm(b);const v=crs(a,b),c=dot(a,b),s=Math.hypot(v[0],v[1],v[2]);if(s<1e-6)return c>0?[1,0,0,0,1,0,0,0,1]:[-1,0,0,0,1,0,0,0,-1];const k=nrm(v),K=[0,-k[2],k[1],k[2],0,-k[0],-k[1],k[0],0],K2=[0,1,2].map(i=>[0,1,2].map(j=>K[i*3]*K[j]+K[i*3+1]*K[3+j]+K[i*3+2]*K[6+j]));
@@ -16345,6 +16360,9 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
  const lidMark=(sp,M)=>{try{if(kitOf24(rigOf(sp))!=="mimic")return;const a=0.15,ca=Math.cos(a),sa=Math.sin(a),L=new Uint8Array(M.NV);   /* 箱のふたの頂点（ゲームの形と同じ、うしろのちょうつがい y0.48・z-0.36、角度0.15） */
    for(let i=0;i<M.NV;i++){const y=M.P0[i*3+1]-0.48,z=M.P0[i*3+2]+0.36,ly=ca*y-sa*z,lz=sa*y+ca*z;L[i]=ly>-0.04&&lz>-0.06&&M.P0[i*3+1]>0.4?1:0;}M.LID=L;}catch(e){}};
  const faceUV=(sp,M)=>{try{if(/^(ghost|sporewraith)$/.test(sp))return;   /* 目と口を形でくりぬいた子は、顔の絵を貼らない */
+ if(sp==="vampire"||sp==="count"){const R=rigSp24(sp,"idle",0),J2=R.J[2],F=new Float32Array(M.NV*3);   /* 吸血鬼：顔の絵（13番目のマス）を小さな頭の前に */
+   for(let i=0;i<M.NV;i++){const r=M.C[i*3],gg=M.C[i*3+1],b=M.C[i*3+2];if(r<120)continue;const x=M.P0[i*3]-J2[0],y=M.P0[i*3+1]-J2[1],z=M.P0[i*3+2]-J2[2];if(Math.hypot(x,y,z)>0.27||z<0.04)continue;const nz=M.N0[i*3+2];if(nz<0.05)continue;const t=Math.max(0,Math.min(1,(nz-0.05)/0.3));F[i*3]=x/0.44+0.5;F[i*3+1]=0.5-(y+0.01)/0.44;F[i*3+2]=t*t*(3-2*t);}
+   M.F=F;M.FI=12;return;}
  if(sp==="wolfrider"&&M.B){const R0=rigSp24("wolfrider","idle",0),j0=R0.J[0];for(let i=0;i<M.NV;i++){if(M.P0[i*3+1]>j0[1]+0.3&&M.P0[i*3+2]<j0[2]+0.45){M.B[i*2]=0;M.B[i*2+1]=0;M.W[i]=255;}}}   /* 乗り手の頂点は胴（0番）だけについて動く（狼の頭の骨にも引かれて、乗り手の軸がずれていた） */
  if(sp==="wolfrider"){const R=rigSp24("wolfrider","idle",0),J0=R.J[0],hc=[J0[0],J0[1]+0.96,J0[2]+0.16],F=new Float32Array(M.NV*3);   /* 狼騎兵の乗り手：ゴブリンの顔の絵（1番目のマス）を大きな頭の前に */
    for(let i=0;i<M.NV;i++){const x=M.P0[i*3]-hc[0],y=M.P0[i*3+1]-hc[1],z=M.P0[i*3+2]-hc[2];if(Math.hypot(x,y,z)>0.27||Math.abs(x)>0.24)continue;const nz=M.N0[i*3+2];if(nz<0.05)continue;const t=Math.max(0,Math.min(1,(nz-0.05)/0.3));F[i*3]=x/0.5+0.5;F[i*3+1]=0.5-(y-0.02)/0.5;F[i*3+2]=t*t*(3-2*t);}
