@@ -1027,13 +1027,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 1.4,
-  "bytes": 126290,
+  "bytes": 125912,
   "verts": 8000,
-  "tris": 16028,
+  "tris": 16012,
   "full": {
    "file": "mon_wolfrider.bin.gz",
    "fmt": "GB02",
-   "bytes": 715910
+   "bytes": 704516
   }
  },
  "wraitheye": {
