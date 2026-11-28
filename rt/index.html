@@ -7475,7 +7475,7 @@ document.addEventListener("click", ev => {
 { const _oc2 = openChest19; openChest19 = function (S, c) { if (c.kind !== "lvall") return _oc2(S, c); if (!S.mons.length) return _oc2(S, c);
   return { text: "👑 覚醒", sub: "Lv+3 する子を1体えらんでね", sp: null, feed: 1, awaken: true, evos: [] }; }; }
 
-const VER20 = "層114／No.350（11/25 00:49）";
+const VER20 = "層115／No.350（11/25 00:49）";
 // ================= proto20：ダンジョンを見る画面と、配置する画面を分ける =================
 // ・ダンジョン画面：洞窟を大きく。部屋をタップ → 部屋ボード（全画面）
 // ・🧭育成：育てる→稼ぐ／守るの流れで見る。卒業Lv・毎朝おまかせ
@@ -13768,6 +13768,145 @@ document.addEventListener("click", ev => { const t = ev.target.closest && ev.tar
 /* 夜の画面のすみに、いまの縛りを出す */
 /* 転生の魂の上乗せは rebirth8 の包みで足す（ここで二重に足していたのを消した） */
 
+/* nav30：歩き方（道の計算・体の幅ぶん壁から離す・まわりをよける）。担当：歩き方＋戦闘AIのエージェント
+   前の作り（fp30 の rt30Step）は「見えたら直進 → 壁にぶつかったら BFS で回りこむ → 0.35秒進めなければ回りこむ → 岩の中なら近い道へ」の継ぎはぎだった。
+   ここでは、ふつうのゲームAIと同じ順に作る：
+     1) 歩ける所の地図：層の当たり判定（Rm.G・0.25m）から、壁までの距離の表を作る（体の半径ごとの「通れる所」が、この表1枚で決まる）
+     2) 道の計算：0.5mのマスで A*（体の幅で通れるマスだけ）。つながっていない所は先に「島の番号」で見分けて、むだに探さない
+     3) 道をなめらかに：ひもを引くように、まっすぐ通れる所の曲がりを省く（壁から少し余分に離れて引くので、角は少し膨らむ）
+     4) まわりをよける：行きたい向きのまわりの速さを何本か試し、ぶつかるまでの時間が短いものほど点を下げる（RVO を簡単にしたもの）
+   重い計算（A*）は1コマで使ってよい量（展開するマスの数）を決めて、こえたら次のコマへ回す（60fps を守る）。
+   地図は層の形が変わったとき（Rm.G が作り直されたとき／Rm.G30.c が変わったとき）だけ作り直す */
+const NAV30 = (() => {
+  const SQ2 = Math.SQRT2, BIG = 1e9;
+  let budget = 0;   /* このコマで A* が展開してよいマスの数（frame() でもどす） */
+  const stat = { astar: 0, exp: 0, wait: 0, direct: 0, fail: 0, build: 0, buildMs: 0 };
+
+  /* ---------- 1) 地図 ---------- */
+  /* G：layerGrid の結果 { W, H, x0, z0, c, fl, cl }。opt：{ top, bot, ZS, ZE }（出入口のトンネルの扱い。where() と同じ） */
+  /* 作るのは数コマに分ける（generator：区切りごとに yield）。はじめて作るときは JavaScript がまだ速くなっておらず、1回で 20〜40ms かかった */
+  function* build(G, opt) {
+    const W = G.W, H = G.H, c = G.c, n = W * H, fl = G.fl, cl = G.cl;
+    /* where() の「歩ける」＝ まわり0.4mの8点と真ん中が床（gFree と同じ式）。ここを毎回 where() で引くと重いので、表にしておく */
+    const blk = new Uint8Array(n); for (let j = 0; j < n; j++) blk[j] = fl[j] === 255 || cl[j] < 70 ? 1 : 0;
+    /* where() は「その点」から0.4mの8点を見るので、同じマスの中でも点の位置で答えが変わる。マスのどこに立っても where() が通るよう、
+       8点がかかりうるマス（各方向2×2）をすべて見る（少しだけ狭めに。前はマスの中心だけで見て、地図では歩けるのに where() では岩の中、という所が0.4%あった） */
+    const oi0 = [], oi1 = [], oj0 = [], oj1 = []; for (let k = 0; k < 8; k++) { const an = k * 0.785, ox = Math.cos(an) * 0.4 / c, oz = Math.sin(an) * 0.4 / c; oi0.push(Math.floor(ox)); oi1.push(Math.floor(ox + 0.999)); oj0.push(Math.floor(oz)); oj1.push(Math.floor(oz + 0.999)); }
+    const walk = new Uint8Array(n);
+    for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) { let ok = !blk[j * W + i];
+      for (let k = 0; k < 8 && ok; k++) for (let ix = i + oi0[k]; ix <= i + oi1[k] && ok; ix++) for (let iz = j + oj0[k]; iz <= j + oj1[k] && ok; iz++) { if (ix < 0 || iz < 0 || ix >= W || iz >= H || blk[iz * W + ix]) ok = false; }
+      /* 出入口のトンネル（where() は真ん中の 0.8m を、床でなくても通す） */
+      if (!ok) { const x = G.x0 + (i + 0.5) * c, z = G.z0 + (j + 0.5) * c; if (Math.abs(x) < 0.8 && ((z > opt.ZS - 1.2 && opt.top) || (z < opt.ZE + 1.2 && opt.bot))) ok = true; }
+      walk[j * W + i] = ok ? 1 : 0; if (i === W - 1 && j % 24 === 23) yield 0; }
+    /* 壁までの距離（m）：2回なめる面取り距離。歩けるマスは最低 c（となりが壁） */
+    const d = new Float32Array(n); for (let j = 0; j < n; j++) d[j] = walk[j] ? BIG : 0;
+    for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) { const k = j * W + i; if (!d[k]) continue; let v = d[k];
+      v = Math.min(v, i > 0 ? d[k - 1] + 1 : 1); if (j > 0) { v = Math.min(v, d[k - W] + 1); if (i > 0) v = Math.min(v, d[k - W - 1] + SQ2); if (i < W - 1) v = Math.min(v, d[k - W + 1] + SQ2); } else v = Math.min(v, 1); d[k] = v; }
+    yield 0;
+    for (let j = H - 1; j >= 0; j--) for (let i = W - 1; i >= 0; i--) { const k = j * W + i; if (!d[k]) continue; let v = d[k];
+      v = Math.min(v, i < W - 1 ? d[k + 1] + 1 : 1); if (j < H - 1) { v = Math.min(v, d[k + W] + 1); if (i < W - 1) v = Math.min(v, d[k + W + 1] + SQ2); if (i > 0) v = Math.min(v, d[k + W - 1] + SQ2); } else v = Math.min(v, 1); d[k] = v; }
+    for (let k = 0; k < n; k++) d[k] *= c; yield 0;
+    /* 層の入口の階段（ローカル z > 0.5）は、逃げる勇者のほかは上がらない（step30 と同じ決まり）。その行を覚えておく */
+    const jUp = Math.floor((0.5 - G.z0) / c);
+    /* 粗いマス（0.5m＝細かいマス2×2）：A* はこちらで。4つのうち壁からいちばん遠い細かいマスを、そのマスの代表点にする */
+    const CW = Math.ceil(W / 2), CH = Math.ceil(H / 2), cn = CW * CH, cd = new Float32Array(cn), cf = new Int32Array(cn).fill(-1), cx = new Float32Array(cn), cz = new Float32Array(cn), cup = new Uint8Array(cn);
+    for (let J = 0; J < CH; J++) for (let I = 0; I < CW; I++) { let best = -1, bd = 0; for (let dj = 0; dj < 2; dj++) for (let di = 0; di < 2; di++) { const i = I * 2 + di, j = J * 2 + dj; if (i >= W || j >= H) continue; const k = j * W + i; if (d[k] > bd) { bd = d[k]; best = k; } }
+      const q = J * CW + I; cd[q] = bd; cf[q] = best; if (best >= 0) { const i = best % W, j = (best / W) | 0; cx[q] = G.x0 + (i + 0.5) * c; cz[q] = G.z0 + (j + 0.5) * c; cup[q] = j > jUp ? 1 : 0; } }
+    return { G, W, H, c, x0: G.x0, z0: G.z0, d, jUp, CW, CH, cd, cf, cx, cz, cup, comp: new Map(),
+      /* A* の作業場（毎回 new しない） */ gS: new Float32Array(cn), par: new Int32Array(cn), stamp: new Uint32Array(cn), closed: new Uint32Array(cn), gen: 1, heap: new Int32Array(cn * 8), hf: new Float32Array(cn * 8), hn: 0 };
+  }
+  /* 体の半径 r → 壁からの距離がいくつ要るか。人（半径0.6）は where() で歩ける所ならどこでも。大きい子ほど広い所しか通れない */
+  const needOf = (nav, r) => nav.c - 0.01 + Math.max(0, r - 0.6);
+  const fineAt = (nav, x, z) => { const i = Math.floor((x - nav.x0) / nav.c), j = Math.floor((z - nav.z0) / nav.c); return i < 0 || j < 0 || i >= nav.W || j >= nav.H ? -1 : j * nav.W + i; };
+  /* (x, z) にその体で立てるか */
+  function passAt(nav, x, z, nd, up) { const k = fineAt(nav, x, z); if (k < 0 || nav.d[k] < nd) return false; return up || ((k / nav.W) | 0) <= nav.jUp; }
+  const clearAt = (nav, x, z) => { const k = fineAt(nav, x, z); return k < 0 ? 0 : nav.d[k]; };
+  /* まっすぐ通れるか（体の幅ぶん。0.15mおきに見る） */
+  function lineClear(nav, x0, z0, x1, z1, nd, up) { const L = Math.hypot(x1 - x0, z1 - z0), m = Math.max(1, Math.ceil(L / 0.15));
+    for (let k = 0; k <= m; k++) { const t = k / m; if (!passAt(nav, x0 + (x1 - x0) * t, z0 + (z1 - z0) * t, nd, up)) return false; } return true; }
+  const cPass = (nav, q, nd, up) => nav.cf[q] >= 0 && nav.cd[q] >= nd && (up || !nav.cup[q]);
+  const cOf = (nav, x, z) => { const I = Math.floor((x - nav.x0) / (nav.c * 2)), J = Math.floor((z - nav.z0) / (nav.c * 2)); return I < 0 || J < 0 || I >= nav.CW || J >= nav.CH ? -1 : J * nav.CW + I; };
+  /* 島の番号（その体で行き来できる所のまとまり）。体の大きさ×階段の可否ごとに1回だけ作る */
+  function comp(nav, nd, up) { const key = Math.round(nd * 100) + (up ? 100000 : 0); let L = nav.comp.get(key); if (L) return L;
+    const CW = nav.CW, cn = CW * nav.CH; L = new Int32Array(cn).fill(-1); let id = 0; const st = new Int32Array(cn);
+    for (let s = 0; s < cn; s++) { if (L[s] >= 0 || !cPass(nav, s, nd, up)) continue; let sp = 0; st[sp++] = s; L[s] = id;
+      while (sp) { const q = st[--sp], I = q % CW, J = (q / CW) | 0; for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) { if (!di && !dj) continue; const i2 = I + di, j2 = J + dj; if (i2 < 0 || j2 < 0 || i2 >= CW || j2 >= nav.CH) continue; const r = j2 * CW + i2; if (L[r] >= 0 || !cPass(nav, r, nd, up)) continue;
+          if (di && dj && !(cPass(nav, J * CW + i2, nd, up) && cPass(nav, j2 * CW + I, nd, up))) continue; L[r] = id; st[sp++] = r; } } id++; }
+    nav.comp.set(key, L); return L; }
+  /* いちばん近い通れる粗いマス（立っている所が通れないとき・行き先が狭すぎるとき）。R は粗いマスの数 */
+  function nearC(nav, x, z, nd, up, R) { const q0 = cOf(nav, x, z); if (q0 >= 0 && cPass(nav, q0, nd, up)) return q0; const I0 = Math.floor((x - nav.x0) / (nav.c * 2)), J0 = Math.floor((z - nav.z0) / (nav.c * 2)); let best = -1, bd = BIG;
+    for (let r = 1; r <= R && best < 0; r++) for (let dj = -r; dj <= r; dj++) for (let di = -r; di <= r; di++) { if (Math.max(Math.abs(di), Math.abs(dj)) !== r) continue; const I = I0 + di, J = J0 + dj; if (I < 0 || J < 0 || I >= nav.CW || J >= nav.CH) continue; const q = J * nav.CW + I; if (!cPass(nav, q, nd, up)) continue; const dd = Math.hypot(nav.cx[q] - x, nav.cz[q] - z); if (dd < bd) { bd = dd; best = q; } }
+    return best; }
+  /* いちばん近い立てる点（岩の中や狭すぎる所に入ってしまったときの出口）。R は m */
+  function nearest(nav, x, z, nd, up, R = 4) { if (passAt(nav, x, z, nd, up)) return [x, z]; const q = nearC(nav, x, z, nd, up, Math.ceil(R / (nav.c * 2))); return q < 0 ? null : [nav.cx[q], nav.cz[q]]; }
+
+  /* ---------- 2) A* ---------- */
+  function push(nav, q, f) { const h = nav.heap, hf = nav.hf; let i = nav.hn++; while (i > 0) { const p = (i - 1) >> 1; if (hf[p] <= f) break; h[i] = h[p]; hf[i] = hf[p]; i = p; } h[i] = q; hf[i] = f; }
+  function pop(nav) { const h = nav.heap, hf = nav.hf, top = h[0], n = --nav.hn; if (n > 0) { const q = h[n], f = hf[n]; let i = 0; for (;;) { let l = i * 2 + 1; if (l >= n) break; if (l + 1 < n && hf[l + 1] < hf[l]) l++; if (hf[l] >= f) break; h[i] = h[l]; hf[i] = hf[l]; i = l; } h[i] = q; hf[i] = f; } return top; }
+  /* 戻り値：[[x,z],…]（なめらかにした曲がり角の列。最後が行き先）／ null（行けない）／ undefined（このコマの計算量を使い切った。次のコマで）
+     extraCost(x, z)：そのマスを通るときの追加の重さ（罠をよける など。なくてよい） */
+  function path(nav, sx, sz, gx, gz, r, up, extraCost) {
+    const nd = needOf(nav, r);
+    /* まっすぐ通れるなら A* はいらない（体の幅で調べているので、見えているだけで突っこむのとはちがう） */
+    if (!extraCost && lineClear(nav, sx, sz, gx, gz, nd, up)) { stat.direct++; return [[gx, gz]]; }
+    const s = nearC(nav, sx, sz, nd, up, 4), g = nearC(nav, gx, gz, nd, up, 5); if (s < 0 || g < 0) { stat.fail++; return null; }
+    const L = comp(nav, nd, up); if (L[s] !== L[g]) { stat.fail++; return null; }   /* 別の島：探すまでもなく行けない */
+    if (budget <= 0) { stat.wait++; return undefined; }
+    const CW = nav.CW, gS = nav.gS, par = nav.par, stamp = nav.stamp, closed = nav.closed, gen = ++nav.gen, tgx = nav.cx[g], tgz = nav.cz[g], step = nav.c * 2, cap = nav.heap.length - 1;
+    const hOf = q => { const dx = Math.abs(nav.cx[q] - tgx), dz = Math.abs(nav.cz[q] - tgz); return Math.max(dx, dz) + (SQ2 - 1) * Math.min(dx, dz); };
+    nav.hn = 0; stamp[s] = gen; gS[s] = 0; par[s] = -1; push(nav, s, hOf(s)); let found = false, exp = 0;
+    while (nav.hn) { const q = pop(nav); if (closed[q] === gen) continue; closed[q] = gen; exp++; if (q === g) { found = true; break; }
+      const I = q % CW, J = (q / CW) | 0;
+      for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) { if (!di && !dj) continue; const i2 = I + di, j2 = J + dj; if (i2 < 0 || j2 < 0 || i2 >= CW || j2 >= nav.CH) continue; const r2 = j2 * CW + i2; if (closed[r2] === gen || !cPass(nav, r2, nd, up)) continue;
+        if (di && dj && !(cPass(nav, J * CW + i2, nd, up) && cPass(nav, j2 * CW + I, nd, up))) continue;   /* 角を斜めにすり抜けない */
+        /* 壁ぎわは少し高くつける：道のまん中を通る（壁をこすって走らない） */ const room = nav.cd[r2] - nd, wallC = room < 0.6 ? 0.8 * (1 - room / 0.6) : 0;
+        const ng = gS[q] + step * (di && dj ? SQ2 : 1) * (1 + wallC) + (extraCost ? extraCost(nav.cx[r2], nav.cz[r2]) : 0);
+        if ((stamp[r2] !== gen || ng < gS[r2]) && nav.hn < cap) { stamp[r2] = gen; gS[r2] = ng; par[r2] = q; push(nav, r2, ng + hOf(r2)); } } }
+    budget -= exp; stat.astar++; stat.exp += exp; if (!found) { stat.fail++; return null; }
+    const raw = []; for (let q = g; q >= 0; q = par[q]) raw.push([nav.cx[q], nav.cz[q]]); raw.reverse();
+    /* 行き先そのものに立てるなら、最後は行き先（細かい位置まで） */ if (passAt(nav, gx, gz, nd, up)) raw.push([gx, gz]);
+    return pull(nav, sx, sz, raw, nd, up); }
+  /* ---------- 3) ひもを引く（なめらかに） ---------- */
+  /* 前の曲がり角から、まっすぐ（壁から余分に 0.2m 離れて）行ける いちばん先の点まで飛ばす。
+     余分の幅がとれない狭い所では、ふつうの幅で少しずつ進める */
+  function pull(nav, sx, sz, raw, nd, up) { const out = []; let ax = sx, az = sz, k = 0; const wide = nd + 0.2;
+    while (k < raw.length) { let j = k;
+      while (j + 1 < raw.length && (lineClear(nav, ax, az, raw[j + 1][0], raw[j + 1][1], wide, up) || (j + 1 - k < 3 && lineClear(nav, ax, az, raw[j + 1][0], raw[j + 1][1], nd, up)))) j++;
+      out.push(raw[j]); ax = raw[j][0]; az = raw[j][1]; k = j + 1; }
+    return out; }
+
+  /* ---------- 4) まわりをよける（速度障害物の簡易版） ---------- */
+  /* me：{ x, z, vx, vz, r }、pref：行きたい速さ [vx, vz]、vmax、others：[{ x, z, vx, vz, r, rec, w }]（rec=1：相手もよける＝半分ずつ。w：よける強さ）、
+     ok(x, z)：その場所に立てるか。速さの候補を何本か試し、
+     「行きたい速さとのちがい」＋「ぶつかるまでの時間が短いほど大きい罰」＋「壁へ向かう罰」が いちばん小さいものを選ぶ */
+  const ANG = [0, 0.3, -0.3, 0.65, -0.65, 1.05, -1.05, 1.55, -1.55, 2.2, -2.2, Math.PI], SPD = [1, 0.5];
+  function avoid(me, pref, vmax, others, ok) { const pl = Math.hypot(pref[0], pref[1]); if (pl < 1e-3 || !others.length) return pref;
+    const near = others.filter(o => Math.hypot(o.x - me.x, o.z - me.z) < 1.2 * vmax + o.r + me.r + 0.5); if (!near.length) return pref;
+    const ux = pref[0] / pl, uz = pref[1] / pl, HZ = 1.0; let best = pref, bp = BIG;
+    const tryV = (vx, vz) => { let p = Math.hypot(vx - pref[0], vz - pref[1]) / Math.max(0.3, vmax);
+      for (const o of near) { const R = me.r + o.r + 0.04, px = o.x - me.x, pz = o.z - me.z, cc = px * px + pz * pz - R * R;
+        /* 相手もよけるなら、ずれる量は半分ずつでよい（RVO：2v − 今の速さ − 相手の速さ） */ const wx = (o.rec ? 2 * vx - me.vx : vx) - o.vx, wz = (o.rec ? 2 * vz - me.vz : vz) - o.vz, b = px * wx + pz * wz;
+        if (cc < 0) { if (b > 0) p += 4 * b / Math.max(0.3, vmax) / Math.sqrt(px * px + pz * pz + 1e-6); continue; }   /* もう重なっている：近づく向きだけ罰（離れる向きは自由） */
+        const a = wx * wx + wz * wz; if (a < 1e-6 || b <= 0) continue; const disc = b * b - a * cc; if (disc <= 0) continue; const t = (b - Math.sqrt(disc)) / a; if (t < HZ) p += (o.w || 1) * 0.5 * (HZ / Math.max(0.08, t) - 1); }
+      if (p >= bp) return; if ((vx || vz) && (!ok(me.x + vx * 0.25, me.z + vz * 0.25) || !ok(me.x + vx * 0.12, me.z + vz * 0.12))) p += 6; if (p < bp) { bp = p; best = [vx, vz]; } };
+    for (const s of SPD) for (const an of ANG) { const c = Math.cos(an), sn = Math.sin(an), vx = (ux * c - uz * sn) * pl * s, vz = (ux * sn + uz * c) * pl * s; tryV(vx, vz); }
+    tryV(0, 0); return best; }
+
+  /* ---------- 層ごとの地図の持ち方 ---------- */
+  /* Rm.G（当たり判定）が作り直されたら・層の形（G30.c）が変わったら、作り直す */
+  let frameNo = 0;
+  function of(Rm, opt) { if (Rm.classic || !Rm.G) return null; const ck = Rm.G30 && Rm.G30.c, N0 = Rm.nav30; if (N0 && N0.G === Rm.G && N0.ck === ck) return N0;
+    let B = Rm.navB30; if (!B || B.G !== Rm.G || B.ck !== ck) B = Rm.navB30 = { G: Rm.G, ck, it: build(Rm.G, opt), ms: 0, fr: -1 };
+    if (B.fr === frameNo) return null; B.fr = frameNo;   /* 1コマに1区切りだけ進める。できるまでは null（呼んだ側は前の歩き方で） */
+    const clk = (typeof window !== "undefined" && window.__rnow) || (() => performance.now()), t0 = clk(), r = B.it.next(); B.ms += clk() - t0; stat.buildMax = Math.max(stat.buildMax || 0, clk() - t0);
+    if (!r.done) return null; const nv = r.value; nv.ck = ck; nv.ms = B.ms; stat.build++; stat.buildMs += B.ms; Rm.nav30 = nv; Rm.navB30 = null; return nv; }
+
+  return { of, path, avoid, passAt, lineClear, nearest, clearAt, needOf, comp, cOf, stat, inside: (nav, x, z) => fineAt(nav, x, z) >= 0,
+    frame: (n = 5000) => { budget = n; frameNo++; },   /* 1コマで A* が展開してよいマスの数 */
+    /* a から b へ、その体で行けるか（島の番号だけ見る。A* はしない） */
+    reach: (nav, ax, az, bx, bz, r, up) => { if (fineAt(nav, ax, az) < 0 || fineAt(nav, bx, bz) < 0) return true;   /* 地図の外（層と層のあいだのトンネル）は、わからないので行けることにする（歩く側で確かめる） */ const nd = needOf(nav, r), s = nearC(nav, ax, az, nd, up, 4), g = nearC(nav, bx, bz, nd, up, 5); if (s < 0 || g < 0) return false; const L = comp(nav, nd, up); return L[s] === L[g]; } };
+})();
+
 // ================= fp30：層を歩く（fp26 を層用に作り替えたもの） =================
 function bfs30(G, a, b){ const W = G.W, H = G.H, k = (x, y) => y * W + x, prev = new Int32Array(W * H).fill(-2); if (!g30at(G, a[0], a[1])) return null; const q = [k(a[0], a[1])]; prev[q[0]] = -1;
   while (q.length) { const c = q.shift(), x = c % W, y = (c / W) | 0; if (x === b[0] && y === b[1]) { const out = []; let t = c; while (t >= 0) { out.unshift([t % W, (t / W) | 0]); t = prev[t]; } return out; }
@@ -14110,8 +14249,10 @@ function fpOpen30(){
     const cb = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, cb); gl.bufferData(gl.ARRAY_BUFFER, new Uint8Array(C), gl.STATIC_DRAW);
     const ib = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint32Array(I), gl.STATIC_DRAW); return { pb, cb, ib, n: I.length, det: 1, fy: 0 }; }
   /* 当たり判定（0.25m）：場が0.62より濃い所だけ歩ける */
-  function layerGrid(Rm){ const F = layerField(Rm), G = Rm.G30, CS = Rm.CS, mid = (G.W - 1) / 2, c = 0.25, x0 = -(mid + 0.5) * CS, z0 = -(G.H - 0.5) * CS, W = Math.round(G.W * CS / c), H = Math.round(G.H * CS / c), fl = new Uint8Array(W * H).fill(255), cl = new Uint8Array(W * H);
-    for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) { const x = x0 + (i + 0.5) * c, zl = z0 + (j + 0.5) * c; if (F.f(x, zl) < 0.55) continue; let nearW = 0; for (let k = 0; k < 8 && !nearW; k++) { const an = k * 0.785; if (F.f(x + Math.cos(an) * 0.45, zl + Math.sin(an) * 0.45) < 0.5) nearW = 1; } if (nearW) continue;   /* 壁から必ず離れて立つ（壁の岩はでこぼこなので、近づくと岩の裏の暗闇が見えた） */ fl[j * W + i] = 50; cl[j * W + i] = Math.round(F.h(x, zl) * 20); }
+  /* layerGrid は、夜に絵のない層の当たり判定を作るとき（NAV30 の地図のため）は数コマに分けて作る（1回で20ms以上かかった）。ふだんは一度に */
+  function layerGrid(Rm){ const it = layerGridGen30(Rm); let r; while (!(r = it.next()).done); return r.value; }
+  function* layerGridGen30(Rm){ const F = layerField(Rm), G = Rm.G30, CS = Rm.CS, mid = (G.W - 1) / 2, c = 0.25, x0 = -(mid + 0.5) * CS, z0 = -(G.H - 0.5) * CS, W = Math.round(G.W * CS / c), H = Math.round(G.H * CS / c), fl = new Uint8Array(W * H).fill(255), cl = new Uint8Array(W * H);
+    for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) { if (i === 0 && j % 16 === 15) yield 0; const x = x0 + (i + 0.5) * c, zl = z0 + (j + 0.5) * c; if (F.f(x, zl) < 0.55) continue; let nearW = 0; for (let k = 0; k < 8 && !nearW; k++) { const an = k * 0.785; if (F.f(x + Math.cos(an) * 0.45, zl + Math.sin(an) * 0.45) < 0.5) nearW = 1; } if (nearW) continue;   /* 壁から必ず離れて立つ（壁の岩はでこぼこなので、近づくと岩の裏の暗闇が見えた） */ fl[j * W + i] = 50; cl[j * W + i] = Math.round(F.h(x, zl) * 20); }
     /* 置き物は通りぬけない（魔物や自分が置き物にめりこんでいた） */ const pr = Rm.props || {}, blk = (px, pz, rr) => { for (let j = Math.max(0, Math.floor((pz - rr - z0) / c)); j <= Math.min(H - 1, Math.ceil((pz + rr - z0) / c)); j++) for (let i = Math.max(0, Math.floor((px - rr - x0) / c)); i <= Math.min(W - 1, Math.ceil((px + rr - x0) / c)); i++) { const x = x0 + (i + 0.5) * c, zl = z0 + (j + 0.5) * c; if (Math.hypot(x - px, zl - pz) < rr) fl[j * W + i] = 255; } };
     (pr.up || []).forEach(q => { if (q.solid) blk(q.x, q.z, q.k === "cart" ? q.w * 0.55 : Math.max(0.3, q.w * 0.35)); }); (pr.veins || []).forEach(v => blk(v.x - v.nx * 0.1, v.z - v.nz * 0.1, 0.75));
     return { W, H, x0, z0, c, fl, cl }; }
@@ -14231,7 +14372,8 @@ function fpOpen30(){
       L.querySelectorAll("[data-r]").forEach(b => b.onclick = () => { const j = +b.dataset.r; m.home = j; m.job19 = null; m.job19h = j; try { save(); } catch (e) {} mkActs(rooms[R.i]); mkActs(rooms[j]); menu.hidden = true; toast(`${m.nick || ""} を ${rooms[j].name} へ`); }); }; }
   const toast = t => { const d = document.createElement("div"); d.className = "f26toast"; d.textContent = t; wrap.appendChild(d); setTimeout(() => d.remove(), 1800); };
   // 魔物の暮らし（軽く）
-  function stepActs(R, dt){ (R.acts || []).forEach(a => { if (a.stay) return;
+  const LIFEH30 = { fitsM: (...q) => fitsM(...q), sepOK: (...q) => sepOK(...q), where: (...q) => where(...q), bfs30: (...q) => bfs30(...q), cellW: (...q) => cellW(...q), rooms: () => rooms, player: () => P, cur: () => curRoom };   /* 暮らしAI（life30）に渡す道具 */
+  function stepActs(R, dt){ const NIGHT = typeof N !== "undefined" && N && !N.done; (R.acts || []).forEach(a => { if (a.stay) return; if (!NIGHT && typeof window.__life30 === "function") { try { if (window.__life30(R, a, dt, LIFEH30)) return; } catch (e) { console.warn('life30', e); } }
     /* 近くに来たら足を止めて、こちらを向く（気づいたら ♪） */ { const dx = P.x - a.x, dz = P.z - (R.Z + a.z), d = Math.hypot(dx, dz); if (R.i === curRoom && d < 3.4 + (a.H || 0) * 0.45) { a.walking = false; a.wait = Math.max(a.wait, 1.5); const tr = Math.atan2(dx, dz), dr = ((tr - a.r) % 6.2832 + 9.4248) % 6.2832 - 3.1416; a.r += dr * Math.min(1, dt * 5); if (!a.nt) a.nt = performance.now(); return; } else if (d > 6 + (a.H || 0) * 0.45) a.nt = 0; }
     if (!a.walking) { a.wait -= dt; if (a.wait <= 0) { for (let k = 0; k < 8; k++) { const ang = Math.random() * 6.28, d = 2 + Math.random() * 5, x = a.hx + Math.cos(ang) * d, z = a.hz + Math.sin(ang) * d; let okp = fitsM(R, a, x, z) && sepOK(R, a, x, z, 1); for (let t = 0.25; okp && t < 1; t += 0.25) okp = fitsM(R, a, a.x + (x - a.x) * t, a.z + (z - a.z) * t); if (okp) { a.tx = x; a.tz = z; a.walking = true; break; }   /* 体の大きさで通れる所だけ（大きい子が壁にめりこんでいた） */ } a.wait = 2 + Math.random() * 4; } return; }
     const dx = a.tx - a.x, dz = a.tz - a.z, L = Math.hypot(dx, dz); if (L < 0.1) { a.walking = false; return; } const s = Math.min(L, 2.2 * Math.sqrt(a.mult || 1) * dt); a.x += dx / L * s; a.z += dz / L * s; a.dist += s; a.r = Math.atan2(dx, dz); }); }
@@ -14271,6 +14413,7 @@ function fpOpen30(){
     if (W0.k === "r") curRoom = W0.i; const R0 = rooms[curRoom]; whereB.textContent = W0.k === "c" || W0.tight ? "通路" : R0.name; whereS.textContent = `B${R0.f + 1}${R0.sub ? "・" + R0.sub : ""}`;
     for (let i = Math.max(0, curRoom - 1); i <= Math.min(n - 1, curRoom + 1); i++) { loadRoom(rooms[i]); stepActs(rooms[i], dt); } nightSync(dt, now); try { sep30(dt); } catch (e) {}
     if (msg.isConnected && R0.mb) msg.remove(); if (R0.err) msg.textContent = R0.err;
+    if (window.__nodraw30) return;   /* 検査用：絵を描かずに中身だけ回す（sim30） */
     if (ft.length >= 20) { const fps = ft.length / ft.reduce((x, y) => x + y, 0); FPQ.t += dt; if (FPQ.t > 1.5) { FPQ.t = 0; if (fps < 26 && FPQ.q > 0.5) FPQ.q = Math.max(0.5, FPQ.q - 0.15); else if (fps > 50 && FPQ.q < 1) FPQ.q = Math.min(1, FPQ.q + 0.1); } }   /* 重い端末では自動で解像度を下げる（なめらかさを優先） */
     const dpr = Math.min(2, window.devicePixelRatio || 1) * FPQ.q, r = { width: cv.clientWidth, height: cv.clientHeight }; W = Math.round(r.width * dpr); H = Math.round(r.height * dpr); if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
     gl.viewport(0, 0, W, H); gl.clearColor(...(window.__ovh30 ? [0.2, 0.16, 0.135] : [0.17, 0.135, 0.13]), 1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -14429,7 +14572,7 @@ function fpOpen30(){
   const cellW = (Rm, c) => [((c[0] - (Rm.G30.W - 1) / 2)) * Rm.CS, -c[1] * Rm.CS];   /* マス → 層のローカル (x, z) */
   const heroAt = h => { if (h.walk == null && h.pos != null && rooms[h.pos] && rooms[h.pos].classic) { const Rm = rooms[h.pos]; if (h.arr30 == null || h.arr30i !== h.pos) { h.arr30 = N.t; h.arr30i = h.pos; } return { i: h.pos, x: ((h.id % 3) - 1) * 1.4, z: Math.max(-6.5, Rm.ZS - 2 - (N.t - h.arr30) * 1.4) + (h.id % 2) * 0.8 }; }
     if (h.walk == null && h.pos != null && rooms[h.pos]) { const Rm = rooms[h.pos], c = (h.flee && h.p30f && h.p30f.i === h.pos ? h.p30f.path[h.p30f.k] : h.p30 && h.p30.i === h.pos && h.p30.path[h.p30.k]) || [(Rm.G30.W - 1) / 2, 0], w = cellW(Rm, c); return { i: h.pos, x: w[0] + ((h.id % 3) - 1) * 0.6, z: w[1] + ((h.id % 2) ? 0.4 : -0.4) }; }
-    if (h.walk != null && h.cor != null && rooms[h.cor]) { const Rm = rooms[h.cor], tot = Math.max(1, typeof corr10 === "function" ? corr10(S, h.cor) : 2), fr = 1 - Math.max(0, h.walk) / tot; return { i: h.cor, x: ((h.id % 3) - 1) * 0.4, z: Rm.ZS + (h.cor === 0 ? 2 : 12) * (1 - fr) }; } return null; };
+    if (h.walk != null && h.cor != null && rooms[h.cor]) { const Rm = rooms[h.cor], tot = Math.max(1, typeof corr10 === "function" ? corr10(S, h.cor) : 2), fr = 1 - Math.max(0, h.walk) / tot; return { i: h.cor, x: (h.id % 2 ? 0.3 : -0.3), z: Rm.ZS + (h.cor === 0 ? 2 : 12) * (1 - fr) + (h.id % 3) * 1.3 }; } return null; };   /* トンネルの中は縦にずらして並ぶ（横0.4mおきでは体が重なり、押し分けと引っぱり合って足踏みしていた：sim30 の wallrun） */
   /* ===== 戦いの演出：踏みこみ・斬撃の弧・飛び道具・火花・衝撃の輪・ふっとび・白く光る・ヒットストップ・倒したときのスロー ===== */
   const MAGIC30 = /mage|shaman|lich|ifrit|imp|eye|mindlord|wraith|ghost|vampire|count|maou|fungus|myconid|spore/;
   const kindOf = (key, a) => { if (!key) return "melee"; if (key[0] === "h") { const h = N.heroes.find(q => "h" + q.id === key) || {}; return h.job === "hunter" ? "bow" : h.job === "mage" ? "magic" : h.job === "priest" ? "holy" : "melee"; } const M = N.mons.find(q => q.ref && "m" + q.ref.id === key) || {}; return M.role === "bow" || M.job === "snipe" || (M.s11 && M.s11.shot > 0) ? "bow" : MAGIC30.test((a && a.sp) || M.sp || "") ? "magic" : "melee"; };
@@ -14499,7 +14642,7 @@ function fpOpen30(){
   const RANGED30 = a => { if (a.hero) { const j = a.h && a.h.job; return j === "hunter" || j === "mage" ? 2 : j === "priest" ? 1 : 0; } const M = N.mons.find(q => q.ref && a.m && q.ref.id === a.m.id) || {}; return M.role === "bow" || M.job === "snipe" || (M.s11 && M.s11.shot > 0) ? 2 : MAGIC30.test(a.sp || "") ? 2 : 0; };
   const okAt = (Rm, x, z) => !!where(x, Rm.Z + z);
   /* 見通し：あいだに岩があれば通らない（攻撃が壁をつきぬけていた） */ const losL = (Rm, x0, z0, x1, z1) => { if (Rm.classic) return true; const F = layerField(Rm), L = Math.hypot(x1 - x0, z1 - z0), n = Math.max(3, Math.ceil(L / 0.15)); for (let k = 1; k < n; k++) { const t = k / n; if (F.f(x0 + (x1 - x0) * t, z0 + (z1 - z0) * t) < 0.6) return false; } return true; };   /* 細い岩も見のがさない（矢や魔法が壁をつきぬけていた） */
-  /* 動くときは必ず洞窟の中：壁にぶつかったら壁ぞいにすべる。それでも無理なら止まる（岩の中や外へは出ない） */ const step30 = (Rm, a, dx, dz) => { if (!Rm.classic && a.z + dz > 0.5 && dz > 0 && !(a.hero && a.h && a.h.flee)) dz = 0;   /* 層の入口の階段へは上がらない（逃げる勇者だけ上がる）。魔法使いが下がりながら撃って階段の暗い所で戦い、見えなかった：録画で発見 */ if (Rm.classic) { a.x = Math.max(-5, Math.min(5, a.x + dx)); a.z = Math.max(-12.5, Math.min(Rm.ZS || 14, a.z + dz)); return; } const inNow = okAt(Rm, a.x, a.z); if (!inNow) { /* 岩の中にいるときは、自由に動かず、いちばん近い歩ける所へ出るだけ（岩の中を歩いて壁をすり抜けていた） */ const k0 = Math.round(a.x * 4) + ',' + Math.round(a.z * 4); let w = a.nw30 && a.nw30.k === k0 ? a.nw30.p : null; if (!w && !(a.nw30 && a.nw30.k === k0)) { for (let r = 0.25; r <= 4 && !w; r += 0.25) for (let i = 0; i < 16; i++) { const an = i / 16 * 6.283, qx = a.x + Math.cos(an) * r, qz = a.z + Math.sin(an) * r; if (okAt(Rm, qx, qz) && !(qz > 0.5 && !(a.hero && a.h && a.h.flee) && !Rm.classic && a.z <= 0.5)) { w = [qx, qz]; break; } } a.nw30 = { k: k0, p: w }; } if (!w) { a.x += dx; a.z += dz; return; } const dd = Math.hypot(w[0] - a.x, w[1] - a.z), sL = Math.min(dd, Math.max(Math.hypot(dx, dz), 0.04)); if (dd > 0.001) { a.x += (w[0] - a.x) / dd * sL; a.z += (w[1] - a.z) / dd * sL; } return; } if (okAt(Rm, a.x + dx, a.z + dz)) { a.x += dx; a.z += dz; } else if (okAt(Rm, a.x + dx, a.z)) a.x += dx; else if (okAt(Rm, a.x, a.z + dz)) a.z += dz; };
+  /* 動くときは必ず洞窟の中：壁にぶつかったら壁ぞいにすべる。それでも無理なら止まる（岩の中や外へは出ない） */ const step30 = (Rm, a, dx, dz) => { if (!Rm.classic && a.z + dz > 0.5 && dz > 0 && !(a.hero && a.h && a.h.flee)) dz = 0;   /* 層の入口の階段へは上がらない（逃げる勇者だけ上がる）。魔法使いが下がりながら撃って階段の暗い所で戦い、見えなかった：録画で発見 */ if (Rm.classic) { a.x = Math.max(-5, Math.min(5, a.x + dx)); a.z = Math.max(-12.5, Math.min(Rm.ZS || 14, a.z + dz)); return; } const inNow = okAt(Rm, a.x, a.z); if (!inNow) { /* 岩の中にいるときは、自由に動かず、いちばん近い歩ける所へ出るだけ（岩の中を歩いて壁をすり抜けていた） */ const k0 = Math.round(a.x * 4) + ',' + Math.round(a.z * 4); let w = a.nw30 && a.nw30.k === k0 ? a.nw30.p : null; if (!w && !(a.nw30 && a.nw30.k === k0)) { const nv = RTON30 ? navOf30(Rm) : null, upF = !!(a.hero && a.h && a.h.flee); if (nv) w = NAV30.nearest(nv, a.x, a.z, nv.c - 0.01, upF || a.z > 0.5, 4); /* 歩ける所の地図（NAV30）から、いちばん近い立てる点。地図の外（入口の前など）で見つからないときだけ、まわりを探す */ if (!w) for (let r = 0.25; r <= 4 && !w; r += 0.25) for (let i = 0; i < 16; i++) { const an = i / 16 * 6.283, qx = a.x + Math.cos(an) * r, qz = a.z + Math.sin(an) * r; if (okAt(Rm, qx, qz) && !(qz > 0.5 && !(a.hero && a.h && a.h.flee) && !Rm.classic && a.z <= 0.5)) { w = [qx, qz]; break; } } a.nw30 = { k: k0, p: w }; } if (!w) { a.x += dx; a.z += dz; return; } const dd = Math.hypot(w[0] - a.x, w[1] - a.z), sL = Math.min(dd, Math.max(Math.hypot(dx, dz), 0.04)); if (dd > 0.001) { a.x += (w[0] - a.x) / dd * sL; a.z += (w[1] - a.z) / dd * sL; } return; } if (okAt(Rm, a.x + dx, a.z + dz)) { a.x += dx; a.z += dz; } else if (okAt(Rm, a.x + dx, a.z)) a.x += dx; else if (okAt(Rm, a.x, a.z + dz)) a.z += dz; };
   function battlePlan(dt, now){ let any = false;
     rooms.forEach(Rm => { const acts = Rm.acts || []; if (Rm.rtOn30) return; acts.forEach(a => { a.bt = null; }); if (Rm.classic) return; const H = acts.filter(a => a.hero && (a.al30 ?? 1) > 0), Ms = acts.filter(a => !a.hero && a.m && !a.lord && !a.hide && (a.al30 ?? 1) > 0); if (!H.length) return;
       const eng = []; Ms.forEach(m => { let best = null, bd = 1e9; H.forEach(h => { const d = Math.hypot(h.x - m.x, h.z - m.z); if (d < bd) { bd = d; best = h; } }); const M = N.mons.find(q => q.ref && q.ref.id === m.m.id); const simE = M && !M.down && M.pos === Rm.i && M.d30 != null && M.d30 <= 3; if (best && (bd < 3 || simE)) { m.tg = best; eng.push(m); } else m.tg = null; });   /* 戦うかどうかは持ち場の決まりにあわせる（遠くから入口まで走っていかない） */
@@ -14569,63 +14712,194 @@ function fpOpen30(){
         tgts.forEach(h => { monHit11(S, N, m, h, d * (m.aoe || 1)); if (m.fx.steal) m.hp = Math.min(m.max, m.hp + Math.round(d * m.fx.steal)); if (h.st === "in" && m.fx.net && Math.random() < m.fx.net) h.stuck = Math.max(h.stuck, 1); if (h.st === "in" && m.fx.scare && !h.boss && !h.flee && Math.random() < m.fx.scare) h.flee = true; }); } } catch (e) {}
     N._rt30 = 0; const H = N.hit25 || []; for (let k = H.length - 1; k >= 0 && k >= H.length - 6; k--) if (H[k].rtq == null) H[k].rtq = 1;
     if (tag) POPS30.push({ x: T.x, y: Rm.Y + 2.9, z: Rm.Z + T.z, txt: tag, col: "#ffcf70", big: 0, t: now });
-    const kx = T.x - A.x, kz = T.z - A.z, KL = Math.hypot(kx, kz) || 1, kb = Math.min(2.2, 0.28 * mul * ua.b.str / Math.max(0.3, ut.b.size)); step30(Rm, T, kx / KL * kb, kz / KL * kb); if (kb > 1.1) { T.stag30 = now + 350; POPS30.push({ x: T.x, y: Rm.Y + 2.6, z: Rm.Z + T.z, txt: "吹っ飛んだ！", col: "#ffd27a", big: 0, t: now }); } }   /* 力の強い子が小さい子を叩くと吹き飛ぶ */
+    const kx = T.x - A.x, kz = T.z - A.z, KL = Math.hypot(kx, kz) || 1, kb = Math.min(2.2, 0.28 * mul * ua.b.str / Math.max(0.3, ut.b.size)); T.kb30 = { vx: kx / KL * kb / 0.2, vz: kz / KL * kb / 0.2, u: now + 200 };   /* ノックバックは0.2秒かけて押し出す（一瞬で2mも飛んで、瞬間移動に見えた） */ if (kb > 1.1) { T.stag30 = now + 350; POPS30.push({ x: T.x, y: Rm.Y + 2.6, z: Rm.Z + T.z, txt: "吹っ飛んだ！", col: "#ffd27a", big: 0, t: now }); } }   /* 力の強い子が小さい子を叩くと吹き飛ぶ */
   const RTON30 = (() => { try { return /\/rt\//.test(location.pathname) || /[?&]rt\b/.test(location.search) || localStorage.getItem("rt30") === "1"; } catch (e) { return false; } })();   /* 作り直し版（/rt/）だけで動かす。いつもの版は今までの戦い */
-  function rt30Step(dt, now) { if (!RTON30 || typeof N === "undefined" || !N || N.scout || N.done) return; N.rtRooms30 = {}; let any = false;
-    rooms.forEach(Rm => { Rm.rtOn30 = false; const acts = Rm.acts || []; const U = acts.filter(a => (a.al30 ?? 1) > 0 && (a.hero || a.m) && rtUnit(a, Rm)); const Hs = U.filter(a => a.rt.side === 0), Ms = U.filter(a => a.rt.side === 1); if (!Hs.length || !Ms.length) return;
-      const seen = (a, b) => Math.hypot(a.x - b.x, a.z - b.z) < (losL(Rm, a.x, a.z, b.x, b.z) ? 90 : 90);   /* 見えなくても、同じ層で戦いの音がする所へは駆けつける（何もしていない子がいた） */
-      const fight = U.some(a => (a.rt.side ? Hs : Ms).some(b => seen(a, b))); if (!fight) { U.forEach(a => { a.rt.tg = null; }); return; }
+  /* ===================== rt30 の考える所（作り直し 11/28） =====================
+     前の作りは「見えたら直進して、ぶつかってから回りこむ」継ぎはぎだった（本人：カス）。いまは毎回この順に決める：
+       1) まわりを見る：味方と敵の強さ・倒れた仲間（気持ちが下がる）・主や強い仲間のそば（強気になる）
+       2) 役わり：盾役（騎士・戦士、魔物は硬くて大きい子）・弓と魔法・回復役・ふつうの前衛・主
+       3) ねらう相手を点数で選ぶ：近さ・今の相手・弱った敵へのとどめ・危ない敵（弓・魔法・回復役）・仲間を狙っている敵を止める・ひとりに群がりすぎない
+       4) 立つ所を決める：前衛は相手の手前（あいていれば横・背中へ回りこむ）。盾役は、後ろの仲間を狙う敵と仲間のあいだに立つ。
+          弓・魔法は見通しがきき、間合いがとれて、敵の前衛から離れた所を探す。回復役は弱った仲間のそばへ
+       5) 地形を使う：魔物は狭い道で待ち構える・負けそうなら群れで下がって固まる・罠のむこうに立って勇者を罠の上へ誘う
+       6) 歩く：NAV30 の道（体の幅で通れる所だけ）をたどり、まわりの子は速度障害物でよける（rtGo30）
+     振りかぶり → 当てる → 戻す・よける（u.ev）・横と背中の倍率・ノックバック・疲れ・主の魔法・網は前のまま */
+  const RN30 = (typeof window.__rnow === "function") ? window.__rnow : () => performance.now();   /* 重さを測る時計（検査では時計を早送りするので、本物の時計で） */
+  const PERF30 = window.__rtPerf30 = window.__rtPerf30 || { n: 0, ms: 0, max: 0, rep: 0, stuck: 0, nav: NAV30.stat, ai: {} }, AI30 = k => { PERF30.ai[k] = (PERF30.ai[k] || 0) + 1; };   /* AI30：どの判断が何回出たか（検査用） */
+  /* 層の歩ける所の地図。まだ絵を作っていない層（カメラから遠い層）は当たり判定だけ先に作る（前は当たり判定がなく、どこも「岩の中」あつかいだった） */
+  const navOf30 = Rm => { if (!Rm || Rm.classic || !Rm.G30) return null; if (!Rm.G) { try { const t0 = RN30(); if (!Rm.lgIt30 || Rm.lgIt30.ck !== Rm.G30.c) Rm.lgIt30 = { it: layerGridGen30(Rm), ck: Rm.G30.c, fr: -1 }; const L = Rm.lgIt30; if (L.fr === PERF30.f) return null; L.fr = PERF30.f; const r = L.it.next(); PERF30.lg = (PERF30.lg || 0) + RN30() - t0; if (!r.done) return null; Rm.G = r.value; Rm.lgIt30 = null; } catch (e) { Rm.lgIt30 = null; return null; } }   /* 1コマに1区切り（16行）ずつ */ try { return NAV30.of(Rm, { top: Rm.i > 0, bot: Rm.i < n - 1, ZS: Rm.ZS, ZE: Rm.ZE }); } catch (e) { console.warn("nav30", e); return null; } };
+  const rtRad30 = a => 0.6 * Math.sqrt(rtSz(a));   /* 体の半径（sep30 と同じ） */
+  const rtRole30 = (a, u) => { const b = u.b; if (a.lord) return "lord"; if (b.ranged) return "ranged"; if (u.side === 0 && b.heal) return "heal";
+    if (u.side === 0 ? (u.o.job === "knight" || u.o.job === "warrior") : ((b.tough >= 1.4 || b.size >= 1.25) && b.brave >= 1.05)) return "tank"; return "melee"; };
+  const backL30 = o => !!(o && o.rt && (o.rt.role === "ranged" || o.rt.role === "heal"));
+  const segD30 = (px, pz, ax, az, bx, bz) => { const vx = bx - ax, vz = bz - az, L2 = vx * vx + vz * vz || 1e-6, t = Math.max(0, Math.min(1, ((px - ax) * vx + (pz - az) * vz) / L2)); return Math.hypot(ax + vx * t - px, az + vz * t - pz); };
+  /* 罠：その勇者がまだ踏んでいない罠（night30 の h.t30 と同じ鍵）。罠は通路のマスにある */
+  const trapsOf30 = Rm => (!Rm.classic && Rm.G30 && Rm.G30.t) || [];
+  const trapLive30 = (Rm, h, t) => !(h && h.t30 && h.t30[Rm.i + ":" + t[0] + "," + t[1]]);
+  /* 勇者 (hx, hz) から (sx, sz) へまっすぐ来ると、まだ踏んでいない罠の上を通るか（罠のむこうに立って誘う） */
+  const trapOnWay30 = (Rm, h, hx, hz, sx, sz) => trapsOf30(Rm).some(t => { if (!trapLive30(Rm, h, t)) return false; const w = cellW(Rm, t), dH = Math.hypot(w[0] - hx, w[1] - hz), dS = Math.hypot(w[0] - sx, w[1] - sz); return dH > 1.5 && dS > 1.2 && segD30(w[0], w[1], hx, hz, sx, sz) < 1.3; });
+
+  /* 歩く：行き先 (gx, gz) へ、NAV30 の道どおりに。まわりの子（OB）はよける。up：入口の階段へ上がってよい（逃げる勇者）。返り値：歩いたか */
+  function rtGo30(Rm, nav, a, u, gx, gz, sp, dt, now, OB, up) {
+    const ML0 = Math.hypot(gx - a.x, gz - a.z); if (ML0 < 0.08) { u.vx = 0; u.vz = 0; u.blkT = 0; return false; }
+    const r = rtRad30(a), UP = !!up; let wx = gx, wz = gz, last = true, nd = 0;
+    /* 層の地図の外（層と層のあいだのトンネルの中）：トンネルは1本道なので、where() の当たりだけでまっすぐ（入ってくる勇者・出ていく勇者） */ const offMap = nav && !NAV30.inside(nav, a.x, a.z);
+    if (nav && !offMap) { nd = NAV30.needOf(nav, r); let P0 = u.np; if (!NAV30.inside(nav, gx, gz)) { const q = NAV30.nearest(nav, Math.max(nav.x0 + 0.2, Math.min(nav.x0 + nav.W * nav.c - 0.2, gx)), Math.max(nav.z0 + 0.2, Math.min(Math.min(0.5, nav.z0 + nav.H * nav.c) - 0.2, gz)), nd, UP, 4); if (q) { gx = q[0]; gz = q[1]; } }   /* 行き先が地図の外（トンネルの中の相手）：地図の中のいちばん近い所まで */
+      /* 道を計算し直すのは：道がない・行き先が動いた・古くなった・押されて道から外れた（曲がり角が見えなくなった）とき */
+      const moved = P0 ? Math.hypot(P0.gx - gx, P0.gz - gz) : 0;
+      if (!P0 || P0.bad || P0.up !== UP || moved > Math.max(0.7, 0.2 * ML0) || now > P0.t + 1600) { const p = NAV30.path(nav, a.x, a.z, gx, gz, r, UP);
+        if (p) { u.np = P0 = { p, k: 0, gx, gz, t: now, up: UP, chk: now }; PERF30.rep++; u.noWay = 0; } else if (p === null) { u.np = P0 = null; u.noWay = (u.noWay || 0) + 1; } }   /* undefined：このコマは計算量を使い切った。前の道のまま */
+      if (!P0) { u.vx = 0; u.vz = 0; return false; }
+      const p = P0.p;
+      /* 曲がり角を順に。次の角がもうまっすぐ見えていれば（体の幅で）先へ */
+      while (P0.k < p.length - 1) { const w = p[P0.k], dw = Math.hypot(w[0] - a.x, w[1] - a.z); if (dw < 0.45 || (dw < 2.5 && NAV30.lineClear(nav, a.x, a.z, p[P0.k + 1][0], p[P0.k + 1][1], nd, UP))) P0.k++; else break; }
+      if (now > P0.chk + 300) { P0.chk = now; const w = p[P0.k]; if (!NAV30.lineClear(nav, a.x, a.z, w[0], w[1], nd, UP)) P0.bad = 1; }
+      last = P0.k === p.length - 1; const w = p[P0.k];
+      /* 最後の区間は、動いている行き先そのものへ（立てる所なら） */ if (last && Math.hypot(w[0] - gx, w[1] - gz) < 1.2 && NAV30.passAt(nav, gx, gz, nd, UP)) { wx = gx; wz = gz; } else { wx = w[0]; wz = w[1]; } }
+    const dx = wx - a.x, dz = wz - a.z, L = Math.hypot(dx, dz) || 1e-6; let s = sp; if (last && L < sp * 0.3) s = L / 0.3;   /* 着く前に足をゆるめる */
+    const pref = [dx / L * s, dz / L * s], okF = nav && !offMap && NAV30.passAt(nav, a.x, a.z, nd, UP) ? (x, z) => NAV30.passAt(nav, x, z, nd, UP) : (x, z) => okAt(Rm, x, z), inRock = !okAt(Rm, a.x, a.z);
+    const others = []; for (const o of OB) { if (o.a === a || o.a === u.tg) continue; o.x = o.a.x; o.z = o.a.z; others.push(o); }   /* 打ち合う相手そのものはよけない（間合いで止まる） */
+    const v = inRock ? pref : NAV30.avoid({ x: a.x, z: a.z, vx: u.vx || 0, vz: u.vz || 0, r }, pref, sp, others, okF);   /* 歩ける所の外にいるとき（入口の前に置かれた勇者など）は、よけずに step30 で中へ出る */ /* 自分の立つ所がその体の「通れる所」の外（入口の階段の上・狭すぎる所）なら、よけるときの壁の判定は where() で（でないと、どの向きも罰がついて止まったままだった） */
+    /* 仲間につかえている（行きたいのに、前の仲間をよけると進めない）時間と相手を覚える：交代に使う */
+    { const pv = Math.hypot(pref[0], pref[1]); let by = null; if (pv > 0.3 * sp && Math.hypot(v[0], v[1]) < 0.25 * pv) { let bd = 1e9; for (const o of others) { const ox = o.x - a.x, oz = o.z - a.z, d = Math.hypot(ox, oz); if (d < r + o.r + 0.6 && ox * pref[0] + oz * pref[1] > 0 && d < bd && o.a.rt && o.a.rt.side === u.side) { bd = d; by = o.a; } } }
+      if (by) { u.wq30 = (u.wq30 || 0) + dt; u.blkBy = by; } else { u.wq30 = 0; u.blkBy = null; } }
+    const kk = Math.min(1, dt * 12); u.vx = (u.vx || 0) + (v[0] - (u.vx || 0)) * kk; u.vz = (u.vz || 0) + (v[1] - (u.vz || 0)) * kk;
+    let sx = u.vx * dt, sz = u.vz * dt; const sl = Math.hypot(sx, sz); if (last && sl > L) { sx *= L / sl; sz *= L / sl; }
+    const ox = a.x, oz = a.z; step30(Rm, a, sx, sz); const mv = Math.hypot(a.x - ox, a.z - oz);
+    /* 壁に止められた（地図と当たり判定がずれた・押された）：その道は捨てて次のコマで計算し直す。ほぼ起きないはず（起きた数を数える） */
+    if (sl > 0.02 && mv < sl * 0.3) { u.blkT = (u.blkT || 0) + dt; if (u.blkT > 0.25 && u.np) { u.np.bad = 1; u.blkT = 0; PERF30.stuck++; } } else u.blkT = 0;
+    u.vx = mv > 1e-4 ? (a.x - ox) / Math.max(dt, 1e-3) : 0; u.vz = mv > 1e-4 ? (a.z - oz) / Math.max(dt, 1e-3) : 0;
+    return mv > 0.5 * dt; }   /* 0.5m/s より遅いときは歩く絵にしない（足だけ動いてすべって見える） */
+
+  /* 戦っていないときの歩き（夜の居場所へ向かう魔物・1手の計算の位置へ向かう勇者）も、NAV30 の道をたどる。
+     前はマスのまん中から次のまん中へまっすぐで、壁ぎわの角や大きい子の通れない所で壁に向かって走っていた。返り値：動いた長さ */
+  const navStep30 = (Rm, a, wx, wz, st) => { const nv = RTON30 ? navOf30(Rm) : null;   /* いつもの版（rt でない）は前のまま */ let tx = wx, tz = wz;
+    if (nv && NAV30.inside(nv, a.x, a.z) && NAV30.inside(nv, wx, wz)) { const r = rtRad30(a), nd = NAV30.needOf(nv, r), up = !!(a.hero && a.h && a.h.flee) || wz > 0.5;
+      if (!NAV30.lineClear(nv, a.x, a.z, wx, wz, nd, up)) { let P = a.wp30; if (!P || P.bad || Math.hypot(P.gx - wx, P.gz - wz) > 0.5) { const p = NAV30.path(nv, a.x, a.z, wx, wz, r, up); if (p) a.wp30 = P = { p, k: 0, gx: wx, gz: wz }; else if (p === null) a.wp30 = P = null; }
+        if (P) { while (P.k < P.p.length - 1 && Math.hypot(P.p[P.k][0] - a.x, P.p[P.k][1] - a.z) < 0.4) P.k++; tx = P.p[P.k][0]; tz = P.p[P.k][1]; } } else a.wp30 = null; }
+    const dx = tx - a.x, dz = tz - a.z, L = Math.hypot(dx, dz); if (L < 1e-4) return 0; const sl = Math.min(st, L), ox = a.x, oz = a.z; step30(Rm, a, dx / L * sl, dz / L * sl); const mv = Math.hypot(a.x - ox, a.z - oz); if (a.wp30 && sl > 0.02 && mv < sl * 0.3) a.wp30.bad = 1; return mv; };
+  function rt30Step(dt, now) { if (!RTON30 || typeof N === "undefined" || !N || N.scout || N.done) return; N.rtRooms30 = {}; let any = false; NAV30.frame(5000); PERF30.f = (PERF30.f || 0) + 1;
+    /* 夜のはじめ（勇者が来た前ぶれのあいだ）に、層の地図を1コマに1つずつ作っておく（戦いが始まってから作ると、そのコマだけ20ms以上かかった） */ { const Rw = rooms.find(R => !R.classic && R.G30 && !(R.nav30 && R.nav30.G === R.G && R.nav30.ck === R.G30.c)); if (Rw) navOf30(Rw); }
+    rooms.forEach(Rm => { Rm.rtOn30 = false; const acts = Rm.acts || []; const U = acts.filter(a => (a.al30 ?? 1) > 0 && (a.hero || a.m) && rtUnit(a, Rm)); const Hs = U.filter(a => a.rt.side === 0), Ms = U.filter(a => a.rt.side === 1);
+      if (!Hs.length || !Ms.length) { U.forEach(a => { a.rt.tg = null; }); Rm.rtPrev30 = null; return; }   /* 同じ層に敵がいれば戦う（見えなくても、戦いの音がする所へ駆けつける） */
       Rm.rtOn30 = true; N.rtRooms30[Rm.i] = 1; any = true; if (Rm.classic) N.rtL30t = performance.now();
-      // ねらい：0.25秒ごとに見直す。今の相手を優先し、近い相手へ。回りこみ・止めに入る判断もここ
-      U.forEach(a => { const u = a.rt, foes = u.side ? Hs : Ms, allies = u.side ? Ms : Hs; if (u.side === 0) { if (u.o.flee) { u.tg = null; return; } } /* 見張り役も夜はふつうに戦う（本人：持ち場を離れない見張りはいらない 11/28） */
-        if (u.th && now < u.th) return; u.th = now + 250 + Math.random() * 100; u.mv = null;
-        const vis = foes.filter(f => seen(a, f) && !(u.unr && u.unr.get(f) > now));   /* たどり着けない相手（岩の向こうで道がない・近づけない）は、しばらく狙わない */ if (!vis.length) { u.tg = null; return; }
+      const nav = navOf30(Rm), dist = (p, q) => Math.hypot(p.x - q.x, p.z - q.z);
+      U.forEach(a => { const u = a.rt; u.role = rtRole30(a, u); if (u.mor == null) u.mor = 1; });
+      // ---- 1) まわりを見る：倒れた仲間・強い仲間のそば・群れの強さ ----
+      { const prev = Rm.rtPrev30 || []; prev.forEach(o => { if (U.includes(o) || !(o.rt && o.rt.o && (o.rt.o.hp <= 0 || o.rt.o.down || o.rt.o.st === "dead"))) return; const side = o.rt && o.rt.side; (side ? Ms : Hs).forEach(a => { if (dist(a, o) > 10 || a.lord) return; const u = a.rt; u.mor = Math.max(0.2, u.mor - 0.28 / Math.max(0.6, u.b.brave)); if (u.b.brave < 1.6) { u.flinch = now + 450 + 300 * Math.random(); AI30("flinch"); if (now - (u.flS || -1e9) > 4000 && (u.flS = now)) POPS30.push({ x: a.x, y: Rm.Y + 3.4, z: Rm.Z + a.z, txt: side ? "ひっ…仲間が" : "くっ…！", col: "#e8e0ff", big: 0, t: now, cue: 1, life: 1200 }); } }); }); Rm.rtPrev30 = U.slice(); }   /* 仲間が倒れるとひるむ（勇気が低いほど） */
+      U.forEach(a => { const u = a.rt, mates = u.side ? Ms : Hs; let aura = 0; mates.forEach(o => { if (o === a) return; const d = dist(a, o); if (o.lord && d < 7) aura = Math.max(aura, 0.45); else if ((o.rt.b.size >= 2 || (o.rt.o && o.rt.o.boss)) && d < 5) aura = Math.max(aura, 0.25); });   /* 主・強い仲間のそばでは強気 */
+        u.aura = aura; u.mor += (1 + aura - u.mor) * Math.min(1, dt * 0.15); });
+      /* 群れで下がる（魔物）：魔物の強さが勇者の3割に届かず、気持ちも下がっているとき。主のいる間・近衛はしない */
+      if (!Rm.classic && nav && now > (Rm.rtGt30 || 0)) { Rm.rtGt30 = now + 500; const Mf = Ms.filter(m => !m.lord), pw = L => L.reduce((s, o) => s + Math.max(0, o.rt.o.hp) * Math.max(1, o.rt.o.atk || 1), 0), ratio = pw(Mf) / Math.max(1, pw(Hs)), mor = Mf.reduce((s, m) => s + m.rt.mor, 0) / Math.max(1, Mf.length);
+        if (Rm.ret30 && (now > Rm.ret30.until || Mf.every(m => dist(m, Rm.ret30) < 1.8 || Hs.some(h => dist(h, m) < 2.2)))) { Rm.ret30 = null; Rm.retCD30 = now + 9000; Mf.forEach(m => { m.rt.mor = Math.min(1.2, m.rt.mor + 0.3); }); }   /* 固まったら持ち直す */
+        else if (!Rm.ret30 && now > (Rm.retCD30 || 0) && Mf.length >= 2 && ratio < 0.3 && mor < 0.85) { const cx = Mf.reduce((s, m) => s + m.x, 0) / Mf.length, cz = Mf.reduce((s, m) => s + m.z, 0) / Mf.length, hx = Hs.reduce((s, h) => s + h.x, 0) / Hs.length, hz = Hs.reduce((s, h) => s + h.z, 0) / Hs.length, L = Math.hypot(cx - hx, cz - hz) || 1, ux = (cx - hx) / L, uz = (cz - hz) / L;
+          let best = null, bs = -1e9; const h0 = Hs[0]; for (const an of [0, 0.5, -0.5, 1, -1]) for (const dd of [5, 8]) { const c = Math.cos(an), s2 = Math.sin(an), px = cx + (ux * c - uz * s2) * dd, pz = cz + (ux * s2 + uz * c) * dd, q = NAV30.nearest(nav, px, pz, NAV30.needOf(nav, 0.85), false, 2); if (!q || !NAV30.reach(nav, cx, cz, q[0], q[1], 0.6, false)) continue; const sc = Math.min(...Hs.map(h => Math.hypot(h.x - q[0], h.z - q[1]))) + (h0 && trapOnWay30(Rm, h0.rt.o, hx, hz, q[0], q[1]) ? 4 : 0); if (sc > bs) { bs = sc; best = q; } }
+          if (best) { AI30("retreat"); Rm.ret30 = { x: best[0], z: best[1], until: now + 4500 }; const lead = Mf[0]; POPS30.push({ x: lead.x, y: Rm.Y + 3.6, z: Rm.Z + lead.z, txt: "下がれ、固まれ！", col: "#ffb070", big: 0, t: now, cue: 1, life: 1600 }); } } }
+      // ---- 2〜5) ねらいと立つ所：0.25秒ごとに見直す（全員が同じコマに考えないよう、少しずつずらす） ----
+      U.forEach(a => { const u = a.rt, foes = u.side ? Hs : Ms, allies = u.side ? Ms : Hs; if (u.side === 0 && u.o.flee) { u.tg = null; return; }   /* 見張り役も夜はふつうに戦う（本人：持ち場を離れない見張りはいらない 11/28） */
+        if (u.th && now < u.th) return; u.th = now + 250 + Math.random() * 100; u.mv = null; u.hold = 0; const wasCov = u.cov; u.cov = 0;
+        const rad = rtRad30(a), canGo = f => !nav || u.role === "ranged" || NAV30.reach(nav, a.x, a.z, f.x, f.z, rad, false);   /* 体の幅で行けない所の相手は選ばない（弓・魔法は届けばよい） */
+        const vis = foes.filter(f => !(u.unr && u.unr.get(f) > now) && canGo(f)); if (!vis.length) { u.tg = null; return; }
         // 止めに入る：仲間の横・背中へ回りこもうとしている敵がそばにいたら、そっちへ
-        if (!u.b.ranged) { const thr = vis.find(f => f.rt.tg && allies.includes(f.rt.tg) && f.rt.tg !== a && f.rt.flk && Math.hypot(f.x - a.x, f.z - a.z) < 4.5); if (thr && u.tg !== thr) { u.tg = thr; u.icp = 1; if (now - (u.icpS || -1e9) > 5000 && (u.icpS = now)) POPS30.push({ x: a.x, y: Rm.Y + 3.6, z: Rm.Z + a.z, txt: u.side ? "🛡 通さない！" : "🛡 させるか！", col: u.side ? "#ff9a8a" : "#9fd0ff", big: 0, t: now, cue: 1, life: 1600 }); return; } }
-        const cur = u.tg && vis.includes(u.tg) ? u.tg : null; const best = vis.slice().sort((p, q) => Math.hypot(p.x - a.x, p.z - a.z) - Math.hypot(q.x - a.x, q.z - a.z))[0];
-        u.tg = cur && Math.hypot(cur.x - a.x, cur.z - a.z) < Math.hypot(best.x - a.x, best.z - a.z) * 1.4 + 1 ? cur : best; if (u.tg !== cur) u.icp = 0;
+        if (!u.b.ranged) { const thr = vis.find(f => f.rt.tg && allies.includes(f.rt.tg) && f.rt.tg !== a && f.rt.flk && dist(f, a) < 4.5); if (thr && u.tg !== thr) { AI30("intercept"); u.tg = thr; u.icp = 1; if (now - (u.icpS || -1e9) > 5000 && (u.icpS = now)) POPS30.push({ x: a.x, y: Rm.Y + 3.6, z: Rm.Z + a.z, txt: u.side ? "🛡 通さない！" : "🛡 させるか！", col: u.side ? "#ff9a8a" : "#9fd0ff", big: 0, t: now, cue: 1, life: 1600 }); return; } if (thr && u.tg === thr) return; }
+        // ねらう相手を点数で
+        const cur = u.tg && vis.includes(u.tg) ? u.tg : null; let best = null, bs = -1e9;
+        vis.forEach(f => { const fu = f.rt, fo = fu.o, d = dist(a, f), hp = fo.hp / (fo.max || 1), los = losL(Rm, a.x, a.z, f.x, f.z); let s = -(u.role === "ranged" ? 0.35 : 1) * (los ? d : d * 1.3 + 2);
+          if (f === cur) s += 2.5;   /* 今の相手から気まぐれに乗りかえない */
+          if (fu.side === 0 && fo.flee) s -= 4; else s += (1 - hp) * 2.5 + (hp < 0.25 ? 2.5 : 0);   /* 弱った敵へのとどめ。ただし逃げていく勇者は深追いしない（前は近い順だったので、逃げる勇者は追われなかった。追い回すと逃げきれる勇者がいなくなった） */
+          if (fu.b.ranged || fu.b.magic || fu.role === "heal") s += u.role === "tank" ? 1 : 2;   /* 危ない敵（弓・魔法・回復役）を先に */
+          const ft = fu.tg; if (ft === a) s += 1.5; else if (ft && allies.includes(ft)) { s += 1.2; if (backL30(ft)) s += u.role === "tank" ? 4 : 2; }   /* 仲間（とくに後ろの弓・魔法・回復役）を狙う敵を止める */
+          if (u.role !== "ranged") { const on = allies.filter(o => o !== a && o.rt.tg === f && !o.rt.b.ranged).length; if (on >= 3) s -= 2 * (on - 2); }   /* ひとりに群がりすぎない */
+          if (u.role === "heal") s += allies.some(o => o.rt.tg === f && dist(o, f) < o.rt.b.reach + 1) ? 2 : -1;   /* 回復役は、仲間が打ち合っている相手を後ろから */
+          if (u.role === "ranged" && los) s += 2;
+          if (s > bs) { bs = s; best = f; } });
+        u.tg = best; if (u.tg !== cur) { u.icp = 0; u.spot = null; }
+        const T = u.tg, dT = dist(a, T);
+        // 盾役：後ろの仲間を狙う敵の前に立ちはだかる
+        if (u.role === "tank" && T.rt.tg && T.rt.tg !== a && backL30(T.rt.tg) && dist(T, T.rt.tg) < 7) { const B = T.rt.tg, L = dist(T, B) || 1, R0 = Math.max(rtR(u.b, T) * 0.8, rtSep(a, T)), px = T.x + (B.x - T.x) / L * R0, pz = T.z + (B.z - T.z) / L * R0;
+          if (okAt(Rm, px, pz)) { u.mv = [px, pz]; if (!wasCov) AI30("cover"); u.cov = 1; if (now - (u.cvS || -1e9) > 6000 && (u.cvS = now)) POPS30.push({ x: a.x, y: Rm.Y + 3.6, z: Rm.Z + a.z, txt: u.side ? "🛡 後ろへは行かせん" : "🛡 下がってろ！", col: u.side ? "#ff9a8a" : "#9fd0ff", big: 0, t: now, cue: 1, life: 1500 }); } }
         // 回りこむ：相手がすでに仲間と打ち合っていたら、正面を避けて横か背中へ
-        const T = u.tg, eng = allies.filter(o => o !== a && o.rt.tg === T && !o.rt.b.ranged && Math.hypot(o.x - T.x, o.z - T.z) < o.rt.b.reach + 0.6);
-        if (!u.b.ranged && eng.length && !u.icp) { const f0 = eng[0], fx = f0.x - T.x, fz = f0.z - T.z, FL = Math.hypot(fx, fz) || 1, ox = fx / FL, oz = fz / FL; const sides = eng.length >= 2 ? [[-ox, -oz]] : [[-oz, ox], [oz, -ox], [-ox, -oz]]; const R0 = Math.max(rtR(u.b, T) * 0.85, rtSep(a, T));
-          const pick = sides.map(([sx, sz]) => [T.x + sx * R0, T.z + sz * R0]).filter(p => okAt(Rm, p[0], p[1])).sort((p, q) => Math.hypot(p[0] - a.x, p[1] - a.z) - Math.hypot(q[0] - a.x, q[1] - a.z))[0]; if (pick) { const was = u.flk; u.mv = pick; u.flk = 1; if (!was && Math.hypot(T.x - a.x, T.z - a.z) < 7 && now - (u.flkS || -1e9) > 5000 && (u.flkS = now)) POPS30.push({ x: a.x, y: Rm.Y + 3.6, z: Rm.Z + a.z, txt: u.side ? "⚡ 横から！" : "⚡ 回りこめ！", col: u.side ? "#ffb070" : "#a9ccff", big: 0, t: now, cue: 1, life: 1500 }); } else u.flk = 0; } else u.flk = 0; });
-      // 動く・振る
-      U.forEach(a => { const u = a.rt, b = u.b; a.rt30 = now; a.btT30 = performance.now(); a.bt = null; let tx = a.x, tz = a.z;
-        /* 持久力：長く戦うと身のこなしが落ちる（持が低いほど早い）。勇気：体力が減ると、勇気が低い子は下がる */
+        const eng = allies.filter(o => o !== a && o.rt.tg === T && !o.rt.b.ranged && dist(o, T) < o.rt.b.reach + 0.6);
+        if (!u.mv && !u.b.ranged && eng.length && !u.icp) { const f0 = eng[0], fx = f0.x - T.x, fz = f0.z - T.z, FL = Math.hypot(fx, fz) || 1, ox = fx / FL, oz = fz / FL; const sides = eng.length >= 2 ? [[-ox, -oz], [-oz, ox], [oz, -ox]] : [[-oz, ox], [oz, -ox], [-ox, -oz]]; const R0 = Math.max(rtR(u.b, T) * 0.85, rtSep(a, T));
+          const taken = p => allies.some(o => o !== a && Math.hypot(o.x - p[0], o.z - p[1]) < 0.9);   /* もう仲間が立っている所へは行かない */
+          const pick = sides.map(([sx, sz]) => [T.x + sx * R0, T.z + sz * R0]).filter(p => (nav ? NAV30.passAt(nav, p[0], p[1], NAV30.needOf(nav, rad), false) : okAt(Rm, p[0], p[1])) && !taken(p)).sort((p, q) => Math.hypot(p[0] - a.x, p[1] - a.z) - Math.hypot(q[0] - a.x, q[1] - a.z))[0];
+          if (pick) { const was = u.flk; u.mv = pick; u.flk = 1; if (!was) AI30("flank"); if (!was && dT < 7 && now - (u.flkS || -1e9) > 5000 && (u.flkS = now)) POPS30.push({ x: a.x, y: Rm.Y + 3.6, z: Rm.Z + a.z, txt: u.side ? "⚡ 横から！" : "⚡ 回りこめ！", col: u.side ? "#ffb070" : "#a9ccff", big: 0, t: now, cue: 1, life: 1500 }); } else u.flk = 0; } else u.flk = 0;
+        // 弓・魔法：見通しがきき、間合いがとれて、敵の前衛から離れた所（0.5秒ごと）
+        if (u.role === "ranged" && (!u.spot || now > u.spotT)) { u.spotT = now + 450 + Math.random() * 150; u.spot = rtSpot30(Rm, nav, a, u, T, foes, allies); }
+        // 狭い道で待ち構える（魔物の前衛）：自分が細い通路にいて、勇者が近づいてくる。3.5秒まで、勇者が6.5mに来たら打って出る
+        if (u.side === 1 && nav && (u.role === "melee" || u.role === "tank") && !u.mv && !a.lord) { const near = foes.some(f => dist(f, a) < 6.5), coming = u.dT0 != null && dT < u.dT0 - 0.05, narrow = NAV30.clearAt(nav, a.x, a.z) < 1.25;
+          if (!near && dT < 16 && narrow && coming && (u.holdU > now || now > (u.holdCD || 0))) {   /* 勇者が近づいてくるあいだだけ待つ（止まった勇者を待ちつづけて棒立ちになっていた） */ if (!(u.holdU > now)) { AI30("hold"); u.holdU = now + 3500; u.holdCD = now + 12000; if (now - (u.hdS || -1e9) > 8000 && (u.hdS = now)) POPS30.push({ x: a.x, y: Rm.Y + 3.6, z: Rm.Z + a.z, txt: "⛰ 狭い所で待ち構える", col: "#ffcf9a", big: 0, t: now, cue: 1, life: 1500 }); } u.hold = 1; } else if (near) u.holdU = 0; }
+        u.dT0 = dT; });
+      // ---- 6) 動く・振る ----
+      const OB = U.map(a => ({ a, x: a.x, z: a.z, vx: a.rt.vx || 0, vz: a.rt.vz || 0, r: rtRad30(a), rec: a.lord || a.rt.ph === "wind" ? 0 : 1, w: 1 }));
+      acts.forEach(a => { if (!a.rt30 || now - a.rt30 > 300) { if ((a.hero || a.m || a.lord) && (a.al30 ?? 1) > 0.3 && !a.hide && !U.includes(a)) OB.push({ a, x: a.x, z: a.z, vx: 0, vz: 0, r: 0.6 * Math.sqrt(a.sz30 || 1), rec: 0, w: 1 }); } });   /* 戦っていない子（近衛など）もよける */
+      // 罠：リアルタイムで戦っている勇者も、まだ踏んでいない罠のマスに入れば踏む（1手の計算は戦っているあいだ止まるので、そのままだと罠の上で戦っても何も起きなかった）
+      if (typeof trapHit30 === "function") Hs.forEach(ha => { const h = ha.rt.o; if (!h || h.st !== "in" && h.st !== "hold30") return; trapsOf30(Rm).forEach(t => { if (!trapLive30(Rm, h, t)) return; const w = cellW(Rm, t); if (Math.hypot(w[0] - ha.x, w[1] - ha.z) < 1.3) { (h.t30 = h.t30 || {})[Rm.i + ":" + t[0] + "," + t[1]] = 1; AI30("trapRt"); try { trapHit30(S, N, h, S.path[Rm.i], t); } catch (e) {} } }); });
+      U.forEach(a => { const u = a.rt, b = u.b; a.rt30 = now; a.btT30 = performance.now(); a.bt = null; a.stay = true; let gx = null, gz = null, up = false;   /* stay：昼のうろうろ（stepActs）を止める。夜のはじめから戦いに入った魔物は stay がつかず、昼の歩きと引っぱり合って足踏みしていた */
+        /* 持久力：長く戦うと身のこなしが落ちる（持が低いほど早い）。勇気：体力が減ると、勇気が低い子は下がる（気持ちが下がっているほど、主・強い仲間のそばほど逃げにくい） */
         u.ft = (u.ft || 0) + (u.tg ? dt : -dt * 0.5); u.ft = Math.max(0, u.ft); u.fat = Math.max(0, Math.min(0.4, (u.ft - 12 * b.stam) / (30 * b.stam))); if (u.fat > 0.15 && !u.fatS) { u.fatS = 1; POPS30.push({ x: a.x, y: Rm.Y + 2.8, z: Rm.Z + a.z, txt: "💦 息が上がる", col: "#cfe3ff", big: 0, t: now }); }
-        const hpR = u.o.hp / (u.o.max || 1); if (!u.scare && hpR < 0.3 && b.brave < 1.1 && Math.random() < dt * (1.2 - b.brave)) { u.scare = now + 3500; POPS30.push({ x: a.x, y: Rm.Y + 3.4, z: Rm.Z + a.z, txt: u.side ? "ひっ…！" : "む、無理だ…！", col: "#e8e0ff", big: 0, t: now, cue: 1, life: 1400 }); if (u.side === 0 && !u.o.boss) u.o.flee = true; }
-        if (u.scare && now > u.scare) u.scare = 0; const T = u.scare ? null : u.tg; if (u.scare && u.tg) { const dx0 = a.x - u.tg.x, dz0 = a.z - u.tg.z, L0 = Math.hypot(dx0, dz0) || 1; tx = a.x + dx0 / L0 * 3; tz = a.z + dz0 / L0 * 3; }
-        if (a.stag30 && now < a.stag30) { a.walking = false; return; }
-        /* 逃げる勇者は、出口へ向かって走る（その場に立ったまま、ふっと消えていた：録画で発見） */ const fleeH = u.side === 0 && u.o.flee; if (fleeH) { const at = heroAt(u.o); if (at && at.i === Rm.i) { tx = at.x; tz = at.z; } }
-        if (u.side === 0 && b.heal) { const low = Hs.filter(o => o.rt.o.hp / o.rt.o.max < 0.6).sort((p, q) => p.rt.o.hp / p.rt.o.max - q.rt.o.hp / q.rt.o.max)[0]; if (low && low !== a && Math.hypot(low.x - a.x, low.z - a.z) > 3) { tx = low.x; tz = low.z; } }
+        const hpR = u.o.hp / (u.o.max || 1), brv = b.brave * Math.max(0.5, Math.min(1.5, u.mor || 1)); if (!u.scare && hpR < 0.3 && brv < 1.1 && Math.random() < dt * (1.2 - brv)) { u.scare = now + 3500; AI30("scare"); POPS30.push({ x: a.x, y: Rm.Y + 3.4, z: Rm.Z + a.z, txt: u.side ? "ひっ…！" : "む、無理だ…！", col: "#e8e0ff", big: 0, t: now, cue: 1, life: 1400 }); if (u.side === 0 && !u.o.boss) u.o.flee = true; }
+        if (u.scare && now > u.scare) u.scare = 0; const T = u.scare ? null : u.tg; if (u.scare && u.tg) { const dx0 = a.x - u.tg.x, dz0 = a.z - u.tg.z, L0 = Math.hypot(dx0, dz0) || 1; gx = a.x + dx0 / L0 * 3; gz = a.z + dz0 / L0 * 3; }
+        if (a.kb30) { if (now < a.kb30.u) { step30(Rm, a, a.kb30.vx * dt, a.kb30.vz * dt); a.walking = false; u.vx = u.vz = 0; return; } a.kb30 = null; }   /* 吹き飛ばされている最中は、自分では動かない */
+        if (a.stag30 && now < a.stag30) { a.walking = false; u.vx = u.vz = 0; return; }
+        /* 逃げる勇者は、出口へ向かって走る（その場に立ったまま、ふっと消えていた：録画で発見）。入口の階段へ上がってよい */ const fleeH = u.side === 0 && u.o.flee; if (fleeH) { const at = heroAt(u.o); if (at && at.i === Rm.i) { gx = at.x; gz = at.z; up = true; } }
+        if (u.side === 0 && b.heal) { const low = Hs.filter(o => o.rt.o.hp / o.rt.o.max < 0.6).sort((p, q) => p.rt.o.hp / p.rt.o.max - q.rt.o.hp / q.rt.o.max)[0]; if (low && low !== a && dist(low, a) > 3.5 && (!nav || NAV30.lineClear(nav, a.x, a.z, low.x, low.z, 0.24, false) || dist(low, a) > 5)) { gx = low.x; gz = low.z; } }   /* 回復役は弱った仲間のそばへ */
         /* 網・足止め（stuck）は、ふだんは1手ごとに1ずつ減る。リアルタイムで戦っている勇者は1手の計算から外れるので減らず、
            ずっと足が遅いまま・一度も振らずに倒されていた（録画で発見）。ここで時間で減らす */
         if (u.side === 0) { if ((u.o.stuck || 0) > (u.stPrev || 0)) u.netT = now; u.stPrev = u.o.stuck || 0; } if (u.side === 0 && u.o.stuck > 0) { u.stk = (u.stk || 0) + dt; if (u.stk >= 1) { u.stk = 0; u.o.stuck--; } if (!u.netS) { u.netS = 1; POPS30.push({ x: a.x, y: Rm.Y + 2.8, z: Rm.Z + a.z, txt: "網にからまった！", col: "#cfe3ff", big: 0, t: now }); } } else u.netS = 0;
-        /* 近づけない見張り：相手に届いていないのに2.5秒たっても0.3mも近づけなければ、その相手はあきらめる（岩をはさんでにらみ合ったまま、夜が止まっていた：録画で発見） */
-        if (u.tg && !b.ranged) { const dN = Math.hypot(u.tg.x - a.x, u.tg.z - a.z); if (dN > rtR(b, u.tg) + 0.3) { if (!u.wd || u.wd.t !== u.tg) u.wd = { t: u.tg, d: dN, at: now }; else if (dN < u.wd.d - 0.3) { u.wd.d = dN; u.wd.at = now; } else if (now - u.wd.at > 2500) { (u.unr || (u.unr = new Map())).set(u.tg, now + 6000); u.tg = null; u.th = 0; u.wd = null; } } else u.wd = null; }
+        /* 近づけない相手：届いていないのに2.5秒たっても0.3mも近づけなければ、しばらく（3秒）その相手はあきらめて別の相手へ（道がないわけではないので、短めに）。狭い道で仲間のうしろにつかえたときは、先に「交代」を試す */
+        if (u.tg && !b.ranged && !u.hold) { const dN = dist(u.tg, a); if (dN > rtR(b, u.tg) + 0.3) { if (!u.wd || u.wd.t !== u.tg) u.wd = { t: u.tg, d: dN, at: now }; else if (dN < u.wd.d - 0.3) { u.wd.d = dN; u.wd.at = now; } else if (now - u.wd.at > 2500) { (u.unr || (u.unr = new Map())).set(u.tg, now + 3000); AI30("giveup"); u.tg = null; u.th = 0; u.wd = null; } } else u.wd = null; } else u.wd = null;
         /* 勇者：戦う相手がいるあいだだけ先へ進まない。いなければ、いつもの道（1手の計算の位置）をたどって先へ */
-        if (u.side === 0 && u.tg) u.o.rtBusy30 = performance.now(); if (u.side === 0 && !u.tg && !u.o.flee) { const at = heroAt(u.o); if (at && at.i === Rm.i) { tx = at.x; tz = at.z; } }
-        const evd = u.ev && now < u.ev.t; if (u.ev && !evd) u.ev = null;
-        if (T && !evd) { const dx = T.x - a.x, dz = T.z - a.z, L = Math.hypot(dx, dz) || 1, want = b.ranged ? (losL(Rm, a.x, a.z, T.x, T.z) ? Math.min(b.reach - 1, 5) : 1.5) : Math.max(rtR(b, T) * 0.85, rtSep(a, T)); if (u.mv) { tx = u.mv[0]; tz = u.mv[1]; } else if (b.ranged && L < 3 && losL(Rm, a.x, a.z, T.x, T.z)) { tx = a.x - dx / L * 2; tz = a.z - dz / L * 2; } else if (L > want) { tx = T.x - dx / L * want; tz = T.z - dz / L * want; } }
-        { /* 岩のむこうの相手へは、マスの道をたどって回りこむ */ if (Math.hypot(tx - a.x, tz - a.z) > 1 && (!losL(Rm, a.x, a.z, tx, tz) || now < (u.fpT || 0))) { const G = Rm.G30, mid = (G.W - 1) / 2, cOf = (x, z) => [Math.max(0, Math.min(G.W - 1, Math.round(x / Rm.CS + mid))), Math.max(0, Math.min(G.H - 1, Math.round(-z / Rm.CS)))]; if (!u.path || now > u.pathT) { const nearW = c => { if (g30at(G, c[0], c[1])) return c; for (let r = 1; r <= 3; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { const q = [c[0] + dx, c[1] + dy]; if (q[0] >= 0 && q[1] >= 0 && q[0] < G.W && q[1] < G.H && g30at(G, q[0], q[1])) return q; } return null; }; const c0 = nearW(cOf(a.x, a.z)), c1 = nearW(cOf(tx, tz)); u.path = c0 && c1 ? bfs30(G, c0, c1) : null; u.pathT = now + 500; u.pk = u.path && u.path.length > 1 ? 1 : 0; if (!u.path && u.tg) { u.noPath = (u.noPath || 0) + 1; if (u.noPath > 2) { (u.unr || (u.unr = new Map())).set(u.tg, now + 6000); u.tg = null; u.th = 0; u.noPath = 0; } } else u.noPath = 0; }   /* 壁ぎわ（鉱脈の前など）にいる子もいちばん近い道のマスから。道がない相手はあきらめて別の相手へ */
-          if (u.path && u.path.length > 1) { while (u.pk < u.path.length - 1) { const w = cellW(Rm, u.path[u.pk]); if (Math.hypot(w[0] - a.x, w[1] - a.z) < 0.6) u.pk++; else break; } const w = cellW(Rm, u.path[Math.min(u.pk, u.path.length - 1)]); tx = w[0]; tz = w[1]; } } else u.path = null; }
-        if (a.lord) { const hx = a.hx ?? 0, hz = a.hz ?? -9, ddx = tx - hx, ddz = tz - hz, dl = Math.hypot(ddx, ddz); if (dl > 4.5) { tx = hx + ddx / dl * 4.5; tz = hz + ddz / dl * 4.5; } }   /* 主は玉座のそばを離れない（入口まで勇者を押し返して、階段の前で戦っていた：録画で発見） */
-        if (evd) { tx = u.ev.x; tz = u.ev.z; }
-        const mx = tx - a.x, mz = tz - a.z, ML = Math.hypot(mx, mz); if (ML > 0.08 && (u.ph !== "wind" || evd)) { const sp = rtSpd(b) * (evd ? 2.2 : fleeH ? 1.5 : ML > 2.5 ? 1.2 : 1) * (u.o.stuck > 0 ? 0.3 : 1) * (1 - (u.fat || 0) * 0.5), st = Math.min(ML, sp * dt); const ox = a.x, oz = a.z; step30(Rm, a, mx / ML * st, mz / ML * st); { const mv = Math.hypot(a.x - ox, a.z - oz); if (st > 0.01 && mv < st * 0.3) { u.blk = (u.blk || 0) + dt; if (u.blk > 0.35) { u.fpT = now + 1500; u.pathT = 0; u.blk = 0; } } else u.blk = 0; }   /* 壁に向かって走り続けていたら（まっすぐ見えても角に引っかかる）、マスの道で回りこむ */ a.dist = (a.dist || 0) + st; a.walking = true; a.y = ML > 2.5 && b.run >= 1.8 && b.size < 2 ? 0.4 * Math.abs(Math.sin(a.dist * 1.7)) : 0; } else { a.walking = false; a.y = (a.y || 0) * 0.8; }
+        if (u.side === 0 && u.tg) u.o.rtBusy30 = performance.now(); if (u.side === 0 && !u.tg && !u.o.flee) { const at = heroAt(u.o); if (at && at.i === Rm.i) { gx = at.x; gz = at.z; } }
+        const evd = u.ev && now < u.ev.t; if (u.ev && !evd) u.ev = null; const fl = u.flinch && now < u.flinch;
+        if (T && !evd) { const dx = T.x - a.x, dz = T.z - a.z, L = Math.hypot(dx, dz) || 1, want = Math.max(rtR(b, T) * 0.85, rtSep(a, T));
+          if (fl) { gx = a.x - dx / L * 0.8; gz = a.z - dz / L * 0.8; }   /* ひるむ：半歩さがる */
+          else if (u.mv) { gx = u.mv[0]; gz = u.mv[1]; }
+          else if (u.role === "ranged") { if (u.spot) { gx = u.spot[0]; gz = u.spot[1]; } else if (L > 1.6) { gx = T.x - dx / L * 1.5; gz = T.z - dz / L * 1.5; } }   /* 見通しのきく所がなければ、近づいて見通しを作る */
+          else if (u.hold) { gx = null; }
+          else if (L > want) { gx = T.x - dx / L * want; gz = T.z - dz / L * want; }
+          if (u.swap) { if (now < u.swap.until && dist(a, u.swap) > 0.3) { gx = u.swap.x; gz = u.swap.z; } else u.swap = null; }   /* 交代で下がる */
+          /* 群れで下がる：目の前で打ち合っていない子から、集まる所へ */ if (u.side === 1 && Rm.ret30 && !a.lord && !Hs.some(h => dist(h, a) < 2.2)) { const k = Ms.indexOf(a), an = k * 2.4; gx = Rm.ret30.x + Math.cos(an) * 0.9 * (k ? 1 : 0); gz = Rm.ret30.z + Math.sin(an) * 0.9 * (k ? 1 : 0); } }
+        if (a.lord && gx != null) { const hx = a.hx ?? 0, hz = a.hz ?? -9, ddx = gx - hx, ddz = gz - hz, dl = Math.hypot(ddx, ddz); if (dl > 4.5) { gx = hx + ddx / dl * 4.5; gz = hz + ddz / dl * 4.5; } }   /* 主は玉座のそばを離れない（入口まで勇者を押し返して、階段の前で戦っていた：録画で発見） */
+        const sp = rtSpd(b) * (evd ? 2.2 : fleeH ? 1.5 : (gx != null && Math.hypot(gx - a.x, gz - a.z) > 2.5) ? 1.2 : 1) * (u.o.stuck > 0 ? 0.3 : 1) * (1 - (u.fat || 0) * 0.5) * (fl ? 0.6 : 1);
+        let walked = false;
+        if (evd) { /* よける：横へ跳ぶ（短いので道の計算はしない。跳ぶ先は立てる所だけ選んである） */ const mx = u.ev.x - a.x, mz = u.ev.z - a.z, ML = Math.hypot(mx, mz); if (ML > 0.05) { const st = Math.min(ML, sp * dt), ox = a.x, oz = a.z; step30(Rm, a, mx / ML * st, mz / ML * st); walked = Math.hypot(a.x - ox, a.z - oz) > 0.25 * dt; } }
+        else if (gx != null && (u.ph !== "wind")) walked = rtGo30(Rm, nav, a, u, gx, gz, sp, dt, now, OB, up);
+        else { u.vx = u.vz = 0; }
+        /* 交代：狭い所で前の仲間につかえて1秒。前の仲間が自分より弱っている（または後ろが向いている弓・魔法・回復役）なら「代われ」と言って、前の子を自分のうしろへ下げる（細い通路で後ろの子が棒立ちしていた） */
+        if (u.wq30 > 1.0 && u.blkBy && T && !a.lord) { const B = u.blkBy, bu = B.rt, hpB = bu.o.hp / (bu.o.max || 1), hpA = u.o.hp / (u.o.max || 1); if (bu.tg && !bu.swap && !B.lord && bu.ph !== "wind" && now > (u.swCD || 0) && now > (bu.swCD || 0) && (!nav || NAV30.clearAt(nav, (a.x + B.x) / 2, (a.z + B.z) / 2) >= 0.9) && (hpB < hpA * 0.85 || (backL30(B) && !backL30(a)))) { u.swCD = bu.swCD = now + 5000;   /* すれちがえる幅がある所だけ（1人幅の通路では入れかわれない）。続けて入れかわらない */ const L = dist(a, B) || 1; bu.swap = { until: now + 1600, x: a.x - (B.x - a.x) / L * 0.8, z: a.z - (B.z - a.z) / L * 0.8 }; u.wq30 = 0; AI30("swap"); if (now - (u.swS || -1e9) > 5000 && (u.swS = now)) POPS30.push({ x: a.x, y: Rm.Y + 3.6, z: Rm.Z + a.z, txt: u.side ? "🔥 代われ！" : "🗡 下がれ、俺が行く！", col: u.side ? "#ffb070" : "#a9ccff", big: 0, t: now, cue: 1, life: 1500 }); } }
+        if (gx != null && u.np === null && u.noWay > 2 && u.tg && !evd) { (u.unr || (u.unr = new Map())).set(u.tg, now + 6000); u.tg = null; u.th = 0; u.noWay = 0; }   /* 道がない相手はあきらめて別の相手へ */
+        if (walked) { const st = Math.hypot(u.vx, u.vz) * dt; a.dist = (a.dist || 0) + st; a.walking = true; a.y = sp > rtSpd(b) * 1.1 && b.run >= 1.8 && b.size < 2 ? 0.4 * Math.abs(Math.sin(a.dist * 1.7)) : 0; } else { a.walking = false; a.y = (a.y || 0) * 0.8; }
         // 向き：相手へ（すばやい子ほど早く向き直る）
-        const want = T ? Math.atan2(T.x - a.x, T.z - a.z) : (a.walking ? Math.atan2(mx, mz) : u.fa), dd = Math.atan2(Math.sin(want - u.fa), Math.cos(want - u.fa)); u.fa += Math.sign(dd) * Math.min(Math.abs(dd), dt * 7 * b.agi); if (!a.lord) a.r = u.fa;   /* 主の絵は向きを変えると斜めに寝て見えた（録画で発見）→ 主は正面のまま */
+        const want = T ? Math.atan2(T.x - a.x, T.z - a.z) : (a.walking ? Math.atan2(u.vx, u.vz) : u.fa), dd = Math.atan2(Math.sin(want - u.fa), Math.cos(want - u.fa)); u.fa += Math.sign(dd) * Math.min(Math.abs(dd), dt * 7 * b.agi); if (!a.lord) a.r = u.fa;   /* 主の絵は向きを変えると斜めに寝て見えた（録画で発見）→ 主は正面のまま */
         // 振る
         u.cd -= dt * (1 - (u.fat || 0)); if (u.ph === "wind") { u.tw -= dt; if (u.tw <= 0) { u.ph = "rec"; u.cd = rtInt(b) - rtWind(b); a.mode = "slash"; const Tn = u.tg; if (u.side === 0 && b.heal && u.healT) { const o = u.healT; const amt = Math.round(u.o.atk * 1.1 * Math.pow(0.85, (u.o.hc23 = (u.o.hc23 || 0) + 1))); o.rt.o.hp = Math.min(o.rt.o.max, o.rt.o.hp + amt); FX30.push({ k: "proj", a: [a.x, Rm.Y + 1.6, Rm.Z + a.z], b: [o.x, Rm.Y + 1.2, Rm.Z + o.z], t0: now, dur: 260, kind: "heal" }); POPS30.push({ x: o.x, y: Rm.Y + 2.4, z: Rm.Z + o.z, txt: "+" + amt, col: "#7dff9a", big: 0, t: now }); u.healT = null; }
-              else if (Tn && Tn.rt && (Tn.al30 ?? 1) > 0 && u.lmg && Math.hypot(Tn.x - a.x, Tn.z - a.z) <= 8.5 && losL(Rm, a.x, a.z, Tn.x, Tn.z)) { FX30.push({ k: "proj", a: [a.x, Rm.Y + 2.2, Rm.Z + a.z], b: [Tn.x, Rm.Y + 1.2, Rm.Z + Tn.z], t0: now, dur: 200 + Math.hypot(Tn.x - a.x, Tn.z - a.z) * 30, kind: "magic" }); a.lmag30 = 1; rtHit(Rm, a, Tn, now); a.lmag30 = 0; }
-              else if (Tn && Tn.rt && (Tn.al30 ?? 1) > 0 && Math.hypot(Tn.x - a.x, Tn.z - a.z) <= rtR(b, Tn) + 0.7 && (!b.ranged || losL(Rm, a.x, a.z, Tn.x, Tn.z))) { if (b.ranged) FX30.push({ k: "proj", a: [a.x, Rm.Y + 1.4, Rm.Z + a.z], b: [Tn.x, Rm.Y + 1.2, Rm.Z + Tn.z], t0: now, dur: 120 + Math.hypot(Tn.x - a.x, Tn.z - a.z) * 25, kind: a.hero ? (u.o.job === "hunter" ? "bow" : "magic") : (MAGIC30.test(a.sp || "") ? "magic" : "bow") }); rtHit(Rm, a, Tn, now); }
+              else if (Tn && Tn.rt && (Tn.al30 ?? 1) > 0 && u.lmg && dist(Tn, a) <= 8.5 && losL(Rm, a.x, a.z, Tn.x, Tn.z)) { FX30.push({ k: "proj", a: [a.x, Rm.Y + 2.2, Rm.Z + a.z], b: [Tn.x, Rm.Y + 1.2, Rm.Z + Tn.z], t0: now, dur: 200 + dist(Tn, a) * 30, kind: "magic" }); a.lmag30 = 1; rtHit(Rm, a, Tn, now); a.lmag30 = 0; }
+              else if (Tn && Tn.rt && (Tn.al30 ?? 1) > 0 && dist(Tn, a) <= rtR(b, Tn) + 0.7 && (!b.ranged || losL(Rm, a.x, a.z, Tn.x, Tn.z))) { if (b.ranged) FX30.push({ k: "proj", a: [a.x, Rm.Y + 1.4, Rm.Z + a.z], b: [Tn.x, Rm.Y + 1.2, Rm.Z + Tn.z], t0: now, dur: 120 + dist(Tn, a) * 25, kind: a.hero ? (u.o.job === "hunter" ? "bow" : "magic") : (MAGIC30.test(a.sp || "") ? "magic" : "bow") }); rtHit(Rm, a, Tn, now); }
               else if (Tn) { const ev = Tn.rt && Tn.rt.ev; POPS30.push(ev ? { x: Tn.x, y: Rm.Y + 2.4, z: Rm.Z + Tn.z, txt: "かわした！", col: "#d8e8ff", big: 0, t: now } : { x: a.x, y: Rm.Y + 2.4, z: Rm.Z + a.z, txt: "空振り", col: "#bba", big: 0, t: now }); } setTimeout(() => { if (a.mode === "slash") a.mode = "idle"; }, 200); } }
-        else if (u.cd <= 0 && !(u.o.sleep > 0) && !(u.o.stuck > 0 && now - (u.netT || 0) < 500)) {   /* 網：かかった直後0.5秒は振れない。あとは足が遅く振りが重いだけ（網つきの魔物に叩かれるたびに網がかかり、ずっと振れなかった：録画で発見） */ if (u.side === 0 && b.heal) { const low = Hs.filter(o => o.rt.o.hp / o.rt.o.max < 0.6 && Math.hypot(o.x - a.x, o.z - a.z) < 7).sort((p, q) => p.rt.o.hp / p.rt.o.max - q.rt.o.hp / q.rt.o.max)[0]; if (low && u.o.atk * 1.1 * Math.pow(0.85, (u.o.hc23 || 0) + 1) >= Math.max(5, u.o.atk * 0.3)) { u.healT = low; u.ph = "wind"; u.tw = rtWind(b); a.mode = "slash"; return; } }   /* 回復は使うほど弱くなる。+2・+3 ばかり出るほど弱くなったら、回復をやめて殴る */
-          const lmg = a.lord && T && Math.hypot(T.x - a.x, T.z - a.z) > rtR(b, T) + 0.2 && Math.hypot(T.x - a.x, T.z - a.z) <= 8 && losL(Rm, a.x, a.z, T.x, T.z);   /* 主は、届かない所の相手（離れて撃つ魔法使いなど）には魔法を飛ばす（主が玉座から離れないので、遠くから撃たれ放題だった） */
-          if (T && (Math.hypot(T.x - a.x, T.z - a.z) <= rtR(b, T) + 0.2 || lmg) && Math.abs(dd) < 0.7 && (!b.ranged || losL(Rm, a.x, a.z, T.x, T.z))) { u.ph = "wind"; u.lmg = lmg; u.tw = rtWind(b) * (u.o.stuck > 0 ? 1.5 : 1) * (lmg ? 1.8 : 1); a.mode = "idle"; a.wnd30 = now;
+        else if (u.cd <= 0 && !fl && !(u.o.sleep > 0) && !(u.o.stuck > 0 && now - (u.netT || 0) < 500)) {   /* 網：かかった直後0.5秒は振れない。あとは足が遅く振りが重いだけ（網つきの魔物に叩かれるたびに網がかかり、ずっと振れなかった：録画で発見）。ひるんでいるあいだも振らない */ if (u.side === 0 && b.heal) { const low = Hs.filter(o => o.rt.o.hp / o.rt.o.max < 0.6 && dist(o, a) < 7).sort((p, q) => p.rt.o.hp / p.rt.o.max - q.rt.o.hp / q.rt.o.max)[0]; if (low && u.o.atk * 1.1 * Math.pow(0.85, (u.o.hc23 || 0) + 1) >= Math.max(5, u.o.atk * 0.3)) { u.healT = low; u.ph = "wind"; u.tw = rtWind(b); a.mode = "slash"; return; } }   /* 回復は使うほど弱くなる。+2・+3 ばかり出るほど弱くなったら、回復をやめて殴る */
+          const lmg = a.lord && T && dist(T, a) > rtR(b, T) + 0.2 && dist(T, a) <= 8 && losL(Rm, a.x, a.z, T.x, T.z);   /* 主は、届かない所の相手（離れて撃つ魔法使いなど）には魔法を飛ばす（主が玉座から離れないので、遠くから撃たれ放題だった） */
+          if (T && (dist(T, a) <= rtR(b, T) + 0.2 || lmg) && Math.abs(dd) < 0.7 && (!b.ranged || losL(Rm, a.x, a.z, T.x, T.z))) { u.ph = "wind"; u.lmg = lmg; u.tw = rtWind(b) * (u.o.stuck > 0 ? 1.5 : 1) * (lmg ? 1.8 : 1); a.mode = "idle"; a.wnd30 = now; u.vx = u.vz = 0;
             /* 振りかぶりを見せる（足もとに赤い輪）。狙われた子は、見えていて余裕があれば横へ跳んでよける（よけたら空振り） */ FX30.push({ k: "ring", x: a.x, y: Rm.Y + 0.05, z: Rm.Z + a.z, t0: now, life: u.tw * 1000, r: 0.9 * Math.pow(b.size, 0.5), col: "255,90,60" });
             const tu = T.rt; if (tu && !b.ranged && !lmg && tu.ph !== "wind" && tu.b.size < 2.2 && !(T.stag30 && now < T.stag30)) { const ang = Math.atan2(a.x - T.x, a.z - T.z), rel = Math.abs(Math.atan2(Math.sin(ang - tu.fa), Math.cos(ang - tu.fa))), sees = rel < 1.3, p = Math.max(0.04, Math.min(0.6, 0.15 + 0.3 * (tu.b.agi / b.agi - 1))) * (sees ? 1 : 0.15) * (1 - (tu.fat || 0));
-              if (Math.random() < p) { const dx = T.x - a.x, dz = T.z - a.z, L = Math.hypot(dx, dz) || 1, sd = Math.random() < 0.5 ? 1 : -1, ex = T.x + (-dz / L * sd * 1.0 + dx / L * 0.7) * Math.pow(b.size, 0.3), ez = T.z + (dx / L * sd * 1.0 + dz / L * 0.7) * Math.pow(b.size, 0.3); if (okAt(Rm, ex, ez)) tu.ev = { x: ex, z: ez, t: now + u.tw * 1000 + 150 }; } } } } });
-      /* ぶつからない：sep30 で全員まとめて（動いたあとに） */ });
+              if (Math.random() < p) { const dx = T.x - a.x, dz = T.z - a.z, L = Math.hypot(dx, dz) || 1, sd = Math.random() < 0.5 ? 1 : -1, ex = T.x + (-dz / L * sd * 1.0 + dx / L * 0.7) * Math.pow(b.size, 0.3), ez = T.z + (dx / L * sd * 1.0 + dz / L * 0.7) * Math.pow(b.size, 0.3), tnav = nav && NAV30.needOf(nav, rtRad30(T));
+                if (nav ? NAV30.lineClear(nav, T.x, T.z, ex, ez, tnav, false) : okAt(Rm, ex, ez)) tu.ev = { x: ex, z: ez, t: now + u.tw * 1000 + 150 }; } } } } });   /* 跳ぶ先まで体の幅で通れるときだけ（壁ぎわでは跳ばない） */
+      /* ぶつからない：sep30 で全員まとめて（動いたあとに）。よける（avoid）がうまくいっていれば、ほとんど出番はない */ });
     N.rt30t = performance.now(); if (any) { window.__eng30 = true; NW30.rtAny = now; } }
+  /* 弓・魔法の立つ所：相手のまわりの輪（3つの半径×12方向）と今いる所から、いちばん点の高い所。
+     見通しがない・届かない・その体で立てない所は使わない。点：ほどよい間合い・近い（歩く量が少ない）・敵の前衛から離れている・
+     味方の前衛が相手とのあいだにいる・（魔物なら）勇者がまっすぐ来ると罠を踏む所。今の所が使えるなら少し上乗せ（行ったり来たりしない） */
+  function rtSpot30(Rm, nav, a, u, T, foes, allies) { const b = u.b, rad = rtRad30(a), nd = nav ? NAV30.needOf(nav, rad) : 0, R0 = Math.min(b.reach - 1, 5.2), Rmin = 2.6;
+    const mel = foes.filter(f => !f.rt.b.ranged), fr = allies.filter(o => o !== a && !o.rt.b.ranged);
+    const score = (x, z, here) => { const dT = Math.hypot(x - T.x, z - T.z); if (dT > b.reach - 0.4 || dT < Rmin) return -1e9; if (nav ? !NAV30.passAt(nav, x, z, nd, false) : !okAt(Rm, x, z)) return -1e9; if (!losL(Rm, x, z, T.x, T.z)) return -1e9;
+      if (!here && nav && !NAV30.reach(nav, a.x, a.z, x, z, rad, false)) return -1e9;
+      let s = -Math.abs(dT - R0) * 0.6 - Math.hypot(x - a.x, z - a.z) * 0.45; const mf = mel.reduce((m, f) => Math.min(m, Math.hypot(f.x - x, f.z - z) - (f.rt.b.reach || 1.5)), 9); if (mf < 1.5) s -= (1.5 - mf) * 3;
+      if (fr.some(o => segD30(o.x, o.z, x, z, T.x, T.z) < 1.0)) s += 0.8;
+      if (u.side === 1 && T.rt && T.rt.o && trapOnWay30(Rm, T.rt.o, T.x, T.z, x, z)) s += 1.5;
+      return s + (here ? 1.2 : 0); };
+    let best = null, bs = score(a.x, a.z, 1); if (bs > -1e8) best = [a.x, a.z];
+    for (const rr of [R0, R0 - 1.3, R0 + 0.9]) for (let k = 0; k < 12; k++) { const an = (k + (rr === R0 ? 0 : 0.5)) / 12 * 6.283, x = T.x + Math.cos(an) * rr, z = T.z + Math.sin(an) * rr, s = score(x, z, 0); if (s > bs) { bs = s; best = [x, z]; } }
+    return best; }
   /* 体が重ならない（本人のスクショ：勇者3人が1か所に重なっていた）。戦っている子だけでなく、歩いている勇者・魔物も全員。
      動き終わったあとに押し分ける。大きい子ほど小さい子を押しのける。押す速さに上限をつけて、ガタガタ震えないように */
   function sep30(dt) { if (typeof N === "undefined" || !N || N.scout) return; const cap = Math.max(0.02, 7 * dt);
@@ -14640,18 +14914,18 @@ function fpOpen30(){
     if (!NW30) { NW30 = { hi: (N.hit25 || []).length, follow: false, p0: { x: P.x, y: P.y, z: P.z, yaw: P.yaw, pit: P.pit, seg: P.seg }, cr: curRoom }; nightCam30(true); if (!document.getElementById("nc30css")) { const st = document.createElement("style"); st.id = "nc30css"; st.textContent = ".night30 .f26stick,.night30 .f26hint{display:none!important}"; document.head.appendChild(st); } try { const JN = { warrior: "戦士", knight: "聖騎士", thief: "盗賊", hunter: "狩人", mage: "魔法使い", priest: "僧侶" }, hs = N.heroes.filter(h => !h.boss || true); const bn = document.createElement("div"); bn.className = "intro30"; bn.innerHTML = `<b>⚔ 勇者が来た</b><div>${hs.map(h => `<span>${JN[h.job] || ""} ${esc(h.name)}<small>Lv${h.lv || 1}</small></span>`).join("")}</div>`; wrap.appendChild(bn); window.__intro30 = performance.now() + 2600; setTimeout(() => { bn.classList.add("out"); setTimeout(() => bn.remove(), 600); }, 2600); try { tone16(220, 0, 0.35, "sawtooth", 0.05); tone16(330, 0.18, 0.35, "sawtooth", 0.05); } catch (e) {} } catch (e) {}   /* 前ぶれ：どんな勇者が来たかを見せてから始める（急に入ってきて、すぐ終わっていた） */ window.__fp30night = 1; const bar = document.createElement("div"); bar.className = "nc30"; bar.innerHTML = `<button data-n="1">×1</button><button data-n="3">×3</button><button data-n="skip">⏭ 最後まで</button><button data-n="f">🎯 勇者の所へ</button>`; { const o2 = wrap.querySelector(".ncs30"); if (o2) o2.remove(); } wrap.appendChild(bar);
       bar.addEventListener("click", ev => { const b = ev.target.closest("[data-n]"); if (!b) return; ev.stopPropagation(); const v = b.dataset.n; if (v === "f") { nightCam30(false); return; } if (v === "skip") { const x = document.querySelector('#app [data-a="skip"]'); if (x) x.click(); return; } speed = +v; try { tick(); } catch (e) {} bar.querySelectorAll("[data-n]").forEach(q => q.classList.toggle("on", q.dataset.n == speed)); }); }
     { let sp = wrap.querySelector(".ncs30"); if (!sp) { sp = document.createElement("div"); sp.className = "ncs30"; wrap.appendChild(sp); } if (sp) sp.textContent = `👤残り${N.heroes.filter(h => h.st === "in" || h.st === "wait").length}・⚔${N.heroes.filter(h => h.st === "dead").length}・👑${Math.round(N.lord.hp)}`; }
-    battlePlan(dt, now); try { rt30Step(dt, now); } catch (e) { console.warn('rt30', e); }
+    battlePlan(dt, now); { const t0 = RN30(); try { rt30Step(dt, now); } catch (e) { console.warn('rt30', e); } const ms = RN30() - t0; if (N && N.rtRooms30 && Object.keys(N.rtRooms30).length) { PERF30.n++; PERF30.ms += ms; PERF30.max = Math.max(PERF30.max, ms); if (ms > 8) PERF30.slow = (PERF30.slow || 0) + 1; } }   /* rt30Step の重さを測る（検査 sim30 が読む） */
     // 魔物：夜の居場所へ歩く。倒れたら消える
     { const LI2 = rooms.findIndex(R => R.classic); if (LI2 >= 0) { const RL = rooms[LI2]; RL.acts = RL.acts || []; const ld = RL.acts.find(a => a.lord); N.mons.forEach(M => { if (!M.guard30 || !M.ref || RL.acts.some(a => a.g30 && a.m && a.m.id === M.ref.id)) return; const k = RL.acts.filter(a => a.g30).length, x = k ? 2.2 : -2.2, z = -4.5; RL.acts.push({ g30: 1, m: M.ref, sp: M.ref.sp, evo: M.ref.evos || 0, x, z, r: 0, hx: x, hz: z, tx: x, tz: z, wait: 99, ph: Math.random() * 6, walking: false, dist: 0, mode: "idle", y: 0, stay: true, fixd: 1 }); }); /* 近衛は、主の間に入ってきた勇者に向かっていく（立ったままだった） */ RL.acts.forEach(a => { if (!(a.g30 || a.lord) || (a.al30 ?? 1) <= 0) return; if (RL.rtOn30 && a.rt30 && now - a.rt30 < 300) return; let best = null, bd = 1e9; RL.acts.forEach(b => { if (!b.hero || (b.al30 ?? 1) <= 0) return; const d = Math.hypot(b.x - a.x, b.z - a.z); if (d < bd) { bd = d; best = b; } }); const hx = a.hx, hz = a.hz; let tx = hx, tz = hz; if (best && bd < (a.lord ? 9 : 14)) { const L = Math.max(0.001, bd), stop = 1.3; tx = best.x - (best.x - a.x) / L * stop; tz = best.z - (best.z - a.z) / L * stop; a.face = best; a.r = Math.atan2(best.x - a.x, best.z - a.z); } const dx = tx - a.x, dz = tz - a.z, L2 = Math.hypot(dx, dz); if (L2 > 0.05) { const st = Math.min(L2, (a.lord ? 1.8 : 3.0) * dt); a.x += dx / L2 * st; a.z += dz / L2 * st; a.walking = true; } else a.walking = false; }); } }   /* 近衛：主のそばに立つ */
     rooms.forEach(Rm => (Rm.acts || []).forEach(a => { if (a.hero || !a.m) return; const M = N.mons.find(q => q.ref && q.ref.id === a.m.id); if (!M) return; if (a.g30) { if (M.down && !M._h30) a.al30 = Math.max(0, (a.al30 ?? 1) - dt * 1.5); return; } if (M.guard30) { a.hide = 1; return; } if (M.down && !M._h30) { a.al30 = Math.max(0, (a.al30 ?? 1) - dt * 1.5); return; }
-      if (M.pos !== Rm.i || M.mto != null) { a.hide = 1; return; } a.hide = 0; if (!M.c30) return; if (Rm.rtOn30 && a.rt30 && now - a.rt30 < 300) { a.wq = []; return; } let w = a.bt; if (!w) { const c = cellW(Rm, M.c30), q = a.wq || (a.wq = []), lst = q[q.length - 1]; if (!lst || Math.hypot(lst[0] - c[0], lst[1] - c[1]) > 0.3) q.push(c); while (q.length > 1 && Math.hypot(q[0][0] - a.x, q[0][1] - a.z) < 0.7) q.shift(); w = q[0]; } else a.wq = [];   /* 魔物も道のマスを順にたどる */ const dx = w[0] - a.x, dz = w[1] - a.z, L = Math.hypot(dx, dz); if (L > (a.bt ? 0.08 : 0.6)) { const dash = a.bt && L > 2.2, st = Math.min(Math.max(0.02, L - (a.bt ? 0 : 0.5)), (dash ? 8.5 : a.bt ? 4.2 : 3.2) * dt); step30(Rm, a, dx / L * st, dz / L * st); a.dist = (a.dist || 0) + st; a.y = dash ? 0.45 * Math.abs(Math.sin(a.dist * 1.6)) : (a.y || 0) * Math.max(0, 1 - dt * 10);   /* 間合いをつめるときは人間ばなれした速さで跳ぶように駆ける */ a.walking = true; a.r = Math.atan2(dx, dz); a.mode = "idle"; a.stay = true; } else a.walking = false; }));
+      if (M.pos !== Rm.i || M.mto != null) { a.hide = 1; return; } a.hide = 0; if (!M.c30) return; if (Rm.rtOn30 && a.rt30 && now - a.rt30 < 300) { a.wq = []; return; } let w = a.bt; if (!w) { const c = cellW(Rm, M.c30), q = a.wq || (a.wq = []), lst = q[q.length - 1]; if (!lst || Math.hypot(lst[0] - c[0], lst[1] - c[1]) > 0.3) q.push(c); while (q.length > 1 && Math.hypot(q[0][0] - a.x, q[0][1] - a.z) < 0.7) q.shift(); w = q[0]; } else a.wq = [];   /* 魔物も道のマスを順にたどる */ const dx = w[0] - a.x, dz = w[1] - a.z, L = Math.hypot(dx, dz); if (L > (a.bt ? 0.08 : 0.6)) { const dash = a.bt && L > 2.2, st = Math.min(Math.max(0.02, L - (a.bt ? 0 : 0.5)), (dash ? 8.5 : a.bt ? 4.2 : 3.2) * dt); const mvd = navStep30(Rm, a, w[0], w[1], st); a.dist = (a.dist || 0) + mvd; a.y = dash ? 0.45 * Math.abs(Math.sin(a.dist * 1.6)) : (a.y || 0) * Math.max(0, 1 - dt * 10);   /* 間合いをつめるときは人間ばなれした速さで跳ぶように駆ける */ a.walking = mvd > st * 0.2; a.r = Math.atan2(dx, dz); a.mode = "idle"; a.stay = true; } else a.walking = false; }));
     // 勇者：いる層に絵を足して、マスの位置へ歩かせる
     N.heroes.forEach(h => { const id = "h" + h.id; let A = null, RA = null; rooms.forEach(Rm => { const f = (Rm.acts || []).find(a => a.hid === id); if (f) { A = f; RA = Rm; } });
       let at = (h.st === "in" || h.st === "hold30") ? heroAt(h) : null;
       if (!at) { if (A) { A.al30 = Math.max(0, (A.al30 ?? 1) - dt * (h.st === "dead" ? 1.2 : 3)); if (A.al30 === 0) RA.acts.splice(RA.acts.indexOf(A), 1); } return; }
       if (A && RA.i !== at.i) { RA.acts.splice(RA.acts.indexOf(A), 1); A = null; }
       if (!A) { const Rm = rooms[at.i]; A = { hero: 1, hid: id, h, m: { nick: h.name, id: -1 - h.id }, sp: heroSp25(h), evo: heroEvo25(h), x: at.x, z: at.z, r: 3.14, hx: at.x, hz: at.z, tx: at.x, tz: at.z, wait: 99, ph: Math.random() * 6, walking: false, dist: 0, mode: "idle", y: 0, stay: true, fixd: 1 }; (Rm.acts = Rm.acts || []).push(A); }
-      A.h = h; if (rooms[at.i] && rooms[at.i].rtOn30 && A.rt30 && now - A.rt30 < 300) { A.wq = []; return; } { const mp = A.bt; if (mp) { at = { ...at, x: mp[0], z: mp[1], rest: 0 }; A.wq = []; } else { const q = A.wq || (A.wq = []), lst = q[q.length - 1]; if (!lst || Math.hypot(lst[0] - at.x, lst[1] - at.z) > 0.3) q.push([at.x, at.z]); while (q.length > 1 && Math.hypot(q[0][0] - A.x, q[0][1] - A.z) < 0.35) q.shift(); if (q.length) { const rest = q.reduce((s2, p2, k) => s2 + (k ? Math.hypot(p2[0] - q[k - 1][0], p2[1] - q[k - 1][1]) : Math.hypot(p2[0] - A.x, p2[1] - A.z)), 0); at = { ...at, x: q[0][0], z: q[0][1], rest }; } } }   /* 通ったマスを順にたどる（角で岩を突っ切っていた） */ if (A.bt) A.btT30 = performance.now(); const dx = at.x - A.x, dz = at.z - A.z, L = Math.hypot(dx, dz); if (L > 0.15) { const tac = A.btT30 && performance.now() - A.btT30 < 2500, dashH = tac && L > 2.2, st = Math.min(L, (tac ? (dashH ? 8.5 : 4.2) : Math.min(7.5, Math.max(2.6, (at.rest || L) * 1.6))) * dt); A.y = dashH ? 0.45 * Math.abs(Math.sin((A.dist || 0) * 1.6)) : (A.y || 0) * Math.max(0, 1 - dt * 10);   /* 駆け引きで動くときは走る速さまで（止めに入る子が瞬間移動して見えた） */ step30(rooms[at.i], A, dx / L * st, dz / L * st); A.dist += st; A.walking = true; A.r = Math.atan2(dx, dz); } else A.walking = false; });
+      A.h = h; if (rooms[at.i] && rooms[at.i].rtOn30 && A.rt30 && now - A.rt30 < 300) { A.wq = []; return; } { const mp = A.bt; if (mp) { at = { ...at, x: mp[0], z: mp[1], rest: 0 }; A.wq = []; } else { const q = A.wq || (A.wq = []), lst = q[q.length - 1]; if (!lst || Math.hypot(lst[0] - at.x, lst[1] - at.z) > 0.3) q.push([at.x, at.z]); while (q.length > 1 && Math.hypot(q[0][0] - A.x, q[0][1] - A.z) < 0.35) q.shift(); if (q.length) { const rest = q.reduce((s2, p2, k) => s2 + (k ? Math.hypot(p2[0] - q[k - 1][0], p2[1] - q[k - 1][1]) : Math.hypot(p2[0] - A.x, p2[1] - A.z)), 0); at = { ...at, x: q[0][0], z: q[0][1], rest }; } } }   /* 通ったマスを順にたどる（角で岩を突っ切っていた） */ if (A.bt) A.btT30 = performance.now(); const dx = at.x - A.x, dz = at.z - A.z, L = Math.hypot(dx, dz); if (L > 0.15) { const tac = A.btT30 && performance.now() - A.btT30 < 2500, dashH = tac && L > 2.2, st = Math.min(L, (tac ? (dashH ? 8.5 : 4.2) : Math.min(7.5, Math.max(2.6, (at.rest || L) * 1.6))) * dt); A.y = dashH ? 0.45 * Math.abs(Math.sin((A.dist || 0) * 1.6)) : (A.y || 0) * Math.max(0, 1 - dt * 10);   /* 駆け引きで動くときは走る速さまで（止めに入る子が瞬間移動して見えた） */ const mvd = navStep30(rooms[at.i], A, at.x, at.z, st); A.dist += mvd; A.walking = mvd > st * 0.2; A.r = Math.atan2(dx, dz); } else A.walking = false; });
     rooms.forEach(Rm => (Rm.acts || []).forEach(a => { const t = a.hero ? a.face : a.tg; if (a.bt && t) { a.r = Math.atan2(t.x - a.x, t.z - a.z); } }));   /* 戦っている相手のほうを向く */
     /* 打ち合いのあいだ（計算の1手と1手のあいだ）も手を止めない：近い相手には斬りかかり・受け止めて火花（数字は出さない）。前は1手ごとに1回だけ動いて、あとは見つめ合っていた */
     rooms.forEach(Rm => (Rm.acts || []).forEach(a => { const t = a.hero ? a.face : a.tg; if (Rm.rtOn30 || !a.bt || !t || (a.al30 ?? 1) <= 0 || (t.al30 ?? 1) <= 0) return; const d = Math.hypot(t.x - a.x, t.z - a.z); if (d > 1.9) return; if (a.hero && RANGED30(a)) return;
@@ -14787,9 +15061,391 @@ setInterval(() => { try { const w = document.getElementById("fp26"); if (!w) ret
   const flash = (e, v) => { const o = +e.dataset.v || 1; if (v < o - 0.004) { e.classList.add("hit"); setTimeout(() => e.classList.remove("hit"), 160); } e.dataset.v = v; e.style.width = (v * 100).toFixed(1) + "%"; };
   flash(hi, hr); flash(mi, mr); el.querySelector(".l").textContent = `勇者 ${hn}`; el.querySelector(".r").textContent = `${M.length}体 ＋主`; } catch (e) {} }, 200);
 
+/* life30：昼の暮らしのAI（一日の動き・仕事の手順・警報）。担当：暮らしAIのエージェント。
+   fp30 の stepActs から window.__life30(R, a, dt, H) が呼ばれる。true を返すとその子のいつもの歩き（うろうろ）は止まる
+   しくみ：
+   ・欲求（疲れ・眠気・空腹・人恋しさ）を毎コマ少しずつ動かし、0.5〜0.9秒おきに「いまやること」を点数で選ぶ（ユーティリティAI）
+   ・やることは「行く → する」の手順で進める。行くときは層の当たり（fitsM）から作った 0.5m の歩けるマスの上で道を探す（A*）
+     ぶつかったら「ほかの子を障害物として道を引き直す」。その場で横に逃げる・押し出すはしない（行き詰まると同じ所でぐるぐるした）
+   ・欲求は見た目のためだけ。ゲームの数値（稼ぎ・経験・けが）は読むだけで書きかえない
+   ・警報（勇者が近づいたら持ち場へ）は作っていない：昼の歩く画面には勇者が出てこない（昼の偵察は2Dの夜の画面で、N.scout のあいだはここが呼ばれない） */
+(function () {
+  "use strict";
+  const NC = 0.5;                       /* 歩けるマスの大きさ（m）。当たりの 0.25m では道探しが重い。体の半径は 0.3m 以上なので 0.5m で足りる */
+  const NAVC = new WeakMap();           /* 層の当たり（R.G）→ 体の大きさごとの歩けるマス。層を作り直すと R.G が新しくなるので、古いのは自然に捨てられる */
+  const NEED = {};                      /* m.id → 欲求。部屋の作り直し（mkActs）や夜をはさんでも続くように、魔物の番号で持つ */
+  const ST = { plans: 0, fails: 0, replans: 0, gaveup: 0, navs: 0, ms: 0, msMax: 0, log: [] };   /* 確かめる道具（tools/day30.js）が読む数 */
+  let HH = null;                        /* fp30 から渡される道具（fitsM など）。確かめる道具からも使う */
+  const now = () => performance.now();
+  const hsh = n => { let h = Math.imul((n | 0) ^ 0x9E3779B9, 0x85EBCA6B); h ^= h >>> 13; h = Math.imul(h, 0xC2B2AE35); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
+  const cl01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
+  const angTo = (a, b) => ((b - a) % 6.2832 + 9.4248) % 6.2832 - 3.1416;
+  /* 夜：勇者が来ている間と、夜が終わって結果を見ている間（fp30 の nightSync がまだ魔物を動かしている）。昼の偵察（2Dの画面）が終わった後は昼 */
+  const isNight = () => typeof N !== "undefined" && !!N && !(N.scout && N.done);
+  /* 暮らしAIで動かす子：魔物だけ。主・勇者・夜の近衛・ボス・罠番（keepers が罠の前に固定している）・主の間（昔の部屋の形）は今までどおり */
+  const elig = (R, a) => !!(a && a.m && a.m.id != null && !a.lord && !a.hero && !a.g30 && !a.boss && !a.keep29 && !R.classic);
+  const bodyR = a => Math.max(0.3, (a.H || 1.6) * 0.3);   /* fitsM と同じ体の半径 */
+
+  /* ---------- 重い計算の配分：歩けるマス作り・道探しは 1 コマに 2 回まで（魔物が多い層で 60fps を落とさない） ---------- */
+  const BUD = { t: -1, n: 0 };
+  const budget = () => { const t = now(); if (t - BUD.t > 12) { BUD.t = t; BUD.n = 0; BUD.f = (BUD.f || 0) + 1; } return BUD.n++ < 2; };
+  const cost = (t0, k) => { const d = now() - t0; ST.ms += d; if (d > ST.msMax) ST.msMax = d; const mk = (k || "plan") + "Max"; if (d > (ST[mk] || 0)) ST[mk] = d; };
+
+  /* ---------- 歩けるマス（体の大きさごと） ---------- */
+  function navOf(R, a, H) { const G = R.G; if (!G) return null; let M = NAVC.get(G); if (!M) NAVC.set(G, M = {});
+    /* 道を探すときの体は、本当より少し大きく見る（半径で約0.15m）。当たりは0.25mのマスで見ているので、壁ぎりぎりの所は「入る・入らない」が数cmごとに入れかわり、
+       ぎりぎりの所に立った子が、どちらへ一歩出ても体が岩にかかって動けなくなった。少し内側を歩かせれば、本当の体はいつも入る。背の高さは切り上げてまとめる */
+    const H0 = a.H || 1.6, hb = Math.ceil((H0 + (H0 < 3 ? 0.5 : 0.25)) * 5) / 5, hov = typeof DHOV25 !== "undefined" && DHOV25[a.sp] ? 1 : 0, key = hb + ":" + hov; if (M[key]) return M[key];
+    /* 作るのは数コマに分ける（1コマ 24 行。全部を一度に作ると 1 万マス以上を調べて、そのコマだけ 10ms 以上かかった）。できるまでその子は立って待つ */
+    let P = M["_" + key]; if (!P) { const W = Math.ceil(G.W * G.c / NC), Hn = Math.ceil(G.H * G.c / NC); P = M["_" + key] = { W, Hn, ok: new Uint8Array(W * Hn), probe: { H: hb, sp: hov ? a.sp : "_" }, j: 0 }; }
+    if (!budget() || P.f === BUD.f) return null; P.f = BUD.f; const t0 = now(), W = P.W, Hn = P.Hn;
+    for (const j1 = Math.min(Hn, P.j + 24); P.j < j1; P.j++) for (let i = 0; i < W; i++) P.ok[P.j * W + i] = H.fitsM(R, P.probe, G.x0 + (i + 0.5) * NC, G.z0 + (P.j + 0.5) * NC) ? 1 : 0;
+    cost(t0, "nav"); if (P.j < Hn) return null; ST.navs++; delete M["_" + key];
+    /* つながっている所ごとに番号をふる：行けない所（細い道の向こう・置き物で囲まれた所）へ道を探して、全部のマスを調べてしまわないように。行き先を選ぶときにも使う */
+    const comp = new Int32Array(W * Hn).fill(-1), q = new Int32Array(W * Hn); let nc = 0; for (let k0 = 0; k0 < W * Hn; k0++) { if (!P.ok[k0] || comp[k0] >= 0) continue; let qh = 0, qt = 0; q[qt++] = k0; comp[k0] = nc;
+      while (qh < qt) { const c = q[qh++], x = c % W, y = (c / W) | 0; if (x > 0 && P.ok[c - 1] && comp[c - 1] < 0) { comp[c - 1] = nc; q[qt++] = c - 1; } if (x < W - 1 && P.ok[c + 1] && comp[c + 1] < 0) { comp[c + 1] = nc; q[qt++] = c + 1; } if (y > 0 && P.ok[c - W] && comp[c - W] < 0) { comp[c - W] = nc; q[qt++] = c - W; } if (y < Hn - 1 && P.ok[c + W] && comp[c + W] < 0) { comp[c + W] = nc; q[qt++] = c + W; } } nc++; }
+    return M[key] = { W, H: Hn, x0: G.x0, z0: G.z0, ok: P.ok, comp, probe: P.probe, g: new Float32Array(W * Hn), came: new Int32Array(W * Hn), seen: new Uint32Array(W * Hn), stamp: 0, blk: new Uint32Array(W * Hn), bst: 1 }; }
+  /* その子が今いる「つながり」の番号（今のマスが歩けなければ、となりの歩けるマスの） */
+  function compAt(nv, x, z) { const k = cellOf(nv, x, z); if (k < 0) return -1; if (nv.ok[k]) return nv.comp[k]; for (let dj = -2; dj <= 2; dj++) for (let di = -2; di <= 2; di++) { const kk = k + dj * nv.W + di; if (kk >= 0 && kk < nv.ok.length && nv.ok[kk]) return nv.comp[kk]; } return -1; }
+  const reach = (nv, a, x, z) => { const k = cellOf(nv, x, z); return k >= 0 && nv.ok[k] === 1 && nv.comp[k] === compAt(nv, a.x, a.z); };
+  const cellOf = (nv, x, z) => { const i = Math.floor((x - nv.x0) / NC), j = Math.floor((z - nv.z0) / NC); return i < 0 || j < 0 || i >= nv.W || j >= nv.H ? -1 : j * nv.W + i; };
+  const ccx = (nv, k) => nv.x0 + ((k % nv.W) + 0.5) * NC, ccz = (nv, k) => nv.z0 + (((k / nv.W) | 0) + 0.5) * NC;
+  const walk = (nv, k) => k >= 0 && nv.ok[k] === 1 && nv.blk[k] !== nv.bst;
+  /* その子の体で立てるか（歩けるマス＋本当の当たり）。置き場所を決めるときに使う */
+  const stand = (R, nv, H, x, z, a) => walk(nv, cellOf(nv, x, z)) && H.fitsM(R, nv.probe, x, z) && (!a || reach(nv, a, x, z));   /* a を渡すと、その子が今いる所から歩いて行ける所だけ */
+
+  /* ほかの子の立っている所を、道探しのときだけ「通れない」にする。
+     止まっている子（行き先のない子）だけ。行き先のある子は待っていてもそのうち動くので、障害物にしない（障害物にすると、待っている子どうしで道がなくなり、みんな止まった）
+     ただし、いまぶつかっている相手（extra）と、こちらを待っている子は障害物にする。半径は「ぶつかる」と見る距離（blocker と同じ）より少し大きく */
+  function markOthers(R, a, nv, extra) { nv.bst++; if (nv.bst > 4e9) { nv.bst = 1; nv.blk.fill(0); } nv.obs = [];
+    (R.acts || []).forEach(b => { if (b === a || b === a.pt || b.hide || b.al30 === 0) return; const L = b.l30 && b.l30.b; if (b !== extra && !(L && L.blkBy === a) && (b.walking || (L && L.go))) return;
+      /* すでにその子のそばにいるときは、円を「今の距離」まで小さくする（そこから先へは近づかない道になる。円の中から出られずに止まっていた） */
+      const d0 = Math.hypot(b.x - a.x, b.z - a.z), r = Math.min(0.45 + ((a.H || 1.6) + (b.H || 1.6)) * 0.22 + 0.1, d0 - 0.05), k0 = cellOf(nv, b.x, b.z); if (k0 < 0 || r <= 0) return; const n = Math.ceil(r / NC); nv.obs.push([b.x, b.z, r]);   /* 縮めた道が相手をかすめないよう、円そのものも覚えておく */
+      for (let dj = -n; dj <= n; dj++) for (let di = -n; di <= n; di++) { const i = (k0 % nv.W) + di, j = ((k0 / nv.W) | 0) + dj; if (i < 0 || j < 0 || i >= nv.W || j >= nv.H) continue; const k = j * nv.W + i; if (Math.hypot(ccx(nv, k) - b.x, ccz(nv, k) - b.z) < r) nv.blk[k] = nv.bst; } });
+  }
+  const unmark = nv => { nv.bst++; nv.obs = null; };
+
+  /* A*（8方向）。始まりのマスが少し壁にかかっていたら、となりの歩けるマスから始める */
+  const HEAP = { k: new Int32Array(1 << 17), f: new Float32Array(1 << 17), n: 0 };
+  const hpush = (k, f) => { let i = HEAP.n++; if (i >= HEAP.k.length) { HEAP.n--; return; } while (i > 0) { const p = (i - 1) >> 1; if (HEAP.f[p] <= f) break; HEAP.k[i] = HEAP.k[p]; HEAP.f[i] = HEAP.f[p]; i = p; } HEAP.k[i] = k; HEAP.f[i] = f; };
+  const hpop = () => { const top = HEAP.k[0], lk = HEAP.k[--HEAP.n], lf = HEAP.f[HEAP.n]; let i = 0; for (;;) { let c = 2 * i + 1; if (c >= HEAP.n) break; if (c + 1 < HEAP.n && HEAP.f[c + 1] < HEAP.f[c]) c++; if (HEAP.f[c] >= lf) break; HEAP.k[i] = HEAP.k[c]; HEAP.f[i] = HEAP.f[c]; i = c; } HEAP.k[i] = lk; HEAP.f[i] = lf; return top; };
+  const DX8 = [1, -1, 0, 0, 1, 1, -1, -1], DY8 = [0, 0, 1, -1, 1, -1, 1, -1];
+  /* 始まりのマス：今いる所から、その子の体のまま（当たりを見ながら）まっすぐ行ける、いちばん近い歩けるマス。
+     今いるマスが「歩けない」（マスの真ん中は岩にかかるが、立っている所は入る）ときに、となりのマスへ向かって岩に歩きこんでいた */
+  function startCell(R, a, nv, H, sx, sz) { const s = cellOf(nv, sx, sz); if (s < 0) return -1; let best = -1, bd = 1e9; const here = H.fitsM(R, a, sx, sz);   /* 今いる所がもう岩にかかっているときは、いちばん近い歩けるマスへ出るだけ */
+    for (let rr = 0; rr <= 3 && best < 0; rr++) for (let dj = -rr; dj <= rr; dj++) for (let di = -rr; di <= rr; di++) { if (Math.max(Math.abs(di), Math.abs(dj)) !== rr) continue; const i = (s % nv.W) + di, j = ((s / nv.W) | 0) + dj; if (i < 0 || j < 0 || i >= nv.W || j >= nv.H) continue; const k = j * nv.W + i; if (!walk(nv, k)) continue;
+      const x = ccx(nv, k), z = ccz(nv, k), d = Math.hypot(x - sx, z - sz); if (d >= bd) continue; let ok = true; const n = Math.ceil(d / 0.15); for (let q = 1; q <= n && ok && here; q++) ok = H.fitsM(R, a, sx + (x - sx) * q / n, sz + (z - sz) * q / n); if (ok) { bd = d; best = k; } }
+    return best; }
+  function astar(nv, s, gx, gz) { const g = cellOf(nv, gx, gz); if (s < 0 || g < 0 || !walk(nv, g)) return null;
+    const W = nv.W, st = ++nv.stamp, gxi = g % W, gyi = (g / W) | 0; HEAP.n = 0; nv.seen[s] = st; nv.g[s] = 0; nv.came[s] = -1; hpush(s, 0); let it = 0;
+    while (HEAP.n && it++ < 4000) {   /* 調べるのは4000マスまで（層の歩ける所はおよそ5000マス。ほかの子にふさがれて行けないときに、全部を調べて重くなった） */ const c = hpop(); if (c === g) { const out = []; for (let t = c; t >= 0; t = nv.came[t]) out.push(t); return out.reverse(); }
+      const x = c % W, y = (c / W) | 0, gc = nv.g[c];
+      for (let d = 0; d < 8; d++) { const dx = DX8[d], dy = DY8[d], nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= W || ny >= nv.H) continue; const k = ny * W + nx; if (!walk(nv, k)) continue;
+        if (dx && dy && (!walk(nv, y * W + nx) || !walk(nv, ny * W + x))) continue;   /* 角を斜めにすり抜けない */
+        const ng = gc + (dx && dy ? 1.4142 : 1); if (nv.seen[k] === st && nv.g[k] <= ng) continue; nv.seen[k] = st; nv.g[k] = ng; nv.came[k] = c;
+        const hx = Math.abs(nx - gxi), hy = Math.abs(ny - gyi); hpush(k, ng + hx + hy - 0.5858 * Math.min(hx, hy)); } }
+    return null; }
+  /* まっすぐ行けるか：0.2m ごとに、その子の体で当たりを見る（マスの真ん中だけ見ると、角をかすめて岩にめりこんだ） */
+  function clear(R, nv, H, x0, z0, x1, z1) { const L = Math.hypot(x1 - x0, z1 - z0), n = Math.ceil(L / 0.2); for (let k = 1; k <= n; k++) { const t = k / n, x = x0 + (x1 - x0) * t, z = z0 + (z1 - z0) * t; if (!H.fitsM(R, nv.probe, x, z)) return false; const c = cellOf(nv, x, z); if (c >= 0 && nv.blk[c] === nv.bst) return false; if (nv.obs) for (const o of nv.obs) if (Math.hypot(o[0] - x, o[1] - z) < o[2]) return false; } return true; }
+  /* 道（マスの列）を、曲がり角だけの点に縮める（マスの上をカクカク歩かない） */
+  function smooth(R, nv, H, cells, sx, sz, gx, gz, a) { const pts = cells.map(k => [ccx(nv, k), ccz(nv, k)]); pts[pts.length - 1] = [gx, gz]; const out = []; let px = sx, pz = sz, i = 0;
+    /* 1本目：始まりのマスの真ん中までは、体のまま行けることを startCell で確かめてある。そこから先を縮める */
+    if (Math.hypot(pts[0][0] - sx, pts[0][1] - sz) > 0.05 && !clear(R, nv, H, sx, sz, pts[Math.min(1, pts.length - 1)][0], pts[Math.min(1, pts.length - 1)][1])) { out.push(pts[0]); px = pts[0][0]; pz = pts[0][1]; i = 1; }
+    /* 先を見るのは16マス（8m）まで：全部の組み合わせを当たりで調べると、長い道でそのコマが重くなった */
+    while (i < pts.length) { let j = Math.min(pts.length - 1, i + 16); while (j > i && !clear(R, nv, H, px, pz, pts[j][0], pts[j][1])) j--; out.push(pts[j]); px = pts[j][0]; pz = pts[j][1]; i = j + 1; } return out; }
+
+  /* ---------- 部屋ごとの手がかり（置き物・広間）。部屋を作り直すと props と G が変わるので、そのとき作り直す ---------- */
+  const objR = q => q.k === "cart" ? q.w * 0.55 : Math.max(0.3, q.w * 0.35);   /* 置き物の当たりの半径（fp30 の layerGrid と同じ） */
+  function ctxOf(R, H) { let C = R.l30c; if (C && C.G === R.G && C.pr === R.props) return C; const pr = R.props || {}, G30 = R.G30;
+    let HL = []; try { HL = g30halls(G30); } catch (e) {} let fac = null; try { fac = g30fac(S, R.i); } catch (e) {}
+    const up = pr.up || [], fl = pr.floor || [], of = k => up.filter(q => q.k === k); let hm = {}; try { hm = g30home(S, R.i); } catch (e) {}
+    const cells = []; for (let y = 1; y < G30.H - 1; y++) for (let x = 0; x < G30.W; x++) if (g30at(G30, x, y)) cells.push(H.cellW(R, [x, y]));
+    C = R.l30c = { G: R.G, pr, fac, res: new Map(), veins: pr.veins || [], carts: of("cart"), dummies: of("dummy"), racks: of("rack"), slits: of("slit").concat(of("tower")), pots: of("pot"), barrels: of("barrel"), beds: fl.filter(q => q.k === "bed"),
+      halls: HL.map(h => h.cells.map(c => H.cellW(R, c))), hall0: HL[0] ? H.cellW(R, [Math.round(HL[0].cx), Math.round(HL[0].cy)]) : [0, -R.CS * 3], cells, home: hm,
+      ent: [0, (R.ZS || 0) - 4] };   /* ent：層の入口の方（見張りが見る向き） */
+    return C; }
+  /* 置き物のまわりの立ち位置：体の大きさぶん離し、歩けて、ほかの子が立っていない所。近い順 */
+  function spotAround(R, a, B, C, nv, H, ox, oz, rad, key) { let best = null, bd = 1e9;
+    for (let ring = 0; ring < 4 && !best; ring++) for (let k = 0; k < 16; k++) { const an = k / 16 * 6.2832, d = rad + ring * 0.3, x = ox + Math.cos(an) * d, z = oz + Math.sin(an) * d, sk = key + ":" + k + ":" + ring, who = C.res.get(sk);
+      if (who && who !== a && who.l30 && who.l30.b && who.l30.b.rk === sk) continue; if (badSpot(B, sk) || !stand(R, nv, H, x, z, a) || !sepStill(R, a, x, z)) continue;
+      const dd = Math.hypot(x - a.x, z - a.z); if (dd < bd) { bd = dd; best = { x, z, key: sk, lx: ox, lz: oz }; } }
+    return best; }
+  /* 止まっている（または行き先が決まっている）ほかの子と重ならないか。行き先のある子は、行き先で見る */
+  const sepStill = (R, a, x, z) => (R.acts || []).every(b => { if (b === a || b.hide || b.al30 === 0) return true; const g = b.l30 && b.l30.b && b.l30.b.go; if (b.walking && !g) return true; const bx = g ? g.x : b.x, bz = g ? g.z : b.z;
+    return Math.hypot(bx - x, bz - z) >= 0.45 + ((a.H || 1.6) + (b.H || 1.6)) * 0.22; });
+  const badSpot = (B, k) => B.bad[k] && B.bad[k] > now();
+  const reserve = (C, B, a, k) => { if (B.rk && C.res.get(B.rk) === a) C.res.delete(B.rk); B.rk = k || null; if (k) C.res.set(k, a); };
+  /* 広間の中の、歩ける点（散歩・見回り）。far：今いる所からこれ以上離れた点（同じ所をうろうろしない） */
+  function hallPoint(R, a, C, nv, H, salt, far) { const L = C.halls.length ? C.halls[(salt >> 3) % C.halls.length] : C.cells; if (!L || !L.length) return null;
+    for (let t = 0; t < 14; t++) { const p = L[(salt * 7 + t * 13) % L.length], x = p[0] + (hsh(salt + t) - 0.5) * R.CS * 0.7, z = p[1] + (hsh(salt * 3 + t) - 0.5) * R.CS * 0.7;
+      if (far && Math.hypot(x - a.x, z - a.z) < far && t < 10) continue; if (stand(R, nv, H, x, z, a) && sepStill(R, a, x, z)) return { x, z }; } return null; }
+
+  /* ---------- 欲求（見た目のためだけ） ---------- */
+  function needOf(m) { let n = NEED[m.id]; if (!n) { const r = k => hsh(m.id * 7 + k); n = NEED[m.id] = { fat: r(1) * 0.45, slp: r(2) * 0.45, hun: r(3) * 0.4 + (S.hungry ? 0.35 : 0), soc: r(4) * 0.6 }; } return n; }   /* 最初は番号から散らす（全員そろって同時に休むと、学校の休み時間に見えた） */
+  /* 体と性格からの係数：持（持久力）が高いほど疲れにくい・走で歩く速さ・のんびりは眠く、熱血は働きたがる。レベルが上がると少し疲れにくい。部屋が好きなら働きたがる（moodOf） */
+  function traitOf(m) { const b = (typeof BODY30V2 !== "undefined" && BODY30V2[m.sp]) || [1, 1, 1, 1, 1, 1, 1, 1], q = m.quirk; let mood = 0; try { mood = moodOf(S, m) || 0; } catch (e) {}
+    return { fat: (q === "lazy" ? 1.3 : q === "sturdy" ? 0.85 : q === "hot" ? 1.1 : 1) / Math.max(0.6, Math.min(1.8, b[5])) * (1 - Math.min(0.3, (m.lv || 1) * 0.015)), slp: q === "lazy" ? 1.5 : 1, hun: S.hungry ? 2 : 1, soc: q === "lucky" || q === "brave" ? 1.25 : 1,
+      spd: Math.max(0.8, Math.min(1.2, 0.85 + 0.15 * b[0])) * (q === "quick" ? 1.1 : 1), dur: q === "quick" ? 0.8 : q === "lazy" ? 1.2 : 1, work: (q === "hot" ? 0.1 : q === "lazy" ? -0.1 : 0) + 0.04 * Math.max(-2, Math.min(3, mood)), patrol: q === "brave" || q === "hot" ? 0.08 : 0 }; }
+  /* 仕事：fp30 の mkActs と同じ決め方（けがで休んでいる子は寝る）。施設のない子は「構え」＝見回り */
+  function jobOf(R, m) { try { if (typeof restLeft7 === "function" && restLeft7(S, m)) return "hurt"; } catch (e) {} let j = null; try { j = jobOf12(S, m); } catch (e) {} return j === "bed" ? "hurt" : j || "guard"; }
+
+  /* ---------- 歩く ---------- */
+  /* (x, z) へ行く道を引く。"ok" / "fail"（道がない）/ "wait"（このコマは重い計算の枠がない） */
+  function plan(R, a, B, nv, H, x, z, extra) { if (!budget()) return "wait"; const t0 = now(); markOthers(R, a, nv, extra); const s0 = startCell(R, a, nv, H, a.x, a.z), gk = cellOf(nv, x, z), cells = s0 < 0 || gk < 0 || nv.comp[s0] !== nv.comp[gk] ? null : astar(nv, s0, x, z); ST.plans++;
+    if (!cells) { ST.fails++; const why = s0 < 0 ? "f_start" : gk < 0 || nv.comp[s0] !== nv.comp[gk] ? "f_comp" : !walk(nv, gk) ? "f_goal" : "f_search"; ST[why] = (ST[why] || 0) + 1; unmark(nv); cost(t0); return "fail"; } const wps = smooth(R, nv, H, cells, a.x, a.z, x, z, a); unmark(nv); cost(t0);
+    let len = 0; for (let i = 0; i < wps.length; i++) len += Math.hypot(wps[i][0] - (i ? wps[i - 1][0] : a.x), wps[i][1] - (i ? wps[i - 1][1] : a.z));
+    const same = B.go && B.go.x === x && B.go.z === z; B.go = { x, z, wps, wi: 0, best: len, bt: now(), blkT: 0, rp: same ? B.go.rp : 0 }; a.tx = x; a.tz = z; return "ok"; }
+  /* 引き直し。7回目でやめる（同じ所で行ったり来たりを続けない） */
+  /* 引き直し。"ok" / "wait" / "nopath"（ぶつかった相手をよけて行く道がない：今の道は残す）/ "fail"（7回目：あきらめる。同じ所で行ったり来たりを続けない） */
+  function replan(R, a, B, nv, H, extra, why) { ST["rp_" + (why || "blk")] = (ST["rp_" + (why || "blk")] || 0) + 1; const g = B.go; const r = plan(R, a, B, nv, H, g.x, g.z, extra); if (r === "wait") return "wait"; ST.replans++;
+    if (r === "fail" && extra) return "nopath";
+    if (r === "fail" || ++B.go.rp > 6) { giveUp(a, B, r, extra); return "fail"; } return "ok"; }
+  const giveUp = (a, B, r, extra) => { const g = B.go || {}; ST.gaveup++; ST.log.push([Math.round(now() / 100) / 10, a.m.nick, B.act, B.st && B.st.ph, r, extra ? extra.m && extra.m.nick : "-", +a.x.toFixed(1), +a.z.toFixed(1), +(g.x || 0).toFixed(1), +(g.z || 0).toFixed(1)].join(" ")); if (ST.log.length > 40) ST.log.shift(); B.go = null; };
+  /* よける：y が other の道（pts）から体ひとつ以上離れた、近くの空いた所へ寄る。細い所で向かい合ったとき・道のまん中で立ち止まっている子がいるときに、片方がわきへ寄る
+     （ぶつかったら回りこむ・押し出すのではなく、相手の通る道を見て、そこからどく） */
+  function yieldFor(R, y, other, pts) { const yb = y.l30 && y.l30.b; if (!yb || !HH || y.pt) return false; if (yb.yd && yb.yd.until > now()) return true; if (yb.act === "chat" && yb.st && yb.st.ph === "talk") return false;
+    const nv = navOf(R, y, HH); if (!nv) return false; const need = 0.45 + ((y.H || 1.6) + (other.H || 1.6)) * 0.22 + 0.3, P = [[other.x, other.z]].concat(pts || []);
+    const dseg = (x, z) => { let m = 1e9; for (let i = 0; i + 1 < P.length; i++) { const [ax, az] = P[i], [bx, bz] = P[i + 1], vx = bx - ax, vz = bz - az, L2 = vx * vx + vz * vz || 1e-6, t = Math.max(0, Math.min(1, ((x - ax) * vx + (z - az) * vz) / L2)); m = Math.min(m, Math.hypot(ax + vx * t - x, az + vz * t - z)); } return P.length > 1 ? m : Math.hypot(P[0][0] - x, P[0][1] - z); };
+    for (const d of [1.0, 1.5, 2.1, 2.8, 3.6, 4.5]) for (let k = 0; k < 16; k++) { const an = k / 16 * 6.2832 + (y.m.id % 5) * 0.2, x = y.x + Math.cos(an) * d, z = y.z + Math.sin(an) * d;
+      if (dseg(x, z) < need || !stand(R, nv, HH, x, z, y) || !sepStill(R, y, x, z) || !clear(R, nv, HH, y.x, y.z, x, z)) continue; yb.yd = { x, z, other, until: now() + 8000, hold: 0 }; yb.go = null; ST.yields = (ST.yields || 0) + 1; return true; }
+    return false; }
+  /* 1コマ歩く。"arrived" / "moving" / "fail" */
+  function stepGo(R, a, B, nv, H, dt) { const g = B.go; if (!g) return "arrived"; const wp = g.wps[g.wi]; if (!wp) { B.go = null; a.walking = false; return "arrived"; }
+    const dx = wp[0] - a.x, dz = wp[1] - a.z, L = Math.hypot(dx, dz);
+    if (L < 0.03) { g.wi++; if (g.wi >= g.wps.length) { B.go = null; a.walking = false; return "arrived"; } return "moving"; }
+    const sp = 2.2 * Math.sqrt(a.mult || 1) * B.tr.spd * (B.job === "hurt" ? 0.7 : 1), s = Math.min(L, sp * dt), nx = a.x + dx / L * s, nz = a.z + dz / L * s;
+    /* 前にいる子：止まっている子なら、その子をよけて道を引き直す。歩いている子なら少し待つ。向かい合ったら番号の小さい方が引き直す */
+    const b = blocker(R, a, nx, nz); B.blkBy = b || null;
+    if (b) { a.walking = false; g.blkT += dt; const bb = b.l30 && b.l30.b, still = !b.walking && !(bb && bb.go), faceOff = bb && bb.blkBy === a;
+      if ((still && g.blkT > 0.15) || (faceOff && a.m.id < b.m.id && g.blkT > 0.15) || g.blkT > 1.2) { const r = replan(R, a, B, nv, H, b); if (r === "fail") return "fail"; if (r === "ok") B.go.blkT = 0;
+        if (r === "nopath") { /* よけて行けない：止まっている相手ならわきへ寄ってもらう。向かい合って歩いているなら、こちらが相手の道からどく（だめなら相手に頼む） */
+          const mine = [[a.x, a.z]].concat(g.wps.slice(g.wi)), theirs = bb && bb.go ? [[b.x, b.z]].concat(bb.go.wps.slice(bb.go.wi)) : [];
+          const ok = still ? yieldFor(R, b, a, mine) : (yieldFor(R, a, b, theirs) || yieldFor(R, b, a, mine)); g.yw = (g.yw || 0) + 1; if (!ok || g.yw > 4) { giveUp(a, B, "noyield", b); return "fail"; } g.blkT = -1.0; } }
+      return "moving"; }
+    if (!H.fitsM(R, a, nx, nz) && H.fitsM(R, a, a.x, a.z)) { a.walking = false; return replan(R, a, B, nv, H, null, "fit") === "fail" ? "fail" : "moving"; }   /* マスは通れても、体の当たりが角にかかった：道を引き直す（壁に向かって足ぶみしない） */
+    a.x = nx; a.z = nz; a.dist = (a.dist || 0) + s; a.walking = true; a.mode = "idle"; a.look = null; turn(a, Math.atan2(dx, dz), dt, 16); g.blkT = 0;
+    /* 進んでいるか：残りの道のりが3秒縮まらなければ引き直す */ let rem = L; for (let i = g.wi + 1; i < g.wps.length; i++) rem += Math.hypot(g.wps[i][0] - g.wps[i - 1][0], g.wps[i][1] - g.wps[i - 1][1]);
+    if (rem < g.best - 0.3) { g.best = rem; g.bt = now(); } else if (now() - g.bt > 3000) { g.bt = now(); if (replan(R, a, B, nv, H, null, "prog") === "fail") return "fail"; }
+    return "moving"; }
+  /* 前をふさぐ子：「ぶつかる」と見る距離（fp30 の sepOK と同じ）の中で、その子に向かって進むとき。
+     横に並んで同じ向きに歩く・すれちがうときの、ほんの少し近づくだけの動きは通す（二人とも「相手がじゃま」で止まり、並んだまま動けなくなった）。
+     ただし 0.85 倍より近くには、どんな向きでも寄らない */
+  const blocker = (R, a, nx, nz) => { const s = Math.hypot(nx - a.x, nz - a.z) || 1e-6; for (const b of R.acts || []) { if (b === a || b === a.pt || b.hide || b.al30 === 0) continue; const need = 0.45 + ((a.H || 1.6) + (b.H || 1.6)) * 0.22, d1 = Math.hypot(b.x - nx, b.z - nz); if (d1 >= need) continue; const d0 = Math.hypot(b.x - a.x, b.z - a.z);
+      if (d1 < d0 - 1e-4 && (d0 - d1 > s * 0.35 || d1 < need * 0.85)) return b; } return null; };
+  const turn = (a, to, dt, k) => { a.r = (a.r || 0) + angTo(a.r || 0, to) * Math.min(1, dt * k); };
+  const face = (a, x, z, dt) => turn(a, Math.atan2(x - a.x, z - a.z), dt, 6);
+  const pose = (a, mode, lx, lz) => { a.walking = false; a.mode = mode; a.look = lx == null ? null : [lx, lz]; };
+  /* 行き先へ（道がなければ引く）。"arrived" / "moving" / "fail" */
+  function goStep(R, a, B, nv, H, dt, x, z) { if (!B.go && Math.hypot(x - a.x, z - a.z) < 0.08) return "arrived"; if (!B.go || B.go.x !== x || B.go.z !== z) { const r = plan(R, a, B, nv, H, x, z); if (r === "wait") { a.walking = false; return "moving"; } if (r === "fail") { B.fail = now(); return "fail"; } }
+    const r = stepGo(R, a, B, nv, H, dt); if (r === "fail") B.fail = now(); return r; }
+
+  /* ---------- やること ---------- */
+  /* それぞれ：score（点数。-1 はできない）・start（行き先を決める）・tick（毎コマ。"done" で終わり） */
+  const ACT = {};
+  /* 仕事：仕事ごとの手順は下の WORK */
+  ACT.work = { score: (B, n) => B.job === "guard" || B.job === "hurt" ? -1 : 0.8 + B.tr.work - 0.75 * n.fat - 0.6 * Math.max(0, n.slp - 0.55) - 0.5 * Math.max(0, n.hun - 0.7),
+    start: (R, a, B) => { B.st = { ph: "pick", t: 0, n: 0 }; },
+    tick: (R, a, B, C, nv, H, dt) => (WORK[B.job] || WORK.guard)(R, a, B, C, nv, H, dt) };
+  /* 見回り：施設のない子（夜、一番前で戦う子）。広間をまわって、入口の方を見る */
+  ACT.patrol = { score: (B, n) => B.job !== "guard" ? -1 : 0.55 + B.tr.patrol - 0.6 * n.fat - 0.4 * Math.max(0, n.slp - 0.6) - 0.5 * Math.max(0, n.hun - 0.7),
+    start: (R, a, B) => { B.st = { ph: "pick", t: 0, n: 0 }; }, tick: (R, a, B, C, nv, H, dt) => WORK.guard(R, a, B, C, nv, H, dt) };
+  /* 休む：自分の場所で一息（座る絵はないので、立ったまま広間の方を見る） */
+  ACT.rest = { score: (B, n) => B.job === "hurt" ? -1 : 0.1 + 0.9 * n.fat * n.fat,
+    start: (R, a, B, C, nv, H) => { const p = homeSpot(R, a, B, C, nv, H); B.st = { ph: "go", t: 0, x: p.x, z: p.z, dur: (7 + hsh(B.seed++) * 6) * B.tr.dur }; },
+    tick: (R, a, B, C, nv, H, dt) => { const s = B.st; if (s.ph === "go") { const r = goStep(R, a, B, nv, H, dt, s.x, s.z); if (r === "fail") return "done"; if (r !== "arrived") return; s.ph = "do"; }
+      pose(a, "idle"); face(a, C.hall0[0], C.hall0[1], dt); B.n.fat = Math.max(0, B.n.fat - dt / 12); s.t += dt; if (s.t > s.dur) return "done"; } };
+  /* 寝る：寝床があれば寝床で、なければ自分の場所で。けがの子はずっと寝ていて、ときどき起きて部屋を見る */
+  ACT.sleep = { score: (B, n) => B.job === "hurt" ? 5 : 1.3 * Math.max(0, n.slp - 0.5) + 0.25 * Math.max(0, n.fat - 0.6),
+    start: (R, a, B, C, nv, H) => { let p = null; const bs = C.beds.slice().sort((u, v) => Math.hypot(u.x - a.x, u.z - a.z) - Math.hypot(v.x - a.x, v.z - a.z));
+      for (const q of bs) { p = spotAround(R, a, B, C, nv, H, q.x, q.z, 0, "bed" + Math.round(q.x * 10) + "_" + Math.round(q.z * 10)); if (p && Math.hypot(p.x - q.x, p.z - q.z) < 1.2) break; p = null; }
+      if (!p) p = homeSpot(R, a, B, C, nv, H);
+      /* 静かな夜は8秒しかない：寝床が遠ければ、その場で丸くなる（寝床まで歩いて着いたら朝、では眠って見えなかった） */
+      if (QN30() && Math.hypot(p.x - a.x, p.z - a.z) > 4) p = { x: a.x, z: a.z, key: "nap" + a.m.id };
+      reserve(C, B, a, p.key); B.st = { ph: "go", t: 0, x: p.x, z: p.z, dur: (16 + hsh(B.seed++) * 14) * B.tr.dur, wk: 30 + hsh(B.seed++) * 25 }; },
+    tick: (R, a, B, C, nv, H, dt) => { const s = B.st; if (s.ph === "go") { const r = goStep(R, a, B, nv, H, dt, s.x, s.z); if (r === "fail") s.ph = "do"; else if (r !== "arrived") return; s.ph = "do"; }
+      s.t += dt; B.n.slp = Math.max(0, B.n.slp - dt / 16); B.n.fat = Math.max(0, B.n.fat - dt / 10);
+      if (B.job === "hurt") { if (s.t % s.wk > s.wk - 3.5) { pose(a, "idle"); face(a, C.hall0[0], C.hall0[1], dt); } else pose(a, "sleep"); return; }   /* けが：寝たまま。30〜55秒に一度、少し起きて部屋を見る */
+      pose(a, "sleep"); if (s.t > s.dur && B.n.slp < 0.2) return "done"; } };
+  /* 食べる：鍋（台所）か樽のそばで。食べる絵はないので、樽の方を向いて立つ。食べ終わったら ♪ */
+  ACT.eat = { score: (B, n) => n.hun < 0.45 ? -1 : 1.2 * (n.hun - 0.3),
+    start: (R, a, B, C, nv, H) => { const L = C.pots.concat(C.barrels).sort((u, v) => Math.hypot(u.x - a.x, u.z - a.z) - Math.hypot(v.x - a.x, v.z - a.z)); let p = null;
+      for (const q of L) { p = spotAround(R, a, B, C, nv, H, q.x, q.z, objR(q) + bodyR(a) + 0.3, "food" + Math.round(q.x * 10) + "_" + Math.round(q.z * 10)); if (p) break; }
+      if (!p) { const h = homeSpot(R, a, B, C, nv, H); p = { x: h.x, z: h.z, lx: C.hall0[0], lz: C.hall0[1] }; } reserve(C, B, a, p.key); B.st = { ph: "go", t: 0, x: p.x, z: p.z, lx: p.lx, lz: p.lz, dur: (6 + hsh(B.seed++) * 4) * B.tr.dur }; },
+    tick: (R, a, B, C, nv, H, dt) => { const s = B.st; if (s.ph === "go") { const r = goStep(R, a, B, nv, H, dt, s.x, s.z); if (r === "fail") return "done"; if (r !== "arrived") return; s.ph = "do"; }
+      pose(a, "idle"); face(a, s.lx, s.lz, dt); s.t += dt; B.n.hun = Math.max(0, B.n.hun - dt / 5); if (s.t > s.dur) { a.nt = now(); return "done"; } } };
+  /* しゃべる：相手のそばまで歩いて、向かい合う。交互に ♪ を出す（文字の吹き出し POPS30 は fp30 の中だけにあって、ここからは出せない） */
+  ACT.chat = { score: (B, n, R, a) => { if (n.soc < 0.45 || B.job === "hurt") return -1; const p = partner(R, a, B); B.cand = p; return p ? 0.95 * (n.soc - 0.25) + (p.good ? 0.1 : 0) : -1; },
+    start: (R, a, B, C, nv, H) => { const p = B.cand && B.cand.b, pb = p && p.l30 && p.l30.b; if (!pb) { B.st = { ph: "end" }; return; }
+      endAct(R, p, pb, C); pb.act = "chat"; pb.st = { ph: "wait", t: 0, who: a, dur: 99 }; pb.until = now() + 20000; B.until = now() + 20000;   /* 相手は立ち止まって、こちらを向いて待つ */
+      B.st = { ph: "go", t: 0, who: p, dur: (5 + hsh(B.seed++) * 4) * B.tr.dur, nt: 0 }; },
+    tick: (R, a, B, C, nv, H, dt) => { const s = B.st; if (s.ph === "end") return "done"; const p = s.who, pb = p && p.l30 && p.l30.b; if (!pb || pb.act !== "chat" || !pb.st || pb.st.who !== a || p.hide) return "done";
+      if (s.ph === "wait") { pose(a, "idle"); face(a, p.x, p.z, dt); s.t += dt; if (s.t > 16) return "done"; return; }   /* 話しかけられた側：相手が来るまで待つ */
+      if (s.ph === "go") { const gap = 0.9 + ((a.H || 1.6) + (p.H || 1.6)) * 0.3; if (s.x == null || Math.hypot(s.px - p.x, s.pz - p.z) > 0.5) { const sp = spotAround(R, a, B, C, nv, H, p.x, p.z, gap, "chat" + p.m.id); if (!sp) return "done"; s.x = sp.x; s.z = sp.z; s.px = p.x; s.pz = p.z; B.go = null; }
+        const r = goStep(R, a, B, nv, H, dt, s.x, s.z); s.t += dt; if (r === "fail" || s.t > 14) return "done"; if (r !== "arrived") return; s.ph = "talk"; s.t = 0; pb.st.ph = "talk"; pb.st.t = 0; pb.st.nt = 0.9; pb.st.dur = s.dur + 2; s.nt = 0; }
+      /* 向かい合って話す：♪ を交互に */ pose(a, "idle"); face(a, p.x, p.z, dt); s.t += dt; B.n.soc = Math.max(0, B.n.soc - dt / 6); s.nt -= dt; if (s.nt <= 0) { a.nt = now(); s.nt = 1.6 + hsh(B.seed++) * 1.4; }
+      if (s.t > s.dur) return "done"; } };
+  /* 散歩：することがない子が、広間をぶらつく（今いる所から4m以上離れた点を選ぶ） */
+  ACT.stroll = { score: (B) => B.job === "hurt" ? -1 : 0.18,
+    start: (R, a, B, C, nv, H) => { const p = hallPoint(R, a, C, nv, H, (B.seed++ * 31 + a.m.id) | 0, 4); B.st = p ? { ph: "go", t: 0, x: p.x, z: p.z, dur: 2 + hsh(B.seed++) * 3 } : { ph: "end" }; },
+    tick: (R, a, B, C, nv, H, dt) => { const s = B.st; if (s.ph === "end") return "done"; if (s.ph === "go") { const r = goStep(R, a, B, nv, H, dt, s.x, s.z); if (r === "fail") return "done"; if (r !== "arrived") return; s.ph = "do"; s.r0 = a.r; }
+      pose(a, "idle"); s.t += dt; turn(a, s.r0 + Math.sin(s.t * 1.3) * 0.9, dt, 3); if (s.t > s.dur) return "done"; } };   /* 立ち止まって、あたりを見まわす */
+
+  /* ---------- 仕事ごとの手順 ---------- */
+  const WORK = {};
+  const tire = (B, dt, k) => { B.n.fat = Math.min(1, B.n.fat + dt / 75 * k * B.tr.fat); };
+  /* 採掘：鉱脈の前まで歩いて掘る → 掘った石をトロッコまで運んで置く → また鉱脈へ（さっきと別の鉱脈を選びやすい） */
+  WORK.mine = (R, a, B, C, nv, H, dt) => { const s = B.st; tire(B, dt, 1.2);
+    if (s.ph === "pick") { if (!C.veins.length) { s.ph = "gnaw"; return; } const taken = i => { const w = C.res.get("vein" + i); return w && w !== a && w.l30 && w.l30.b && w.l30.b.rk === "vein" + i; };
+      const VS = C.veins.map((v, i) => ({ v, i })).filter(o => !taken(o.i) && !badSpot(B, "vein" + o.i)).sort((p, q) => (p.i === s.lastV) - (q.i === s.lastV) || Math.hypot(p.v.x - a.x, p.v.z - a.z) - Math.hypot(q.v.x - a.x, q.v.z - a.z));
+      for (const { v, i } of VS) { /* 鉱脈の正面（壁から外へ）にまっすぐ下がっていって、体が入る所に立つ（大きい子は少し離れる） */ for (let d = 0.95; d < 3.2; d += 0.15) { const x = v.x + v.nx * d, z = v.z + v.nz * d; if (stand(R, nv, H, x, z, a) && sepStill(R, a, x, z)) { reserve(C, B, a, "vein" + i); Object.assign(s, { vi: i, x, z, lx: v.x, lz: v.z, ph: "go", t: 0, dur: (7 + hsh(B.seed++) * 5) * B.tr.dur }); return; } }
+        B.bad["vein" + i] = now() + 15000; }
+      s.ph = "gnaw"; return; }
+    if (s.ph === "gnaw") { /* 鉱脈が空いていない：自分の場所のとなりの岩を掘る（fp30 の mkActs と同じ：岩のマスの方へ歩いて、壁の手前で掘る） */ const p = homeSpot(R, a, B, C, nv, H), k = C.home[a.m.id], G = R.G30, nb = k ? [[1, 0], [-1, 0], [0, 1], [0, -1]].find(([dx, dy]) => !g30at(G, k[0] + dx, k[1] + dy)) : null;
+      let q = null; if (nb) { const ux = nb[0], uz = -nb[1]; for (let d = 0; d < R.CS * 1.2; d += 0.15) { const x = p.x + ux * d, z = p.z + uz * d; if (stand(R, nv, H, x, z, a)) q = [x, z, ux, uz]; else if (q) break; } }
+      if (q) Object.assign(s, { x: q[0], z: q[1], lx: q[0] + q[2] * (bodyR(a) + 0.7), lz: q[1] + q[3] * (bodyR(a) + 0.7) }); else { const L = C.veins[a.m.id % Math.max(1, C.veins.length)]; Object.assign(s, { x: p.x, z: p.z, lx: L ? L.x : C.hall0[0], lz: L ? L.z : C.hall0[1] }); }
+      Object.assign(s, { ph: "go", t: 0, dur: 9 + hsh(B.seed++) * 4, vi: -1 }); return; }
+    if (s.ph === "go") { const r = goStep(R, a, B, nv, H, dt, s.x, s.z); if (r === "fail") { if (s.vi >= 0) B.bad["vein" + s.vi] = now() + 15000; s.ph = "pick"; return; } if (r !== "arrived") return; s.ph = "dig"; s.t = 0; }
+    if (s.ph === "dig") { pose(a, "mine", s.lx, s.lz); s.t += dt; if (s.t > s.dur) { s.lastV = s.vi; reserve(C, B, a, null); s.ph = C.carts.length ? "carry" : "pick"; s.t = 0; } return; }
+    if (s.ph === "carry") { const q = C.carts.slice().sort((u, v) => Math.hypot(u.x - a.x, u.z - a.z) - Math.hypot(v.x - a.x, v.z - a.z))[0], p = q && spotAround(R, a, B, C, nv, H, q.x, q.z, objR(q) + bodyR(a) + 0.25, "cart" + Math.round(q.x * 10));
+      if (!p) { s.ph = "pick"; return; } reserve(C, B, a, p.key); Object.assign(s, { x: p.x, z: p.z, lx: q.x, lz: q.z, ph: "haul" }); return; }
+    if (s.ph === "haul") { const r = goStep(R, a, B, nv, H, dt, s.x, s.z); if (r === "fail") { s.ph = "pick"; return; } if (r !== "arrived") return; s.ph = "drop"; s.t = 0; }
+    if (s.ph === "drop") { pose(a, "lift", s.lx, s.lz); s.t += dt; if (s.t > 1.3) { reserve(C, B, a, null); s.ph = "pick"; s.n++; } } };   /* トロッコに石を置く（持ち上げて下ろす動き。石を持って歩く絵はない） */
+  /* 訓練：始めに武器の棚へ寄る。相手がいれば向かい合って打ち合い、いなければ打ちこみ人形 */
+  WORK.train = (R, a, B, C, nv, H, dt) => { const s = B.st; tire(B, dt, 1.35);
+    if (s.ph === "pick") { if (!s.rack && C.racks.length) { s.rack = 1; const q = C.racks[a.m.id % C.racks.length], p = spotAround(R, a, B, C, nv, H, q.x, q.z, objR(q) + bodyR(a) + 0.3, "rack" + Math.round(q.x * 10)); if (p) { reserve(C, B, a, p.key); Object.assign(s, { ph: "goRack", x: p.x, z: p.z, lx: q.x, lz: q.z, t: 0 }); return; } }
+      const mate = trainMate(R, a, B); if (mate && pairUp(R, a, B, mate, C, nv, H)) return;
+      const L = C.dummies.slice().sort((u, v) => Math.hypot(u.x - a.x, u.z - a.z) - Math.hypot(v.x - a.x, v.z - a.z)); for (const q of L) { const p = spotAround(R, a, B, C, nv, H, q.x, q.z, objR(q) + bodyR(a) + 0.5, "dummy" + Math.round(q.x * 10) + "_" + Math.round(q.z * 10)); if (p) { reserve(C, B, a, p.key); Object.assign(s, { ph: "go", x: p.x, z: p.z, lx: q.x, lz: q.z, t: 0, dur: (9 + hsh(B.seed++) * 6) * B.tr.dur }); return; } }
+      const h = homeSpot(R, a, B, C, nv, H); Object.assign(s, { ph: "go", x: h.x, z: h.z, lx: C.hall0[0], lz: C.hall0[1], t: 0, dur: 10 }); return; }   /* 人形もない：その場で素振り */
+    if (s.ph === "goRack") { const r = goStep(R, a, B, nv, H, dt, s.x, s.z); if (r === "fail") { s.ph = "pick"; return; } if (r !== "arrived") return; s.ph = "rack"; s.t = 0; }
+    if (s.ph === "rack") { pose(a, "lift", s.lx, s.lz); s.t += dt; if (s.t > 1.4) { reserve(C, B, a, null); s.ph = "pick"; } return; }   /* 棚から武器を取る */
+    if (s.ph === "pair") return pairTick(R, a, B, C, nv, H, dt);
+    if (s.ph === "go") { const r = goStep(R, a, B, nv, H, dt, s.x, s.z); if (r === "fail") { s.ph = "pick"; s.rack = 1; return; } if (r !== "arrived") return; s.ph = "hit"; s.t = 0; }
+    if (s.ph === "hit") { s.t += dt; pose(a, s.t % 9 < 6 ? "slash" : "spar", s.lx, s.lz); if (s.t > s.dur) { reserve(C, B, a, null); s.ph = "pick"; s.rack = 1; s.n++; }   /* 打ちこみ6秒・跳びかかり3秒をくり返す */
+      else if (s.t > 3 && Math.random() < dt * 0.15) { const mate = trainMate(R, a, B); if (mate) { reserve(C, B, a, null); if (!pairUp(R, a, B, mate, C, nv, H)) reserve(C, B, a, null); } } } };   /* 人形を叩いている間に相手が空いたら、手合わせに切りかえる */
+  /* 見張り（狙撃も）：のぞき穴・物見台のそばに立って外を見る。ときどき入口の方をふり返り、別の穴へ移る */
+  WORK.watch = WORK.snipe = (R, a, B, C, nv, H, dt) => { const s = B.st; tire(B, dt, 0.6);
+    if (s.ph === "pick") { let p = null, q = null; for (let t = 0; t < C.slits.length && !p; t++) { q = C.slits[(s.n + a.m.id + t) % C.slits.length]; p = spotAround(R, a, B, C, nv, H, q.x, q.z, objR(q) + bodyR(a) + 0.3, "slit" + Math.round(q.x * 10) + "_" + Math.round(q.z * 10)); }
+      if (!p) { p = hallPoint(R, a, C, nv, H, (B.seed++ * 17 + a.m.id) | 0, 0) || homeSpot(R, a, B, C, nv, H); q = { x: C.ent[0], z: C.ent[1] }; } reserve(C, B, a, p.key); Object.assign(s, { ph: "go", x: p.x, z: p.z, lx: q.x, lz: q.z, t: 0, dur: (14 + hsh(B.seed++) * 10) * B.tr.dur }); return; }
+    if (s.ph === "go") { const r = goStep(R, a, B, nv, H, dt, s.x, s.z); if (r === "fail") { s.n++; s.ph = "pick"; return; } if (r !== "arrived") return; s.ph = "look"; s.t = 0; }
+    if (s.ph === "look") { s.t += dt; if (s.t % 7 < 5) pose(a, "watch", s.lx, s.lz); else { pose(a, "idle"); face(a, C.ent[0], C.ent[1], dt); } if (s.t > s.dur) { reserve(C, B, a, null); s.n++; s.ph = "pick"; } } };
+  /* 料理：鍋をかきまぜる */
+  WORK.cook = (R, a, B, C, nv, H, dt) => { const s = B.st; tire(B, dt, 0.8);
+    if (s.ph === "pick") { const q = C.pots[0] || C.barrels[0], p = q && spotAround(R, a, B, C, nv, H, q.x, q.z, objR(q) + bodyR(a) + 0.3, "pot" + Math.round(q.x * 10)); if (!p) { s.ph = "none"; return; } reserve(C, B, a, p.key); Object.assign(s, { ph: "go", x: p.x, z: p.z, lx: q.x, lz: q.z, t: 0 }); return; }
+    if (s.ph === "none") { s.g = s.g || { ph: "pick", t: 0, n: 0 }; return guardTick(R, a, B, C, nv, H, dt, s.g); }   /* 鍋も樽もない：見回りをする */
+    if (s.ph === "go") { const r = goStep(R, a, B, nv, H, dt, s.x, s.z); if (r === "fail") { s.ph = "pick"; return; } if (r !== "arrived") return; s.ph = "stir"; s.t = 0; }
+    s.t += dt; if (s.t % 8 < 5.5) pose(a, "lift", s.lx, s.lz); else { pose(a, "idle"); face(a, s.lx, s.lz, dt); } };
+  /* 巣ごもり：自分の場所でじっとして、ゆっくり向きを変える */
+  WORK.nest = (R, a, B, C, nv, H, dt) => { const s = B.st; tire(B, dt, 0.4);
+    if (s.ph === "pick") { const p = homeSpot(R, a, B, C, nv, H); Object.assign(s, { ph: "go", x: p.x, z: p.z, t: 0 }); return; }
+    if (s.ph === "go") { const r = goStep(R, a, B, nv, H, dt, s.x, s.z); if (r !== "arrived" && r !== "fail") return; s.ph = "sit"; s.t = 0; s.r0 = a.r; }
+    s.t += dt; const an = s.r0 + Math.sin(s.t * 0.2) * 1.2; pose(a, "nest", a.x + Math.sin(an) * 3, a.z + Math.cos(an) * 3); };
+  /* 見回り：広間を順にまわる（今いる所から5m以上離れた点）。着いたら入口の方を見て、あたりを見まわす */
+  WORK.guard = (R, a, B, C, nv, H, dt) => guardTick(R, a, B, C, nv, H, dt, B.st);
+  function guardTick(R, a, B, C, nv, H, dt, s) { B.n.fat = Math.min(1, B.n.fat + dt / 150 * B.tr.fat);
+    if (s.ph === "pick") { const p = hallPoint(R, a, C, nv, H, (B.seed++ * 29 + a.m.id * 5 + s.n * 8) | 0, 5); if (!p) { Object.assign(s, { ph: "look", t: 0, dur: 3, r0: a.r }); return; } Object.assign(s, { ph: "go", x: p.x, z: p.z, t: 0 }); return; }
+    if (s.ph === "go") { const r = goStep(R, a, B, nv, H, dt, s.x, s.z); if (r === "fail") { s.n++; s.ph = "pick"; return; } if (r !== "arrived") return; Object.assign(s, { ph: "look", t: 0, dur: (3 + hsh(B.seed++) * 4) * B.tr.dur, r0: Math.atan2(C.ent[0] - a.x, C.ent[1] - a.z) }); }
+    if (s.ph === "look") { pose(a, "idle"); s.t += dt; turn(a, s.r0 + Math.sin(s.t * 1.1) * 1.0, dt, 3); if (s.t > s.dur) { s.n++; s.ph = "pick"; } } }
+  WORK.trapw = WORK.guard;   /* 罠番は fp30 の keepers が罠の前に固定しているので、ふつうはここに来ない */
+
+  /* 手合わせの相手：同じ部屋で訓練中、手が空いている子（人形を叩いている・相手を探している） */
+  function trainMate(R, a, B) { let best = null, bd = 1e9; (R.acts || []).forEach(b => { if (b === a || b.hide) return; const bb = b.l30 && b.l30.b; if (!bb || bb.act !== "work" || bb.job !== "train" || !bb.st) return; if (!(bb.st.ph === "hit" || bb.st.ph === "pick")) return; const d = Math.hypot(b.x - a.x, b.z - a.z); if (d < bd && d < 22) { bd = d; best = b; } }); return best; }
+  /* 二人の立ち位置：広間の空いた所で、体の大きさぶん離して向かい合う（fp30 の手合わせと同じ間合い）。決まったら true */
+  function pairUp(R, a, B, b, C, nv, H) { const bb = b.l30.b, nvb = navOf(R, b, H); if (!nvb) return false; const gap = 1.5 + ((a.H || 1.6) + (b.H || 1.6)) * 0.3, mx = (a.x + b.x) / 2, mz = (a.z + b.z) / 2;
+    const cand = (C.halls[0] || C.cells).slice().sort((p, q) => Math.hypot(p[0] - mx, p[1] - mz) - Math.hypot(q[0] - mx, q[1] - mz));
+    for (const c of cand) for (let k = 0; k < 8; k++) { const an = k / 8 * 3.1416 + (a.m.id % 3) * 0.3, ux = Math.cos(an) * gap / 2, uz = Math.sin(an) * gap / 2; let ax = c[0] - ux, az = c[1] - uz, bx = c[0] + ux, bz = c[1] + uz;
+      if (!(stand(R, nv, H, ax, az, a) && stand(R, nvb, H, bx, bz, b) && sepStill(R, a, ax, az) && sepStill(R, b, bx, bz) && clear(R, nv, H, ax, az, bx, bz))) continue;   /* 二人のあいだに岩や置き物がない */
+      if (Math.hypot(ax - a.x, az - a.z) + Math.hypot(bx - b.x, bz - b.z) > Math.hypot(bx - a.x, bz - a.z) + Math.hypot(ax - b.x, az - b.z)) { if (!(stand(R, nv, H, bx, bz) && stand(R, nvb, H, ax, az))) continue; [ax, az, bx, bz] = [bx, bz, ax, az]; }   /* 近い方の立ち位置へ（入れちがうと、行く途中で二人がぶつかった） */
+      reserve(C, B, a, null); reserve(C, bb, b, null); B.go = null; bb.go = null; const dur = (14 + hsh(B.seed++) * 8) * B.tr.dur;
+      B.st = { ph: "pair", sub: "go", x: ax, z: az, mate: b, role: 0, t: 0, dur, n: (B.st && B.st.n) || 0 }; bb.st = { ph: "pair", sub: "go", x: bx, z: bz, mate: a, role: 1, t: 0, dur, n: (bb.st && bb.st.n) || 0 }; bb.until = Math.max(bb.until || 0, now() + 4000); return true; }
+    return false; }
+  function pairTick(R, a, B, C, nv, H, dt) { const s = B.st, b = s.mate, bb = b && b.l30 && b.l30.b, back = () => { unpair(a); s.ph = "pick"; s.rack = 1; };
+    if (!bb || bb.act !== "work" || !bb.st || bb.st.ph !== "pair" || bb.st.mate !== a || b.hide) { const was = s.sub === "duel"; back(); return was ? "done" : undefined; }   /* 相手が打ち合いを終えた：こちらも区切って考え直す */
+    if (s.sub === "go") { const r = goStep(R, a, B, nv, H, dt, s.x, s.z); s.t += dt; if (r === "fail" || s.t > 15) { back(); bb.st.ph = "pick"; bb.st.rack = 1; return; } if (r !== "arrived") return; s.sub = "ready"; s.t = 0; }
+    if (s.sub === "ready") { pose(a, "idle"); face(a, b.x, b.z, dt); s.t += dt; if (bb.st.sub === "ready" || bb.st.sub === "duel") { s.sub = "duel"; s.t = 0; if (s.role === 0) a.dph = b.dph = hsh(B.seed++) * 9; } else if (s.t > 15) back(); return; }
+    /* 打ち合い：fp30 の「duel」の描き方（交互に打ちこむ・火花・音）をそのまま使う */ a.mode = "duel"; a.pt = b; a.role = s.role; a.duelSet = 1; a.walking = false; a.look = [b.x, b.z]; s.t += dt; tire(B, dt, 0.3);
+    if (s.t > s.dur) { back(); s.n++; return "done"; } }   /* 打ち合いが終わったら、仕事をいったん区切って考え直す（すぐ次の相手と組んで、疲れても休まなかった） */
+  function unpair(a) { const b = a.pt; a.pt = null; if (a.mode === "duel") a.mode = "idle"; if (b && b.pt === a) { b.pt = null; if (b.mode === "duel") b.mode = "idle"; } }
+
+  /* 話し相手：同じ部屋で、ひまそうな子（休む・散歩・見回り）か、しゃべりたい見張り・掘る子。仲のいい子（rel28）を先に、仲の悪い子は選ばない */
+  function partner(R, a, B) { let best = null, bs = -1e9; (R.acts || []).forEach(b => { if (b === a || b.hide) return; const bb = b.l30 && b.l30.b; if (!bb || bb.job === "hurt" || !bb.act) return; const free = bb.act === "rest" || bb.act === "stroll" || bb.act === "patrol" || (bb.act === "work" && bb.n.soc > 0.6 && bb.job !== "train");
+      if (!free || (bb.cool && bb.cool > now())) return; let rl = 0; try { rl = typeof rel28 === "function" ? rel28(a.m, b.m) : 0; } catch (e) {} if (rl < 0) return; const d = Math.hypot(b.x - a.x, b.z - a.z); if (d > 20) return; const sc = -d * 0.05 + rl * 0.5 + bb.n.soc; if (sc > bs) { bs = sc; best = { b, good: rl > 0 }; } }); return best; }
+
+  /* 自分の場所：夜の計算と同じマス（g30home）。2体目からは少しずらす。体が入らなければ近くの入る所 */
+  function homeSpot(R, a, B, C, nv, H) { if (B.home) return B.home; const c = C.home[a.m.id], mid = (R.G30.W - 1) / 2; let x = a.hx, z = a.hz; if (c) { const n2 = c[2] || 0; x = (c[0] - mid) * R.CS + (n2 ? (n2 % 2 ? 0.9 : -0.9) : 0); z = -c[1] * R.CS + (n2 > 1 ? 0.9 : 0); }
+    for (let r = 0; r < 4; r += 0.25) for (let k = 0; k < (r ? 12 : 1); k++) { const xx = x + Math.cos(k / 12 * 6.2832) * r, zz = z + Math.sin(k / 12 * 6.2832) * r; if (stand(R, nv, H, xx, zz, a)) return B.home = { x: xx, z: zz, key: "home" + a.m.id }; }
+    return B.home = { x: a.x, z: a.z, key: "home" + a.m.id }; }
+  /* やることを終える：予約・手合わせ・話し相手をほどく */
+  function endAct(R, a, B, C) { if (!B.act) return; reserve(C, B, a, null); if (a.pt) { const b = a.pt, bb = b.l30 && b.l30.b; unpair(a); if (bb && bb.st && bb.st.ph === "pair") { bb.st.ph = "pick"; bb.st.rack = 1; } }
+    if (B.act === "chat") B.cool = now() + 20000; B.go = null; B.act = null; B.st = null; }
+
+  /* 夜行性：コウモリ・夜の狼・幽霊・吸血鬼など＋「夜の子」「月に吠える」の特性 */
+  const NOCT30 = { bat: 1, firebat: 1, eyebat: 1, nightwolf: 1, nightspider: 1, ghost: 1, wraitheye: 1, ghoul: 1, vampire: 1, count: 1 };
+  function noct30(m) { return !!(m && (NOCT30[m.sp] || (m.sk && (m.sk.nightborn || m.sk.moonhowl)))); }
+  function QN30() { const q = window.__qn30; return !!(q && performance.now() < q.end); }
+  window.__noct30 = noct30;
+  /* 夜の始まりと朝：みんなすぐ考え直す（「始めたら最低○秒続ける」を待つと、夜のあいだ寝床へ向かわなかった） */
+  window.__life30kick = function (morning) { try { const F = window.__fp26; if (!F || !F.rooms) return; F.rooms.forEach(R => (R.acts || []).forEach(a => { const B = a.l30 && a.l30.b; if (!B) return; B.until = 0; B.tk = 0;
+    if (morning) { if (noct30(a.m)) B.n.slp = Math.max(B.n.slp, 0.75); else B.n.slp = Math.min(B.n.slp, 0.1); } })); } catch (e) {} };
+  /* ---------- 考える：0.5〜0.9秒おきに、点数がいちばん高いことを選ぶ ---------- */
+  const MINT = { work: 6000, patrol: 5000, rest: 6000, sleep: 12000, eat: 4000, chat: 3000, stroll: 3000 };   /* 始めたら少なくともこの間は続ける（すぐ気が変わると、行っては戻るをくり返した） */
+  function think(R, a, B, C, nv, H) { const n = B.n; let best = null, bs = -1e9;
+    if (B.act === "chat" && B.st && (B.st.ph === "wait" || B.st.ph === "talk")) return;   /* 話の途中では考えない（相手を置いて行かない） */
+    if (B.act === "work" && B.st && B.st.ph === "pair") return;   /* 手合わせの途中も同じ */
+    const qn = QN30(), nc = qn && noct30(a.m);
+    for (const k in ACT) { let s = ACT[k].score(B, n, R, a);
+      /* 襲撃のない夜（yoru30）：ふつうの子は寝床へ、夜行性の子だけ起きて働く */
+      if (qn) { if (k === "sleep") s = nc ? -1 : 50; else if (!nc) s -= 5; else if (k === "work" || k === "patrol") s += 0.6; }
+      if (s < 0) continue; if (k === B.act) s += 0.15; if (B.pen[k] > now()) s -= 0.6;   /* さっき行けなかったことは、しばらく後回し（行けない所へ毎コマ行こうとして止まっていた） */ s += (hsh(B.seed * 13 + k.length) - 0.5) * 0.06; if (s > bs) { bs = s; best = k; } }   /* いまやっていることは少し高く */
+    if (!best || best === B.act) return; if (B.act && B.until > now()) return;
+    endAct(R, a, B, C); B.act = best; B.until = now() + (MINT[best] || 3000); ACT[best].start(R, a, B, C, nv, H); }
+
+  /* 体の大きさ：ふつうは初めて描くときに fp30 が決める（a.mult・a.H）。描かずに回す検査（__nodraw30）でも動けるよう、同じ式でここでも決める */
+  function sizeOf(a) { if (a.H) return true; try { const o = dspr25(a.sp, a.evo); if (!o || !o.ok) return false; const H0 = ((o.foot || 122) - (o.top || 0)) / (o.ppu || 36), q = Math.min(1, Math.max(0, (H0 - 2.2) / 2.4)), m0 = 1 + 0.55 * q * q * (3 - 2 * q); a.mult = Math.min(m0, 5.9 / H0); a.H = H0 * a.mult; return true; } catch (e) { return false; } }
+
+  /* 重さの内訳（REAL=1 の検査のときだけ） */
+  if (window.__life30prof) { const wrap = (f, k) => function () { const t0 = now(), r = f.apply(this, arguments); cost(t0, k); return r; }; spotAround = wrap(spotAround, "spot"); pairUp = wrap(pairUp, "pair"); hallPoint = wrap(hallPoint, "hall"); ctxOf = wrap(ctxOf, "ctx"); think = wrap(think, "think"); yieldFor = wrap(yieldFor, "yield"); }
+
+  /* ---------- 入口：fp30 から1体ずつ毎コマ ---------- */
+  /* 重さを測る（tools/day30.js の REAL=1）：window.__life30prof を true にすると、1体ぶんの計算時間を足していく */
+  window.__life30 = function (R, a, dt, H) { if (!window.__life30prof) return tickOne(R, a, dt, H); const t0 = now(), r = tickOne(R, a, dt, H), d = now() - t0; ST.callMs = (ST.callMs || 0) + d; ST.calls = (ST.calls || 0) + 1; if (d > (ST.callMax || 0)) { ST.callMax = d; const B = a.l30 && a.l30.b; ST.callWhat = (B ? B.act + "/" + (B.st && B.st.ph) : "init") + " t" + Math.round(t0); } if (d > 4) (ST.slow = ST.slow || []).push((B0 => (B0 ? B0.act + "/" + (B0.st && B0.st.ph) : "init"))(a.l30 && a.l30.b) + " " + d.toFixed(1) + "ms t" + Math.round(t0)); return r; };
+  function tickOne(R, a, dt, H) { if (!elig(R, a) || isNight()) return false; HH = H; if (!a.l30) adopt(a); if (a.l30.off) { a.l30.off = 0; a.stay = false; }
+    if (!R.G || !sizeOf(a)) return true;   /* 層の当たり・体の大きさがまだ：1コマ待つ */
+    const nv = navOf(R, a, H); if (!nv) { a.walking = false; return true; }
+    const C = ctxOf(R, H); let B = a.l30.b; if (!B || B.R !== R) { B = a.l30.b = { R, n: needOf(a.m), tr: traitOf(a.m), job: jobOf(R, a.m), seed: (a.m.id * 101) | 0, bad: {}, pen: {}, act: null, st: null, tk: hsh(a.m.id) * 0.6, jt: 5 };
+      /* 置かれた所が岩・置き物にかかっていたら、最初の1コマで近くの入る所へずらす（fp30 の描く側の「めりこみ直し」と同じ。掘る子は鉱脈の前に置かれて、岩にかかったままだった） */
+      if (!H.fitsM(R, a, a.x, a.z)) { let got = null; for (let r = 0.25; r < 6 && !got; r += 0.25) for (let k = 0; k < 16; k++) { const x = a.x + Math.cos(k / 16 * 6.2832) * r, z = a.z + Math.sin(k / 16 * 6.2832) * r; if (stand(R, nv, H, x, z) && sepStill(R, a, x, z)) { got = [x, z]; break; } } if (got) { a.x = a.tx = got[0]; a.z = a.tz = got[1]; } }
+      a.fixd = 1; }   /* fixd：描く側のめりこみ直し（瞬間移動）はもう要らない。この先は道を歩いて動く */
+    /* わきへ寄る（ほかの子に道をあける）：寄ったら少し待って、相手が通ったら、やっていたことを考え直す */
+    if (B.yd) { const Y = B.yd, o = Y.other; if (now() > Y.until || !o) { B.yd = null; } else { if (!Y.hold) { const r = goStep(R, a, B, nv, H, dt, Y.x, Y.z); if (r === "fail") Y.until = 0; else if (r === "arrived") Y.hold = now(); }
+        if (Y.hold) { pose(a, "idle"); face(a, o.x, o.z, dt); const ob = o.l30 && o.l30.b; if (now() - Y.hold > 1200 && (!ob || !ob.go || Math.hypot(o.x - a.x, o.z - a.z) > 3.5 || now() - Y.hold > 5000)) Y.until = 0; }
+        if (Y.until === 0) { B.yd = null; endAct(R, a, B, C); B.tk = 0; } return true; } }
+    if (a.wait > 0) { a.wait -= dt; a.walking = false; return true; }   /* 話しかけられている（fp30 の monMenu が a.wait を入れる）：止まって主を向いたまま */
+    /* 欲求は毎コマ少しずつ */ const n = B.n, tr = B.tr; n.slp = cl01(n.slp + dt / 260 * tr.slp); n.hun = cl01(n.hun + dt / 170 * tr.hun); if (B.act !== "chat") n.soc = cl01(n.soc + dt / 80 * tr.soc); if (B.go) n.fat = cl01(n.fat + dt / 220 * tr.fat);
+    B.jt -= dt; if (B.jt <= 0) { B.jt = 5; const j = jobOf(R, a.m); if (j !== B.job) { B.job = j; B.until = 0; if (B.act && !(B.act === "chat")) { endAct(R, a, B, C); } } }   /* 仕事が変わったら（部屋の画面で替えた・けがが治った）すぐ考え直す */
+    B.tk -= dt; if (B.tk <= 0 || !B.act) { B.tk = 0.5 + hsh(B.seed++) * 0.4; think(R, a, B, C, nv, H); }
+    /* 主が近くに来たら：仕事中・寝ている・話している子はそのまま。ひまな子・歩いている子は足を止めて主を向く（気づいたら ♪） */
+    { const P = H.player(), d = Math.hypot(P.x - a.x, P.z - (R.Z + a.z)), busy = (B.act === "work" && B.st && /^(dig|hit|look|stir|sit|rack|drop|pair)$/.test(B.st.ph)) || B.act === "sleep" || (B.act === "chat" && B.st && B.st.ph !== "go");
+      if (R.i === H.cur() && d < 3.4 + (a.H || 0) * 0.45 && !busy) { a.walking = false; if (a.mode !== "idle") pose(a, "idle"); turn(a, Math.atan2(P.x - a.x, P.z - (R.Z + a.z)), dt, 5); if (!B.seen) { B.seen = 1; a.nt = now(); } return true; } else if (d > 6 + (a.H || 0) * 0.45) B.seen = 0; }
+    if (B.act) { let r; try { r = ACT[B.act].tick(R, a, B, C, nv, H, dt); } catch (e) { r = "done"; console.warn("life30", e); } if (r === "done") { if (B.fail && now() - B.fail < 300) B.pen[B.act] = now() + 6000; endAct(R, a, B, C); B.tk = 0; } }
+    return true; }
+
+  /* ---------- 引き受ける・返す ----------
+     fp30 の stepActs は「その場で働く子（a.stay）」には __life30 を呼ばない。そこで昼の間は、仕事中の子も stay を外して引き受ける（0.25秒おきに見回る）。
+     夜になったら、元の stay と姿勢に戻して夜の計算に返す（夜の動きは今までどおり） */
+  function adopt(a) { a.l30 = { st0: !!a.stay, md0: a.mode }; if (a.mode === "duel") unpair(a); a.stay = false; a.wait = 0; a.duelSet = 1; }   /* duelSet：描く側が手合わせの2人を勝手に並べ直さないように */
+  function release(R, a) { const L = a.l30; if (!L || L.off) return; const B = L.b; if (B && R.l30c) endAct(R, a, B, R.l30c); unpair(a); a.stay = L.st0; a.mode = L.md0 === "sleep" ? "sleep" : "idle"; a.look = null; a.walking = false; L.off = 1; L.b = null; }
+  setInterval(() => { try { const F = window.__fp26; if (!F || !F.rooms || !document.getElementById("fp26")) return; const nt = isNight();
+      F.rooms.forEach(R => (R.acts || []).forEach(a => { if (!elig(R, a)) return; if (nt) { release(R, a); return; } if (!a.l30) adopt(a); else if (a.l30.off) { a.l30.off = 0; a.stay = false; a.wait = 0; } })); } catch (e) { console.warn("life30", e); } }, 250);
+
+  /* 確かめる道具（tools/day30.js）用：いま何をしているか・体が入るか */
+  window.__life30dbg = { st: ST, list: () => { const F = window.__fp26; if (!F) return []; const out = []; F.rooms.forEach((R, ri) => (R.acts || []).forEach(a => { if (!a.m || a.lord || a.hero) return; const B = a.l30 && a.l30.b; out.push({ ri, id: a.m.id, nick: a.m.nick, sp: a.sp, H: a.H, x: a.x, z: a.z, walking: !!a.walking, mode: a.mode, act: B ? B.act : null, ph: B && B.st ? (B.st.ph + (B.st.sub ? "/" + B.st.sub : "")) : null, job: B ? B.job : null, n: B ? { fat: +B.n.fat.toFixed(2), slp: +B.n.slp.toFixed(2), hun: +B.n.hun.toFixed(2), soc: +B.n.soc.toFixed(2) } : null, pt: a.pt && a.pt.m ? a.pt.m.id : null, look: a.look, go: B && B.go ? [B.go.x, B.go.z] : null }); })); return out; },
+    fits: (ri, id, x, z) => { const F = window.__fp26, R = F && F.rooms[ri], a = R && (R.acts || []).find(q => q.m && q.m.id === id); return HH && a && R.G ? HH.fitsM(R, a, x, z) : null; } };
+})();
+
 // ================= night30：夜、勇者は層の中の道を1マスずつ進む =================
 // 計算の中身（戦い・罠の強さ）は今までのものを使う。そのうえで：
 //  ・勇者は入口→降り口の道を歩く（分かれ道で行き止まりに迷いこむことがある）
+//    → 勇者AI（hero30）がある今は、地図を知らずに見た所だけで探して進む。隊列・相談・盗みの寄り道も hero30。ここは h.p30 を作る所と1マス進める所で hero30 を呼ぶだけ
 //  ・魔物は自分のマスにいて、近く（5マス以内）に勇者が来たら寄っていく。戦えるのは隣のマス（弓・魔法は3マス）だけ
 //  ・層の罠は、そのマスを踏んだときだけ効く
 const T30 = { aggro: 7, melee: 1, range: 3, lostP: 0.32 };   /* 魔物は遠くからでも駆けつける（戦いが少なかった） */
@@ -14820,8 +15476,8 @@ stepNight5 = (prev => function (S0, N0) {
   if (!N0.l30) { N0.l30 = 1; const HM = {}; N0.mons.forEach(m => { const i = m.home; if (!HM[i]) HM[i] = g30home(S0, i); const c = HM[i][m.ref.id]; m.c30 = c ? [c[0], c[1]] : [((g30(S0, i).W - 1) >> 1), 1]; }); }
   const LI = typeof lordIdx === "function" ? lordIdx(S0) : -1;   /* 主の間は前の部屋のまま（層の中を歩かない） */
   const heroes = N0.heroes.filter(h => h.st === "in" && h.walk == null && h.pos != null && h.pos !== LI);
-  heroes.forEach(h => { if (!h.p30 || h.p30.i !== h.pos) h.p30 = path30(S0, N0, h, h.pos);
-    /* 逃げる勇者は、層の中を歩いて入口まで戻る（前は一瞬で前の層へ消えていた） */ if (h.flee && (!h.p30f || h.p30f.i !== h.pos)) { const G = g30(S0, h.pos), mid = (G.W - 1) >> 1, here = h.p30 && h.p30.i === h.pos && !h.p30f ? h.p30.path[h.p30.k] : [mid, G.H - 1], pp = bfs30(G, here, [mid, 0]) || [here, [mid, 0]]; h.p30f = { i: h.pos, path: pp, k: 0 }; } });
+  heroes.forEach(h => { if (!h.p30 || h.p30.i !== h.pos) h.p30 = typeof hero30Init === "function" ? hero30Init(S0, N0, h, h.pos) : path30(S0, N0, h, h.pos);   /* 勇者AI（hero30）：地図を知らずに探す。道は歩きながら作る（path30 は hero30 がないときの予備） */
+    /* 逃げる勇者は、層の中を歩いて入口まで戻る（前は一瞬で前の層へ消えていた） */ if (h.flee && (!h.p30f || h.p30f.i !== h.pos)) { const G = g30(S0, h.pos), mid = (G.W - 1) >> 1, here = h.p30 && h.p30.i === h.pos && !h.p30f ? h.p30.path[h.p30.k] : [mid, G.H - 1], pp = (typeof hero30Flee === "function" ? hero30Flee(S0, N0, h, here) : bfs30(G, here, [mid, 0])) || [here, [mid, 0]];   /* 逃げ道は知っているマス（歩いてきた道）だけで */ h.p30f = { i: h.pos, path: pp, k: 0 }; } });
   // 魔物：近くの勇者へ寄る
   const byRoom = {}; heroes.forEach(h => (byRoom[h.pos] = byRoom[h.pos] || []).push(h));
   const distTo = {}; Object.keys(byRoom).forEach(i => { const G = g30(S0, +i); byRoom[i].forEach(h => { const c = h.flee && h.p30f ? h.p30f.path[h.p30f.k] : h.p30.path[h.p30.k]; h.c30 = c; distTo[h.id] = g30dist(G, c[0], c[1]); }); });
@@ -14843,8 +15499,10 @@ stepNight5 = (prev => function (S0, N0) {
     m.d30 = best ? bd : 99; const blind = ranged && best && bd > 1 && !los30(G, m.c30, best.c30); m.blind30 = !!blind; const hallJoin = inHall && best && bd <= reach + 3;   /* 同じ広間で仲間が戦っているのに棒立ちしない：広間の子は全員でかかる（本人：味方が戦ってるのに棒立ち） */ if (hallJoin && bd > reach) m.d30 = reach; if (hs && (!(best && (bd <= reach || hallJoin)) || blind)) { m.down = true; m._h30 = 1; hid.push(m); } });   /* 勇者のいない層の魔物は隠さない（入ってきた瞬間の待ち伏せ・盗みの判定が効くように） */
   // 勇者：戦う相手がそばにいなければ、1マス進む（道の終わりまで来たら、いつもどおり次の層へ）
   heroes.forEach(h => { if (!h.flee) return; const F = h.p30f; if (F.k < F.path.length - 1) { if (h.stuck > 0) h.stuck--; else F.k++; h.c30 = F.path[F.k]; if (F.k < F.path.length - 1) { h.st = "hold30"; held.push(h); } } });
-  heroes.forEach(h => { if (h.flee) return; if (h.rtBusy30 && typeof performance !== "undefined" && performance.now() - h.rtBusy30 < 400) { if (h.st === "in") { h.st = "hold30"; held.push(h); } return; }   /* 止めておく（そのまま次の層へ素通りしていた） */   /* リアルタイムで戦っている勇者は先へ進まない */ const P = h.p30, last = P.path.length - 1, near = N0.mons.some(m => !m.down && m.pos === h.pos && m.d30 != null && m.d30 <= T30.range && g30dist(g30(S0, h.pos), h.c30[0], h.c30[1])[m.c30[1] * g30(S0, h.pos).W + m.c30[0]] <= T30.range);
-    if (h.flee || near || P.k >= last) return;
+  (typeof hxRank30 === "function" ? heroes.slice().sort((a, b) => hxRank30(a) - hxRank30(b) || a.id - b.id) : heroes).forEach(h => { if (h.flee) return; if (h.rtBusy30 && typeof performance !== "undefined" && performance.now() - h.rtBusy30 < 400) { if (h.st === "in") { h.st = "hold30"; held.push(h); } return; }   /* 止めておく（そのまま次の層へ素通りしていた） */   /* リアルタイムで戦っている勇者は先へ進まない */ const P = h.p30, last = P.path.length - 1, near = N0.mons.some(m => !m.down && m.pos === h.pos && m.d30 != null && m.d30 <= T30.range && g30dist(g30(S0, h.pos), h.c30[0], h.c30[1])[m.c30[1] * g30(S0, h.pos).W + m.c30[0]] <= T30.range);
+    if (h.flee || near) return;
+    if (P.x30 && typeof hero30Step === "function") { if (h.stuck > 0) { h.stuck--; h.st = "hold30"; held.push(h); return; } const r = hero30Step(S0, N0, h); h.c30 = h.p30.path[h.p30.k]; if (r !== "go" && h.st === "in") { h.st = "hold30"; held.push(h); } return; }   /* 勇者AI：先頭は見ていない所を探し、ほかの子は隊列でついていく。"go" は降り口から次の層へ */
+    if (P.k >= last) return;
     if (h.stuck > 0) { h.stuck--; h.st = "hold30"; held.push(h); return; }
     P.k++; const c = P.path[P.k], G = g30(S0, h.pos), t = (G.t || []).find(q => q[0] === c[0] && q[1] === c[1]); if (t && !(h.t30 = h.t30 || {})[h.pos + ":" + c[0] + "," + c[1]]) { h.t30[h.pos + ":" + c[0] + "," + c[1]] = 1; trapHit30(S0, N0, h, S0.path[h.pos], t); }
     if (h.st === "in" && P.k < last) { h.st = "hold30"; held.push(h); } });
@@ -14957,6 +15615,213 @@ function lordRt30(N0) { return !!(N0 && N0.rt30t && typeof performance !== "unde
 const rtOn30 = (N0, i) => N0 && N0.rt30t && typeof performance !== "undefined" && performance.now() - N0.rt30t < 400 && (!(typeof S !== "undefined" && S && typeof lordIdx === "function" && i === lordIdx(S)) || lordRt30(N0));   /* リアルタイムが動いている間は、主の間より手前の層の殴り合い・撃ち合いはすべてリアルタイム側だけ（通路にいて姿の見えない勇者に、昔の計算の矢が飛んでいた） */
 monHit11 = (prev => function (S, N, m, h, d) { if (!N._rt30 && m && rtOn30(N, m.pos)) return; return prev.apply(this, arguments); })(monHit11);
 hitMon5 = (prev => function (S, N, m, d, h) { if (!N._rt30 && h && m && rtOn30(N, m.pos)) return; return prev.apply(this, arguments); })(hitMon5);
+
+/* hero30：勇者のAI（見た所だけ覚えて迷う・パーティーの相談）。担当：勇者AIのエージェント
+   ねらい（本人：勇者は地図を知らずに探して奥を目指す。それが見せ場）
+   ・勇者は層の地図を知らない。見えた所（マス）だけをパーティーで覚える（声をかけ合うので全員で共有）
+   ・先頭の子が「まだ見ていない所の手前（境目）」を選んで進む。降り口が見えたらそこへ。行き止まりは覚えて戻る
+   ・ほかの子は隊列で先頭の通った跡をたどる（前衛が前、後衛・回復が後ろ）。遅れた子がいれば先頭が待つ
+   ・けが人が出たら足を止めて相談：全員で引き返す／けが人だけ帰す／けが人を後ろに回して進む
+   ・盗賊は鉱脈が見えたら寄り道して盗む（同じ広間に手のあいた見張りがいると盗めない。仲間が引きつけて戦っている隙なら盗める。掘り出すのに2手）
+   中身は night30 の1手の計算（h.p30 の道・h.c30）をそのまま使う。h.p30.path は「歩いた跡＋これからの予定」、k が今のマス
+   ※ 印の意味は前と同じ：h.p30.path[h.p30.k] が今いるマス（fp30 の heroAt がここから絵の位置を作る）。h.p30f は逃げ道 */
+const HX30 = {
+  R: 1.5,        /* 見える広さ（マス。1マス4.4m）：細い道は暗く、たいまつで見えるのはまわりの1マスだけ（2.4だと分かれ道の先まで見えて、迷わずまっすぐ降り口へ行ってしまった）。広間に立てば広間ぜんぶが見える */
+  Reye: 2.9,     /* 遠視（狩人の目）のある隊：細い道の先も2〜3マス見える（行き止まりに入らずにすむ） */
+  lagMax: 3,     /* 隊列：先頭から何マス後ろまで並ぶか */
+  waitOut: 6,    /* 層に入った先頭が、まだ来ていない仲間を待つ手数（待ちすぎると夜が長い） */
+  hurryK: 1.7,   /* 迷った手数が「本当の道の長さ×これ＋8」を超えたら、風の流れで降り口の方角がわかる（夜が長くなりすぎない） */
+  talkGap: 5,    /* 同じ子が続けてしゃべらない（手数） */
+  council: 2,    /* 相談で足を止める手数（戦っていないときだけ） */
+  rest: 3,       /* けが人を手当てする手数（僧侶がいるとき） */
+  lagV: 1.5,     /* 見た目の勇者が計算の位置から何マス遅れたら待つか（計算だけ先へ走り、絵が層の途中で次の層へ飛んでいた。探す様子も見えなかった） */
+  waitV: 15 };   /* 見た目を待つのは続けて何手まで（絵が引っかかって動けないときに、夜が止まらないように） */
+
+/* ---------- 記憶：層ごとに、見たマス（0=知らない 1=歩ける 2=岩）・歩いた回数・行き止まり ---------- */
+function hxN30(N0) { return N0.hx30 || (N0.hx30 = { L: {}, seed: Math.floor(((N0.rnd || Math.random)()) * 1e6), bub: [], st: { steps: 0, revisit: 0, deadEnd: 0, council: 0, retreat: 0, sendBack: 0, stay: 0, loot: 0, robbed: 0, hurry: 0, lost: 0, wait: 0, heal: 0, help: 0, vwait: 0 }, said: {} }); }
+function hxMem30(S0, N0, i) { const X = hxN30(N0), G = g30(S0, i); let M = X.L[i]; if (M && M.c === G.c) return M;
+  const W = G.W, H = G.H, mid = (W - 1) >> 1; M = X.L[i] = { c: G.c, kn: new Uint8Array(W * H), vis: new Uint8Array(W * H), dead: {}, steps: 0, waited: 0, said: {}, tgt: null, exit: [mid, H - 1], ent: [mid, 0], hurry: 0, loot: null, robbed: {}, council: 0, rest: 0 };
+  const main = bfs30(G, M.ent, M.exit); M.mainLen = main ? main.length : W + H;
+  /* 地図を持っている層（前に来た勇者が地図を作った）は、はじめから全部わかる */ if (typeof known10 === "function" && known10(S0, i)) for (let k = 0; k < W * H; k++) M.kn[k] = +G.c[k] ? 1 : 2;
+  return M; }
+const hxOpen30 = (G, M, x, y) => x >= 0 && y >= 0 && x < G.W && y < G.H && M.kn[y * G.W + x] === 1;
+/* 見る：見える広さの中で、あいだが岩でふさがれていないマスを覚える。広間に立てば広間ぜんぶが見える（広い所は明かりが届く） */
+function hxSee30(S0, N0, G, M, c, R) { const W = G.W, mark = (x, y) => { if (x < 0 || y < 0 || x >= W || y >= G.H) return; const k = y * W + x; if (!M.kn[k]) M.kn[k] = g30at(G, x, y) ? 1 : 2; };
+  const r = Math.ceil(R); for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { if (dx * dx + dy * dy > R * R + 0.3) continue; const x = c[0] + dx, y = c[1] + dy; if (x < 0 || y < 0 || x >= W || y >= G.H) continue; if (M.kn[y * W + x]) continue; if (hxLos30(G, c, [x, y])) mark(x, y); }
+  [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(([a, b]) => mark(c[0] + a, c[1] + b));
+  if (g30at(G, c[0], c[1]) === 2) { const HC = hallMap30(G), id = HC[c[1] * W + c[0]]; for (let k = 0; k < W * G.H; k++) if (HC[k] === id) { const x = k % W, y = (k / W) | 0; mark(x, y); [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(([a, b]) => mark(x + a, y + b)); } } }
+/* 見通し：2つのマスの中心を結ぶ線が、岩のマスを通らないか（行き先のマスそのものは岩でもよい＝岩の壁が見える） */
+function hxLos30(G, a, b) { const dx = b[0] - a[0], dy = b[1] - a[1], n = Math.ceil(Math.max(Math.abs(dx), Math.abs(dy)) * 3); for (let k = 1; k < n; k++) { const x = Math.round(a[0] + dx * k / n), y = Math.round(a[1] + dy * k / n); if (x === b[0] && y === b[1]) continue; if (!g30at(G, x, y)) return false; } return true; }
+/* 知っているマスだけを通る距離（知らない所は通れるかわからないので通らない） */
+function hxDist30(G, M, a) { const W = G.W, d = new Int16Array(W * G.H).fill(-1); if (!hxOpen30(G, M, a[0], a[1])) return d; const q = [a[1] * W + a[0]]; d[q[0]] = 0;
+  for (let qi = 0; qi < q.length; qi++) { const c = q[qi], x = c % W, y = (c / W) | 0; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = x + dx, ny = y + dy; if (hxOpen30(G, M, nx, ny) && d[ny * W + nx] < 0) { d[ny * W + nx] = d[c] + 1; q.push(ny * W + nx); } } } return d; }
+/* 距離と「最初の1歩」：ここから各マスへ行くとき、最初にどのとなりへ出るか（分かれ道で、行き先の候補が何本の道に分かれているかを数える） */
+function hxDistF30(G, M, a) { const W = G.W, d = new Int16Array(W * G.H).fill(-1), f = new Int8Array(W * G.H).fill(-1); if (!hxOpen30(G, M, a[0], a[1])) return { d, f }; const q = [a[1] * W + a[0]]; d[q[0]] = 0;
+  for (let qi = 0; qi < q.length; qi++) { const c = q[qi], x = c % W, y = (c / W) | 0; for (let j = 0; j < 4; j++) { const nx = x + [1, -1, 0, 0][j], ny = y + [0, 0, 1, -1][j]; if (hxOpen30(G, M, nx, ny) && d[ny * W + nx] < 0) { const k = ny * W + nx; d[k] = d[c] + 1; f[k] = qi === 0 ? j : f[c]; q.push(k); } } } return { d, f }; }
+/* a から b への道（知っているマスだけ）。b から逆にたどる */
+function hxPath30(G, M, a, b) { const W = G.W, D = hxDist30(G, M, b); if (D[a[1] * W + a[0]] < 0) return null; const out = [a.slice()]; let c = a; for (let g = 0; g < 400 && (c[0] !== b[0] || c[1] !== b[1]); g++) { let nx = null; for (const [dx, dy] of [[0, 1], [1, 0], [-1, 0], [0, -1]]) { const x = c[0] + dx, y = c[1] + dy; if (x < 0 || y < 0 || x >= W || y >= G.H) continue; const v = D[y * W + x]; if (v >= 0 && v < D[c[1] * W + c[0]]) { nx = [x, y]; break; } } if (!nx) break; out.push(nx); c = nx; } return out; }
+/* 境目：歩けるとわかっているマスのうち、となりにまだ見ていないマスがあるところ */
+function hxFront30(G, M, x, y) { if (!hxOpen30(G, M, x, y)) return 0; let n = 0; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= G.W || ny >= G.H) continue; if (!M.kn[ny * G.W + nx]) n++; } return n; }
+const hxEq30 = (a, b) => !!(a && b && a[0] === b[0] && a[1] === b[1]);
+/* 隊列の順：前衛（戦士・聖騎士・ボス）が前、盗賊・狩人・魔法使いが中、僧侶がいちばん後ろ。けが人は後ろへ回す */
+function hxRank30(h) { return (h.boss ? 0 : ({ warrior: 0, knight: 0, thief: 1, hunter: 2, mage: 2, priest: 3 }[h.job] ?? 1)) + (h.rear30 ? 4 : 0); }
+const hxAlive30 = h => (h.st === "in" || h.st === "hold30") && h.hp > 0;
+/* 見た目の遅れ（マス）：歩く画面が開いていて、絵が毎フレーム動いているときだけ測る。「最後まで」で一気に回すとき・絵がないときは -1（待たない） */
+function hxLag30(N0, h) { const X = hxN30(N0), F = typeof window !== "undefined" && window.__fp26; if (!X.live || !F || !F.rooms || !h.p30) return -1; const Rm = F.rooms[h.pos]; if (!Rm || Rm.classic || !Rm.G30) return -1;
+  const a = (Rm.acts || []).find(o => o.hid === "h" + h.id); if (!a) return -1; const c = h.p30.path[h.p30.k]; return Math.hypot(a.x - (c[0] - (Rm.G30.W - 1) / 2) * Rm.CS, a.z + c[1] * Rm.CS) / Rm.CS; }
+/* 戦っている：リアルタイムで打ち合っている（rtBusy30）か、となりのマスに魔物がいる */
+const hxBusy30 = (N0, o) => { if (o.rtBusy30 && typeof performance !== "undefined" && performance.now() - o.rtBusy30 < 400) return true; const c = o.p30 && o.p30.path[o.p30.k]; return !!c && N0.mons.some(m => !m.down && m.hp > 0 && m.pos === o.pos && m.c30 && Math.abs(m.c30[0] - c[0]) + Math.abs(m.c30[1] - c[1]) <= 1); };
+const hxEye30 = N0 => N0.heroes.some(x => hxAlive30(x) && x.sk && x.sk.eye);   /* 遠視の子（狩人）が生きていれば、隊のみんなが遠くまで知る */
+/* しゃべる：ログに出し（say5）、吹き出し用に N.hx30.bub にも積む（fp30 側で頭の上に出す） */
+function hxSay30(N0, h, txt, i, kind, key) { const X = hxN30(N0); if (key) { if (X.said[key]) return false; X.said[key] = N0.t; } if (h.ts30 != null && N0.t - h.ts30 < HX30.talkGap && kind !== "must") return false; h.ts30 = N0.t;
+  hxBub30(N0, h.id, txt, i, kind); try { say5(N0, h.name, txt, i); } catch (e) {} return true; }
+/* 吹き出し：{ n: 通し番号, h: 勇者のid, txt, t: 手, i: 層, k: 種類 }。fp30 は n が前に読んだものより大きい分だけ出す（古いものは60件で捨てる） */
+function hxBub30(N0, hid, txt, i, k) { const X = hxN30(N0); X.bn = (X.bn || 0) + 1; X.bub.push({ n: X.bn, h: hid, txt, t: N0.t, i, k: k || "" }); if (X.bub.length > 60) X.bub.splice(0, X.bub.length - 60); }
+
+/* ---------- 層に入ったとき：歩いた跡はまだ入口だけ ---------- */
+function hero30Init(S0, N0, h, i) { const M = hxMem30(S0, N0, i); h.p30 = { i, path: [M.ent.slice()], k: 0, x30: 1 }; return h.p30; }
+/* 予定を入れかえる：今のマスより後ろを消して、予定の道をつなぐ。その先（予定の行き先→降り口）は「魔物から見た勇者の通り道」として残す
+   （night30 の魔物は h.p30.path に自分の広間が入っているかで、待ち伏せるか迎え撃ちに出るかを決めている。予定だけにすると、まだ決めていない先の広間の子がみんな飛び出してきた） */
+function hxPlan30(S0, h, plan) { const P = h.p30, G = g30(S0, P.i), mid = (G.W - 1) >> 1; P.path.length = P.k + 1; (plan || []).slice(1).forEach(c => P.path.push(c)); const end = P.path[P.path.length - 1], ex = [mid, G.H - 1]; if (!hxEq30(end, ex)) { const gh = bfs30(G, end, ex); if (gh) gh.slice(1).forEach(c => P.path.push(c)); } }
+/* 1マス進む（罠はそのマスを踏んだときだけ） */
+function hxStep30(S0, N0, h, G, M, to) { const P = h.p30, X = hxN30(N0); P.path.length = P.k + 1; P.path.push(to); P.k++; const k = to[1] * G.W + to[0], mv = P.mv30 || (P.mv30 = {}); if (mv[k]) X.st.revisit++; mv[k] = 1; M.vis[k] = Math.min(250, M.vis[k] + 1); X.st.steps++; hxSee30(S0, N0, G, M, to, hxEye30(N0) ? HX30.Reye : HX30.R);   /* 着いたマスから見る（行き止まりに着いた瞬間に、行き止まりだとわかる） */   /* revisit：同じ子が同じ層の同じマスに戻った数（行き止まりから戻る・迷って引き返す） */
+  const t = (G.t || []).find(q => q[0] === to[0] && q[1] === to[1]); if (t && !(h.t30 = h.t30 || {})[h.pos + ":" + to[0] + "," + to[1]]) { h.t30[h.pos + ":" + to[0] + "," + to[1]] = 1; try { trapHit30(S0, N0, h, S0.path[h.pos], t); } catch (e) {} } }
+
+/* ---------- 先頭の子：どこへ向かうか ---------- */
+function hxLeadTgt30(S0, N0, h, G, M, here, D) { const W = G.W, X = hxN30(N0), exitOk = hxOpen30(G, M, M.exit[0], M.exit[1]) && D[M.exit[1] * W + M.exit[0]] >= 0;
+  // 盗み：盗賊がいて鉱脈の広間が見えていたら、先に寄る（盗賊が先頭に立つ。hxParty30）
+  if (M.loot && !M.robbed[M.loot.by] && M.loot.by === h.id) { const c = M.loot.c; if (D[c[1] * W + c[0]] >= 0) return { c, why: "loot" }; }   /* 寄り道は盗賊が先頭のときだけ（盗賊が倒れた・逃げたら、ほかの子は寄らない） */
+  if (exitOk) return { c: M.exit, why: "exit" };
+  // 迷いすぎ：風の流れで降り口の方角がわかる（本当の道を、今いる所から降り口まで覚える）
+  if (!M.hurry && M.steps > M.mainLen * HX30.hurryK + 8) { M.hurry = 1; X.st.hurry++; const tr = bfs30(G, here, M.exit) || []; tr.forEach(c => { M.kn[c[1] * W + c[0]] = 1; hxSee30(S0, N0, G, M, c, 1); }); hxSay30(N0, h, "風が下から…こっちだ", h.pos, "must"); return { c: M.exit, why: "exit" }; }
+  // 今の行き先がまだ境目なら、そのまま（ふらふら行き先を変えない）
+  if (M.tgt && hxFront30(G, M, M.tgt[0], M.tgt[1]) && D[M.tgt[1] * W + M.tgt[0]] >= 0) return { c: M.tgt, why: "front" };
+  // 境目を選ぶ：近い所。奥（下）へ向かう所を少し好む（勇者は降り口が奥にあると思っている）。何度も通った所は選ばない。子ごとの好みで少しずれる（分かれ道の選び方が毎回同じにならない）
+  let best = null, bs = 1e9; const dirs = new Set(), DF = hxDistF30(G, M, here), sd = X.seed + h.id * 7919, Dent = hxDist30(G, M, M.ent), fdHere = Math.max(0, Dent[here[1] * W + here[0]]);
+  for (let y = 0; y < G.H; y++) for (let x = 0; x < W; x++) { const d = D[y * W + x]; if (d < 0) continue; const nf = hxFront30(G, M, x, y); if (!nf) continue; if (DF.f[y * W + x] >= 0) dirs.add(DF.f[y * W + x]);
+    const dy = y - here[1], back = Dent && Dent[y * W + x] >= 0 && Dent[y * W + x] < fdHere - 1 ? 2.5 : 0;   /* 通りすぎた所（入口に近い側）へ戻って調べるのは、ほかに手がないときだけ（大きな広間を見たあと、入口わきの小さな穴まで戻っていた） */
+    const jit = (((x * 73856093) ^ (y * 19349663) ^ sd) >>> 0) % 1000 / 1000 * 1.6, s = d + (dy < 0 ? -dy * 1.0 : -0.45 * dy) + back + jit + M.vis[y * W + x] * 1.5 - (nf >= 2 ? 0.3 : 0); if (s < bs) { bs = s; best = [x, y]; } }
+  if (best) { M.tgt = best; return { c: best, why: "front", fork: dirs.size }; }
+  // 境目がない（全部見た）のに降り口へ行けない：ありえないはずだが、念のため本当の道で降り口へ
+  const tr = bfs30(G, here, M.exit) || []; tr.forEach(c => { M.kn[c[1] * W + c[0]] = 1; }); return { c: M.exit, why: "exit" }; }
+
+/* 層の中の隊：その層にいる、逃げていない子を隊列の順に。先頭は前衛。盗みの寄り道中は盗賊が先頭 */
+function hxParty30(N0, i) { const M = (hxN30(N0).L || {})[i]; const P = N0.heroes.filter(h => hxAlive30(h) && h.walk == null && h.pos === i && !h.flee && h.p30 && h.p30.i === i).sort((a, b) => hxRank30(a) - hxRank30(b) || a.id - b.id);
+  if (M && M.loot && !M.robbed[M.loot.by]) { const t = P.find(h => h.id === M.loot.by); if (t) { P.splice(P.indexOf(t), 1); P.unshift(t); } } return P; }
+
+/* ---------- 1手：勇者1人ぶん。night30 から呼ばれる。"go" を返すと降り口から次の層へ（それ以外は止めておく） ---------- */
+function hero30Step(S0, N0, h) { const i = h.pos, G = g30(S0, i), M = hxMem30(S0, N0, i), W = G.W; if (!h.p30 || h.p30.i !== i) hero30Init(S0, N0, h, i);
+  const P = h.p30, here = P.path[P.k];
+  hxSee30(S0, N0, G, M, here, hxEye30(N0) ? HX30.Reye : HX30.R); { const k = here[1] * W + here[0]; if (!M.vis[k]) M.vis[k] = 1; }
+  const party = hxParty30(N0, i), lead = party[0], atExit = hxEq30(here, M.exit);
+  // 相談中・手当て中は、隊のみんなが止まる
+  if (M.council > 0 || M.rest > 0) return "hold";
+  // 見た目を待つ：絵の勇者が遅れていたら、計算の勇者は先へ行かない（降り口では、絵が階段に着くまで降りない）
+  { const lag = hxLag30(N0, h), lim = atExit ? 0.7 : HX30.lagV; if (lag > lim && (h.pw30 = (h.pw30 || 0) + 1) <= HX30.waitV) { hxN30(N0).st.vwait++; return "hold"; } if (lag >= 0 && lag <= lim) h.pw30 = 0; }
+  // 加勢：同じ層の仲間が戦っているのに、自分は離れて待っている（棒立ち）なら、そこへ駆けつける。弓・魔法・僧侶は2マスまで寄れば届く
+  { const ally = party.find(o => o !== h && hxBusy30(N0, o)); if (ally) { const ac = ally.p30.path[ally.p30.k], D = hxDist30(G, M, here), da = D[ac[1] * W + ac[0]], want = /hunter|mage|priest/.test(h.job) ? 2 : 1;
+    if (da > want) { const p = hxPath30(G, M, here, ac); if (p && p.length >= 2) { hxPlan30(S0, h, p); hxStep30(S0, N0, h, G, M, p[1]); hxN30(N0).st.help++; hxSay30(N0, h, ["加勢する！", "今行く！", "持ちこたえろ！"][(h.id + N0.t) % 3], i, "", "help" + i + ":" + h.id + ":" + ally.id); return "hold"; } } if (da >= 0) return "hold"; } }
+  if (lead === h) { M.steps++; return hxLead30(S0, N0, h, G, M, here, party, atExit); }
+  return hxFollow30(S0, N0, h, G, M, here, party, lead, atExit); }
+
+function hxLead30(S0, N0, h, G, M, here, party, atExit) { const W = G.W, X = hxN30(N0), i = h.pos, P = h.p30;
+  const D = hxDist30(G, M, here), Dent = hxDist30(G, M, M.ent), fd = c => { const v = Dent[c[1] * W + c[0]]; return v >= 0 ? v : 0; };
+  // 盗賊：鉱脈の広間が見えたら寄り道を決める（1つの層で1回）
+  hxLootSee30(S0, N0, G, M, party);
+  // 遅れている仲間を待つ：同じ層で後ろにいて離れすぎている子、まだ層に来ていない子（層に入ってすぐの間だけ、少しだけ）
+  const behind = party.slice(1).filter(o => { const c = o.p30.path[o.p30.k], d = D[c[1] * W + c[0]]; return fd(c) <= fd(here) && (d < 0 || d > Math.min(HX30.lagMax, party.indexOf(o)) + 2); });
+  const LI = typeof lordIdx === "function" ? lordIdx(S0) : -1, coming = N0.heroes.filter(o => o !== h && hxAlive30(o) && !o.flee && ((o.walk != null && o.cor === i) || (o.walk == null && o.pos != null && o.pos < i && o.pos !== LI)));
+  if (behind.length || (coming.length && M.waited < HX30.waitOut && P.k < 6)) { M.waited++; X.st.wait++; if (behind.length && M.waited > 2) hxSay30(N0, h, "待て、遅れてるぞ", i, "", "wt" + i + ":" + ((N0.t / 20) | 0)); return "hold"; }
+  // 降り口：みんなそろったら降りる（遅れている子は上で待った）
+  if (atExit) return "go";
+  const T = hxLeadTgt30(S0, N0, h, G, M, here, D);
+  if (T.why === "exit" && !M.said.exit) { M.said.exit = 1; hxSay30(N0, h, "降り口だ！", i, "must"); }
+  if (T.why === "loot" && hxEq30(here, T.c)) { hxRob30(S0, N0, h, G, M, here); return "hold"; }
+  const path = hxPath30(G, M, here, T.c); if (!path || path.length < 2) { M.tgt = null; return "hold"; }
+  hxPlan30(S0, h, path);
+  // 迷う：行き先を選びなおすとき、まだ見ていない所が別々の道の先に2つ以上あれば（分かれ道・広間の出口）、ひとこと
+  if (T.fork >= 2 && !M.said["f" + here]) { M.said["f" + here] = 1; X.st.lost++; M.nf = (M.nf || 0) + 1; if (M.nf <= 2 && ((X.seed >> 3) + N0.t + M.nf) % 3 !== 0) hxSay30(N0, h, ["こっちか…？", "どっちだ？", "分かれ道か…", "こっちを見てみる", "道が分かれてる…"][(N0.t + h.id) % 5], i); }   /* 本当の分かれ道（まだ見ていない所が2本以上の道の先にある）で選ぶときだけ。同じ所では1回、1つの層で多くて2回（広間ごとにしゃべって、うるさかった） */
+  hxStep30(S0, N0, h, G, M, path[1]);
+  // 行き止まり：着いたマスが袋小路（つながる道は1本だけ、まわりは全部見た）
+  { const c = path[1], k = c[1] * W + c[0]; let n = 0; [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(([a, b]) => { if (g30at(G, c[0] + a, c[1] + b)) n++; }); if (n === 1 && !hxFront30(G, M, c[0], c[1]) && !hxEq30(c, M.exit) && !hxEq30(c, M.ent) && !M.dead[k]) { M.dead[k] = 1; X.st.deadEnd++; M.tgt = null; hxSay30(N0, h, ["行き止まりだ、戻るぞ", "ちっ、行き止まりか", "ここはふさがってる"][(N0.t + h.id) % 3], i, "must"); } }
+  return "hold"; }
+
+function hxFollow30(S0, N0, h, G, M, here, party, lead, atExit) { const W = G.W;
+  // 先頭がもう降りた（この層にいない）：降り口へ
+  if (!lead) { if (atExit) return "go"; const p = hxPath30(G, M, here, M.exit); if (!p || p.length < 2) return "hold"; hxPlan30(S0, h, p); hxStep30(S0, N0, h, G, M, p[1]); return "hold"; }
+  const LP = lead.p30, lc = LP.path[LP.k], lag = Math.min(HX30.lagMax, Math.max(1, party.indexOf(h))), D = hxDist30(G, M, here), dl = D[lc[1] * W + lc[0]];
+  // 先頭が降り口にいる：自分も降り口まで来たら降りる（先頭は全員が近くに来るまで待っている）
+  if (atExit && hxEq30(lc, M.exit)) return "go";
+  if (dl >= 0 && dl <= lag) return "hold";   /* 先頭のすぐ後ろ：並んで待つ */
+  const Dent = hxDist30(G, M, M.ent), fd = c => { const v = Dent[c[1] * W + c[0]]; return v >= 0 ? v : 0; };
+  // 自分のほうが奥にいる（先頭が後から来た）：先頭のところへ寄る。それ以外は先頭の通った跡（lag マス後ろ）をたどる
+  const tgt = fd(here) > fd(lc) ? lc : LP.path[Math.max(0, LP.k - lag)];
+  const p = hxPath30(G, M, here, tgt) || hxPath30(G, M, here, lc); if (!p || p.length < 2) return "hold";
+  hxPlan30(S0, h, p); hxStep30(S0, N0, h, G, M, p[1]); return "hold"; }
+
+/* ---------- 盗み：盗賊は鉱脈の広間が見えたら寄る ---------- */
+function hxLootSee30(S0, N0, G, M, party) { if (M.loot || M.lootNo) return; const i = party[0] && party[0].pos; if (i == null) return; const R = S0.path[i];
+  if (!(typeof hasFac12 === "function" && hasFac12(R, "mine"))) { M.lootNo = 1; return; }
+  const th = party.find(h => h.job === "thief" && !M.robbed[h.id]); if (!th) return; const HL = g30halls(G), fh = HL[0]; if (!fh) { M.lootNo = 1; return; }
+  const seen = fh.cells.filter(c => hxOpen30(G, M, c[0], c[1])); if (!seen.length) return;
+  // 見張りから遠い、広間のマスをねらう
+  const mons = N0.mons.filter(m => m.pos === i && m.hp > 0 && (!m.down || m._h30) && m.c30); const far = c => mons.reduce((a, m) => Math.min(a, Math.abs(m.c30[0] - c[0]) + Math.abs(m.c30[1] - c[1])), 99);
+  const c = seen.slice().sort((p, q) => far(q) - far(p))[0]; M.loot = { by: th.id, c: c.slice() }; hxN30(N0).st.loot++; hxSay30(N0, th, "鉱脈だ…ちょっと寄るぜ", i, "must"); }
+function hxRob30(S0, N0, h, G, M, here) { const i = h.pos; if (M.robbed[h.id]) return false;
+  // 見張り：同じ広間か3マス以内に、起きていて手のあいた魔物がいたら盗めない。仲間が引きつけて打ち合っている間なら盗める（隙をつく）。掘り出すのに2手、じゃまされずにいること。8手待ってだめならあきらめる
+  const HC = hallMap30(G), hid = HC[here[1] * G.W + here[0]], watch = N0.mons.filter(m => m.pos === i && m.hp > 0 && (!m.down || m._h30) && !(m.sleep > 0) && m.c30 && m.vsH30 == null && m.flk30 == null && ((hid >= 0 && HC[m.c30[1] * G.W + m.c30[0]] === hid) || Math.abs(m.c30[0] - here[0]) + Math.abs(m.c30[1] - here[1]) <= 3));
+  M.lw = (M.lw || 0) + 1; if (watch.length) { M.dig = 0; if (M.lw > 8) { M.robbed[h.id] = 1; hxSay30(N0, h, "見張りがいる…無理だ", i, "must"); } return false; }
+  M.dig = (M.dig || 0) + 1; if (M.dig < 2) { hxSay30(N0, h, "よし、今のうちに…", i, "", "dig" + i + ":" + h.id); return false; }
+  M.robbed[h.id] = 1; hxN30(N0).st.robbed++; const g = Math.min(Math.max(0, (S0.dp || 0) + (N0.dp || 0)), Math.round(20 * (1 + 0.1 * (h.lv || 1))));   /* 盗む量は前の計算（層に入った瞬間に盗む）と同じ */
+  if (g > 0) { N0.stolen = (N0.stolen || 0) + g; say5(N0, h.name, `魔石を${g}いただいた！`, i, "esc"); try { pop10(N0, i, `-${g}DP`, "bad"); } catch (e) {} } return true; }
+
+/* ---------- 逃げ道：知っているマスだけで入口へ（歩いてきた道を戻る） ---------- */
+function hero30Flee(S0, N0, h, here) { const i = h.pos, G = g30(S0, i), M = hxMem30(S0, N0, i); hxSee30(S0, N0, G, M, here, 1); return hxPath30(G, M, here, M.ent) || bfs30(G, here, M.ent); }
+
+/* ---------- 相談：けが人が出た・勝手に逃げ出した子がいる・仲間が倒れた ---------- */
+function hxCouncil30(S0, N0) { const X = hxN30(N0), LI = typeof lordIdx === "function" ? lordIdx(S0) : -1, rnd = N0.rnd || Math.random;
+  const live = N0.heroes.filter(h => hxAlive30(h) || (h.walk != null && h.st !== "dead" && h.st !== "escaped" && h.st !== "down")), init = N0.heroes.length;
+  // 何が起きたか：新しく逃げ出した子（相談で決めた逃げは除く）・深手の子・倒れた子
+  const subj = []; N0.heroes.forEach(h => { const was = h.fl30; h.fl30 = !!h.flee; if (h.st === "dead" && !h.dd30) { h.dd30 = 1; if (!h.routed27 && !h.rout27) subj.push([h, "dead"]); return; } if (!hxAlive30(h)) return;
+    if (h.flee && !was && !h.gr30) subj.push([h, "fled"]); else if (!h.flee && !h.boss && h.hp < h.max * 0.35 && !h.wd30) { h.wd30 = 1; subj.push([h, "hurt"]); } else if (!h.flee && h.stay30 && h.hp < h.max * 0.15 && h.wd30 === 1) { h.wd30 = 2; subj.push([h, "hurt"]); } });
+  subj.forEach(([s, why]) => { const i = s.pos; if (i == null || i === LI) return; const mem = live.filter(o => o !== s && !o.flee && o.pos !== LI && (o.pos === i || (o.walk != null && o.cor === i) || Math.abs((o.pos ?? -9) - i) <= 1)); if (!mem.length) return;
+    X.st.council++; const M = hxMem30(S0, N0, i), all = mem.concat(why === "dead" ? [] : [s]), heal = mem.some(o => o.sk && o.sk.heal && o.hp > o.max * 0.4), boss = mem.some(o => o.boss),
+      hpR = all.reduce((a, o) => a + o.hp / o.max, 0) / all.length, lost = N0.heroes.filter(o => o.st === "dead" || o.st === "escaped" || (o.flee && o !== s)).length / init, depth = Math.max(0, Math.min(1, (s.maxPos || i) / Math.max(1, LI)));
+    /* 進むか退くか：みんなの体力・回復役がいるか・どこまで来たか・何人やられたか・ボスがいるか（ボスは退かない） */
+    const press = hpR + (heal ? 0.25 : 0) + 0.25 * depth - 0.55 * lost + (boss ? 1 : 0) + (mem.length >= 2 ? 0.1 : -0.1) + (rnd() - 0.5) * 0.2;
+    const L = mem.slice().sort((a, b) => hxRank30(a) - hxRank30(b) || a.id - b.id)[0], other = mem.find(o => o !== L) || L, fight = !!(N0.fight30 && N0.fight30[i]);
+    if (!fight) M.council = Math.max(M.council, HX30.council);   /* 戦っていなければ、足を止めて話す */
+    hxSay30(N0, L, why === "dead" ? s.name + "がやられた…どうする？" : why === "fled" ? s.name + "、待て！" : "大丈夫か、" + s.name + "！", i, "must");
+    if (press < 0.5) { // 全員で引き返す（深手で退いたあつかい：何も持ち帰らない）
+      X.st.retreat++; if (other !== L) hxSay30(N0, other, "もう無理だ、引き返そう", i, "must"); hxBub30(N0, L.id, "全員で引き返すぞ！", i, "must"); try { say5(N0, L.name, "全員で引き返すぞ！", i); } catch (e) {}
+      all.concat(why === "fled" ? [s] : [], N0.heroes.filter(o => o.st === "wait")).forEach(o => { if (o.boss) return;   /* まだ入ってきていない仲間も、入口で引き返す */ o.flee = true; o.gr30 = 1; o.fl30 = true; o.rout27 = 1; o.loot = 0; o.stay30 = 0; }); M.council = 0; M.rest = 0; return; }
+    if (why === "dead") { if (other !== L) hxSay30(N0, other, "仇はとる…進むぞ", i); return; }
+    if (why === "fled") { if (s.rout27 && !s.boss && s.hp > 0 && heal) { /* 深手で退こうとした子：僧侶がいれば引き止めて手当てし、後ろに回す。逃げ道を1マスでも戻っていたら、その場所を今のマスにする（絵が前のマスへ飛ばないように） */ hxUnflee30(s); s.flee = false; s.fl30 = false; s.rout27 = 0; s.stay30 = 1; s.rear30 = 1; X.st.stay++; hxSay30(N0, s, "…すまん、まだやれる", i, "must"); if (!fight) { M.rest = HX30.rest; X.st.heal++; } return; }
+      X.st.sendBack++; if (other !== L) hxSay30(N0, other, "あいつは戻らせろ、俺たちは行く", i); return; }
+    // 深手（まだ逃げていない）：手当てして後ろへ回す／回復役がいなくて重いなら一人で帰す。臆病な子は自分から帰りたがる（「残れ」と言われてすぐ逃げ出していた）
+    if (s.coward && !s.boss && !heal) { X.st.sendBack++; hxSay30(N0, s, "もう無理だ…戻らせてくれ", i, "must"); s.flee = true; s.gr30 = 1; s.fl30 = true; return; }
+    if (s.hp < s.max * 0.25 && !heal && !s.boss) { X.st.sendBack++; s.flee = true; s.gr30 = 1; s.fl30 = true; s.rout27 = 1; s.loot = 0; hxSay30(N0, L, "お前は戻れ、" + s.name, i, "must"); return; }
+    s.rear30 = 1; s.stay30 = 1; X.st.stay++; hxSay30(N0, L, heal ? "手当てする、後ろに下がってろ" : "後ろに下がってろ", i, "must"); if (heal && !fight) { M.rest = HX30.rest; X.st.heal++; } }); }
+function hxUnflee30(s) { const F = s.p30f, P = s.p30; if (F && P && F.i === s.pos && P.i === s.pos) { const c = F.path[F.k]; P.path.length = P.k + 1; if (c && !hxEq30(c, P.path[P.k])) { P.path.push(c.slice()); P.k++; } s.c30 = P.path[P.k]; } s.p30f = null; }
+/* 手当て：相談のあとの休みの間、僧侶がいちばん弱った仲間を治す（止めている子は1手の計算で手を出せないので、ここで治す。治す量は前の計算と同じ、だんだん減る） */
+function hxHeal30(S0, N0, i) { const P = N0.heroes.filter(h => hxAlive30(h) && h.walk == null && h.pos === i && !h.flee); const pr = P.find(h => h.sk && h.sk.heal); if (!pr) return; const low = P.slice().sort((a, b) => a.hp / a.max - b.hp / b.max)[0]; if (!low || low.hp >= low.max * 0.9) return;
+  const v = Math.round(Math.pow(0.85, (pr.hc23 = (pr.hc23 || 0) + 1) - 1) * pr.atk * 2.2 * (1 + 0.3 * ((pr.sk.heal || 1) - 1))); low.hp = Math.min(low.max, low.hp + v); low.poison = 0; hxBub30(N0, pr.id, "+" + v + " 手当て", i, "heal"); }
+
+/* ---------- 1手のまとめ ---------- */
+const HX30MAXT = typeof MAX_T5 !== "undefined" ? MAX_T5 : 600;   /* 夜の手数の上限（もとの値）。見た目を待った手のぶんだけ、その夜はのばす（待った手で時間切れになり、勇者が「逃げきった」あつかいにならないように） */
+stepNight5 = (prev => function (S0, N0) {
+  if (!N0 || N0.done || N0.scout || !S0.path.every((r, i) => g30(S0, i))) return prev.apply(this, arguments);
+  const X = hxN30(N0), F = N0.flags10 || (N0.flags10 = {});
+  /* 絵が動いているか：リアルタイムの1コマ（rt30Step）が前の手から1回でも進んでいれば、見た目を待ってよい */ X.live = N0.rt30t != null && N0.rt30t !== X.hb; X.hb = N0.rt30t;
+  /* 前の計算の「層に入った瞬間にランダムで迷う（横穴）」「層に入った瞬間に鉱脈から盗む」は使わない。迷うのは本当の分かれ道・行き止まりで、盗むのは鉱脈の広間まで行ってから */
+  N0.heroes.forEach(h => { if (h.x30i) return; h.x30i = 1; S0.path.forEach((r, i) => { F["lost" + i + ":" + h.id] = 1; F["rob" + i + ":" + h.id] = 1; }); });
+  const vw0 = X.st.vwait; try { MAX_T5 = HX30MAXT + (X.vws || 0); } catch (e) {}
+  const r = prev.apply(this, arguments);
+  if (X.st.vwait > vw0) X.vws = (X.vws || 0) + 1;
+  try { Object.keys(X.L).forEach(i => { const M = X.L[i]; if (M.council > 0) M.council--; else if (M.rest > 0) { M.rest--; hxHeal30(S0, N0, +i); } }); hxCouncil30(S0, N0); } catch (e) { console.warn("hero30", e); }
+  return r; })(stepNight5);
+/* 相談で「残る」と決めた子は、そのあと勝手に深手で逃げ出さない（体力がもっと減ったら、もう一度相談する） */
+mid27 = (prev => function (S2, N2) { const st = N2 && N2.heroes ? N2.heroes.filter(h => h.stay30 && !h.flee && h.st === "in") : []; st.forEach(h => { h.flee = true; }); try { return prev.apply(this, arguments); } finally { st.forEach(h => { h.flee = false; }); } })(mid27);
 
 // ================= main30：層の試作版のつなぎ =================
 fpOpen26 = fpOpen30;   /* fp26 のすぐ後に入る（上に重ねたボタンなどはそのまま効く） */
@@ -15473,6 +16338,56 @@ html.land30 .mph30{font-size:40px}
 /* 描き直しのたびに◆や見出しの登場がやり直されていた → 2回目からは止まった絵で */
 .mp30.st .mpp30 *{animation:none!important}
 `; document.head.appendChild(st); }
+
+/* yoru30：襲撃のない日にも夜を入れる（本人の案 11/28：昼→昼→昼 ではなく 昼→夜→昼→夜）
+   - 「次の日へ」を押すと、歩く画面のまま8秒ほどの静かな夜になる。ふつうの子は寝床へ、夜行性の子だけ起きて働く（life30 が __qn30 を見る）
+   - タップで朝まで飛ばせる（毎日8秒待たされるのはつらいので）
+   - 夜行性の子が掘った分は、静かな夜に3割増し（夜行性を置く理由を少しだけ作る。襲撃の夜は今までどおり特性の night が効く） */
+(() => {
+  const QN_MS = 8000, NOCT_BONUS = 0.3;
+  const noct = m => typeof window.__noct30 === "function" && window.__noct30(m);
+
+  /* 稼ぎ：その日の仕事の計算（dayJobs9）の直後に、夜行性の掘り手へ3割足す。早送り（skipToRaid）でも同じ計算を通るので、見せ方で差が出ない */
+  dayJobs9 = (prev => function (S, rep) { const r = prev.apply(this, arguments);
+    try { if (!isRaid9(S) && S.scoutDay !== S.day) { let dp = 0, n = 0; (rep.mined || []).forEach(([m, g]) => { if (!noct(m) || !(g > 0)) return; const b = Math.round(g * NOCT_BONUS); if (b > 0) { dp += b; n++; } });
+      if (dp > 0) { S.dp += dp; rep.dp += dp; rep.night30 = { dp, n }; } } } catch (e) { console.warn("yoru30", e); }
+    return r; })(dayJobs9);
+
+  /* ふりかえりに1行 */
+  repBox = (prev => function () { let h = prev.apply(this, arguments); try { const q = lastRep && lastRep.night30; if (q) h = h.replace(/(💎 掘った[\s\S]*?<\/div>)/, `$1<div style="font-size:12px">🌙 夜行性 ${q.n}体が夜も掘った <span class="gold">+${fmt8(q.dp)}</span></div>`); } catch (e) {} return h; })(repBox);
+
+  /* 見せ方：歩く画面の上に夜の幕。押した瞬間に計算はせず、夜が明けてから元の nextDay を呼ぶ */
+  const st = document.createElement("style"); st.textContent = `
+#qn30{position:fixed;inset:0;z-index:9000;pointer-events:auto;background:radial-gradient(ellipse at 50% 40%,rgba(14,22,60,.58),rgba(3,5,18,.9));opacity:0;transition:opacity .9s ease;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:calc(14px + env(safe-area-inset-top,0px));font-family:"Zen Antique","Noto Sans JP",serif;color:#dfe6ff}
+#qn30.on{opacity:1}#qn30.out{opacity:0;transition:opacity 1.1s ease}
+#qn30 .t{font-size:22px;letter-spacing:.2em;text-shadow:0 0 12px #6f86ff}
+#qn30 .s{font-size:13px;margin-top:6px;opacity:.85;font-family:"Noto Sans JP",sans-serif}
+#qn30 .k{position:absolute;right:calc(14px + env(safe-area-inset-right,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));font-size:12px;opacity:.7;font-family:"Noto Sans JP",sans-serif}
+#qn30 .bar{width:160px;height:3px;background:rgba(255,255,255,.15);margin-top:10px;border-radius:2px;overflow:hidden}#qn30 .bar i{display:block;height:100%;width:0;background:#9fb2ff;transition:width linear}
+`; document.head.appendChild(st);
+
+  let busy = false;
+  nextDay = (prev => function () {
+    try {
+      if (busy) return;
+      const fp = document.getElementById("fp26");
+      const quiet = S && !S.ended && !S.contractDone && !N && !isRaid9(S) && S.scoutDay !== S.day && !(typeof tutOn === "function" && tutOn()) && fp && !window.__noqn30;
+      if (!quiet) return prev.apply(this, arguments);
+      busy = true; const args = arguments, self = this;
+      let nn = 0, nw = 0; S.mons.forEach(m => { if (m.home == null) return; if (noct(m)) nn++; else nw++; });
+      const el = document.createElement("div"); el.id = "qn30";
+      el.innerHTML = `<div class="t">🌙 静かな夜</div><div class="s">${nn ? `夜行性 ${nn}体が起きて働いている・ほかの${nw}体は寝床へ` : `みんな寝床へ。夜行性の子がいれば、夜も働く`}</div><div class="bar"><i></i></div><div class="k">タップで朝へ ≫</div>`;
+      document.body.appendChild(el);
+      window.__qn30 = { end: performance.now() + QN_MS + 400 }; if (window.__life30kick) window.__life30kick(false);
+      requestAnimationFrame(() => { el.classList.add("on"); const b = el.querySelector(".bar i"); b.style.transitionDuration = QN_MS + "ms"; b.style.width = "100%"; });
+      let done = false; const morning = () => { if (done) return; done = true; clearTimeout(tm); window.__qn30 = null; if (window.__life30kick) window.__life30kick(true);
+        el.classList.add("out"); setTimeout(() => el.remove(), 1200); busy = false;
+        try { prev.apply(self, args); } catch (e) { console.warn("yoru30", e); } };
+      const tm = setTimeout(morning, QN_MS); el.addEventListener("pointerdown", e => { e.stopPropagation(); morning(); });
+      return;
+    } catch (e) { busy = false; console.warn("yoru30", e); return prev.apply(this, arguments); }
+  })(nextDay);
+})();
 
 // ================= 第6回テストのあと：壊れの修正 =================
 // ---------- 1) 夜のとちゅうで閉じたら、閉じたところから続ける（前は夜が最初からになっていた） ----------
