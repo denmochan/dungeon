@@ -172,13 +172,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 0.9,
-  "bytes": 88011,
-  "verts": 7000,
-  "tris": 13996,
+  "bytes": 129211,
+  "verts": 9000,
+  "tris": 17996,
   "full": {
    "file": "mon_eye.bin.gz",
    "fmt": "GB02",
-   "bytes": 260186
+   "bytes": 562062
   }
  },
  "eyebat": {
@@ -580,13 +580,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 1.2,
-  "bytes": 101916,
-  "verts": 7000,
-  "tris": 14020,
+  "bytes": 136182,
+  "verts": 9000,
+  "tris": 17980,
   "full": {
    "file": "mon_mindlord.bin.gz",
    "fmt": "GB02",
-   "bytes": 589314
+   "bytes": 913331
   }
  },
  "minerorc": {
@@ -902,13 +902,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 1.0,
-  "bytes": 94768,
-  "verts": 7000,
-  "tris": 14016,
+  "bytes": 128457,
+  "verts": 9000,
+  "tris": 17976,
   "full": {
    "file": "mon_stoneeye.bin.gz",
    "fmt": "GB02",
-   "bytes": 540453
+   "bytes": 718506
   }
  },
  "stonespider": {

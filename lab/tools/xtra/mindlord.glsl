@@ -1,0 +1,34 @@
+// 心読みの主（11/28 2D案A「目の司祭」）：フードの奥の顔が一つ目（紫の虹彩）・顔から垂れる触手・紫のローブに金の線・呪術師の骨の冠・緑がかった爪の手・まわりに浮かぶ3つの小さな目
+const float XK=0.02;
+vec2 U(vec2 a,vec2 b){return b.x<a.x?b:a;}
+float hbx(vec3 p,vec3 b){vec3 q=abs(p)-b;return length(max(q,0.0))+min(max(q.x,max(q.y,q.z)),0.0);}
+float seam(float x,float w){return 1.0-smoothstep(0.0,w,abs(x));}
+// 目玉の色（中心 c・半径 R・前の向き +z）：白目に血管、金のふちの虹彩、たての瞳孔
+vec3 eyeCol(vec3 p,vec3 n,vec3 c,float R,vec3 iris){vec3 d=normalize(p-c);float a=acos(clamp(d.z,-1.0,1.0));
+ vec3 col=vec3(0.96,0.92,0.88);float an=atan(d.y,d.x);float vn=seam(sin(an*9.0+fbm(d*6.0)*5.0),0.12)*smoothstep(0.55,1.4,a);col=mix(col,vec3(0.8,0.15,0.2),vn*0.8);   // 血管
+ float ir=smoothstep(0.47,0.45,a);float rim=seam(a-0.46,0.025);vec3 ic=mix(iris*0.5,iris*1.3,smoothstep(0.0,0.45,a))*(0.85+0.3*fbm(d*30.0));col=mix(col,ic,ir);col=mix(col,vec3(1.0,0.8,0.3),rim);
+ float pu=step(abs(d.x)/0.07+abs(d.y)/0.3,1.0)*step(0.0,d.z);col=mix(col,vec3(0.06,0.02,0.02),pu);
+ return col*(0.78+0.3*smoothstep(-0.4,0.9,n.y));}
+vec2 eyeb(vec3 p){vec3 C=J[0];vec2 r=vec2(1e3,15.0);
+
+ {float t=clamp((1.25-p.y)/1.25,0.0,1.0);float rr=length(p.xz*vec2(1.0,1.15));float an=atan(p.x,p.z);float ro=max(rr-(0.16+0.36*t*t)-0.015*sin(an*7.0)*t,max(p.y-1.25,0.02-p.y));ro=smin(ro,sEll(p-vec3(0.0,1.12,0.0),vec3(0.27,0.18,0.22)),0.08);r=U(r,vec2(ro,15.0));}   // ローブ
+ for(int s=0;s<2;s++){float sg=s==0?-1.0:1.0;vec3 a=vec3(0.24*sg,1.12,0.0),b=vec3(0.38*sg,0.8,0.12),c=vec3(0.44*sg,0.56,0.22);r=U(r,vec2(smin(sTap(p,a,b,0.08,0.07),sTap(p,b,c,0.07,0.11),0.03),15.0));   // そで
+  for(int k=0;k<4;k++){vec3 f=c+vec3(0.03*sg*(float(k)-1.5),-0.06,0.025*(float(k)-1.5));r=U(r,vec2(smin(sTap(p,f,f+vec3(0.01*sg,-0.1,0.02),0.018,0.012),sTap(p,f+vec3(0.01*sg,-0.1,0.02),f+vec3(0.0,-0.16,0.06),0.012,0.003),0.008),17.0));}}   // 爪の手
+ {vec3 q=p-vec3(0.0,1.45,0.0);float hd=sEll(q,vec3(0.3,0.34,0.3));hd=max(hd,-sEll(q-vec3(0.0,-0.04,0.18),vec3(0.21,0.25,0.2)));hd=smin(hd,sTap(p,vec3(0.0,1.7,-0.12),vec3(0.0,1.6,-0.34),0.07,0.02),0.05);r=U(r,vec2(hd,16.0));   // フード
+  r=U(r,vec2(sEll(q-vec3(0.0,-0.04,0.02),vec3(0.2,0.24,0.18)),19.0));   // フードの奥の暗がり
+  r=U(r,vec2(length(q-vec3(0.0,-0.02,0.12))-0.16,20.0));   // 一つ目
+  for(int k=0;k<4;k++){float x=-0.09+0.06*float(k);vec3 b0=vec3(x,1.32,0.18);r=U(r,vec2(smin(sTap(p,b0,b0+vec3(0.02*sin(float(k)*2.0),-0.2,0.04),0.028,0.02),sTap(p,b0+vec3(0.02*sin(float(k)*2.0),-0.2,0.04),b0+vec3(0.0,-0.36,0.02),0.02,0.008),0.02),18.0));}   // 顔から垂れる触手
+  for(int k=0;k<5;k++){float a=-0.9+0.45*float(k);vec3 b0=vec3(0.26*sin(a),1.72,0.26*cos(a)-0.04);r=U(r,vec2(sTap(p,b0,b0+vec3(0.03*sin(a),0.12+0.06*(1.0-abs(a)),0.0),0.03,0.006),17.0));}}   // 骨の冠
+ for(int k=0;k<3;k++){float a=2.1*float(k)+0.6;vec3 c=vec3(0.62*sin(a),1.3+0.2*float(k),0.62*cos(a));r=U(r,vec2(length(p-c)-0.09,21.0+float(k)));}   // まわりに浮かぶ小さな目
+
+ return r;}
+vec2 xmod(vec2 b,vec3 p){return eyeb(p);}
+vec2 xbody(vec3 p){return vec2(1e3,15.0);}
+vec4 xcol(vec3 p,vec3 n,float m){float sh=smoothstep(-0.4,0.9,n.y);vec3 C=J[0];
+ if(m>20.5){float k=m-21.0;vec3 c=k<0.5?vec3(0.62*sin(0.6),1.3,0.62*cos(0.6)):(k<1.5?vec3(0.62*sin(2.7),1.5,0.62*cos(2.7)):vec3(0.62*sin(4.8),1.7,0.62*cos(4.8)));return vec4(pow(eyeCol(p,n,c,0.09,vec3(0.6,0.2,0.85)),vec3(2.2)),0.7);}
+ if(m>19.5)return vec4(pow(eyeCol(p,n,vec3(0.0,1.43,0.12),0.16,vec3(0.6,0.2,0.85)),vec3(2.2)),0.7);
+ if(m>18.5)return vec4(pow(vec3(0.05,0.02,0.07),vec3(2.2)),0.1);   // 暗がり
+ if(m>17.5){vec3 c=mix(vec3(0.45,0.26,0.5),vec3(0.7,0.46,0.72),sh);return vec4(pow(c,vec3(2.2)),0.4);}   // 触手
+ if(m>16.5){vec3 c=vec3(0.62,0.66,0.48)*(0.74+0.34*sh);return vec4(pow(c,vec3(2.2)),0.3);}   // 骨の冠・爪
+ vec3 c=mix(vec3(0.16,0.08,0.22),vec3(0.3,0.16,0.38),sh)*(0.88+0.2*fbm(p*8.0));c=mix(c,vec3(0.85,0.66,0.26),seam(p.x,0.012)*step(0.0,p.z)*step(p.y,1.1)+step(p.y,0.08));return vec4(pow(c,vec3(2.2)),0.3);
+}
