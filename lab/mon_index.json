@@ -88,13 +88,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 2.2,
-  "bytes": 105825,
-  "verts": 7000,
-  "tris": 13996,
+  "bytes": 121443,
+  "verts": 8000,
+  "tris": 15996,
   "full": {
    "file": "mon_chimera.bin.gz",
    "fmt": "GB02",
-   "bytes": 528701
+   "bytes": 574545
   }
  },
  "count": {
@@ -635,13 +635,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 1.0,
-  "bytes": 92908,
+  "bytes": 102057,
   "verts": 7000,
   "tris": 13996,
   "full": {
    "file": "mon_nightwolf.bin.gz",
    "fmt": "GB02",
-   "bytes": 309453
+   "bytes": 380217
   }
  },
  "noble": {
@@ -705,13 +705,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 0.3,
-  "bytes": 95241,
+  "bytes": 97300,
   "verts": 7000,
-  "tris": 13996,
+  "tris": 13980,
   "full": {
    "file": "mon_rat.bin.gz",
    "fmt": "GB02",
-   "bytes": 234956
+   "bytes": 242164
   }
  },
  "ratking": {
@@ -873,13 +873,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 0.35,
-  "bytes": 98743,
+  "bytes": 101084,
   "verts": 7000,
-  "tris": 13996,
+  "tris": 13992,
   "full": {
    "file": "mon_sporerat.bin.gz",
    "fmt": "GB02",
-   "bytes": 301292
+   "bytes": 313494
   }
  },
  "sporewraith": {
@@ -1013,13 +1013,13 @@
   "fmt": "GB03",
   "kind": "pointskin",
   "scale": 0.9,
-  "bytes": 98848,
+  "bytes": 99716,
   "verts": 7000,
   "tris": 13996,
   "full": {
    "file": "mon_wolf.bin.gz",
    "fmt": "GB02",
-   "bytes": 314465
+   "bytes": 379191
   }
  },
  "wolfrider": {
