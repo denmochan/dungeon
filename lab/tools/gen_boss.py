@@ -33,7 +33,7 @@ write('underlord', '冥王（11/28 本人が2D案B「血の皇帝」を選んだ
  {float hr=max(sEll(h-vec3(0.0,0.03,-0.03),vec3(0.185,0.235,0.215)),-max(h.y-0.1+0.4*max(0.0,0.05-abs(h.x)),-0.03-h.z));hr=max(hr,-(h.y+0.22));for(int k=0;k<4;k++){float a=2.2+0.3*float(k);for(int s=0;s<2;s++){float sg=s==0?-1.0:1.0;vec3 t0=vec3(0.17*sin(a)*sg,-0.02,0.17*cos(a));hr=smin(hr,sTap(h,t0,t0+vec3(0.03*sg,-0.22,-0.03),0.04,0.012),0.03);}}r=U(r,vec2(hr,24.0));}   // うしろへ流れる黒髪
  {vec3 q=h-vec3(0.0,0.17,-0.01);float cr=max(band(q,0.19,0.2,0.04),-band(q,0.165,0.175,0.06));for(int k=0;k<5;k++){float a=-0.9+0.45*float(k);vec3 b0=vec3(0.18*sin(a),0.03,0.19*cos(a));cr=min(cr,sTap(q,b0,b0+vec3(0.0,0.1+0.08*(1.0-abs(a)),0.0),0.03,0.005));}
   for(int s=0;s<2;s++){float sg=s==0?-1.0:1.0;vec3 b0=vec3(0.17*sg,0.04,0.0);cr=min(cr,sTap(q,b0,b0+vec3(0.08*sg,0.1,-0.04),0.035,0.025));cr=min(cr,sTap(q,b0+vec3(0.08*sg,0.1,-0.04),b0+vec3(0.06*sg,0.26,-0.1),0.025,0.004));}r=U(r,vec2(cr,23.0));   // 角の黒い王冠
-  r=U(r,vec2(length(q-vec3(0.0,0.06,0.19))-0.028,28.0));}   // 王冠の赤い玉
+  r=U(r,vec2(length(q-vec3(0.0,0.06,0.19))-0.028,28.0));r=U(r,vec2(sTap(q,vec3(0.0,0.04,-0.19),vec3(0.0,0.3,-0.26),0.04,0.006),23.0));r=U(r,vec2(length(q-vec3(0.0,0.07,-0.21))-0.024,28.0));}   // 王冠の赤い玉と、うしろの高いとげと玉
  for(int s=0;s<2;s++){vec3 a=s==0?J[3]:J[6],b=s==0?J[4]:J[7],c=s==0?J[5]:J[8];vec3 d=normalize(c-b);
   r=U(r,vec2(sTap(p,a,b,0.075,0.065),4.0));r=U(r,vec2(sTap(p,b,c-d*0.03,0.068,0.1),4.0));r=U(r,vec2(sTap(p,c-d*0.06,c-d*0.035,0.102,0.104),18.0-10.0));
   vec3 sd=normalize(cross(d,vec3(0.0,0.0,1.0)));for(int k=0;k<4;k++){vec3 f0=c+d*0.02+sd*(0.03*(float(k)-1.5));r=U(r,vec2(min(sTap(p,f0,f0+d*0.08+vec3(0.0,0.0,0.02),0.013,0.01),sTap(p,f0+d*0.08+vec3(0.0,0.0,0.02),f0+d*0.13+vec3(0.0,0.0,0.05),0.01,0.003)),7.0));}r=U(r,vec2(sEll(p-c,vec3(0.045,0.04,0.035)),7.0));}   // 長いそでと、骨の指
@@ -46,12 +46,12 @@ write('underlord', '冥王（11/28 本人が2D案B「血の皇帝」を選んだ
  for(int s=0;s<2;s++){vec3 sh=s==0?J[3]:J[6];float sg=s==0?-1.0:1.0;vec3 q=p-sh-vec3(-0.02*sg,0.06,0.0);float pd=max(sEll(q,vec3(0.17,0.13,0.16)),-(q.y+0.07));for(int k=0;k<2;k++){float y=-0.06-0.05*float(k);pd=min(pd,max(sEll(q-vec3(0.01*sg,y,0.0),vec3(0.18+0.01*float(k),0.1,0.165+0.01*float(k))),abs(q.y-y)-0.016));}r=U(r,vec2(pd,20.0));
   r=U(r,vec2(sTap(p,sh+vec3(0.05*sg,0.15,-0.02),sh+vec3(0.2*sg,0.32,-0.08),0.04,0.006),18.0));r=U(r,vec2(sTap(p,sh+vec3(0.1*sg,0.12,0.05),sh+vec3(0.22*sg,0.22,0.05),0.03,0.004),18.0));}   // 肩よろい（三段）と金のとげ
  {vec3 q=p-J[1]-vec3(0.0,0.08,-0.06);float top=0.0;float t=clamp(-q.y/(J[1].y+0.08),0.0,1.0);float rad=mix(0.32,0.44,smoothstep(0.0,0.15,-q.y))+0.22*t+0.03*sin(atan(q.x,-q.z)*8.0)*t;float rr=length(q.xz*vec2(1.0,1.15));float an=atan(q.x,-q.z);float lim=mix(1.9,1.3,smoothstep(0.03,0.2,-q.y))+0.8*smoothstep(0.55,1.0,t);
-  float cp=max(abs(rr-rad)-0.03,max(q.y,-(p.y-0.03)));cp=max(cp,abs(an)-lim);r=U(r,vec2(cp,rr<rad-0.008?22.0:21.0));}   // マント（外は黒、内は赤）
+  float cp=max(abs(rr-rad)-0.03,max(q.y,-(p.y-0.03-0.06*max(0.0,sin(an*11.0))*step(0.3,abs(an)))));cp=max(cp,abs(an)-lim);r=U(r,vec2(cp,rr<rad-0.008?22.0:21.0));}   // マント（外は黒、内は赤）
  {vec3 q=p-J[1]-vec3(0.0,0.12,-0.08);float cl=max(abs(sEll(q,vec3(0.28,0.24,0.24)))-0.018,max(-q.y-0.02,q.y-0.26));cl=max(cl,-(q.z-0.02+0.5*q.y));r=U(r,vec2(cl,q.z>0.0?22.0:21.0));}   // 立てた高いえり
 ''', {2: 'vec3 c=mix(vec3(0.84,0.8,0.88),vec3(0.9,0.86,0.74),step(0.004,h.x))*(0.72+0.36*sh)*(0.95+0.1*fbm(p*20.0));return vec4(pow(c,vec3(2.2)),0.2);',
       4: flat(0.16, 0.12, 0.2, 0.3, 0.1), 7: flat(0.88, 0.84, 0.72, 0.3, 0.1, 30.0), 8: metal(0.9, 0.7, 0.28), 9: flat(0.12, 0.1, 0.14),
       16: flat(0.17, 0.12, 0.22, 0.3, 0.12, 8.0), 17: metal(0.22, 0.2, 0.26), 18: metal(0.92, 0.72, 0.28), 19: flat(0.62, 0.06, 0.12, 0.4, 0.1),
-      20: metal(0.24, 0.22, 0.3), 21: flat(0.07, 0.06, 0.08, 0.5, 0.12, 6.0), 22: flat(0.6, 0.05, 0.1, 0.3, 0.12), 23: metal(0.14, 0.12, 0.17), 24: flat(0.1, 0.08, 0.12, 0.4, 0.2, 40.0),
+      20: metal(0.24, 0.22, 0.3), 21: 'vec3 q=p-J[1]-vec3(0.0,-0.25,0.0);vec2 u=vec2(q.x,q.y);float rg=seam(length(u)-0.2,0.012)+seam(length(u)-0.16,0.006);float cr=step(abs(q.x),0.11)*step(-0.07,q.y)*step(q.y,0.03+0.05*step(0.5,fract(q.x*13.6+0.5)))*step(length(u),0.15);float sk=step(length(u-vec2(0.0,-0.06)),0.05);float bk=step(p.z,J[1].z-0.1);vec3 c=vec3(0.07,0.06,0.08)*(0.74+0.34*sh)*(0.88+0.24*fbm(p*6.0));c=mix(c,vec3(0.85,0.66,0.26),min(1.0,rg)*bk);c=mix(c,vec3(0.7,0.06,0.12),cr*bk);c=mix(c,vec3(0.8,0.76,0.66),sk*bk);return vec4(pow(c,vec3(2.2)),0.5);', 22: flat(0.6, 0.05, 0.1, 0.3, 0.12), 23: metal(0.14, 0.12, 0.17), 24: flat(0.1, 0.08, 0.12, 0.4, 0.2, 40.0),
       28: 'return vec4(pow(vec3(1.0,0.12,0.18),vec3(2.2))*1.6,0.9);'})
 
 # ---------- 腐海の主「菌の母胎」：腐った沼の山に菌の森、うつろな仮面の顔、根の腕 ----------
@@ -61,9 +61,12 @@ write('rotlord', '腐海の主（11/28 本人が2D案A「菌の母胎」を選�
  {float an=atan(p.x,p.z);float bd=sEll(p-vec3(0.0,0.34,0.0),vec3(0.6,0.5,0.54));bd=smin(bd,sEll(p-vec3(0.0,0.07,0.0),vec3(0.78,0.12,0.72)),0.12);
   bd+=0.025*sin(an*5.0+p.y*6.0)*smoothstep(0.5,0.0,p.y)+0.012*sin(p.x*17.0)*sin(p.z*15.0)*sin(p.y*13.0);bd=max(bd,-p.y);r=U(r,vec2(bd,16.0));   // 沼の山（すそが広がり波うつ）
   for(int k=0;k<7;k++){float a=0.9*float(k)+0.3;vec3 d0=vec3(0.6*sin(a),0.3,0.54*cos(a));float dr=sTap(p,d0,vec3(0.72*sin(a),0.02,0.66*cos(a)),0.035,0.05);r=U(r,vec2(dr,17.0));}}   // たれる沼
- {vec3 c=vec3(0.0,0.44,0.5);vec3 q=(p-c)/1.45;float mk=sEll(q,vec3(0.17,0.21,0.1));mk=smin(mk,sEll(q-vec3(0.0,-0.16,-0.02),vec3(0.1,0.08,0.07)),0.05);
-  for(int s=0;s<2;s++){float sg=s==0?-1.0:1.0;mk=max(mk,-sEll(q-vec3(0.068*sg,0.04,0.08),vec3(0.042,0.058,0.06)));}mk=max(mk,-sEll(q-vec3(0.0,-0.11,0.08),vec3(0.05,0.025,0.06)));r=U(r,vec2(mk*1.45,18.0));   // うつろな仮面（目と口の穴）
-  for(int s=0;s<2;s++){float sg=s==0?-1.0:1.0;r=U(r,vec2((length(q-vec3(0.068*sg,0.03,0.04))-0.026)*1.45,28.0));}}   // 穴の奥で光る目
+ {vec3 c=vec3(0.0,0.44,0.5);vec3 q=(p-c)/1.45;float mk=sEll(q,vec3(0.145,0.24,0.1));mk=smin(mk,sEll(q-vec3(0.0,-0.2,-0.02),vec3(0.075,0.09,0.07)),0.05);   // 細長い仮面
+  for(int s=0;s<2;s++){float sg=s==0?-1.0:1.0;vec3 qe=q-vec3(0.06*sg,0.06,0.08);qe.y+=0.35*qe.x*sg;mk=max(mk,-sEll(qe,vec3(0.036,0.068,0.06)));}   // 目じりの下がった目の穴
+  mk=max(mk,-sEll(q-vec3(0.0,-0.16,0.08),vec3(0.032,0.07,0.06)));   // 縦に長くあいた口（泣きさけぶ形）
+  mk=max(mk,-sTap(q,vec3(0.03,0.25,0.1),vec3(0.05,0.15,0.11),0.009,0.005));mk=max(mk,-sTap(q,vec3(0.05,0.15,0.11),vec3(0.03,0.1,0.11),0.006,0.003));mk=max(mk,-sTap(q,vec3(-0.12,0.0,0.06),vec3(-0.08,-0.12,0.08),0.008,0.003));   // ひび
+  r=U(r,vec2(mk*1.45,18.0));
+  for(int s=0;s<2;s++){float sg=s==0?-1.0:1.0;r=U(r,vec2((length(q-vec3(0.06*sg,0.05,0.04))-0.026)*1.45,28.0));}}   // 穴の奥で光る目
  for(int s=0;s<2;s++){float sg=s==0?-1.0:1.0;vec3 a=vec3(0.5*sg,0.36,0.18),b=vec3(0.78*sg,0.32,0.36),c=vec3(0.86*sg,0.05,0.46);float rt=smin(sTap(p,a,b,0.09,0.06),sTap(p,b,c,0.06,0.04),0.04);
   for(int k=0;k<3;k++){vec3 f=c+vec3(0.06*sg*(float(k)-1.0),0.0,0.06*(float(k)-1.0)*0.5);rt=smin(rt,sTap(p,c,f+vec3(0.04*sg*(float(k)-1.0),-0.03,0.1),0.04,0.012),0.02);}
   rt=smin(rt,sTap(p,mix(a,b,0.5),mix(a,b,0.5)+vec3(0.05*sg,0.15,-0.05),0.03,0.006),0.02);r=U(r,vec2(rt,19.0));}   // 根の腕と根の指
@@ -73,7 +76,7 @@ write('rotlord', '腐海の主（11/28 本人が2D案A「菌の母胎」を選�
  {float ms=sEll(p-vec3(0.0,0.6,-0.1),vec3(0.5,0.25,0.45))+0.015*sin(p.x*30.0)*sin(p.z*30.0);ms=max(ms,sEll(p-vec3(0.0,0.34,0.0),vec3(0.62,0.52,0.56)));r=U(r,vec2(ms,24.0));}   // 上をおおうこけ
  for(int k=0;k<9;k++){float a=1.7*float(k);vec3 sp=vec3(0.55*sin(a),0.2+0.06*float(k),0.5*cos(a));r=U(r,vec2(length(p-sp)-0.022,28.0));}   // 体に付いた光る胞子のつぶ
 ''', {16: 'float w=fbm(p*5.0);vec3 c=mix(vec3(0.22,0.16,0.26),vec3(0.38,0.27,0.4),w)*(0.72+0.36*sh);c=mix(c,vec3(0.4,0.5,0.2),smoothstep(0.62,0.72,fbm(p*9.0+2.0)));return vec4(pow(c,vec3(2.2)),0.4);',
-      17: flat(0.34, 0.24, 0.36, 0.5, 0.2), 18: 'float tr=seam(p.x-0.1,0.014)+seam(p.x+0.1,0.014);tr*=step(p.y,0.42)*step(0.16,p.y);vec3 c=vec3(0.86,0.8,0.66)*(0.72+0.36*sh)*(0.92+0.12*fbm(p*20.0));c=mix(c,vec3(0.4,0.34,0.26),tr*0.8);return vec4(pow(c,vec3(2.2)),0.3);',
+      17: flat(0.34, 0.24, 0.36, 0.5, 0.2), 18: 'float tr=seam(p.x-0.087+0.012*sin(p.y*28.0),0.018)+seam(p.x+0.087+0.012*sin(p.y*31.0+1.0),0.018);tr*=step(p.y,0.47)*step(0.12,p.y);vec3 c=vec3(0.86,0.8,0.66)*(0.72+0.36*sh)*(0.92+0.12*fbm(p*20.0));c=mix(c,vec3(0.18,0.22,0.1),min(1.0,tr)*0.85);c*=0.85+0.15*smoothstep(0.3,0.7,fbm(p*14.0));return vec4(pow(c,vec3(2.2)),0.3);',
       19: flat(0.38, 0.28, 0.18, 0.3, 0.25, 20.0), 20: flat(0.9, 0.86, 0.76, 0.2, 0.1),
       21: 'vec3 c=vec3(0.66,0.16,0.2)*(0.74+0.34*sh);c=mix(c,vec3(0.95,0.92,0.86),step(0.62,fbm(p*11.0))*step(0.0,n.y));return vec4(pow(c,vec3(2.2)),0.4);',
       22: 'vec3 c=vec3(0.75,0.36,0.14)*(0.74+0.34*sh);c=mix(c,vec3(0.95,0.92,0.86),step(0.62,fbm(p*10.0))*step(0.0,n.y));return vec4(pow(c,vec3(2.2)),0.4);',

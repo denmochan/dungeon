@@ -734,13 +734,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 2.0,
-  "bytes": 179087,
+  "bytes": 179724,
   "verts": 12000,
   "tris": 24012,
   "full": {
    "file": "mon_rotlord.bin.gz",
    "fmt": "GB01",
-   "bytes": 815631
+   "bytes": 817169
   }
  },
  "rotslime": {
@@ -944,13 +944,13 @@
   "fmt": "GB03",
   "kind": "biped",
   "scale": 1.8,
-  "bytes": 180416,
+  "bytes": 180920,
   "verts": 12000,
   "tris": 24040,
   "full": {
    "file": "mon_underlord.bin.gz",
    "fmt": "GB01",
-   "bytes": 892278
+   "bytes": 891610
   }
  },
  "vampire": {
