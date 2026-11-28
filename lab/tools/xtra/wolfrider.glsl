@@ -14,7 +14,7 @@ vec2 xbody(vec3 p){float d=sEll(p-J[0]-vec3(0.0,0.02,0.02),vec3(0.2,0.21,0.48));
  vec3 S=J[0]+vec3(0.0,0.24,-0.02);float sd=sEll(p-S,vec3(0.25,0.07,0.32));sd=smin(sd,sEll(p-S-vec3(0.0,0.07,0.22),vec3(0.09,0.09,0.05)),0.03);sd=smin(sd,sEll(p-S-vec3(0.0,0.08,-0.24),vec3(0.2,0.09,0.05)),0.03);   // 鞍（前の突起と後ろの背もたれ）
  sd=min(sd,max(abs(length((p-J[0]).xy)-0.235)-0.018,abs(p.z-J[0].z-0.05)-0.04));r=U(r,vec2(sd,17.0));   // 腹帯
  float bl=max(sEll(p-S-vec3(0.0,-0.03,0.0),vec3(0.34,0.06,0.4)),-(p.y-J[0].y-0.12));bl=max(bl,abs(p.x)-0.3);r=U(r,vec2(bl,23.0));   // 鞍の下の布（ふちが垂れる）
- vec3 B=J[0]+vec3(0.0,0.36,-0.02);mat2 lean=mat2(cos(0.25),sin(0.25),-sin(0.25),cos(0.25));   // 乗り手のこし。上半身は前へかがむ
+ vec3 B=J[0]+vec3(0.0,0.44,-0.04);mat2 lean=mat2(cos(0.25),sin(0.25),-sin(0.25),cos(0.25));   // 乗り手のこし。上半身は前へかがむ
  vec3 pl=p-B;pl.yz=lean*pl.yz;pl+=B;
  float g=sEll(pl-B-vec3(0.0,0.17,0.02),vec3(0.17,0.21,0.15));   // 胴
  vec3 HC=B+vec3(0.0,0.52,0.2);g=smin(g,sEll(p-HC,vec3(0.22,0.2,0.19)),0.05);g=smin(g,sEll(p-HC-vec3(0.0,0.08,0.13),vec3(0.18,0.045,0.06)),0.02);   // 頭・眉
