@@ -16308,13 +16308,20 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
   g.fillStyle="#0e0a10";for(const c of[14.8,17.2]){const[x,y]=P(c,18.6);g.beginPath();g.ellipse(x,y,0.55*K,0.45*K,0,0,6.283);g.fill();}   // 鼻
   const[mx,my]=P(16,22.4);g.fillStyle="#2a0a12";g.beginPath();g.moveTo(mx-4.4*K,my-1.0*K);g.quadraticCurveTo(mx,my+0.6*K,mx+4.4*K,my-1.0*K);g.quadraticCurveTo(mx,my+3.4*K,mx-4.4*K,my-1.0*K);g.fill();   // 口
   g.fillStyle="#f4ecd8";for(let k=-3;k<=3;k++){const x=mx+k*1.15*K,big=Math.abs(k)===2,h=(big?2.6:1.1)*K;g.beginPath();g.moveTo(x-0.5*K,my-0.5*K);g.lineTo(x+0.5*K,my-0.5*K);g.lineTo(x,my-0.5*K+h);g.closePath();g.fill();}}   // 上の牙の列（2本が長い）
+ /* コボルトの目（11/28）：形の目玉の上に、琥珀色の目・丸い黒目（犬の目）・光・黒いふち・目の下の涙のすじを描く。顔の表の12番目のマス */
+ function koboldFace(g,ox,K){g.clearRect(ox,0,32*K,32*K);const P=(c,r)=>[ox+c*K,r*K];
+  for(const[c,fl]of[[9.9,1],[22.1,-1]]){const[x,y]=P(c,13.0);
+   g.fillStyle="#140c08";g.beginPath();g.ellipse(x,y,2.5*K,2.2*K,0,0,6.283);g.fill();
+   g.fillStyle="#f0a020";g.beginPath();g.ellipse(x,y,1.9*K,1.75*K,0,0,6.283);g.fill();g.fillStyle="#ffd860";g.beginPath();g.ellipse(x,y+0.5*K,1.2*K,0.9*K,0,0,6.283);g.fill();
+   g.fillStyle="#140c08";g.beginPath();g.ellipse(x+fl*0.15*K,y+0.1*K,1.0*K,1.0*K,0,0,6.283);g.fill();g.fillStyle="#fff";g.beginPath();g.ellipse(x-fl*0.55*K,y-0.6*K,0.55*K,0.55*K,0,0,6.283);g.fill();
+   g.strokeStyle="rgba(30,18,10,0.75)";g.lineWidth=0.7*K;g.lineCap="round";g.beginPath();g.moveTo(x+fl*1.6*K,y+1.6*K);g.quadraticCurveTo(x+fl*2.8*K,y+3.4*K,x+fl*4.0*K,y+4.2*K);g.stroke();}}   // 目の下のすじ
  function faceAtlasSmooth(gl){const K=8,W=512*K,H=32*K,out=new ImageData(W,H),up=(m)=>{const a=document.createElement("canvas");a.width=32;a.height=32;const g0=a.getContext("2d"),im=g0.createImageData(32,32);for(let q=0;q<1024;q++){im.data[q*4]=im.data[q*4+1]=im.data[q*4+2]=255;im.data[q*4+3]=m[q];}g0.putImageData(im,0,0);
    const b=document.createElement("canvas");b.width=32*K;b.height=32*K;const g=b.getContext("2d");g.imageSmoothingEnabled=true;g.imageSmoothingQuality="high";g.filter="blur("+(K*0.35)+"px)";g.drawImage(a,0,0,32*K,32*K);return g.getImageData(0,0,32*K,32*K).data;};
   ["goblin","slime","bat","ghost","imp","myconid","orc","human"].forEach((sp,fi)=>{const F=FACE24[sp],cols={};F.rows.forEach((r,y)=>[...r].forEach((ch,k)=>{if(!F.pal[ch])return;(cols[ch]=cols[ch]||new Uint8Array(1024))[y*32+k]=255;}));
    const all=new Uint8Array(1024);Object.values(cols).forEach(m=>m.forEach((v,q)=>{if(v)all[q]=255;}));const A=up(all),U=Object.keys(cols).map(ch=>[F.pal[ch],up(cols[ch])]);
    for(let y=0;y<32*K;y++)for(let x=0;x<32*K;x++){const q=(y*32*K+x)*4;let best=-1,bc=null;for(const[c,m]of U){if(m[q+3]>best){best=m[q+3];bc=c;}}const o=(y*W+fi*32*K+x)*4,a=A[q+3]/255,t=Math.max(0,Math.min(1,(a-0.4)/0.2));
     if(bc){out.data[o]=bc[0];out.data[o+1]=bc[1];out.data[o+2]=bc[2];}out.data[o+3]=t*t*(3-2*t)*255;}});
-  const cv=document.createElement("canvas");cv.width=W;cv.height=H;const g=cv.getContext("2d");g.putImageData(out,0,0);humanFace(g,7*32*K,K);slimeFace(g,1*32*K,K);orcFace(g,6*32*K,K);smugGobFace(g,8*32*K,K);guardSlimeFace(g,9*32*K,K);batFace(g,10*32*K,K);
+  const cv=document.createElement("canvas");cv.width=W;cv.height=H;const g=cv.getContext("2d");g.putImageData(out,0,0);humanFace(g,7*32*K,K);slimeFace(g,1*32*K,K);orcFace(g,6*32*K,K);smugGobFace(g,8*32*K,K);guardSlimeFace(g,9*32*K,K);batFace(g,10*32*K,K);koboldFace(g,11*32*K,K);
   const t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,cv);[gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER].forEach(k=>gl.texParameteri(gl.TEXTURE_2D,k,gl.LINEAR));[gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T].forEach(k=>gl.texParameteri(gl.TEXTURE_2D,k,gl.CLAMP_TO_EDGE));return t;}
  /* ===== 四つ足の歩き（11/28）：ゲームのリグは足を動かさないので、脚ごとに「腰→ひざ→足」の2本の骨を入れて、足を床に止めて歩かせる ===== */
  const rotAB=(a,b)=>{a=nrm(a);b=nrm(b);const v=crs(a,b),c=dot(a,b),s=Math.hypot(v[0],v[1],v[2]);if(s<1e-6)return c>0?[1,0,0,0,1,0,0,0,1]:[-1,0,0,0,1,0,0,0,-1];const k=nrm(v),K=[0,-k[2],k[1],k[2],0,-k[0],-k[1],k[0],0],K2=[0,1,2].map(i=>[0,1,2].map(j=>K[i*3]*K[j]+K[i*3+1]*K[3+j]+K[i*3+2]*K[6+j]));
@@ -16336,7 +16343,7 @@ window.__labProps3={list:{},make(h3,fb3){const P=[],N=[],C=[],I=[],RK=[];let see
  if(/^(bat|firebat|eyebat)$/.test(sp)){const R=rigSp24(rigOf(sp),"idle",0),J0=R.J[0],hc=[J0[0],J0[1]+0.17,J0[2]+0.02],F=new Float32Array(M.NV*3),WG=new Int8Array(M.NV),EB=sp==="eyebat",TH=EB?0.29:0.15;M.WHX=EB?0.26:0.13;   /* コウモリ：頭の前に顔の絵（11番目のマス）。羽の頂点にしるし（はばたく） */
    for(let i=0;i<M.NV;i++){const x=M.P0[i*3],y=M.P0[i*3+1],z=M.P0[i*3+2],dx=x-J0[0];if(Math.abs(dx)>TH)WG[i]=dx>0?1:-1;if(EB)continue;const d=Math.hypot(x-hc[0],y-hc[1],z-hc[2]);if(d>0.2||WG[i])continue;const nz=M.N0[i*3+2];if(nz<0.05)continue;const t=Math.max(0,Math.min(1,(nz-0.05)/0.3));F[i*3]=(x-hc[0])/0.34+0.5;F[i*3+1]=0.5-(y-hc[1])/0.34;F[i*3+2]=t*t*(3-2*t);}
    M.F=EB?null:F;M.FI=10;M.WING=WG;return;}
- const kit=kitOf24(rigOf(sp)),fi=FACEIDX24[kit];if(fi==null||fi<0)return;const R=rigSp24(rigOf(sp),"idle",0),A=R.HR,J2=R.J[2];if(!J2||J2[1]<-5)return;   /* 頭の空間で、顔の絵のどこに当たるか（ゲームの charCol と同じ式） */
+ const kit=kitOf24(rigOf(sp)),fi=kit==="kobold"?11:FACEIDX24[kit];if(fi==null||fi<0)return;   /* コボルトは試し場の目の絵（12番目） */const R=rigSp24(rigOf(sp),"idle",0),A=R.HR,J2=R.J[2];if(!J2||J2[1]<-5)return;   /* 頭の空間で、顔の絵のどこに当たるか（ゲームの charCol と同じ式） */
    const F=new Float32Array(M.NV*3),hm=(v)=>[A[0]*v[0]+A[3]*v[1]+A[6]*v[2],A[1]*v[0]+A[4]*v[1]+A[7]*v[2],A[2]*v[0]+A[5]*v[1]+A[8]*v[2]];
    const GRY=/^(slimeknight|berserker)$/.test(sp);   /* かぶとをかぶる子：灰色の金属の頂点には顔を貼らない */
    for(let i=0;i<M.NV;i++){if(M.WP&&M.WP[i])continue;if(GRY){const r=M.C[i*3],g=M.C[i*3+1],b=M.C[i*3+2];if(Math.max(r,g,b)-Math.min(r,g,b)<28&&r>90)continue;}const hp=hm([M.P0[i*3]-J2[0],M.P0[i*3+1]-J2[1],M.P0[i*3+2]-J2[2]]);if(Math.hypot(hp[0],hp[1],hp[2])>=0.52)continue;const hn=hm([M.N0[i*3],M.N0[i*3+1],M.N0[i*3+2]]),t=Math.max(0,Math.min(1,(hn[2]-0.05)/0.25)),fz=t*t*(3-2*t);
